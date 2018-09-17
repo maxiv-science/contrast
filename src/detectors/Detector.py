@@ -1,6 +1,6 @@
-from Gadget import Gadget
-from Environment import macro
-import utils
+from ..Gadget import Gadget
+from ..environment import macro
+from .. import utils
 import numpy as np
 import time
 

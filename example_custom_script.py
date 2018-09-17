@@ -1,4 +1,4 @@
-import Environment as env
+import environment as env
 
 for i in range(5):
     env.runCommand('wa')

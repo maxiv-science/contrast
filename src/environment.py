@@ -1,16 +1,19 @@
-from Gadget import Gadget
-import Recorder
-import utils
 from IPython import get_ipython
 ipython = get_ipython()
 
-print(__name__)
+from . import utils
+#from .recorders import Recorder, PlotRecorder
 
-### We will use a number of global "environment" variables.
-currentDetectorGroup = None # a DetectorGroup instance
-registered_macros = {}
-nextScanID = 0
-userLevel = 5
+class Env(object):
+    """
+    Container for a number of global environment variables.
+    """
+    def __init__(self):
+        self.currentDetectorGroup = None # a DetectorGroup instance
+        self.registered_macros = {}
+        self.nextScanID = 0
+        self.userLevel = 5
+env = Env()
 
 def runCommand(line):
     """
@@ -43,33 +46,11 @@ def macro(cls):
     assert cls.run.__call__
 
     name = cls.__name__.lower()
-    registered_macros[name] = cls
+    env.registered_macros[name] = cls
     ipython.register_magic_function(fcn, magic_name=name)
     return cls
 
 @macro
 class LsMac(object):
     def run(self):
-        print(utils.dict_to_table(registered_macros, titles=('name', 'class')))
-
-
-### the following should go in Recorders, but can't get that to work.
-
-def active_recorders():
-    return [r for r in Recorder.Recorder.getinstances() if r.is_alive()]
-
-@macro
-class LsRec(object):
-    def run(self):
-        dct = {r.name: r.__class__ for r in active_recorders()}
-        print(utils.dict_to_table(dct, titles=('name', 'class')))
-
-@macro
-class LivePlot(object):
-   def __init__(self, xdata, ydata, name='plot'):
-       self.xdata = xdata.name
-       self.ydata = ydata.name
-       self.name = name
-   def run(self):
-       rec = Recorder.PlotRecorder(self.xdata, self.ydata, self.name)
-       rec.start()
+        print(utils.dict_to_table(env.registered_macros, titles=('name', 'class')))

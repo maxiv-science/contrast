@@ -1,7 +1,7 @@
 import time
 import numpy as np
-from Environment import macro
-import Environment
+from ..environment import macro, env
+from ..recorders import active_recorders
 
 print(__name__)
 
@@ -19,19 +19,19 @@ class SoftwareScan(object):
         """
         self.motors = []         # list of motors, the order is preserved.
         self.exposuretime = None # needs to be initialized!
-        self.scannr = Environment.nextScanID
-        Environment.nextScanID += 1
+        self.scannr = env.nextScanID
+        env.nextScanID += 1
 
     def header_line(self):
         motor_names = [m.name for m in self.motors]
-        group = Environment.currentDetectorGroup
+        group = env.currentDetectorGroup
         det_names = [d.name for d in group]
         header = '#       ' + len(motor_names) * '%-8s' + len(group) * '%-14s' + 'dt'
         line = '-' * (8 + len(motor_names) * 8 + len(group) * 16 + 8)
         return ('\n' + header + '\n' + line) % tuple(motor_names + det_names)
 
     def table_line(self):
-        group = Environment.currentDetectorGroup
+        group = env.currentDetectorGroup
         return '%-8d' + len(self.motors) * '%-8.2f' + len(group) * '%-12s  ' + '%-8.2f'
 
     def format_number(self, nr):
@@ -58,7 +58,7 @@ class SoftwareScan(object):
             while True in [m.busy() for m in self.motors]:
                 time.sleep(.01)
             # prepare and start detectors
-            group = Environment.currentDetectorGroup
+            group = env.currentDetectorGroup
             group.prepare(self.exposuretime)
             group.start()
             while group.busy():
@@ -71,7 +71,7 @@ class SoftwareScan(object):
             for m in self.motors:
                 dct[m.name] = m.position()
             # pass data to recorders
-            for r in Environment.active_recorders():
+            for r in active_recorders():
                 r.queue.put(dct)
             # print spec-style info
             print(table_line % tuple([i] + 

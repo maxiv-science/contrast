@@ -1,4 +1,4 @@
-from Gadget import Gadget
+from .Gadget import Gadget
 
 def dict_to_table(dct, titles=('col1', 'col2'), margin=3):
     """

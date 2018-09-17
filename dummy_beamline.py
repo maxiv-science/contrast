@@ -3,11 +3,11 @@
 # processes etc.
 if __name__=='__main__':
 
-    from Motor import DummyMotor
-    from Scan import *
-    from Detector import DummyDetector, DetectorGroup
-    import Environment
-    from Recorder import PlotRecorder, DummyRecorder
+    from src.motors import DummyMotor
+    from src.scans import *
+    from src.detectors import DummyDetector, DetectorGroup
+    from src.environment import env
+    from src.recorders import PlotRecorder, DummyRecorder
 
     print(__name__)
 
@@ -18,9 +18,8 @@ if __name__=='__main__':
 
     detgrp = DetectorGroup('detgrp', det1, det2)
 
-    Environment.currentDetectorGroup = detgrp
+    env.currentDetectorGroup = detgrp
 
     #rec = PlotRecorder('samx', 'det1')
     #rec = DummyRecorder('rec')
     #rec.start()
-    

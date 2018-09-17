@@ -1,9 +1,10 @@
 import time
 import numpy as np
-from Gadget import Gadget
-from Environment import macro
-import utils
 from collections import OrderedDict
+
+from ..Gadget import Gadget
+from ..environment import macro
+from .. import utils
 
 print(__name__)
 
