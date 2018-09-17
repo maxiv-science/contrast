@@ -13,11 +13,24 @@ class Detector(Gadget):
     """
     
     def prepare(self, acqtime):
+        """
+        Run before acquisition, once per scan.
+        """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         self.acqtime = acqtime
 
+    def arm(self):
+        """
+        Run before every acquisition. Arm any hardware triggered detectors.
+        """
+        if self.busy():
+            raise Exception('%s is busy!' % self.name)
+
     def start(self):
+        """
+        Start acquisition for any software triggered detectors.
+        """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -56,6 +69,10 @@ class DetectorGroup(Gadget):
     def prepare(self, acqtime):
         for d in self:
             d.prepare(acqtime)
+
+    def arm(self):
+        for d in self:
+            d.arm()
 
     def start(self):
         for d in self:

@@ -46,10 +46,11 @@ class SoftwareScan(object):
         Detectors.
         """
         positions = self._generate_positions()
-
         print(self.header_line())
         table_line = self.table_line()
-
+        # find and prepare the detectors
+        group = env.currentDetectorGroup
+        group.prepare(self.exposuretime)
         t0 = time.time()
         for i in range(len(list(positions.values())[0])):
             # move motors
@@ -57,9 +58,8 @@ class SoftwareScan(object):
                 m.move(positions[m.name][i])
             while True in [m.busy() for m in self.motors]:
                 time.sleep(.01)
-            # prepare and start detectors
-            group = env.currentDetectorGroup
-            group.prepare(self.exposuretime)
+            # arm and start detectors
+            group.arm()
             group.start()
             while group.busy():
                 time.sleep(.01)
