@@ -30,6 +30,15 @@ liveplot   <class 'lib.recorders.PlotRecorder.LivePlot'>
 lsgrp      <class 'lib.detectors.Detector.LsGrp'>       
 
 ```
+Macros aren't stored in a special library. They are written throughout the library wherever they make sense. For example, in `Detector.py` where the detector base classes are defined, the ´lsdet´ macro is defined as follows.
+´´´
+@macro
+class LsDet(object):
+    def run(self):
+        dct = {d.name: d.__class__ for d in Detector.getinstances()}
+print(utils.dict_to_table(dct, titles=('name', 'class')))
+´´´
+
 Note that a macro is different from a script. Anyone can easily write a macro, but for composite operations where existing macros are just combined it is faster to write a script. The following is a script, not a macro, but uses a special `runCommand` function to interface with the command line syntax.
 ```
 import lib.environment as env
