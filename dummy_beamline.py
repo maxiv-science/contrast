@@ -7,12 +7,14 @@ if __name__=='__main__':
     from src.scans import *
     from src.detectors import DummyDetector, DetectorGroup
     from src.environment import env
-    from src.recorders import PlotRecorder, DummyRecorder
+    from src.recorders import Hdf5Recorder
+
+    import os
 
     print(__name__)
 
-    samx=DummyMotor('samx')
-    samy=DummyMotor('samy')
+    samx = DummyMotor('samx')
+    samy = DummyMotor('samy')
     det1 = DummyDetector('det1')
     det2 = DummyDetector('det2')
 
@@ -20,6 +22,9 @@ if __name__=='__main__':
 
     env.currentDetectorGroup = detgrp
 
-    #rec = PlotRecorder('samx', 'det1')
-    #rec = DummyRecorder('rec')
-    #rec.start()
+    try:
+        os.remove('/tmp/data.h5')
+    except FileNotFoundError:
+        pass
+    rec = Hdf5Recorder('/tmp/data.h5')
+    rec.start()
