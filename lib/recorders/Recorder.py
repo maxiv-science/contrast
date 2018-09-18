@@ -58,6 +58,13 @@ class Recorder(Gadget, Process):
         """
         pass
 
+    def stop(self):
+        """
+        Stop a started subprocess safely by putting a poison pill in
+        its queue.
+        """
+        self.queue.put(None)
+
 
 class DummyRecorder(Recorder):
     def act_on_data(self, dct):
