@@ -29,9 +29,12 @@ class PlotRecorder(Recorder):
             col = 'bkmrcg'[(self.nplots-1) % 6]
             self.l = Line2D(xdata=[], ydata=[], color=col)
             self.ax.add_line(self.l)
+        try:
+            self.x.append(dct[self.xdata])
+            self.y.append(dct[self.ydata])
+        except KeyError:
+            return
         self.l.set_data(self.x, self.y)
-        self.x.append(dct[self.xdata])
-        self.y.append(dct[self.ydata])
         self.ax.relim()
         self.ax.autoscale_view()
         plt.draw()
@@ -46,10 +49,16 @@ class PlotRecorder(Recorder):
 
 @macro
 class LivePlot(object):
-   def __init__(self, xdata, ydata, name='plot'):
-       self.xdata = xdata.name
-       self.ydata = ydata.name
-       self.name = name
-   def run(self):
-       rec = PlotRecorder(self.xdata, self.ydata, self.name)
-       rec.start()
+    def __init__(self, xdata, ydata):
+        basename = 'name'
+        name = basename
+        i = 2
+        while name in [r.name for r in Recorder.getinstances()]:
+            name = basename + '_%d' % i
+            i += 1
+        self.xdata = xdata.name
+        self.ydata = ydata.name
+        self.name = name
+    def run(self):
+        rec = PlotRecorder(self.xdata, self.ydata, self.name)
+        rec.start()
