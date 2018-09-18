@@ -13,12 +13,12 @@ class SoftwareScan(object):
         _generate_positions (which generates the line scan, mesh, spiral, or what ever you like)
     """
 
-    def __init__(self, *args):
+    def __init__(self, exposuretime):
         """
         The constructor should parse parameters.
         """
-        self.motors = []         # list of motors, the order is preserved.
-        self.exposuretime = None # needs to be initialized!
+        self.motors = []   # list of motors, to be filled by subclass
+        self.exposuretime = exposuretime
         self.scannr = env.nextScanID
         env.nextScanID += 1
 
@@ -85,7 +85,6 @@ class SoftwareScan(object):
         """
         raise NotImplementedError
 
-
 @macro
 class AScan(SoftwareScan):
     """
@@ -100,8 +99,8 @@ class AScan(SoftwareScan):
         """
         Parse arguments.
         """
-        super(AScan, self).__init__(*args)
-        self.exposuretime = float(args[-1])
+        exposuretime = float(args[-1])
+        super(AScan, self).__init__(exposuretime)
         self.motors = []
         self.limits = []
         self.intervals = []
@@ -121,7 +120,6 @@ class AScan(SoftwareScan):
         grids = [l for l in reversed(grids)] # fastest last
         return {m.name: pos.flatten() for (m, pos) in zip(self.motors, grids)}
 
-
 @macro
 class DScan(AScan):
     def _generate_positions(self):
@@ -138,3 +136,46 @@ class DScan(AScan):
         while True in [m.busy() for m in self.motors]:
             time.sleep(.01)
         print('...done')
+
+@macro
+class LoopScan(SoftwareScan):
+    """
+    A software scan with no motor movements. Has its own class to avoid
+    handling the special case of no motors directly in SoftwareScan.
+    """
+    def __init__(self, intervals, exposuretime=1.0):
+        """
+        Parse arguments.
+        """
+        super(LoopScan, self).__init__(float(exposuretime))
+        self.intervals = intervals
+
+    def run(self):
+        """
+        This method does all the serious interaction with motors and
+        Detectors.
+        """
+        print(self.header_line())
+        table_line = self.table_line()
+        # find and prepare the detectors
+        group = env.currentDetectorGroup
+        group.prepare(self.exposuretime)
+        t0 = time.time()
+        for i in range(self.intervals + 1):
+            # arm and start detectors
+            group.arm()
+            group.start()
+            while group.busy():
+                time.sleep(.01)
+            # read detectors
+            dt = time.time() - t0
+            dct = {'dt': dt, 'scannr': self.scannr}
+            for d in group:
+                dct[d.name] = d.read()
+            # pass data to recorders
+            for r in active_recorders():
+                r.queue.put(dct)
+            # print spec-style info
+            print(table_line % tuple([i]
+                  + [self.format_number(dct[d.name]) for d in group]
+                  + [dt]))
