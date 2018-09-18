@@ -3,8 +3,6 @@ import numpy as np
 from ..environment import macro, env
 from ..recorders import active_recorders
 
-print(__name__)
-
 class SoftwareScan(object):
     """
     Base class for the normal sardana-style software-controlled scan.

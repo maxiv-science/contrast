@@ -4,8 +4,6 @@ from .. import utils
 import numpy as np
 import time
 
-print(__name__)
-
 class Detector(Gadget):
     """
     Base class representing any device which can be read out to produce

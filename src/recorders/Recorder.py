@@ -13,8 +13,6 @@ Queue = ctx.Queue
 
 import matplotlib.pyplot as plt
 
-print(__name__)
-
 class Recorder(Gadget, Process):
     """
     Base class for Recorders. Provides the multiprocessing and queuing

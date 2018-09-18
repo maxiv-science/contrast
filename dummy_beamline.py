@@ -11,10 +11,12 @@ if __name__=='__main__':
 
     import os
 
-    print(__name__)
+    env.userLevel = 1 # we're not experts!
 
     samx = DummyMotor('samx')
     samy = DummyMotor('samy')
+    gap = DummyMotor('gap', userlevel=5)
+
     det1 = DummyDetector('det1')
     det2 = DummyDetector('det2')
     det3 = Dummy1dDetector('det3')

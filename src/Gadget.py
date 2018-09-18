@@ -1,7 +1,5 @@
 import weakref
 
-print(__name__)
-
 class Gadget(object):
     """
     Base class for motors, detectors, etc. Main purpose is to keep track
@@ -20,10 +18,11 @@ class Gadget(object):
 
     _base_class_instances = set()
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, userlevel=1):
         if not str(name) == name:
             raise Exception('Gadgets must have names!')
         self.name = name
+        self.userlevel = userlevel
         self._base_class_instances.add(weakref.ref(self))
 
     @classmethod

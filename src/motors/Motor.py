@@ -3,10 +3,8 @@ import numpy as np
 from collections import OrderedDict
 
 from ..Gadget import Gadget
-from ..environment import macro
+from ..environment import macro, env
 from .. import utils
-
-print(__name__)
 
 class Motor(Gadget):
     """
@@ -59,6 +57,9 @@ class Mv(object):
         self.targets = np.array(args[1::2])
     
     def run(self):
+        if max(m.userlevel for m in self.motors) > env.userLevel:
+            print('You are trying to move motors above your user level!')
+            return
         for m, pos in zip(self.motors, self.targets):
             m.move(pos)
         try:
@@ -89,10 +90,12 @@ class Wm(object):
 @macro
 class Wa(Wm):
     def __init__(self):
-        self.motors = [m for m in Motor.getinstances()]
+        self.motors = [m for m in Motor.getinstances()
+                       if m.userlevel <= env.userLevel]
 
 @macro
 class LsM(object):
     def run(self):
-        dct = {m.name: m.__class__ for m in Motor.getinstances()}
+        dct = {m.name: m.__class__ for m in Motor.getinstances()
+               if m.userlevel <= env.userLevel}
         print(utils.dict_to_table(dct, titles=('name', 'class')))
