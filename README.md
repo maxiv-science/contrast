@@ -30,7 +30,7 @@ liveplot   <class 'lib.recorders.PlotRecorder.LivePlot'>
 lsgrp      <class 'lib.detectors.Detector.LsGrp'>       
 
 ```
-Macros aren't stored in a special library. They are written throughout the library wherever they make sense. For example, in `Detector.py` where the detector base classes are defined, the `lsdet` macro is defined as follows.
+Note how macros aren't stored in a special library. They are written throughout the library wherever they make sense. For example, in `Detector.py` where the detector base classes are defined, the `lsdet` macro is defined as follows.
 ```
 @macro
 class LsDet(object):
