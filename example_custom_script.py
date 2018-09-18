@@ -8,7 +8,7 @@ Execute this script with
 
 """
 
-import src.environment as env
+import lib.environment as env
 
 for i in range(5):
     new_y_pos = i * 1.5 + 2
