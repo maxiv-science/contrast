@@ -30,6 +30,15 @@ liveplot   <class 'lib.recorders.PlotRecorder.LivePlot'>
 lsgrp      <class 'lib.detectors.Detector.LsGrp'>       
 
 ```
+Note that a macro is different from a script. Anyone can easily write a macro, but for composite operations where existing macros are just combined it is faster to write a script. The following is a script, not a macro, but uses a special `runCommand` function to interface with the command line syntax.
+```
+import lib.environment as env
+
+for i in range(5):
+    env.runCommand('mv samy %d' % new_y_pos)
+    env.runCommand('ascan samx 0 1 5 .1')
+
+```
 
 ## environment variables
 No global environment variables are used. Instead, a central object called in the environment module is used to store values such as scan number, current detector group, etc.
