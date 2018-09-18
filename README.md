@@ -73,7 +73,9 @@ Out[3]: ['gap', 'detgrp', 'det1', 'samy', 'samx', 'det3', 'det2', 'hdf5recorder'
 Detectors are chosen through detector groups. The variable `lib.environment.env.currentDetectorGroup` selects which detector group to read out when scanning. A detector can be a member of many groups, but only one group can be selected at the same time. `DetectorGroup` objects are iterable and generally nice.
 
 ## recorders
-Data is captured by recorders. Recorders are run in separate processes and get data through queues, avoiding holding up the main acquisition loop because of I/O. They can do anything with the data, for example saving to `hdf5` files or live plotting. See the `Hdf5Recorder` and `PlotRecorder` classes for examples. The `lsrec` macro lists currently running recorders.
+Data is captured by recorders. Recorders are run in separate processes and get data through queues, avoiding holding up the main acquisition loop because of I/O. They can do anything with the data, for example saving to `hdf5` files or live plotting. See the `Hdf5Recorder` and `PlotRecorder` classes for examples. The former is very primitive still, but the latter is quite nice.
+
+The `lsrec` macro lists currently running recorders.
 ```
 In [30]: lsrec
 
