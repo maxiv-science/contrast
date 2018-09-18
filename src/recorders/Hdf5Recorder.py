@@ -1,6 +1,7 @@
 from . import Recorder
 import h5py
 import time
+import numpy as np
 
 class Hdf5Recorder(Recorder):
     """
@@ -54,14 +55,26 @@ class Hdf5Recorder(Recorder):
                     print('won''t write data to this target.')
                     print('*********************************')
                     return
-                dtype = type(val)
-                # assuming scalar values for now
-                d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=dtype)
+                if isinstance(val, np.ndarray):
+                    # arrays
+                    d = self.fp.create_dataset(name, shape=(1,)+val.shape, maxshape=(None,)+val.shape, dtype=val.dtype)
+                elif type(val) == str:
+                    # strings
+                    d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype='S10')
+                else:
+                    # scalars of any type
+                    d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=type(val))
             else:
                 # existing scan, just resize and add data
                 d = self.fp[name]
-                d.resize((d.shape[0]+1,))
-            d[-1] = val
+                d.resize((d.shape[0]+1,) + d.shape[1:])
+
+            # special case
+            if type(val) == str:
+                val_ = val.encode(encoding='ascii', errors='ignore')
+            else:
+                val_ = val
+            d[-1] = val_
         self.scannr = dct['scannr']
 
     def periodic_check(self):

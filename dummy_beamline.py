@@ -5,7 +5,7 @@ if __name__=='__main__':
 
     from src.motors import DummyMotor
     from src.scans import *
-    from src.detectors import DummyDetector, DetectorGroup
+    from src.detectors import DummyDetector, DetectorGroup, Dummy1dDetector
     from src.environment import env
     from src.recorders import Hdf5Recorder
 
@@ -17,8 +17,9 @@ if __name__=='__main__':
     samy = DummyMotor('samy')
     det1 = DummyDetector('det1')
     det2 = DummyDetector('det2')
+    det3 = Dummy1dDetector('det3')
 
-    detgrp = DetectorGroup('detgrp', det1, det2)
+    detgrp = DetectorGroup('detgrp', det1, det2, det3)
 
     env.currentDetectorGroup = detgrp
 

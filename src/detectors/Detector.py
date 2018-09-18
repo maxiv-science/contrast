@@ -112,41 +112,6 @@ class DetectorGroup(Gadget):
         dct = {n: c for n, c in zip(names, classes)}
         return utils.dict_to_table(dct, titles=('name', 'class'))
 
-
-class DummyDetector(Detector, LiveDetector):
-    def start(self):
-        super(DummyDetector, self).start()
-        try:
-            self.val = np.random.rand() * self.acqtime
-            self._started = time.time()
-        except AttributeError:
-            raise Exception('Detector not prepared!')
-
-    def stop(self):
-        try:
-            self._started = time.time() - self.acqtime
-        except AttributeError:
-            return
-
-    def busy(self):
-        try:
-            return time.time() < self._started + self.acqtime
-        except AttributeError:
-            return False
-
-    def read(self):
-        try:
-            return self.val
-        except AttributeError:
-            raise Exception('Detector not started!')
-
-class DummyWritingDetector(DummyDetector):
-    def read(self):
-        try:
-            return Link('/home/alex/files/images/scan.hdf5')
-        except AttributeError:
-            raise Exception('Detector not started!')
-
 class Link(object):
     """
     Some detectors write their own data to disk. When that happens,

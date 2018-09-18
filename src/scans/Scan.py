@@ -36,6 +36,10 @@ class SoftwareScan(object):
 
     def format_number(self, nr):
         try:
+            return '%8s' % (nr.shape,)
+        except:
+            pass
+        try:
             return '%8e' % nr
         except TypeError:
             return str(nr)[-8:]
