@@ -1,3 +1,7 @@
+"""
+Sets up a mock beamline with dummy motors and detectors.
+"""
+
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
