@@ -45,8 +45,9 @@ class SoftwareScan(object):
         This method does all the serious interaction with motors and
         Detectors.
         """
-        positions = self._generate_positions()
+        print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
         print(self.header_line())
+        positions = self._generate_positions()
         table_line = self.table_line()
         # find and prepare the detectors
         group = env.currentDetectorGroup
@@ -78,6 +79,7 @@ class SoftwareScan(object):
                   [m.position() for m in self.motors]
                   + [self.format_number(dct[d.name]) for d in group] 
                   + [dt]))
+        print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
         
     def _generate_positions(self):
         """
@@ -155,6 +157,7 @@ class LoopScan(SoftwareScan):
         This method does all the serious interaction with motors and
         Detectors.
         """
+        print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
         print(self.header_line())
         table_line = self.table_line()
         # find and prepare the detectors
@@ -179,3 +182,4 @@ class LoopScan(SoftwareScan):
             print(table_line % tuple([i]
                   + [self.format_number(dct[d.name]) for d in group]
                   + [dt]))
+        print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
