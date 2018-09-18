@@ -80,6 +80,10 @@ Out[3]: ['gap', 'detgrp', 'det1', 'samy', 'samx', 'det3', 'det2', 'hdf5recorder'
  
 ## detector groups
 Detectors are chosen through detector groups. The variable `lib.environment.env.currentDetectorGroup` selects which detector group to read out when scanning. A detector can be a member of many groups, but only one group can be selected at the same time. `DetectorGroup` objects are iterable and generally nice.
+```
+In [3]: [d.name for d in detgrp]
+Out[3]: ['det1', 'det2', 'det3']
+```
 
 ## recorders
 Data is captured by recorders. Recorders are run in separate processes and get data through queues, avoiding holding up the main acquisition loop because of I/O. They can do anything with the data, for example saving to `hdf5` files or live plotting. See the `Hdf5Recorder` and `PlotRecorder` classes for examples. The former is very primitive still, but the latter is quite nice.
@@ -92,4 +96,22 @@ name           class
 ----------------------------------------------------------------
 hdf5recorder   <class 'lib.recorders.Hdf5Recorder.Hdf5Recorder'>
 name           <class 'lib.recorders.PlotRecorder.PlotRecorder'>
+```
+
+## user levels
+All `Gadget` instances have an associated user level. This means that certain motors can be hidden and protected while others are exposed through the macros. In this example, two sample motors are available to everyone while the undulator gap is higher level. This is not a security feature but meant to simplify the environment and reduce the risk of mistakes
+```
+In [7]: env.userLevel
+Out[7]: 1
+
+In [8]: wa
+samy 0.0
+samx 0.0
+
+In [9]: env.userLevel = 5
+
+In [10]: wa
+samy 0.0
+gap 0.0
+samx 0.0
 ```
