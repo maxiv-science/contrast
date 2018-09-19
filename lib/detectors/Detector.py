@@ -3,6 +3,7 @@ from ..environment import macro
 from .. import utils
 import numpy as np
 import time
+import threading
 
 class Detector(Gadget):
     """
@@ -47,11 +48,26 @@ class LiveDetector(object):
     make a detector run continuously with no synchronization or data
     capture.
     """
-    def startLive(self, acqtime):
-        pass
+    def __init__(self):
+        self.thread = None
+        self.stopped = False
 
-    def stopLive(self):
-        pass
+    def start_live(self, acqtime=1.0):
+        self.thread = threading.Thread(target=self._start, args=(acqtime,))
+        self.thread.start()
+
+    def stop_live(self):
+        if not self.thread: return
+        self.stopped = True
+        self.thread.join()
+
+    def _start(self, acqtime):
+        self.stopped = False
+        while not self.stopped:
+            self.prepare(acqtime)
+            self.start()
+            while self.busy():
+                time.sleep(.05)
 
 class DetectorGroup(Gadget):
     """

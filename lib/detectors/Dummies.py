@@ -4,6 +4,10 @@ import time
 import numpy as np
 
 class DummyDetector(Detector, LiveDetector):
+    def __init__(self, name=None):
+        Detector.__init__(self, name=name)
+        LiveDetector.__init__(self)
+
     def start(self):
         super(DummyDetector, self).start()
         try:

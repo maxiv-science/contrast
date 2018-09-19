@@ -33,5 +33,5 @@ if __name__=='__main__':
         os.remove('/tmp/data.h5')
     except FileNotFoundError:
         pass
-    rec = Hdf5Recorder('/tmp/data.h5')
-    rec.start()
+    h5rec = Hdf5Recorder('/tmp/data.h5', name='h5rec')
+    h5rec.start()
