@@ -8,7 +8,6 @@ plt.ion()
 class PlotRecorder(Recorder):
 
     def __init__(self, data1, data2=None, name='plot'):
-        #super(PlotRecorder, self).__init__(name='plotrecorder')
         Recorder.__init__(self, name=name)
         if data2 is not None:
             self.xdata = data1
@@ -17,6 +16,8 @@ class PlotRecorder(Recorder):
             self.xdata = None
             self.ydata = data1
         self.nplots = 0
+        # override the sleeping function, time.sleep would block the GUI.
+        self.sleep_fcn = plt.pause
 
     def init(self):
         self.fig = plt.figure()

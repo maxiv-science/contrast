@@ -11,7 +11,7 @@ ctx = get_context('spawn')
 Process = ctx.Process
 Queue = ctx.Queue
 
-import matplotlib.pyplot as plt
+import time
 
 class Recorder(Gadget, Process):
     """
@@ -25,11 +25,12 @@ class Recorder(Gadget, Process):
         self.queue = ctx.Queue()
         self.delay = delay
         self.quit = False
+        self.sleep_fcn = time.sleep
 
     def run(self):
         self.init()
         while not self.quit:
-            plt.pause(self.delay)
+            self.sleep_fcn(self.delay)
             dcts = [self.queue.get() for i in range(self.queue.qsize())] # ok since only we are reading from self.queue
             for dct in dcts:
                 if not dct:

@@ -1,3 +1,5 @@
 from .Motor import Motor, DummyMotor
-from .E727 import E727
 
+# don't automatically import hardware-specific classes here,
+# as these might have special dependencies that aren't
+# available everywhere.
