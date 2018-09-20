@@ -15,7 +15,7 @@ class E727Motor(Motor):
 
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(tango_device)
-        self.axis = 1
+        self.axis = axis
         if axis == 1:
             self._mvrelfunc = self.proxy.move_relative1
         elif axis == 2:
