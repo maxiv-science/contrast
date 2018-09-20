@@ -41,6 +41,11 @@ def macro(cls):
         args = utils.str_to_args(line)
         obj = cls(*args)
         obj.run()
+    if cls.__doc__:
+        fcn.__doc__ = cls.__doc__
+    else:
+        print('Please document your macros! %s is missing a docstring.'\
+                % cls.__name__)
 
     # sanity check
     assert cls.run.__call__
@@ -52,5 +57,8 @@ def macro(cls):
 
 @macro
 class LsMac(object):
+    """
+    List available macros. Do <macro-name>? (without <>) for more information.
+    """
     def run(self):
         print(utils.dict_to_table(env.registered_macros, titles=('name', 'class')))

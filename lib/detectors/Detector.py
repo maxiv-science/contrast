@@ -139,12 +139,18 @@ class Link(object):
 
 @macro
 class LsDet(object):
+    """
+    List available detectors.
+    """
     def run(self):
         dct = {d.name: d.__class__ for d in Detector.getinstances()}
         print(utils.dict_to_table(dct, titles=('name', 'class')))
 
 @macro
 class LsGrp(object):
+    """
+    List detector groups.
+    """
     def run(self):
         dct = {d.name: d.__class__ for d in DetectorGroup.getinstances()}
         print(utils.dict_to_table(dct, titles=('name', 'class')))

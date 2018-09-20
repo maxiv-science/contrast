@@ -52,6 +52,12 @@ class DummyMotor(Motor):
 
 @macro
 class Mv(object):
+    """
+    Move one or more motors.
+
+    mvr <motor1> <position1> <motor2> <position2> ...
+
+    """
     def __init__(self, *args):
         self.motors = args[::2]
         self.targets = np.array(args[1::2])
@@ -71,6 +77,12 @@ class Mv(object):
 
 @macro
 class Mvr(Mv):
+    """
+    Move one or more motors relative to their current positions.
+
+    mvr <motor1> <position1> <motor2> <position2> ...
+
+    """
     def __init__(self, *args):
         self.motors = args[::2]
         displacements = np.array(args[1::2])
@@ -79,6 +91,11 @@ class Mvr(Mv):
 
 @macro
 class Wm(object):
+    """
+    Print the positions of one or more motors.
+
+    wm <motor1> <motor2> ...
+    """
     def __init__(self, *args):
         self.motors = args
     def run(self, *args):
@@ -89,12 +106,18 @@ class Wm(object):
 
 @macro
 class Wa(Wm):
+    """
+    Print the positions of all motors available at the current user level.
+    """
     def __init__(self):
         self.motors = [m for m in Motor.getinstances()
                        if m.userlevel <= env.userLevel]
 
 @macro
 class LsM(object):
+    """
+    List available motors.
+    """
     def run(self):
         dct = {m.name: m.__class__ for m in Motor.getinstances()
                if m.userlevel <= env.userLevel}

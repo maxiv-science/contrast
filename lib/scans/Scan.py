@@ -93,10 +93,8 @@ class SoftwareScan(object):
 class AScan(SoftwareScan):
     """
     Software scan on a regular grid of N motors.
-
-    General syntax the same as spock ascan and mesh:
         
-        scan_command motor1 start stop intervals ... exp_time
+    ascan <motor1> <start> <stop> <intervals> ... <exp_time>
     """
 
     def __init__(self, *args):
@@ -126,6 +124,12 @@ class AScan(SoftwareScan):
 
 @macro
 class DScan(AScan):
+    """
+    Software scan on a regular grid of N motors, with positions relative
+    to each motor's current one.
+
+    ascan <motor1> <start> <stop> <intervals> ... <exp_time>
+    """
     def _generate_positions(self):
         positions = super(DScan, self)._generate_positions()
         for i, m in enumerate(self.motors):
@@ -144,8 +148,9 @@ class DScan(AScan):
 @macro
 class LoopScan(SoftwareScan):
     """
-    A software scan with no motor movements. Has its own class to avoid
-    handling the special case of no motors directly in SoftwareScan.
+    A software scan with no motor movements.
+
+    loopscan <intervals> <exp_time>
     """
     def __init__(self, intervals, exposuretime=1.0):
         """

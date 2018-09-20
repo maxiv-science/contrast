@@ -81,6 +81,9 @@ def active_recorders():
 
 @macro
 class LsRec(object):
+    """
+    List active recorders.
+    """
     def run(self):
         dct = {r.name: r.__class__ for r in active_recorders()}
         print(utils.dict_to_table(dct, titles=('name', 'class')))

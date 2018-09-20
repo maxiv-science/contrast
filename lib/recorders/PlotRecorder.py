@@ -62,6 +62,15 @@ class PlotRecorder(Recorder):
 
 @macro
 class LivePlot(object):
+    """
+    Start a live plot recorder which will plot coming scans.
+
+    liveplot [<x>] <y>
+
+    Examples:
+    liveplot xmotor diode1
+    liveplot diode1
+    """
     def __init__(self, data1, data2=None):
         basename = 'name'
         name = basename
