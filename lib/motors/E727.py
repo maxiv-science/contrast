@@ -5,12 +5,14 @@ Provides a Motor subclass for the PI E727 piezo driver.
 import PyTango
 from . import Motor
 
-class E727(Motor):
+class E727Motor(Motor):
     """
     Should also handle limits and maybe user/dial units.
     """
 
-    def __init__(self, tango_device='B303A-EH/CTL/PZCU-02', axis=None):
+    def __init__(self, tango_device='B303A-EH/CTL/PZCU-02', axis=None, name=None):
+        super(E727Motor, self).__init__(name=name)
+
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(tango_device)
         self.axis = 1
