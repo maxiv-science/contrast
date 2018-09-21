@@ -53,7 +53,7 @@ class SoftwareScan(object):
         table_line = self.table_line()
         # find and prepare the detectors
         group = env.currentDetectorGroup
-        group.prepare(self.exposuretime)
+        group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
         for i in range(len(list(positions.values())[0])):
             # move motors
@@ -63,6 +63,8 @@ class SoftwareScan(object):
                 time.sleep(.01)
             # arm and start detectors
             group.arm()
+            while group.busy():
+                time.sleep(.01)
             group.start()
             while group.busy():
                 time.sleep(.01)
@@ -169,11 +171,13 @@ class LoopScan(SoftwareScan):
         table_line = self.table_line()
         # find and prepare the detectors
         group = env.currentDetectorGroup
-        group.prepare(self.exposuretime)
+        group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
         for i in range(self.intervals + 1):
             # arm and start detectors
             group.arm()
+            while group.busy():
+                time.sleep(.01)
             group.start()
             while group.busy():
                 time.sleep(.01)

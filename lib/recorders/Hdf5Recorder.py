@@ -58,9 +58,9 @@ class Hdf5Recorder(Recorder):
                 if isinstance(val, np.ndarray):
                     # arrays
                     d = self.fp.create_dataset(name, shape=(1,)+val.shape, maxshape=(None,)+val.shape, dtype=val.dtype)
-                elif type(val) == str:
-                    # strings
-                    d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype='S10')
+                elif (type(val) == str) or hasattr(val, 'target'):
+                    # strings or links
+                    d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype='S100')
                 else:
                     # scalars of any type
                     d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=type(val))
@@ -69,9 +69,13 @@ class Hdf5Recorder(Recorder):
                 d = self.fp[name]
                 d.resize((d.shape[0]+1,) + d.shape[1:])
 
-            # special case
+            # special cases
             if type(val) == str:
+                # a string
                 val_ = val.encode(encoding='ascii', errors='ignore')
+            elif hasattr(val, 'target'):
+                # a link
+                val_ = val.target.encode(encoding='ascii', errors='ignore')
             else:
                 val_ = val
             d[-1] = val_

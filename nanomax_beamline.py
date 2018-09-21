@@ -9,9 +9,10 @@ if __name__=='__main__':
 
     import lib
     from lib.environment import env
-#    from lib.recorders import Hdf5Recorder
+    from lib.recorders import Hdf5Recorder
     from lib.motors.E727 import E727Motor
-    from lib.detectors import DetectorGroup, Pilatus
+    from lib.detectors import DetectorGroup
+    from lib.detectors.Pilatus import Pilatus
     import os
     
 
@@ -26,12 +27,13 @@ if __name__=='__main__':
                       det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
 
     detgrp = DetectorGroup('detgrp')
+    detgrp.append(pilatus)
     env.currentDetectorGroup = detgrp
 
-#    try:
-#        os.remove('/tmp/data.h5')
-#    except FileNotFoundError:
-#        pass
-#    h5rec = Hdf5Recorder('/tmp/data.h5', name='h5rec')
-#    h5rec.start()
+    try:
+        os.remove('/tmp/data.h5')
+    except FileNotFoundError:
+        pass
+    h5rec = Hdf5Recorder('/tmp/data.h5', name='h5rec')
+    h5rec.start()
 

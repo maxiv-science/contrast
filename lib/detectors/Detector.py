@@ -11,9 +11,13 @@ class Detector(Gadget):
     recordable data.
     """
     
-    def prepare(self, acqtime):
+    def prepare(self, acqtime, dataid):
         """
         Run before acquisition, once per scan.
+            acqtime: exposure time for which to prepare
+            dataid:  some way of identifying the data to
+                     collected, useful for detectors that
+                     write their own data files.
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
@@ -64,7 +68,7 @@ class LiveDetector(object):
     def _start(self, acqtime):
         self.stopped = False
         while not self.stopped:
-            self.prepare(acqtime)
+            self.prepare(acqtime, None)
             self.start()
             while self.busy():
                 time.sleep(.05)
@@ -80,9 +84,9 @@ class DetectorGroup(Gadget):
         self.detectors = list()
         self.append(args)
 
-    def prepare(self, acqtime):
+    def prepare(self, acqtime, dataid):
         for d in self:
-            d.prepare(acqtime)
+            d.prepare(acqtime, dataid)
 
     def arm(self):
         for d in self:
@@ -135,7 +139,7 @@ class Link(object):
     def __init__(self, target=None):
         self.target = target
     def __str__(self):
-        return '<%s>' % self.target
+        return '<link>'
 
 @macro
 class LsDet(object):
