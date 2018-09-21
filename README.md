@@ -88,6 +88,8 @@ Out[3]: ['det1', 'det2', 'det3']
 ## recorders
 Data is captured by recorders. Recorders are run in separate processes and get data through queues, avoiding holding up the main acquisition loop because of I/O. They can do anything with the data, for example saving to `hdf5` files or live plotting. See the `Hdf5Recorder` and `PlotRecorder` classes for examples. The former is very primitive still, but the latter is quite nice.
 
+Note how easy it is to write these recorders, and how easy it would be to integrate online data analysis, for example writing a recorder which serves data (or links to data) for an on-the-fly ptycho engine to grab.
+
 The `lsrec` macro lists currently running recorders.
 ```
 In [30]: lsrec
@@ -115,3 +117,14 @@ samy 0.0
 gap 0.0
 samx 0.0
 ```
+
+## direct access to python objects
+If `Gadget` objects operate on underlying Tango devices, then Tango attributes are directly accessible on the objects themselvs. PyTango provides tab completion and so these can be easily checked or corrected. Of course `Gadget`subclasses can provide nice getter and setter methods, but fixes are easily done.
+```
+In [7]: pilatus.det.energy
+Out[7]: 10.0
+
+In[8]: pilatus.lima.saving_mode
+Out[8]: 'MANUAL'
+```
+
