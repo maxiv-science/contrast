@@ -170,3 +170,41 @@ class LoopScan(SoftwareScan):
     def _generate_positions(self):
         # dummy positions with a non existent motor
         return {'fake': [i for i in range(self.intervals + 1)]}
+
+@macro
+class Ct(object):
+    """
+    Make a single acquisition on the current detector group without
+    saving data. Optional argument <exp_time> specifies exposure time,
+    the default is 1.0.
+
+    ct [<exp_time>]
+    """
+    def __init__(self, exp_time=1, print_nd=True):
+        """
+        Parse arguments.
+        """
+        self.exposuretime = float(exp_time)
+
+    def run(self):
+        # find and prepare the detectors
+        group = env.currentDetectorGroup
+        group.prepare(self.exposuretime, dataid=None)
+        # arm and start detectors
+        group.arm()
+        while group.busy():
+            time.sleep(.01)
+        group.start()
+        while group.busy():
+            time.sleep(.01)
+        # read detectors and motors
+        dct = {}
+        for d in group:
+            dct[d.name] = d.read()
+        # print results
+        for key, val in dct.items():
+            try:
+                val_ = val.shape
+            except AttributeError:
+                val_ = val
+            print(key, ':', val_)
