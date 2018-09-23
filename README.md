@@ -50,7 +50,7 @@ for i in range(5):
 ```
 
 ## environment variables
-No global environment variables are used. Instead, a central object called in the environment module is used to store values such as scan number, current detector group, etc.
+No global environment variables are used. Instead, a central object in the environment module is used to store values such as scan number, current detector group, etc.
 ```
 In [24]: from lib.environment import env
 
