@@ -154,7 +154,8 @@ class DScan(AScan):
 @macro
 class LoopScan(SoftwareScan):
     """
-    A software scan with no motor movements.
+    A software scan with no motor movements. Number of exposures is
+    <intervals> + 1, for consistency with ascan, dscan etc.
 
     loopscan <intervals> <exp_time>
     """
@@ -164,41 +165,8 @@ class LoopScan(SoftwareScan):
         """
         super(LoopScan, self).__init__(float(exposuretime))
         self.intervals = intervals
+        self.motors = []
 
-    def run(self):
-        """
-        This method does all the serious interaction with motors and
-        Detectors.
-        """
-        print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
-        print(self.header_line())
-        table_line = self.table_line()
-        # find and prepare the detectors
-        group = env.currentDetectorGroup
-        group.prepare(self.exposuretime, self.scannr)
-        t0 = time.time()
-        try:
-            for i in range(self.intervals + 1):
-                # arm and start detectors
-                group.arm()
-                while group.busy():
-                    time.sleep(.01)
-                group.start()
-                while group.busy():
-                    time.sleep(.01)
-                # read detectors
-                dt = time.time() - t0
-                dct = {'dt': dt, 'scannr': self.scannr}
-                for d in group:
-                    dct[d.name] = d.read()
-                # pass data to recorders
-                for r in active_recorders():
-                    r.queue.put(dct)
-                # print spec-style info
-                print(table_line % tuple([i]
-                      + [self.format_number(dct[d.name]) for d in group]
-                      + [dt]))
-            print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
-        except KeyboardInterrupt:
-            group.stop()
-            print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
+    def _generate_positions(self):
+        # dummy positions with a non existent motor
+        return {'fake': [i for i in range(self.intervals + 1)]}
