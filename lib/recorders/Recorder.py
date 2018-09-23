@@ -12,6 +12,7 @@ Process = ctx.Process
 Queue = ctx.Queue
 
 import time
+import signal
 
 class Recorder(Gadget, Process):
     """
@@ -28,6 +29,8 @@ class Recorder(Gadget, Process):
         self.sleep_fcn = time.sleep
 
     def run(self):
+        # ignore SIGINT signals from ctrl-C in the main process
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         self.init()
         while not self.quit:
             self.sleep_fcn(self.delay)
