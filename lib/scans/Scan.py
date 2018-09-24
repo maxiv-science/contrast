@@ -56,10 +56,10 @@ class SoftwareScan(object):
         group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
         try:
-            for i in range(len(list(positions.values())[0])):
+            for i, pos in enumerate(positions):
                 # move motors
                 for m in self.motors:
-                    m.move(positions[m.name][i])
+                    m.move(pos[m.name])
                 while True in [m.busy() for m in self.motors]:
                     time.sleep(.01)
                 # arm and start detectors
@@ -91,7 +91,8 @@ class SoftwareScan(object):
         
     def _generate_positions(self):
         """
-        Function which returns ordered dict {motor.name: (pos0, pos1, pos2, ...)}.
+        Function or generator which returns or yields an iterable of
+        dicts {motorA.name: posA, motorB.name: posB, ...}
         """
         raise NotImplementedError
 
@@ -119,14 +120,14 @@ class AScan(SoftwareScan):
 
     def _generate_positions(self):
         positions = []
-        size = 1
         for i in range(len(self.motors)):
             positions.append(np.linspace(self.limits[i][0],
                                          self.limits[i][1],
                                          self.intervals[i]+1))
         grids = np.meshgrid(*reversed(positions))
         grids = [l for l in reversed(grids)] # fastest last
-        return {m.name: pos.flatten() for (m, pos) in zip(self.motors, grids)}
+        for i in range(len(grids[0].flat)):
+            yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
 
 @macro
 class DScan(AScan):
@@ -137,13 +138,17 @@ class DScan(AScan):
     ascan <motor1> <start> <stop> <intervals> ... <exp_time>
     """
     def _generate_positions(self):
-        positions = super(DScan, self)._generate_positions()
-        for i, m in enumerate(self.motors):
-            positions[m.name] += m.position()
-        return positions
+        current = {m.name:m.position() for m in self.motors}
+        for pos in super(DScan, self)._generate_positions():
+            for i, m in enumerate(self.motors):
+                pos[m.name] += current[m.name]
+            yield pos
     def run(self):
         old_pos = [m.position() for m in self.motors]
         super(DScan, self).run()
+        # wait for motors then move them back
+        while True in [m.busy() for m in self.motors]:
+            time.sleep(.01)
         print('Returning motors to their starting positions...')
         for m, pos in zip(self.motors, old_pos):
             m.move(pos)
@@ -169,7 +174,8 @@ class LoopScan(SoftwareScan):
 
     def _generate_positions(self):
         # dummy positions with a non existent motor
-        return {'fake': [i for i in range(self.intervals + 1)]}
+        for i in range(self.intervals + 1):
+            yield {'fake':i}
 
 @macro
 class Ct(object):
