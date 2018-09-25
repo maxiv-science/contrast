@@ -6,15 +6,35 @@ from ..Gadget import Gadget
 from ..environment import macro, env
 from .. import utils
 
+class MotorLimitException(Exception):
+    pass
+
 class Motor(Gadget):
     """
-    Should also handle limits and maybe user/dial units.
+    General base class for motors.
+
+    Don't forget to call and check the return value of super().move in
+    subclasses, as this checks motor limits!
     """
+
+    def __init__(self, *args, **kwargs):
+        super(Motor, self).__init__(*args, **kwargs)
+        self._uplim = None
+        self._lowlim = None
+        self._format = '%.2f'
 
     def move(self, pos):
         if self.busy():
             raise Exception('Motor is busy')
-        # check limits here as well
+        try:
+            assert pos <= self._uplim
+            assert pos >= self._lowlim
+        except AssertionError:
+            print('Trying to move %s outside its limits!' % self.name)
+            return -1
+        except TypeError:
+            pass
+        return 0
 
     def position(self):
         raise NotImplementedError
@@ -25,6 +45,17 @@ class Motor(Gadget):
     def stop(self):
         raise NotImplementedError
 
+    @property
+    def limits(self):
+        return (self._lowlim, self._uplim)
+
+    @limits.setter
+    def limits(self, lims):
+        lowlim, uplim = lims
+        assert uplim > lowlim
+        self._lowlim = lowlim
+        self._uplim = uplim
+
 class DummyMotor(Motor):
     def __init__(self, *args, **kwargs):
         super(DummyMotor, self).__init__(*args, **kwargs)
@@ -33,10 +64,10 @@ class DummyMotor(Motor):
         self._started = 0.0
         self.velocity = 1.0
     def move(self, pos):
-        super(DummyMotor, self).move(pos)
-        self._oldpos = self.position()
-        self._started = time.time()
-        self._aim = pos
+        if super(DummyMotor, self).move(pos) == 0:
+            self._oldpos = self.position()
+            self._started = time.time()
+            self._aim = pos
     def position(self):
         dpos = self._aim - self._oldpos
         dt = time.time() - self._started
@@ -99,10 +130,22 @@ class Wm(object):
     def __init__(self, *args):
         self.motors = args
     def run(self, *args):
-        positions = tuple([m.position() for m in self.motors])
-        dct = OrderedDict()
-        for m, p in zip(self.motors, positions):
-            print(m.name, p)
+        names = [m.name for m in self.motors]
+        vals = [m._format % m.position() for m in self.motors]
+        lims = [str(m.limits) for m in self.motors]
+        col1 = max([8,] + [len(s) for s in names])
+        col2 = max([10,] + [len(s) for s in vals])
+        col3 = max([8,] + [len(s) for s in lims])
+        header = ('%%-%ss'%col1) % 'motor' \
+                 + ('%%-%ss'%col2) % 'position' \
+                 + ('%%-%ss'%col3) % 'limits'
+        print('\n' + header)
+        print('-' * len(header))
+        for m, p, l in zip(names, vals, lims):
+            line = ('%%-%ss'%col1) % m \
+                   + ('%%-%ss'%col2) % p \
+                   + ('%%-%ss'%col3) % l
+            print(line)
 
 @macro
 class Wa(Wm):
@@ -122,3 +165,19 @@ class LsM(object):
         dct = {m.name: m.__class__ for m in Motor.getinstances()
                if m.userlevel <= env.userLevel}
         print(utils.dict_to_table(dct, titles=('name', 'class')))
+
+@macro
+class SetLim(object):
+    """
+    Set limits on motors.
+
+    setlim <motor1> <lower 1> <upper 1> ...
+    """
+    def __init__(self, *args):
+        self.motors = args[::3]
+        self.lowers = args[1::3]
+        self.uppers = args[2::3]
+
+    def run(self):
+        for m, l, u in zip(self.motors, self.lowers, self.uppers):
+            m.limits = (l, u)

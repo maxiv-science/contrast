@@ -7,7 +7,7 @@ from . import Motor
 
 class E727Motor(Motor):
     """
-    Should also handle limits and maybe user/dial units.
+    Single axis on the E727.
     """
 
     def __init__(self, tango_device='B303A-EH/CTL/PZCU-02', axis=None, name=None):
@@ -24,11 +24,10 @@ class E727Motor(Motor):
             self._mvrelfunc = self.proxy.move_relative3
 
     def move(self, pos):
-        if self.busy():
-            raise Exception('Motor is busy')
-        current = self.position()
-        rel = pos - current
-        self._mvrelfunc(rel)
+        if super(E727Motor, self).move(pos) == 0:
+            current = self.position()
+            rel = pos - current
+            self._mvrelfunc(rel)
 
     def position(self):
         if self.axis == 1:
