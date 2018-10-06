@@ -72,7 +72,7 @@ class LivePlot(object):
     liveplot diode1
     """
     def __init__(self, data1, data2=None):
-        basename = 'name'
+        basename = 'plot'
         name = basename
         i = 2
         while name in [r.name for r in Recorder.getinstances()]:
