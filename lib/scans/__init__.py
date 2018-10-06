@@ -1,1 +1,1 @@
-from .Scan import SoftwareScan, AScan, DScan
+from .Scan import SoftwareScan, AScan, DScan, Ct
