@@ -1,5 +1,5 @@
 from ..environment import macro
-from .Scan import AScan
+from .Mesh import Mesh
 import tty, sys, termios
 
 # constants to keep track of key buttons
@@ -26,7 +26,7 @@ def getarrowkey():
         return None
 
 @macro
-class Tweak(AScan):
+class Tweak(Mesh):
     """
     An interactive scan where motor positions are chosen manually for
     each point. Useful for tweaking motors and reading the current
@@ -40,7 +40,7 @@ class Tweak(AScan):
         Parse arguments.
         """
         exposuretime = float(args[-1])
-        super(AScan, self).__init__(exposuretime)
+        super(Mesh, self).__init__(exposuretime)
         self.motors = args[:-1:2]
         self.steps = args[1::2]
         print('\nUse the arrow keys to tweak motors and ctrl-C to stop.')

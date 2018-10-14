@@ -97,66 +97,6 @@ class SoftwareScan(object):
         raise NotImplementedError
 
 @macro
-class AScan(SoftwareScan):
-    """
-    Software scan on a regular grid of N motors.
-        
-    ascan <motor1> <start> <stop> <intervals> ... <exp_time>
-    """
-
-    def __init__(self, *args):
-        """
-        Parse arguments.
-        """
-        exposuretime = float(args[-1])
-        super(AScan, self).__init__(exposuretime)
-        self.motors = []
-        self.limits = []
-        self.intervals = []
-        for i in range(int((len(args) - 1) / 4)):
-            self.motors.append(args[4*i])
-            self.limits.append([float(m) for m in args[4*i+1:4*i+3]])
-            self.intervals.append(int(args[4*i+3]))
-
-    def _generate_positions(self):
-        positions = []
-        for i in range(len(self.motors)):
-            positions.append(np.linspace(self.limits[i][0],
-                                         self.limits[i][1],
-                                         self.intervals[i]+1))
-        grids = np.meshgrid(*reversed(positions))
-        grids = [l for l in reversed(grids)] # fastest last
-        for i in range(len(grids[0].flat)):
-            yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
-
-@macro
-class DScan(AScan):
-    """
-    Software scan on a regular grid of N motors, with positions relative
-    to each motor's current one.
-
-    ascan <motor1> <start> <stop> <intervals> ... <exp_time>
-    """
-    def _generate_positions(self):
-        current = {m.name:m.position() for m in self.motors}
-        for pos in super(DScan, self)._generate_positions():
-            for i, m in enumerate(self.motors):
-                pos[m.name] += current[m.name]
-            yield pos
-    def run(self):
-        old_pos = [m.position() for m in self.motors]
-        super(DScan, self).run()
-        # wait for motors then move them back
-        while True in [m.busy() for m in self.motors]:
-            time.sleep(.01)
-        print('Returning motors to their starting positions...')
-        for m, pos in zip(self.motors, old_pos):
-            m.move(pos)
-        while True in [m.busy() for m in self.motors]:
-            time.sleep(.01)
-        print('...done')
-
-@macro
 class LoopScan(SoftwareScan):
     """
     A software scan with no motor movements. Number of exposures is
