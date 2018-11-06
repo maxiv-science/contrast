@@ -1,4 +1,5 @@
 from .Detector import Detector, LiveDetector, TriggeredDetector, Link
+from ..environment import env
 
 import time
 import numpy as np
@@ -32,7 +33,6 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
-
         # get out of the fault caused by trigger timeout
         if (self.lima.acq_status == 'Fault') and (self.lima.acq_status_fault_error == 'No error'):
             self.lima.stopAcq()
@@ -47,6 +47,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             self.link = None
         else:
             # saving
+            self.lima.saving_directory = env.paths.directory
             self.lima.saving_mode = "AUTO_FRAME"
             filename = 'scan_%04d_%s' % (dataid, self.name)
             self.lima.saving_prefix = filename

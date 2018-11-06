@@ -13,9 +13,9 @@ if __name__=='__main__':
     from lib.motors.E727 import E727Motor
     from lib.detectors import DetectorGroup
     from lib.detectors.Pilatus import Pilatus
+    from lib.data import SdmPathFixer
     import os
     
-
     env.userLevel = 1 # we're not experts!
 
     samx = E727Motor(axis=1, name='samx')
@@ -29,6 +29,8 @@ if __name__=='__main__':
     detgrp = DetectorGroup('detgrp')
     detgrp.append(pilatus)
     env.currentDetectorGroup = detgrp
+
+    env.paths = SdmPathFixer('B303A/CTL/SDM-01')
 
     try:
         os.remove('/tmp/data.h5')

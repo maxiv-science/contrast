@@ -2,7 +2,7 @@ from IPython import get_ipython
 ipython = get_ipython()
 
 from . import utils
-#from .recorders import Recorder, PlotRecorder
+from .data import PathFixer
 
 class Env(object):
     """
@@ -13,6 +13,7 @@ class Env(object):
         self.registered_macros = {}
         self.nextScanID = 0
         self.userLevel = 5
+        self.paths = PathFixer()
 env = Env()
 
 def runCommand(line):
