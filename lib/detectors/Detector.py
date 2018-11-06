@@ -74,6 +74,15 @@ class LiveDetector(object):
             while self.busy():
                 time.sleep(.05)
 
+class TriggeredDetector(object):
+    """
+    Defines the API for detectors that optionally accept hardware
+    triggers.
+    """
+    def __init__(self):
+        self.hw_trig = False
+        self.hw_trig_n = 1
+
 class DetectorGroup(Gadget):
     """
     Collection of Detector objects to be acquired together, in a scan
