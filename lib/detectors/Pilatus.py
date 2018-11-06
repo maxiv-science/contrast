@@ -51,7 +51,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             self.lima.saving_mode = "AUTO_FRAME"
             filename = 'scan_%04d_%s' % (dataid, self.name)
             self.lima.saving_prefix = filename
-            self.link = Link(filename)
+            self.link = Link(filename + self.lima.saving_suffix)
 
         if self.hw_trig:
             self.lima.acq_trigger_mode = "EXTERNAL_TRIGGER_MULTI"

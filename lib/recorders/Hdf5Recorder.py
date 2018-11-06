@@ -38,7 +38,7 @@ class Hdf5Recorder(Recorder):
 
     def act_on_data(self, dct):
         """
-        Assuming scalar data for now!
+        Write data packets to the h5 file.
         """
         if not self.file_open:
             self._open()
