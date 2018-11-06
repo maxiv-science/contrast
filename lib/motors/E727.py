@@ -10,11 +10,11 @@ class E727Motor(Motor):
     Single axis on the E727.
     """
 
-    def __init__(self, tango_device='B303A-EH/CTL/PZCU-02', axis=None, name=None):
+    def __init__(self, name, device, axis):
         super(E727Motor, self).__init__(name=name)
 
         assert axis in (1, 2, 3)
-        self.proxy = PyTango.DeviceProxy(tango_device)
+        self.proxy = PyTango.DeviceProxy(device)
         self.axis = axis
         if axis == 1:
             self._mvrelfunc = self.proxy.move_relative1

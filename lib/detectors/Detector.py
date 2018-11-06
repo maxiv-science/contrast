@@ -67,8 +67,8 @@ class LiveDetector(object):
 
     def _start(self, acqtime):
         self.stopped = False
+        self.prepare(acqtime, None)
         while not self.stopped:
-            self.prepare(acqtime, None)
             self.arm()
             self.start()
             while self.busy():

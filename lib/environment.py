@@ -10,7 +10,7 @@ class Env(object):
     """
     def __init__(self):
         self.currentDetectorGroup = None # a DetectorGroup instance
-        self.registered_macros = {}
+        self.registeredMacros = {}
         self.nextScanID = 0
         self.userLevel = 5
         self.paths = PathFixer()
@@ -52,7 +52,7 @@ def macro(cls):
     assert cls.run.__call__
 
     name = cls.__name__.lower()
-    env.registered_macros[name] = cls
+    env.registeredMacros[name] = cls
     ipython.register_magic_function(fcn, magic_name=name)
     return cls
 
@@ -62,4 +62,4 @@ class LsMac(object):
     List available macros. Do <macro-name>? (without <>) for more information.
     """
     def run(self):
-        print(utils.dict_to_table(env.registered_macros, titles=('name', 'class')))
+        print(utils.dict_to_table(env.registeredMacros, titles=('name', 'class')))

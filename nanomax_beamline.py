@@ -18,9 +18,9 @@ if __name__=='__main__':
     
     env.userLevel = 1 # we're not experts!
 
-    samx = E727Motor(axis=1, name='samx')
-    samy = E727Motor(axis=3, name='samy')
-    samz = E727Motor(axis=2, name='samz')
+    samx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='samx')
+    samy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='samy')
+    samz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='samz')
 
     pilatus = Pilatus(name='pilatus', 
                       lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
