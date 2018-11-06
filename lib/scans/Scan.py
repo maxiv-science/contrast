@@ -44,8 +44,8 @@ class SoftwareScan(object):
 
     def run(self):
         """
-        This method does all the serious interaction with motors and
-        Detectors.
+        This method does all the serious interaction with motors,
+        detectors, and data recorders.
         """
         print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
         print(self.header_line())
@@ -55,6 +55,9 @@ class SoftwareScan(object):
         group = env.currentDetectorGroup
         group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
+        # send a header to the recorders
+        for r in active_recorders():
+            r.queue.put({'scan_header':True, 'scannr': self.scannr, 'path': env.paths.directory})
         try:
             for i, pos in enumerate(positions):
                 # move motors
@@ -71,7 +74,7 @@ class SoftwareScan(object):
                     time.sleep(.01)
                 # read detectors and motors
                 dt = time.time() - t0
-                dct = {'dt': dt, 'scannr': self.scannr}
+                dct = {'dt': dt}
                 for d in group:
                     dct[d.name] = d.read()
                 for m in self.motors:
@@ -88,6 +91,10 @@ class SoftwareScan(object):
         except KeyboardInterrupt:
             group.stop()
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
+
+        # tell the recorders that the scan is over
+        for r in active_recorders():
+            r.queue.put({'scan_footer':True})
         
     def _generate_positions(self):
         """
@@ -121,7 +128,7 @@ class LoopScan(SoftwareScan):
 class Ct(object):
     """
     Make a single acquisition on the current detector group without
-    saving data. Optional argument <exp_time> specifies exposure time,
+    recording data. Optional argument <exp_time> specifies exposure time,
     the default is 1.0.
 
     ct [<exp_time>]

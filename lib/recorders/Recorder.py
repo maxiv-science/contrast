@@ -38,6 +38,10 @@ class Recorder(Gadget, Process):
             for dct in dcts:
                 if not dct:
                     self.quit = True
+                elif 'scan_header' in dct.keys():
+                    self.act_on_header(dct)
+                elif 'scan_footer' in dct.keys():
+                    self.act_on_footer()
                 else:
                     self.act_on_data(dct)
             self.periodic_check()
@@ -49,12 +53,34 @@ class Recorder(Gadget, Process):
         """
         pass
 
-    def act_on_data(self):
+    def act_on_header(self, dct):
         """
-        Subclass this. Performs an action when a new data package is
-        received.
+        Subclass this. Performs an action when a new scan is started.
+        The key-value pairs of dct are "path":path and "scannr":scannr plus the
+        identifier "scan_header":True.
         """
         pass
+
+    def act_on_data(self, dct):
+        """
+        Subclass this. Performs an action when a new data package is
+        received. The keys of dct are detector and motor names, the values
+        are their readings at one particular point in the scan.
+        """
+        pass
+
+    def act_on_footer(self):
+        """
+        Subclass this. Performs an action when a scan ends.
+        """
+        pass
+
+    def periodic_check(self):
+        """
+        Subclass if you like. A function which gets called on every iteration
+        of the recorder. Useful for example for checking if files should be
+        closed or whether a plot window still exists.
+        """
 
     def close(self):
         """
@@ -71,8 +97,12 @@ class Recorder(Gadget, Process):
 
 
 class DummyRecorder(Recorder):
+    def act_on_header(self, dct):
+        print('got a header! am told to write scan %d to %s' % (dct['scannr'], dct['path']))
     def act_on_data(self, dct):
         print('found this!', dct)
+    def act_on_footer(self):
+        print('scan over, apparently')
     def init(self):
         print('opening')
     def close(self):

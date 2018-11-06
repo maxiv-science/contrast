@@ -26,19 +26,19 @@ class PlotRecorder(Recorder):
         self.ax.set_xlabel(self.xdata)
         self.ax.set_ylabel(self.ydata)
         plt.pause(.1)
-        self.scannr = None
+
+    def act_on_header(self, dct):
+        # start a new scan
+        self.nplots += 1
+        self.x, self.y = [], []
+        col = 'bkmrcg'[(self.nplots-1) % 6]
+        self.l = Line2D(xdata=[], ydata=[], color=col, label=str(dct['scannr']))
+        self.ax.add_line(self.l)
+        self.ax.legend()
 
     def act_on_data(self, dct):
-        if not dct['scannr'] == self.scannr:
-            # start a new scan
-            self.nplots += 1
-            self.scannr = dct['scannr']
-            self.x, self.y = [], []
-            col = 'bkmrcg'[(self.nplots-1) % 6]
-            self.l = Line2D(xdata=[], ydata=[], color=col)
-            self.ax.add_line(self.l)
+        # if our data isn't in dct, just move on
         try:
-            # if our data isn't in dct, just move on
             self.y.append(dct[self.ydata])
             if self.xdata is not None:
                 # checking if we have explicit x data

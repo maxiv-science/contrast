@@ -33,10 +33,14 @@ if __name__=='__main__':
     detgrp = DetectorGroup('detgrp', det1, det2, det3)
 
     env.currentDetectorGroup = detgrp
+    env.paths.directory = '/tmp'
 
-    try:
-        os.remove('/tmp/data.h5')
-    except FileNotFoundError:
-        pass
-    h5rec = Hdf5Recorder('/tmp/data.h5', name='h5rec')
+    # remove old files
+    files = os.listdir(env.paths.directory)
+    for file in files:
+        if file.endswith(".h5"):
+            os.remove(os.path.join(env.paths.directory, file))
+
+    # the Hdf5Recorder later gets its path from the env object
+    h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
