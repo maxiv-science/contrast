@@ -57,7 +57,7 @@ class PlotRecorder(Recorder):
         if not plt.fignum_exists(self.fig.number):
             self.quit = True
 
-    def close(self):
+    def _close(self):
         plt.close(self.fig)
 
 @macro

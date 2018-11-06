@@ -45,7 +45,7 @@ class Recorder(Gadget, Process):
                 else:
                     self.act_on_data(dct)
             self.periodic_check()
-        self.close()
+        self._close()
 
     def init(self):
         """
@@ -82,7 +82,7 @@ class Recorder(Gadget, Process):
         closed or whether a plot window still exists.
         """
 
-    def close(self):
+    def _close(self):
         """
         Subclass this. Clean up (close windows, close files...)
         """
@@ -105,7 +105,7 @@ class DummyRecorder(Recorder):
         print('scan over, apparently')
     def init(self):
         print('opening')
-    def close(self):
+    def _close(self):
         print('closing')
 
 
