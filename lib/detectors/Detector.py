@@ -69,6 +69,7 @@ class LiveDetector(object):
         self.stopped = False
         while not self.stopped:
             self.prepare(acqtime, None)
+            self.arm()
             self.start()
             while self.busy():
                 time.sleep(.05)
