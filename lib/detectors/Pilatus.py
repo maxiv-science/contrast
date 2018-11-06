@@ -1,13 +1,14 @@
-from .Detector import Detector, LiveDetector, Link
+from .Detector import Detector, LiveDetector, TriggeredDetector, Link
 
 import time
 import numpy as np
 import PyTango
 
-class Pilatus(Detector, LiveDetector):
+class Pilatus(Detector, LiveDetector, TriggeredDetector):
     def __init__(self, name=None, lima_device=None, det_device=None):
         Detector.__init__(self, name=name)
         LiveDetector.__init__(self)
+        TriggeredDetector.__init__(self)
 
         self.name = name
         self.link = None
@@ -26,21 +27,40 @@ class Pilatus(Detector, LiveDetector):
         self.lima.saving_suffix = '.hdf5'
         self.lima.saving_directory = '/scan_data/temp/'
 
-
     def prepare(self, acqtime, dataid):
         """
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
+
+        # get out of the fault caused by trigger timeout
+        if (self.lima.acq_status == 'Fault') and (self.lima.acq_status_fault_error == 'No error'):
+            self.lima.stopAcq()
+            self.lima.prepareAcq()
+
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
-        filename = 'scan_%04d_%s_' % (dataid, self.name)
-            
+        if dataid is None:
+            # no saving
+            self.lima.saving_mode = "MANUAL" # no saving
+            self.link = None
+        else:
+            # saving
+            self.lima.saving_mode = "AUTO_FRAME"
+            filename = 'scan_%04d_%s' % (dataid, self.name)
+            self.lima.saving_prefix = filename
+            self.link = Link(filename)
+
+        if self.hw_trig:
+            self.lima.acq_trigger_mode = "EXTERNAL_TRIGGER_MULTI"
+            self.lima.acq_nb_frames = self.hw_trig_n
+        else:
+            self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
+            self.lima.acq_nb_frames = 1
+
         self.acqtime = acqtime
         self.lima.acq_expo_time = acqtime
-        self.lima.saving_prefix = filename
-        self.link = Link(filename)
 
     def arm(self):
         """
@@ -49,6 +69,8 @@ class Pilatus(Detector, LiveDetector):
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         self.lima.prepareAcq()
+        if self.hw_trig:
+            self.lima.startAcq()
 
     def start(self):
         """
@@ -56,7 +78,8 @@ class Pilatus(Detector, LiveDetector):
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        self.lima.startAcq()
+        if not self.hw_trig:
+            self.lima.startAcq()
 
     def stop(self):
         self.lima.stopAcq()
@@ -66,4 +89,4 @@ class Pilatus(Detector, LiveDetector):
 
     def read(self):
         return self.link
-
+        
