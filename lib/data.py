@@ -1,4 +1,7 @@
-import PyTango
+try:
+    import PyTango
+except ModuleNotFoundError:
+    pass
 
 class PathFixer(object):
     """
