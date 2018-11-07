@@ -32,10 +32,6 @@ if __name__=='__main__':
 
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
 
-    try:
-        os.remove('/tmp/data.h5')
-    except FileNotFoundError:
-        pass
-    h5rec = Hdf5Recorder('/tmp/data.h5', name='h5rec')
+    h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
 
