@@ -13,6 +13,7 @@ if __name__=='__main__':
     from lib.motors import DummyMotor
     from lib.motors.E727 import E727Motor
     from lib.motors.SardanaPoolMotor import SardanaPoolMotor
+    from lib.motors.SmaractMotor import SmaractLinearMotor
     from lib.detectors import DetectorGroup
     from lib.detectors.Pilatus import Pilatus
     from lib.data import SdmPathFixer
@@ -27,6 +28,9 @@ if __name__=='__main__':
     samx.limits = (0, 100)
     samy.limits = (0, 100)
     samz.limits = (0, 100)
+
+    # smaracts
+    diode_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode_x')
 
     # some steppers through sardana
     sams_x = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-X', name='sams_x')
