@@ -15,9 +15,13 @@ def dict_to_table(dct, titles=('col1', 'col2'), margin=3):
 
 def str_to_args(line):
     """
-    Handy function which splits a list of arguments, and translates
-    names of Gadget instances to actual objects. Throws an error if one
-    of the arguments cannot be evaluated.
+    Handy function which splits a list of arguments, translates
+    names of Gadget instances to actual objects, and evaluates
+    other expressions. For example,
+
+    In [11]: str_to_args("samx 'hej' 1./20")
+    Out[11]: [<lib.motors.Motor.DummyMotor at 0x7f6b11b0ba90>, 'hej', 0.05]
+
     """
     args = line.split()
     gadget_lookup = {g.name: g for g in Gadget.getinstances()}
@@ -25,8 +29,5 @@ def str_to_args(line):
         if a in gadget_lookup.keys():
             args[i] = gadget_lookup[a]
         else:
-            try:
-                args[i] = eval(a)
-            except NameError:
-                args[i] = a
+            args[i] = eval(a)
     return args
