@@ -1,5 +1,4 @@
 from .Gadget import Gadget
-from .motors.Motor import Motor
 
 def dict_to_table(dct, titles=('col1', 'col2'), margin=3):
     """
@@ -32,11 +31,3 @@ def str_to_args(line):
         else:
             args[i] = eval(a)
     return args
-
-def are_motors(seq):
-    """
-    Function which returns True if all objects in seq are instances
-    of Motor or its subclasses.
-    """
-    checks = [isinstance(m, Motor) for m in seq]
-    return not (False in checks)

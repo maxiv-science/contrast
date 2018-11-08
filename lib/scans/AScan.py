@@ -1,6 +1,6 @@
 from .Scan import SoftwareScan
 from ..environment import macro, MacroSyntaxError
-from ..utils import are_motors
+from ..motors import all_are_motors
 import numpy as np
 import time
 
@@ -25,7 +25,7 @@ class AScan(SoftwareScan):
             for i in range(int((len(args) - 2) / 3)):
                 self.motors.append(args[3*i])
                 self.limits.append([float(m) for m in args[3*i+1:3*i+3]])
-            assert are_motors(self.motors)
+            assert all_are_motors(self.motors)
             assert (len(args) - 2) % 3 == 0
         except:
             raise MacroSyntaxError

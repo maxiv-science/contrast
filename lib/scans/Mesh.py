@@ -1,6 +1,6 @@
 from .Scan import SoftwareScan
 from ..environment import macro, MacroSyntaxError
-from ..utils import are_motors
+from ..motors import all_are_motors
 import numpy as np
 
 @macro
@@ -25,7 +25,7 @@ class Mesh(SoftwareScan):
                 self.motors.append(args[4*i])
                 self.limits.append([float(m) for m in args[4*i+1:4*i+3]])
                 self.intervals.append(int(args[4*i+3]))
-            assert are_motors(self.motors)
+            assert all_are_motors(self.motors)
             assert (len(args) - 1) % 4 == 0
         except:
             raise MacroSyntaxError
