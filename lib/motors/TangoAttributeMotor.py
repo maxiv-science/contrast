@@ -12,8 +12,8 @@ class TangoAttributeMotor(Motor):
     considered busy.
     """
 
-    def __init__(self, name, device, attribute):
-        super(TangoAttributeMotor, self).__init__(name=name)
+    def __init__(self, device, attribute, **kwargs):
+        super(TangoAttributeMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
         self.attribute = attribute
 

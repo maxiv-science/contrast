@@ -17,8 +17,8 @@ class E727Motor(Motor):
     values.
     """
 
-    def __init__(self, name, device, axis, offset=0, scale=1):
-        super(E727Motor, self).__init__(name=name)
+    def __init__(self, device, axis, offset=0, scale=1, **kwargs):
+        super(E727Motor, self).__init__(**kwargs)
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(device)
         self.axis = axis

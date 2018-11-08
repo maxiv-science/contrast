@@ -72,3 +72,20 @@ class LsMac(object):
     """
     def run(self):
         print(utils.dict_to_table(env.registeredMacros, titles=('name', 'class')))
+
+@macro
+class UserLevel(object):
+    """
+    Get or set the current user level
+
+    userlevel [<level>]
+    """
+    def __init__(self, level=None):
+        if level is None:
+            print("Current userlevel: %d" % env.userLevel)
+        else:
+            env.userLevel = level
+    def run(self):
+        pass
+
+

@@ -133,9 +133,9 @@ class Wm(object):
         names = [m.name for m in self.motors]
         vals = [m._format % m.position() for m in self.motors]
         lims = [str(m.limits) for m in self.motors]
-        col1 = max([8,] + [len(s) for s in names])
-        col2 = max([10,] + [len(s) for s in vals])
-        col3 = max([8,] + [len(s) for s in lims])
+        col1 = max([8,] + [len(s) + 2 for s in names])
+        col2 = max([10,] + [len(s) + 2 for s in vals])
+        col3 = max([8,] + [len(s) + 2 for s in lims])
         header = ('%%-%ss'%col1) % 'motor' \
                  + ('%%-%ss'%col2) % 'position' \
                  + ('%%-%ss'%col3) % 'limits'

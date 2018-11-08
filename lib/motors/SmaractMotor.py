@@ -17,8 +17,8 @@ class SmaractLinearMotor(Motor):
     values.
     """
 
-    def __init__(self, name, device, axis, offset=0, scale=1):
-        super(SmaractLinearMotor, self).__init__(name=name)
+    def __init__(self, device, axis, offset=0, scale=1, **kwargs):
+        super(SmaractLinearMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
         self.axis = int(axis)
         self.offset = offset

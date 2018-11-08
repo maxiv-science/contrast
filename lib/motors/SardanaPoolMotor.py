@@ -12,8 +12,8 @@ class SardanaPoolMotor(Motor):
     Single motor as exposed by Pool. Use for IcePAP:s.
     """
 
-    def __init__(self, name, device):
-        super(SardanaPoolMotor, self).__init__(name=name)
+    def __init__(self, device, **kwargs):
+        super(SardanaPoolMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
 
     def move(self, pos):
