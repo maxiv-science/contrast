@@ -1,5 +1,6 @@
 from .Scan import SoftwareScan
-from ..environment import macro
+from ..environment import macro, MacroSyntaxError
+from ..utils import are_motors
 import numpy as np
 
 @macro
@@ -14,15 +15,20 @@ class Mesh(SoftwareScan):
         """
         Parse arguments.
         """
-        exposuretime = float(args[-1])
-        super(Mesh, self).__init__(exposuretime)
         self.motors = []
         self.limits = []
         self.intervals = []
-        for i in range(int((len(args) - 1) / 4)):
-            self.motors.append(args[4*i])
-            self.limits.append([float(m) for m in args[4*i+1:4*i+3]])
-            self.intervals.append(int(args[4*i+3]))
+        try:
+            exposuretime = float(args[-1])
+            super(Mesh, self).__init__(exposuretime)
+            for i in range(int((len(args) - 1) / 4)):
+                self.motors.append(args[4*i])
+                self.limits.append([float(m) for m in args[4*i+1:4*i+3]])
+                self.intervals.append(int(args[4*i+3]))
+            assert are_motors(self.motors)
+            assert (len(args) - 1) % 4 == 0
+        except:
+            raise MacroSyntaxError
 
     def _generate_positions(self):
         positions = []

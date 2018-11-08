@@ -1,6 +1,7 @@
-from ..environment import macro
+from ..environment import macro, MacroSyntaxError
 from .Mesh import Mesh
 import tty, sys, termios
+from ..utils import are_motors
 
 # constants to keep track of key buttons
 KEY_UP = '\x1b[A'
@@ -39,10 +40,15 @@ class Tweak(Mesh):
         """
         Parse arguments.
         """
-        exposuretime = float(args[-1])
-        super(Mesh, self).__init__(exposuretime)
-        self.motors = args[:-1:2]
-        self.steps = args[1::2]
+        try:
+            exposuretime = float(args[-1])
+            super(Mesh, self).__init__(exposuretime)
+            self.motors = args[:-1:2]
+            self.steps = args[1::2]
+            assert len(args) in (2, 4)
+            assert are_motors(self.motors)
+        except:
+            raise MacroSyntaxError
         print('\nUse the arrow keys to tweak motors and ctrl-C to stop.')
 
     def _generate_positions(self):
