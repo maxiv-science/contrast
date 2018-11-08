@@ -1,4 +1,5 @@
 from .Motor import Motor, DummyMotor
+from .PseudoMotor import PseudoMotor, ExamplePseudoMotor
 
 def all_are_motors(seq):
     """
