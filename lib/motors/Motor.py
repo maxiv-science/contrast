@@ -131,7 +131,14 @@ class Wm(object):
         self.motors = args
     def run(self, *args):
         names = [m.name for m in self.motors]
-        vals = [m._format % m.position() for m in self.motors]
+        vals = []
+        for m in self.motors:
+            try:
+                pos = m._format % m.position()
+                vals.append(pos)
+            except: # can be any number of errors
+                print('Could not get position of %s' % m.name)
+                vals.append('None')
         lims = [str(m.limits) for m in self.motors]
         col1 = max([8,] + [len(s) + 2 for s in names])
         col2 = max([10,] + [len(s) + 2 for s in vals])
