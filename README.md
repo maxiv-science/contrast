@@ -50,23 +50,48 @@ for i in range(5):
 ```
 
 ## environment variables
-No global environment variables are used. Instead, a central object in the environment module is used to store values such as scan number, current detector group, etc.
+No global environment variables are used. Instead, a central object in the environment module is used to store values such as scan number etc.
 ```
 In [24]: from lib.environment import env
 
 In [25]: env.nextScanID
 Out[25]: 1
+```
 
-In [26]: env.currentDetectorGroup
-Out[26]: <lib.detectors.Detector.DetectorGroup at 0x7f5af40189b0>
+## detector selection
+Detectors have an `active` attribute which determines if they are included in data acquisition such as scans. The macro `lsdet` indicates if each detector is active with an asterisk.
+```
+In [2]: lsdet
 
-In [27]: env.currentDetectorGroup.name
-Out[27]: 'detgrp'
+  name   class                                          
+--------------------------------------------------------
+* det2   <class 'lib.detectors.Dummies.DummyDetector'>  
+* det3   <class 'lib.detectors.Dummies.Dummy1dDetector'>
+* det1   <class 'lib.detectors.Dummies.DummyDetector'>  
+
+In [3]: ct
+det2 : 0.5862324427414796
+det3 : (100,)
+det1 : 0.815299279368746
+
+In [4]: det3.active=False
+
+In [5]: lsdet
+
+  name   class                                          
+--------------------------------------------------------
+* det2   <class 'lib.detectors.Dummies.DummyDetector'>  
+  det3   <class 'lib.detectors.Dummies.Dummy1dDetector'>
+* det1   <class 'lib.detectors.Dummies.DummyDetector'>  
+
+In [6]: ct
+det2 : 0.26999817158517125
+det1 : 0.4045182722290984
 ```
 
 ## instance tracking
 The framework has no databases or central registries. Instead, objects are related through inheritance. A common base class `Gadget`
- is inherited by detectors, motors, as all the rest. `Gadget` and all of its subclasses keep track of their instances. An example follows.
+is inherited by detectors, motors, as all the rest. `Gadget` and all of its subclasses keep track of their instances. An example follows.
 ```
 In [1]: [m.name for m in Motor.getinstances()]
 Out[1]: ['gap', 'samy', 'samx']
@@ -78,13 +103,6 @@ In [3]: [g.name for g in Gadget.getinstances()]
 Out[3]: ['gap', 'detgrp', 'det1', 'samy', 'samx', 'det3', 'det2', 'hdf5recorder']
 ```
  
-## detector groups
-Detectors are chosen through detector groups. The variable `lib.environment.env.currentDetectorGroup` selects which detector group to read out when scanning. A detector can be a member of many groups, but only one group can be selected at the same time. `DetectorGroup` objects are iterable and generally nice.
-```
-In [3]: [d.name for d in detgrp]
-Out[3]: ['det1', 'det2', 'det3']
-```
-
 ## recorders
 Data is captured by recorders. Recorders are run in separate processes and get data through queues, avoiding holding up the main acquisition loop because of I/O. They can do anything with the data, for example saving to `hdf5` files or live plotting. See the `Hdf5Recorder` and `PlotRecorder` classes for examples. The former is very primitive still, but the latter is quite nice.
 

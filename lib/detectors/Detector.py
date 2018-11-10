@@ -10,6 +10,18 @@ class Detector(Gadget):
     Base class representing any device which can be read out to produce
     recordable data.
     """
+
+    def __init__(self, *args, **kwargs):
+        super(Detector, self).__init__(*args, **kwargs)
+        self.active = True
+
+    @classmethod
+    def get_active_detectors(cls):
+        """
+        Returns a DetectorGroup instance containing the currently active
+        detectors.
+        """
+        return DetectorGroup(*[d for d in cls.getinstances() if d.active])
     
     def prepare(self, acqtime, dataid):
         """
@@ -83,16 +95,17 @@ class TriggeredDetector(object):
         self.hw_trig = False
         self.hw_trig_n = 1
 
-class DetectorGroup(Gadget):
+class DetectorGroup(object):
     """
     Collection of Detector objects to be acquired together, in a scan
-    for example.
+    for example. Convenience class to call prepare, arm, busy etc
+    in shorthand.
     """
 
-    def __init__(self, name, *args):
-        super(DetectorGroup, self).__init__(name)
+    def __init__(self, *args):
         self.detectors = list()
-        self.append(args)
+        for arg in args:
+            self.detectors.append(arg)
 
     def prepare(self, acqtime, dataid):
         for d in self:
@@ -121,25 +134,6 @@ class DetectorGroup(Gadget):
     def __len__(self):
         return self.detectors.__len__()
 
-    def append(self, obj):
-        """
-        Append a single detector, another DetectorGroup, or any iterable
-        containing detectors.
-        """
-        try:
-            for d in obj:
-                self.append(d)
-        except TypeError:
-            assert isinstance(obj, Detector), 'DetectorGroup can only contain Detectors!'
-            if obj not in self.detectors:
-                self.detectors.append(obj)
-
-    def __str__(self):
-        names = [d.name for d in self]
-        classes = [d.__class__ for d in self]
-        dct = {n: c for n, c in zip(names, classes)}
-        return utils.dict_to_table(dct, titles=('name', 'class'))
-
 class Link(object):
     """
     Some detectors write their own data to disk. When that happens,
@@ -157,14 +151,8 @@ class LsDet(object):
     List available detectors.
     """
     def run(self):
-        dct = {d.name: d.__class__ for d in Detector.getinstances()}
-        print(utils.dict_to_table(dct, titles=('name', 'class')))
-
-@macro
-class LsGrp(object):
-    """
-    List detector groups.
-    """
-    def run(self):
-        dct = {d.name: d.__class__ for d in DetectorGroup.getinstances()}
-        print(utils.dict_to_table(dct, titles=('name', 'class')))
+        dct = {}
+        for d in Detector.getinstances():
+            name = ('* ' + d.name) if d.active else ('  ' + d.name)
+            dct[name] = d.__class__
+        print(utils.dict_to_table(dct, titles=('  name', 'class')))

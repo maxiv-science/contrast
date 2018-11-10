@@ -30,8 +30,8 @@ def getarrowkey():
 class Tweak(Mesh):
     """
     An interactive scan where motor positions are chosen manually for
-    each point. Useful for tweaking motors and reading the current
-    detector group after each step.
+    each point. Useful for tweaking motors and reading the currently
+    active detectors after each step.
 
     tweak <motor1> <stepsize1> [<motor2> <stepsize2>] <exp_time>
     """

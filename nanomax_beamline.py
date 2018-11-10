@@ -79,11 +79,6 @@ if __name__=='__main__':
                       lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
                       det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
 
-    # detector groups
-    detgrp = DetectorGroup('detgrp')
-    detgrp.append(pilatus)
-    env.currentDetectorGroup = detgrp
-
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
 

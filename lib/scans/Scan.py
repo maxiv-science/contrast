@@ -2,6 +2,7 @@ import time
 import numpy as np
 from ..environment import macro, env
 from ..recorders import active_recorders
+from ..detectors import Detector
 
 class SoftwareScan(object):
     """
@@ -22,14 +23,14 @@ class SoftwareScan(object):
 
     def header_line(self):
         motor_names = [m.name for m in self.motors]
-        group = env.currentDetectorGroup
+        group = Detector.get_active_detectors()
         det_names = [d.name for d in group]
         header = '#       ' + len(motor_names) * '%-8s' + len(group) * '%-14s' + 'dt'
         line = '-' * (8 + len(motor_names) * 8 + len(group) * 16 + 8)
         return ('\n' + header + '\n' + line) % tuple(motor_names + det_names)
 
     def table_line(self):
-        group = env.currentDetectorGroup
+        group = Detector.get_active_detectors()
         return '%-8d' + len(self.motors) * '%-8.2f' + len(group) * '%-12s  ' + '%-8.2f'
 
     def format_number(self, nr):
@@ -52,7 +53,7 @@ class SoftwareScan(object):
         positions = self._generate_positions()
         table_line = self.table_line()
         # find and prepare the detectors
-        group = env.currentDetectorGroup
+        group = Detector.get_active_detectors()
         group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
         # send a header to the recorders
@@ -127,9 +128,9 @@ class LoopScan(SoftwareScan):
 @macro
 class Ct(object):
     """
-    Make a single acquisition on the current detector group without
-    recording data. Optional argument <exp_time> specifies exposure time,
-    the default is 1.0.
+    Make a single acquisition on the active detectors without recording
+    data. Optional argument <exp_time> specifies exposure time, the default
+    is 1.0.
 
     ct [<exp_time>]
     """
@@ -141,7 +142,7 @@ class Ct(object):
 
     def run(self):
         # find and prepare the detectors
-        group = env.currentDetectorGroup
+        group = Detector.get_active_detectors()
         group.prepare(self.exposuretime, dataid=None)
         # arm and start detectors
         group.arm()

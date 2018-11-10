@@ -30,9 +30,6 @@ if __name__=='__main__':
     det2 = DummyDetector('det2')
     det3 = Dummy1dDetector('det3')
 
-    detgrp = DetectorGroup('detgrp', det1, det2, det3)
-
-    env.currentDetectorGroup = detgrp
     env.paths.directory = '/tmp'
 
     # remove old files

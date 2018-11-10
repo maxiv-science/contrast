@@ -9,7 +9,6 @@ class Env(object):
     Container for a number of global environment variables.
     """
     def __init__(self):
-        self.currentDetectorGroup = None # a DetectorGroup instance
         self.registeredMacros = {}
         self.nextScanID = 0
         self.userLevel = 5
