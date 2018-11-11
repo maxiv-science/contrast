@@ -50,7 +50,7 @@ class DummyWritingDetector(DummyDetector):
         if dataid is None:
             self.filename_base = None
         else:
-            self.filename_base = '/tmp/Dummy_scan_%03d_image_%%03d' % dataid
+            self.filename_base = '/tmp/Dummy_scan_%03d_image_%%03d.hdf5' % dataid
             self.next_image = -1
 
     def start(self):

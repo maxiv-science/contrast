@@ -68,7 +68,10 @@ class Hdf5Recorder(Recorder):
 
             # write the data
             if isinstance(d, h5py.Group):
-                # a group of links
+                # a group of links. convert to a path relative to the master h5 file.
+                val_ = h5py.ExternalLink(
+                    filename=os.path.relpath(val_.filename, start=os.path.dirname(self.fp.filename)),
+                    path=val_.path)
                 d['%06u' % self.dcts_received] = val_
             else:
                 # a dataset
