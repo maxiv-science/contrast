@@ -9,7 +9,7 @@ if __name__=='__main__':
 
     from lib.motors import DummyMotor
     from lib.scans import *
-    from lib.detectors import DummyDetector, Dummy1dDetector
+    from lib.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
     from lib.environment import env
     from lib.recorders import Hdf5Recorder
 
@@ -27,7 +27,7 @@ if __name__=='__main__':
     gap._format = '%8f'
 
     det1 = DummyDetector('det1')
-    det2 = DummyDetector('det2')
+    det2 = DummyWritingDetector('det2')
     det3 = Dummy1dDetector('det3')
 
     env.paths.directory = '/tmp'

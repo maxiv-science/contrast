@@ -25,6 +25,7 @@ class Hdf5Recorder(Recorder):
             self.fp = None
         else:
             self.fp = h5py.File(filename, 'w')
+        self.dcts_received = 0
 
     def act_on_data(self, dct):
         """
@@ -36,32 +37,44 @@ class Hdf5Recorder(Recorder):
             return
         for key, val in dct.items():
             name = base + key
+
+            # decide where to put the new data
             if not name in self.fp:
                 # create datasets the first time around
                 if isinstance(val, np.ndarray):
                     # arrays
                     d = self.fp.create_dataset(name, shape=(1,)+val.shape, maxshape=(None,)+val.shape, dtype=val.dtype)
-                elif (type(val) == str) or hasattr(val, 'target'):
-                    # strings or links
+                elif isinstance(val, h5py.ExternalLink):
+                    # links
+                    d = self.fp.create_group(name)
+                elif (type(val) == str):
+                    # strings
                     d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype='S100')
                 else:
                     # scalars of any type
                     d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=type(val))
+            elif isinstance(self.fp[name], h5py.Group):
+                # a group of links, do nothing
+                d = self.fp[name]
             else:
-                # otherwise just resize
+                # a dataset, just resize
                 d = self.fp[name]
                 d.resize((d.shape[0]+1,) + d.shape[1:])
 
-            # special cases
+            # special case: convert strings
+            val_ = val
             if type(val) == str:
-                # a string
                 val_ = val.encode(encoding='ascii', errors='ignore')
-            elif hasattr(val, 'target'):
-                # a link
-                val_ = val.target.encode(encoding='ascii', errors='ignore')
+
+            # write the data
+            if isinstance(d, h5py.Group):
+                # a group of links
+                d['%06u' % self.dcts_received] = val_
             else:
-                val_ = val
-            d[-1] = val_
+                # a dataset
+                d[-1] = val_
+
+        self.dcts_received += 1
 
     def act_on_footer(self):
         """
