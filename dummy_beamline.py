@@ -9,7 +9,7 @@ if __name__=='__main__':
 
     from lib.motors import DummyMotor
     from lib.scans import *
-    from lib.detectors import DummyDetector, DetectorGroup, Dummy1dDetector
+    from lib.detectors import DummyDetector, Dummy1dDetector
     from lib.environment import env
     from lib.recorders import Hdf5Recorder
 

@@ -14,7 +14,6 @@ if __name__=='__main__':
     from lib.motors.E727 import E727Motor
     from lib.motors.SardanaPoolMotor import SardanaPoolMotor
     from lib.motors.SmaractMotor import SmaractLinearMotor
-    from lib.detectors import DetectorGroup
     from lib.detectors.Pilatus import Pilatus
     from lib.data import SdmPathFixer
     import os
