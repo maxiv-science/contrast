@@ -4,14 +4,15 @@ from ..environment import env
 import time
 import numpy as np
 import PyTango
+import os
 
 class Pilatus(Detector, LiveDetector, TriggeredDetector):
     def __init__(self, name=None, lima_device=None, det_device=None):
+        self.lima_device_name = lima_device
+        self.det_device_name = det_device
         Detector.__init__(self, name=name)
         LiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
-        self.lima_device_name = lima_device
-        self.det_device_name = det_device
 
     def initialize(self):
         self.lima = PyTango.DeviceProxy(self.lima_device_name)
@@ -44,14 +45,17 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         if dataid is None:
             # no saving
             self.lima.saving_mode = "MANUAL" # no saving
-            self.link = None
+            self.saving_filename = None
         else:
             # saving
             self.lima.saving_directory = env.paths.directory
             self.lima.saving_mode = "AUTO_FRAME"
-            filename = 'scan_%04d_%s' % (dataid, self.name)
-            self.lima.saving_prefix = filename
-            self.link = Link(filename + self.lima.saving_suffix)
+            prefix = 'scan_%06d_%s' % (dataid, self.name)
+            self.lima.saving_prefix = prefix
+            self.saving_filename = prefix + self.lima.saving_suffix
+            if os.path.exists(self.saving_filename):
+                raise Exception('Pilatus hdf5 file already exists')
+            self.image_number = -1
 
         if self.hw_trig:
             self.lima.acq_trigger_mode = "EXTERNAL_TRIGGER_MULTI"
@@ -69,6 +73,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
+        self.image_number += 1
         self.lima.prepareAcq()
         if self.hw_trig:
             self.lima.startAcq()
@@ -89,4 +94,9 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         return not self.lima.ready_for_next_acq
 
     def read(self):
-        return self.link
+        if self.saving_filename is None:
+            return None
+        else:
+            absfile = os.path.join(self.lima.saving_directory, self.saving_filename)
+            return Link(absfile , 'entry_%04d/measurement/Pilatus/data' % self.image_number)
+
