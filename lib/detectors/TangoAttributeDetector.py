@@ -14,8 +14,11 @@ class TangoAttributeDetector(Detector):
     """
     def __init__(self, name, device, attribute):
         super(TangoAttributeDetector, self).__init__(name=name)
-        self.proxy = PyTango.DeviceProxy(device)
+        self.device_name = device
         self.attribute = attribute
+
+    def initialize(self):
+        self.proxy = PyTango.DeviceProxy(self.device_name)
 
     def start(self):
         super(TangoAttributeDetector, self).start()

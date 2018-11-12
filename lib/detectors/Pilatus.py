@@ -10,13 +10,13 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         Detector.__init__(self, name=name)
         LiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
+        self.lima_device_name = lima_device
+        self.det_device_name = det_device
 
-        self.name = name
-        self.link = None
-
-        self.lima = PyTango.DeviceProxy(lima_device)
+    def initialize(self):
+        self.lima = PyTango.DeviceProxy(self.lima_device_name)
         self.lima.set_timeout_millis(10000)
-        self.det = PyTango.DeviceProxy(det_device)
+        self.det = PyTango.DeviceProxy(self.det_device_name)
         
         self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
         self.lima.saving_mode = "AUTO_FRAME"
@@ -90,4 +90,3 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
 
     def read(self):
         return self.link
-        

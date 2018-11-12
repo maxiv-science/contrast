@@ -15,6 +15,7 @@ class Detector(Gadget):
     def __init__(self, *args, **kwargs):
         super(Detector, self).__init__(*args, **kwargs)
         self.active = True
+        self.initialize()
 
     @classmethod
     def get_active_detectors(cls):
@@ -49,6 +50,12 @@ class Detector(Gadget):
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
+
+    def initialize(self):
+        """
+        Mandatory method for initializing a detector.
+        """
+        raise NotImplementedError
 
     def stop(self):
         raise NotImplementedError

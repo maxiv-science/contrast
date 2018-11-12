@@ -9,6 +9,9 @@ class DummyDetector(Detector, LiveDetector):
         Detector.__init__(self, name=name)
         LiveDetector.__init__(self)
 
+    def initialize(self):
+        pass
+
     def start(self):
         super(DummyDetector, self).start()
         try:
