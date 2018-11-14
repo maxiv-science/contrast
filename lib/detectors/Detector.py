@@ -77,13 +77,15 @@ class LiveDetector(object):
         self.stopped = False
 
     def start_live(self, acqtime=1.0):
+        if self.thread is not None: self.stop_live()
         self.thread = threading.Thread(target=self._start, args=(acqtime,))
         self.thread.start()
 
     def stop_live(self):
-        if not self.thread: return
+        if self.thread is None: return
         self.stopped = True
         self.thread.join()
+        self.thread = None
 
     def _start(self, acqtime):
         self.stopped = False
