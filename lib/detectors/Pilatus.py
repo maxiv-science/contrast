@@ -55,7 +55,6 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             self.saving_filename = prefix + self.lima.saving_suffix
             if os.path.exists(self.saving_filename):
                 raise Exception('Pilatus hdf5 file already exists')
-            self.image_number = -1
 
         if self.hw_trig:
             self.lima.acq_trigger_mode = "EXTERNAL_TRIGGER_MULTI"
@@ -64,6 +63,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
             self.lima.acq_nb_frames = 1
 
+        self.image_number = -1
         self.acqtime = acqtime
         self.lima.acq_expo_time = acqtime
 
