@@ -43,6 +43,15 @@ class SoftwareScan(object):
         except TypeError:
             return str(nr)[-8:]
 
+    def _before_move(self):
+        pass
+
+    def _before_arm(self):
+        pass
+
+    def _before_start(self):
+        pass
+
     def run(self):
         """
         This method does all the serious interaction with motors,
@@ -62,14 +71,18 @@ class SoftwareScan(object):
         try:
             for i, pos in enumerate(positions):
                 # move motors
+                self._before_move()
                 for m in self.motors:
                     m.move(pos[m.name])
                 while True in [m.busy() for m in self.motors]:
                     time.sleep(.01)
-                # arm and start detectors
+                # arm detectors
+                self._before_arm()
                 group.arm()
                 while group.busy():
                     time.sleep(.01)
+                # start detectors
+                self._before_start()
                 group.start()
                 while group.busy():
                     time.sleep(.01)
