@@ -27,7 +27,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         self.lima.saving_overwrite_policy = 'MULTISET'
         self.lima.saving_format = 'HDF5'
         self.lima.saving_suffix = '.hdf5'
-        self.lima.saving_directory = '/scan_data/temp/'
+        self.lima.saving_directory = '/tmp/'
 
     def prepare(self, acqtime, dataid):
         """
@@ -52,7 +52,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             self.lima.saving_mode = "AUTO_FRAME"
             prefix = 'scan_%06d_%s' % (dataid, self.name)
             self.lima.saving_prefix = prefix
-            self.saving_filename = prefix + self.lima.saving_suffix
+            self.saving_filename = prefix + '0000' + self.lima.saving_suffix
             if os.path.exists(self.saving_filename):
                 raise Exception('Pilatus hdf5 file already exists')
 
@@ -82,10 +82,11 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         """
         Start acquisition when software triggered.
         """
+        if self.hw_trig:
+            return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        if not self.hw_trig:
-            self.lima.startAcq()
+        self.lima.startAcq()
 
     def stop(self):
         self.lima.stopAcq()

@@ -79,8 +79,6 @@ class SoftwareScan(object):
                 # arm detectors
                 self._before_arm()
                 group.arm()
-                while group.busy():
-                    time.sleep(.01)
                 # start detectors
                 self._before_start()
                 group.start()

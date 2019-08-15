@@ -11,7 +11,8 @@ if __name__=='__main__':
     from lib.environment import env
     from lib.recorders import Hdf5Recorder
     from lib.motors import DummyMotor
-    from lib.motors.E727 import E727Motor
+    from lib.motors.LC400 import LC400Motor
+    from lib.detectors.LC400Buffer import LC400Buffer
     from lib.motors.SardanaPoolMotor import SardanaPoolMotor
     from lib.motors.SmaractMotor import SmaractLinearMotor
     from lib.detectors.Pilatus import Pilatus
@@ -25,13 +26,13 @@ if __name__=='__main__':
     # 3 - optics
     # 4 - potentially dangerous
 
-    # sample piezos - these already have the right orientation so scale/offset not needed.
-    samx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='samx')
-    samy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='samy')
-    samz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='samz')
-    samx.limits = (0, 100)
-    samy.limits = (0, 100)
-    samz.limits = (0, 100)
+    # sample piezos
+    sx = LC400Motor(device='NpointLC400/usb/1', axis=2, name='sx')
+    sy = LC400Motor(device='NpointLC400/usb/1', axis=3, name='sy')
+    sz = LC400Motor(device='NpointLC400/usb/1', axis=1, name='sz')
+
+    # buffered position detector
+    npoint_buff = LC400Buffer(device='LC400ScanControl/test/1', name='npoint_buff')
 
     # smaracts
     # controller 1
