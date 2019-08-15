@@ -8,9 +8,9 @@ class NpointFlyscan(AScan):
     """
     Flyscan macro for the Npoint LC400 setup.
         
-    npointflyscan <fly-motor> <start> <stop> <intervals> <step-motor1> <start> <stop> <intervals> <exp time>
+    npointflyscan <fly-motor> <start> <stop> <intervals> <step-motor1> <start1> <stop1> <intervals1> ... <exp time> <latency>
 
-    The argument fly-motor must be an instance of the E727 motor class.
+    The argument fly-motor must be an instance of the LC400Motor class.
     """
 
     def __init__(self, *args):
@@ -18,16 +18,13 @@ class NpointFlyscan(AScan):
         Parse arguments.
         """
         try:
-            assert (len(args) == 9)
-            exposuretime = float(args[8])
-            super(AScan, self).__init__(exposuretime)
+            assert all_are_motors([fastmotor, slowmotor])
+            super(NpointFlyscan, self).__init__(slowmotor, args[4:])
             self.fastmotor = args[0]
-            self.fastlimits = [float(m) for m in args[1:3]]
+            self.fastlimits = [float(i) for i in args[1:3]]
             self.fastintervals = int(args[3])
-            self.slowmotor = args[4]
-            self.slowlimits = [float(m) for m in args[5:7]]
-            self.slowintervals = int(args[7])
-            assert all_are_motors([self.fastmotor, self.slowmotor])
+            self.exptime = float(args[-2])
+            self.latency = float(args[-1])
         except:
             raise MacroSyntaxError
 
@@ -45,12 +42,17 @@ class NpointFlyscan(AScan):
         axismap = {'sz': 1, 'sx': 2, 'sy': 3}
         fast_axis = axismap[self.fastmotor]
         self.scancontrol = PyTango.DeviceProxy("lc400scancontrol/test/1")
-        self.scancontrol.write_attribute("FlyScanMotorStartPosition", int(self.start_pos_fly) )
-        self.scancontrol.write_attribute("FlyScanMotorEndPosition", int(self.final_pos_fly) )
-        self.scancontrol.write_attribute("NumberOfIntervals", nr_interv_fly )
-        self.scancontrol.write_attribute("GateWidth", exposure_time )
-        self.scancontrol.write_attribute("GateLatency", latency_time )
-        self.scancontrol.write_attribute("FlyScanMotorAxis", fast_axis)
+        ### note: these Tango attributes might have different names, check in Jive
+        self.scancontrol.write_attribute("FlyScanMotorStartPosition", self.fastlimits[0])
+        self.scancontrol.write_attribute("FlyScanMotorEndPosition", self.fastlimits[1])
+        self.scancontrol.write_attribute("NumberOfIntervals", self.fastintervals)
+        self.scancontrol.write_attribute("GateWidth", self.exptime)
+        self.scancontrol.write_attribute("GateLatency", self.latency)
+        self.scancontrol.write_attribute("FlyScanMotorAxis", self.fastmotor.axis)
+        self.scancontrol.ConfigureLC4400Motion()
+        self.scancontrol.ConfigureLC4400Recorder()
+        self.scancontrol.ConfigureStanford()
+        self.scancontrol.ConfigureNi6602() # a historical feature of the scancontrol device - will get refactored into the Ni6602 device
 
         # run the main part
         super(NpointFlyscan, self).run()
@@ -61,3 +63,4 @@ class NpointFlyscan(AScan):
     def _before_start(self):
         # we need to call Go() on the SC device at some point, maybe here.
         self.scancontrol.Go()
+

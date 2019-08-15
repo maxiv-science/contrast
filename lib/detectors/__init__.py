@@ -1,4 +1,4 @@
-from .Detector import Detector, DetectorGroup, LiveDetector, Link
+from .Detector import Detector, DetectorGroup, LiveDetector, Link, TriggeredDetector
 from .Dummies import DummyDetector, Dummy1dDetector, DummyWritingDetector
 
 # don't automatically import hardware-specific classes here,
