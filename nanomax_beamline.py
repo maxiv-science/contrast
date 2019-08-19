@@ -16,6 +16,7 @@ if __name__=='__main__':
     from lib.motors.SardanaPoolMotor import SardanaPoolMotor
     from lib.motors.SmaractMotor import SmaractLinearMotor
     from lib.detectors.Pilatus import Pilatus
+    from lib.detectors.Xspress3 import Xspress3
     from lib.data import SdmPathFixer
     import os
     
@@ -33,6 +34,7 @@ if __name__=='__main__':
 
     # buffered position detector
     npoint_buff = LC400Buffer(device='LC400ScanControl/test/1', name='npoint_buff')
+    npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
 
     # smaracts
     # controller 1
@@ -78,6 +80,9 @@ if __name__=='__main__':
     pilatus = Pilatus(name='pilatus', 
                       lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
                       det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
+    xspress3 = Xspress3(name='xspress3',
+                        lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
+                        det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
