@@ -70,7 +70,9 @@ class LsMac(object):
     List available macros. Do <macro-name>? (without <>) for more information.
     """
     def run(self):
-        print(utils.dict_to_table(env.registeredMacros, titles=('name', 'class')))
+        sorted_dct = {key:env.registeredMacros[key] for key in sorted(env.registeredMacros.keys())}
+        print(utils.dict_to_table(sorted_dct, titles=('name', 'class')))
+        print('\nDo <macro-name>? (without <>) for more information.')
 
 @macro
 class UserLevel(object):
