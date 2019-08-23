@@ -3,6 +3,7 @@ ipython = get_ipython()
 
 from . import utils
 from .data import PathFixer
+from .scheduling import DummyScheduler
 
 class Env(object):
     """
@@ -13,6 +14,7 @@ class Env(object):
         self.nextScanID = 0
         self.userLevel = 5
         self.paths = PathFixer()
+        self.scheduler = DummyScheduler()
 env = Env()
 
 def runCommand(line):

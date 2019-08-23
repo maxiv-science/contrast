@@ -9,3 +9,4 @@ from . import Gadget
 from . import utils
 from . import environment
 from . import data
+from . import scheduling

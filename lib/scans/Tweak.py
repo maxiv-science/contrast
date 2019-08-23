@@ -45,9 +45,10 @@ class Tweak(Mesh):
             super(Mesh, self).__init__(exposuretime)
             self.motors = args[:-1:2]
             self.steps = args[1::2]
-            assert len(args) in (2, 4)
+            assert len(args) in (3, 5)
             assert all_are_motors(self.motors)
         except:
+            raise
             raise MacroSyntaxError
         print('\nUse the arrow keys to tweak motors and ctrl-C to stop.')
 
@@ -60,3 +61,7 @@ class Tweak(Mesh):
             direction = -1 if key in (KEY_DOWN, KEY_LEFT) else 1
             positions[self.motors[imotor].name] += direction * self.steps[imotor]
             yield positions
+
+    def _before_move(self):
+        # Override so as not to respect the scheduler.
+        pass

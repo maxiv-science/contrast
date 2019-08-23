@@ -6,7 +6,9 @@ from ..detectors import Detector
 
 class SoftwareScan(object):
     """
-    Base class for the normal sardana-style software-controlled scan.
+    Base class for the normal sardana-style software-controlled scan. Respects
+    the availability and deadlines managed by env.scheduler.
+
     Overwrite these methods:
         __init__ (which reads in the scan parameters) and
         _generate_positions (which generates the line scan, mesh, spiral, or what ever you like)
@@ -43,13 +45,43 @@ class SoftwareScan(object):
         except TypeError:
             return str(nr)[-8:]
 
+    def _calc_time_needed(self):
+        """
+        Suggestion for how to organize topup avoidance. You could 
+        also look at how long acquisitions have tended to take. Or
+        you could try to estimate the time needed based on the
+        input parameters.
+        """
+        return self.exposuretime * 5 + 5
+
     def _before_move(self):
-        pass
+        """
+        Gets called for each step.
+        """
+
+        # Example implementation of topup avoidance
+        time_needed = self._calc_time_needed()
+        enough_time = time_needed < env.scheduler.limit
+        ready = env.scheduler.ready
+        while not ready or not enough_time:
+            if not enough_time:
+                print('not enough time to complete this measurement, so waiting...')
+            else:
+                print('Waiting for beamline to become available...')
+            time.sleep(1.)
+            enough_time = time_needed < env.scheduler.limit
+            ready = env.scheduler.ready
 
     def _before_arm(self):
+        """
+        Gets called for each step.
+        """
         pass
 
     def _before_start(self):
+        """
+        Gets called for each step.
+        """
         pass
 
     def run(self):

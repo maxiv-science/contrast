@@ -12,6 +12,7 @@ if __name__=='__main__':
     from lib.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
     from lib.environment import env
     from lib.recorders import Hdf5Recorder
+    from lib.scheduling import DummyInjectionScheduler
 
     import os
 
@@ -41,3 +42,6 @@ if __name__=='__main__':
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
+
+    # fake top-up scheduling
+    env.scheduler = DummyInjectionScheduler()
