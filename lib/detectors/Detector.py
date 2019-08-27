@@ -165,3 +165,43 @@ class LsDet(object):
             name = ('* ' + d.name) if d.active else ('  ' + d.name)
             dct[name] = d.__class__
         print(utils.dict_to_table(dct, titles=('  name', 'class')))
+
+@macro
+class StartLive(object):
+    """
+    Starts software live mode on listed eligible detectors.
+
+    startlive <det1> ... <detN> [<exposure time>]
+    """
+    def __init__(self, *args):
+        try:
+            self.exptime = float(args[-1])
+            self.dets = args[:-1]
+        except TypeError:
+            self.exptime = .1
+            self.dets = args
+
+    def run(self):
+        for d in self.dets:
+            if isinstance(d, LiveDetector):
+                d.start_live(float(self.exptime))
+            else:
+                print('%s is not a LiveDetector' % d.name)
+
+@macro
+class StopLive(object):
+    """
+    Stops software live mode on listed eligible detectors.
+
+    startlive <det1> ... <detN>
+    """
+    def __init__(self, *args):
+        self.dets = args
+
+    def run(self):
+        for d in self.dets:
+            if isinstance(d, LiveDetector):
+                d.stop_live()
+            else:
+                print('%s is not a LiveDetector' % d.name)
+

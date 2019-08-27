@@ -6,7 +6,7 @@ import numpy as np
 import PyTango
 import os
 
-class Pilatus(Detector, LiveDetector, TriggeredDetector):
+class Xspress3(Detector, LiveDetector, TriggeredDetector):
     def __init__(self, name=None, lima_device=None, det_device=None):
         self.lima_device_name = lima_device
         self.det_device_name = det_device
@@ -20,9 +20,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         self.det = PyTango.DeviceProxy(self.det_device_name)
         
         self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
-        self.lima.saving_mode = "AUTO_FRAME"
-        self.lima.saving_frame_per_file = 1
-        self.lima.acq_nb_frames = 1
+        self.lima.saving_mode = "MANUAL"
         self.lima.saving_managed_mode = 'SOFTWARE'
         self.lima.saving_overwrite_policy = 'MULTISET'
         self.lima.saving_format = 'HDF5'
@@ -35,7 +33,7 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
-        # get out of the fault caused by trigger timeout
+        # get out of the fault caused by trigger timeout, taken from Pilatus so maybe not useful
         if (self.lima.acq_status == 'Fault') and (self.lima.acq_status_fault_error == 'No error'):
             self.lima.stopAcq()
             self.lima.prepareAcq()
@@ -55,10 +53,10 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             self.lima.saving_prefix = prefix
             self.saving_filename = prefix + self.lima.saving_suffix
             if os.path.exists(self.saving_filename):
-                raise Exception('Pilatus hdf5 file already exists')
+                raise Exception('Xspress3 hdf5 file already exists')
 
         if self.hw_trig:
-            self.lima.acq_trigger_mode = "EXTERNAL_TRIGGER_MULTI"
+            self.lima.acq_trigger_mode = "EXTERNAL_GATE"
             self.lima.acq_nb_frames = self.hw_trig_n
         else:
             self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
@@ -101,5 +99,5 @@ class Pilatus(Detector, LiveDetector, TriggeredDetector):
             return None
         else:
             absfile = os.path.join(self.lima.saving_directory, self.saving_filename)
-            return Link(absfile , 'entry_%04d/measurement/Pilatus/data' % self.image_number)
+            return Link(absfile , 'entry_%04d/measurement/xspress3/data' % self.image_number)
 
