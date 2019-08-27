@@ -61,7 +61,7 @@ class SoftwareScan(object):
 
         # Example implementation of topup avoidance
         time_needed = self._calc_time_needed()
-        enough_time = time_needed < env.scheduler.limit
+        enough_time = time_needed < env.scheduler.limit if env.scheduler.limit else True
         ready = env.scheduler.ready
         while not ready or not enough_time:
             if not enough_time:
