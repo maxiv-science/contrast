@@ -70,3 +70,17 @@ class DummyWritingDetector(DummyDetector):
 
     def read(self):
         return self.latest_link
+
+class DummyDictDetector(DummyDetector):
+    """
+    Illustrates how multi-channel detectors can return dict values.
+    """
+    def start(self):
+        super(DummyDictDetector, self).start()
+        try:
+            self.val = {'ch1': np.random.rand() * self.acqtime,
+                        'ch2': np.random.rand() * self.acqtime * 2,
+                        'ch3': np.random.rand() * self.acqtime * 3,}
+            self._started = time.time()
+        except AttributeError:
+            raise Exception('Detector not prepared!')

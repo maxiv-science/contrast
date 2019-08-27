@@ -38,6 +38,12 @@ class Hdf5Recorder(Recorder):
         for key, val in dct.items():
             name = base + key
 
+            # treat dict values recursively
+            if type(val) == dict:
+                new_dct = {key + '/' + str(k): v for k, v in val.items()}
+                self.act_on_data(new_dct)
+                continue
+
             # decide where to put the new data
             if not name in self.fp:
                 # create datasets the first time around
@@ -53,7 +59,7 @@ class Hdf5Recorder(Recorder):
                 else:
                     # scalars of any type
                     d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=type(val))
-            elif isinstance(self.fp[name], h5py.Group):
+            elif isinstance(val, h5py.ExternalLink):
                 # a group of links, do nothing
                 d = self.fp[name]
             else:
@@ -67,7 +73,7 @@ class Hdf5Recorder(Recorder):
                 val_ = val.encode(encoding='ascii', errors='ignore')
 
             # write the data
-            if isinstance(d, h5py.Group):
+            if isinstance(val, h5py.ExternalLink):
                 # a group of links. convert to a path relative to the master h5 file.
                 val_ = h5py.ExternalLink(
                     filename=os.path.relpath(val_.filename, start=os.path.dirname(self.fp.filename)),

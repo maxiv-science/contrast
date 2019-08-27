@@ -36,6 +36,8 @@ class SoftwareScan(object):
         return '%-8d' + len(self.motors) * '%-8.2f' + len(group) * '%-12s  ' + '%-8.2f'
 
     def format_number(self, nr):
+        if isinstance(nr, dict):
+            return '<%d-dict>' % len(nr)
         try:
             return '%8s' % (nr.shape,)
         except:
