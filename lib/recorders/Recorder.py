@@ -26,24 +26,26 @@ class Recorder(Gadget, Process):
         self.queue = ctx.Queue()
         self.delay = delay
         self.quit = False
-        self.sleep_fcn = time.sleep
+
+    def _process_queue(self):
+        dcts = [self.queue.get() for i in range(self.queue.qsize())] # ok since only we are reading from self.queue
+        for dct in dcts:
+            if dct is None:
+                self.quit = True
+            elif 'scan_header' in dct.keys():
+                self.act_on_header(dct)
+            elif 'scan_footer' in dct.keys():
+                self.act_on_footer()
+            else:
+                self.act_on_data(dct)
 
     def run(self):
         # ignore SIGINT signals from ctrl-C in the main process
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         self.init()
         while not self.quit:
-            self.sleep_fcn(self.delay)
-            dcts = [self.queue.get() for i in range(self.queue.qsize())] # ok since only we are reading from self.queue
-            for dct in dcts:
-                if not dct:
-                    self.quit = True
-                elif 'scan_header' in dct.keys():
-                    self.act_on_header(dct)
-                elif 'scan_footer' in dct.keys():
-                    self.act_on_footer()
-                else:
-                    self.act_on_data(dct)
+            time.sleep(self.delay)
+            self._process_queue()
             self.periodic_check()
         self._close()
 

@@ -1,11 +1,18 @@
 from . import Recorder
 from ..environment import macro
 
+import signal
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-plt.ion()
+
 
 class PlotRecorder(Recorder):
+    """
+    Recorder which catches data and plots it with matplotlib.
+
+    Unlike the base class Recorder, the GUI event loop takes care of
+    the timing (plt.timer) and when to close (plt.show).
+    """
 
     def __init__(self, data1, data2=None, name='plot'):
         Recorder.__init__(self, name=name)
@@ -16,16 +23,31 @@ class PlotRecorder(Recorder):
             self.xdata = None
             self.ydata = data1
         self.nplots = 0
-        # override the sleeping function, time.sleep would block the GUI.
-        self.sleep_fcn = plt.pause
 
     def init(self):
+        # set up figure and axes
         self.fig = plt.figure()
         self.fig.canvas.set_window_title(self.name)
         self.ax = self.fig.gca()
         self.ax.set_xlabel(self.xdata)
         self.ax.set_ylabel(self.ydata)
-        plt.pause(.1)
+
+        # add a timer to trigger periodic checking of the queue
+        timer = self.fig.canvas.new_timer(interval=self.delay*1000)
+        timer.add_callback(self._timer_callback)
+        timer.start()
+
+        # blocking show() manages when the application should close
+        plt.show()
+
+    def _timer_callback(self):
+        # this SIGINT handling has to be set up here, for some reason
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        self._process_queue()
+        self.periodic_check()
+
+    def run(self):
+        self.init()
 
     def act_on_header(self, dct):
         # start a new scan
@@ -51,11 +73,6 @@ class PlotRecorder(Recorder):
         self.ax.relim()
         self.ax.autoscale_view()
         plt.draw()
-        plt.pause(.01)
-
-    def periodic_check(self):
-        if not plt.fignum_exists(self.fig.number):
-            self.quit = True
 
     def _close(self):
         plt.close(self.fig)
