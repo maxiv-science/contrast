@@ -78,6 +78,10 @@ class LiveDetector(object):
         raise NotImplementedError
 
     def stop_live(self):
+        """
+        This method should be made harmless, so that it can be
+        run even if the detector is not running.
+        """
         raise NotImplementedError
 
 class SoftwareLiveDetector(LiveDetector):
@@ -181,17 +185,20 @@ class LsDet(object):
 @macro
 class StartLive(object):
     """
-    Starts software live mode on listed eligible detectors.
+    Starts software live mode on listed eligible detectors. If none
+    are listed, all active and eligible detectors are started.
 
-    startlive <det1> ... <detN> [<exposure time>]
+    startlive [<det1> ... <detN> <exposure time>]
     """
     def __init__(self, *args):
         try:
             self.exptime = float(args[-1])
             self.dets = args[:-1]
-        except TypeError:
+        except (TypeError, IndexError):
             self.exptime = .1
             self.dets = args
+        if not self.dets:
+            self.dets = [d for d in Detector.get_active_detectors() if isinstance(d, LiveDetector)]
 
     def run(self):
         for d in self.dets:
@@ -203,12 +210,17 @@ class StartLive(object):
 @macro
 class StopLive(object):
     """
-    Stops software live mode on listed eligible detectors.
+    Stops software live mode on listed eligible detectors. If
+	no arguments are given, all active live detectors are
+	stopped.
 
-    startlive <det1> ... <detN>
+    stoplive [<det1> ... <detN>]
     """
     def __init__(self, *args):
-        self.dets = args
+        if args:
+            self.dets = args
+        else:
+            self.dets = [d for d in Detector.get_active_detectors() if isinstance(d, LiveDetector)]
 
     def run(self):
         for d in self.dets:
