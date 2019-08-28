@@ -68,7 +68,6 @@ class NpointFlyscan(Mesh):
         self.scancontrol.ConfigureLC400Motion()
         self.scancontrol.ConfigureLC400Recorder()
         self.scancontrol.ConfigureStanford()
-        self.scancontrol.ConfigureNi6602() # a historical feature of the scancontrol device - will get refactored into the Ni6602 device
 
         # run the main part
         super(NpointFlyscan, self).run()

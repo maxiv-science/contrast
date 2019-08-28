@@ -17,6 +17,7 @@ if __name__=='__main__':
     from lib.motors.SmaractMotor import SmaractLinearMotor
     from lib.detectors.Pilatus import Pilatus
     from lib.detectors.Xspress3 import Xspress3
+    from lib.detectors.Ni6602 import Ni6602CounterCard
     from lib.data import SdmPathFixer
     import os
     
@@ -83,6 +84,7 @@ if __name__=='__main__':
     xspress3 = Xspress3(name='xspress3',
                         lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
                         det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
+    ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
