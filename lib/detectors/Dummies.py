@@ -1,13 +1,13 @@
-from .Detector import Detector, LiveDetector, Link
+from .Detector import Detector, SoftwareLiveDetector, Link
 
 import time
 import numpy as np
 import h5py
 
-class DummyDetector(Detector, LiveDetector):
+class DummyDetector(Detector, SoftwareLiveDetector):
     def __init__(self, name=None):
         Detector.__init__(self, name=name)
-        LiveDetector.__init__(self)
+        SoftwareLiveDetector.__init__(self)
 
     def initialize(self):
         pass

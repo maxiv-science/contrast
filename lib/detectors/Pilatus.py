@@ -1,4 +1,4 @@
-from .Detector import Detector, LiveDetector, TriggeredDetector, Link
+from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, Link
 from ..environment import env
 
 import time
@@ -6,12 +6,12 @@ import numpy as np
 import PyTango
 import os
 
-class Pilatus(Detector, LiveDetector, TriggeredDetector):
+class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector):
     def __init__(self, name=None, lima_device=None, det_device=None):
         self.lima_device_name = lima_device
         self.det_device_name = det_device
         Detector.__init__(self, name=name)
-        LiveDetector.__init__(self)
+        SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
 
     def initialize(self):

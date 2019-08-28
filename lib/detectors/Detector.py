@@ -68,9 +68,21 @@ class Detector(Gadget):
 
 class LiveDetector(object):
     """
-    Implements software live mode, i e making repeated acquisitions to
-    make a detector run continuously with no synchronization or data
-    capture.
+    Abstract class to define the interface of live detectors, which
+    can run continuously with no synchronization or data capture.
+    """
+    def __init__(self):
+        pass
+
+    def start_live(self, acqtime=1.0):
+        raise NotImplementedError
+
+    def stop_live(self):
+        raise NotImplementedError
+
+class SoftwareLiveDetector(LiveDetector):
+    """
+    Implements software live mode.
     """
     def __init__(self):
         self.thread = None
