@@ -34,7 +34,7 @@ if __name__=='__main__':
     sz = LC400Motor(device='NpointLC400/usb/1', axis=1, name='sz')
 
     # buffered position detector
-    npoint_buff = LC400Buffer(device='LC400ScanControl/test/1', name='npoint_buff')
+    npoint_buff = LC400Buffer(device='LC400ScanControl/test/1', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
     npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
 
     # smaracts

@@ -11,9 +11,12 @@ class LC400Buffer(Detector):
     reading the flyscan positions.
     """
 
-    def __init__(self, name=None, device=None):
+    def __init__(self, name=None, device=None, xaxis=2, yaxis=3, zaxis=1):
         self.proxy = PyTango.DeviceProxy(device)
         Detector.__init__(self, name=name)
+        self.xaxis = xaxis
+        self.yaxis = yaxis
+        self.zaxis = zaxis
 
     def initialize(self):
         pass
@@ -26,10 +29,10 @@ class LC400Buffer(Detector):
 
     def read(self):
         self.proxy.ReadLC400Buffer()
-        ax1 = self.proxy.Axis1Positions
-        ax2 = self.proxy.Axis2Positions
-        ax3 = self.proxy.Axis3Positions
-        return np.stack((ax1, ax2, ax3), axis=1)
+        data = {1: self.proxy.Axis1Positions,
+                2: self.proxy.Axis2Positions,
+                3: self.proxy.Axis3Positions,}
+        return {'x': data[self.xaxis], 'y': data[self.yaxis], 'z': data[self.zaxis]}
 
     def start(self):
         """
@@ -37,3 +40,4 @@ class LC400Buffer(Detector):
         scancontrol device. That device is managed manually from macros.
         """
         pass
+
