@@ -14,8 +14,13 @@ class Detector(Gadget):
 
     def __init__(self, *args, **kwargs):
         super(Detector, self).__init__(*args, **kwargs)
-        self.active = True
-        self.initialize()
+        try:
+            self.active = True
+            self.initialize()
+        except Exception as e:
+            self.active = False
+            print('Failed to initialize Detector object %s:' % self.name)
+            print(e)
 
     @classmethod
     def get_active_detectors(cls):
