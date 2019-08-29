@@ -56,7 +56,9 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
         pass
 
     def stop(self):
-        self.dev.Stop()
+        if not self.dev.State() == PyTango.DevState.STANDBY:
+            # AdLink gets angry if you stop it in standby
+            self.dev.Stop()
 
     def busy(self):
         return (self.dev.State() == PyTango.DevState.RUNNING)
