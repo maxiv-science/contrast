@@ -54,10 +54,12 @@ class LC400Motor(Motor):
         return user
 
     def busy(self):
-        state = self.proxy.State()
-        if state in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
+        if self.proxy.State() == PyTango.DevState.STANDBY:
+            # this is much faster than asking if axes are on target!
             return False
-        return True
+        attribute = 'axis%d_position_on_target' % self.axis
+        on_target = self.proxy.read_attribute(attribute).value
+        return not on_target
 
     def stop(self):
         self.proxy.stop_waveform()
