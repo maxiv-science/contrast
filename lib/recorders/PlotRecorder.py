@@ -33,9 +33,9 @@ class PlotRecorder(Recorder):
         self.ax.set_ylabel(self.ydata)
 
         # add a timer to trigger periodic checking of the queue
-        timer = self.fig.canvas.new_timer(interval=self.delay*1000)
-        timer.add_callback(self._timer_callback)
-        timer.start()
+        self.timer = self.fig.canvas.new_timer(interval=int(self.delay*1000))
+        self.timer.add_callback(self._timer_callback)
+        self.timer.start()
 
         # blocking show() manages when the application should close
         plt.show()
