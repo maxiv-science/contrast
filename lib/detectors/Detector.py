@@ -19,8 +19,7 @@ class Detector(Gadget):
             self.initialize()
         except Exception as e:
             self.active = False
-            print('Failed to initialize Detector object %s:' % self.name)
-            print(e)
+            print('Failed to initialize %s. Run "%s.initialize()" to try again and perhaps learn more.' % (self.name, self.name))
 
     @classmethod
     def get_active_detectors(cls):

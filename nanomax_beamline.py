@@ -16,6 +16,7 @@ if __name__=='__main__':
     from lib.motors.SardanaPoolMotor import SardanaPoolMotor
     from lib.motors.SmaractMotor import SmaractLinearMotor
     from lib.detectors.Pilatus import Pilatus
+    from lib.detectors.Merlin import Merlin
     from lib.detectors.Xspress3 import Xspress3
     from lib.detectors.Ni6602 import Ni6602CounterCard
     from lib.detectors.AdLink import AdLinkAnalogInput
@@ -82,6 +83,9 @@ if __name__=='__main__':
     pilatus = Pilatus(name='pilatus', 
                       lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
                       det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
+    merlin = Merlin(name='merlin',
+                    lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
+                    det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
     xspress3 = Xspress3(name='xspress3',
                         lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
                         det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
