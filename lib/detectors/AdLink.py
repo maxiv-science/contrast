@@ -15,8 +15,7 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
         self.dev = PyTango.DeviceProxy(self.dev_name)
         self.dev.init()
         
-        if not self.dev.command_inout("State") == PyTango.DevState.STANDBY:
-            self.dev.Stop() # needs to be in standby to change anything
+        self.stop() # needs to be in standby to change anything
 
         self.dev.write_attribute("TriggerSources", "ExtD:+")
         self.dev.write_attribute("TriggerMode", 1)

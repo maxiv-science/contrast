@@ -36,6 +36,10 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
         self.lima = PyTango.DeviceProxy(self.lima_device_name)
         self.lima.set_timeout_millis(10000)
         self.det = PyTango.DeviceProxy(self.det_device_name)
+
+        # Make sure the devices are reachable, or this will throw an error
+        self.lima.state()
+        self.det.state()
         
         self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
         self.lima.saving_mode = "AUTO_FRAME"
@@ -87,6 +91,10 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
         self.acqtime = acqtime
         self.lima.acq_expo_time = acqtime
 
+        while self.busy():
+            print(self.name, 'slept 5 ms while waiting for prepare')
+            time.sleep(.005)
+
     def arm(self):
         """
         Start the detector if hardware triggered, just prepareAcq otherwise.
@@ -95,6 +103,8 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
             raise Exception('%s is busy!' % self.name)
         self.image_number += 1
         self.lima.prepareAcq()
+        while self.busy():
+            time.sleep(.005)
         if self.hw_trig:
             self.lima.startAcq()
 
@@ -109,6 +119,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
         self.lima.startAcq()
 
     def stop(self):
+        self.lima.stopAcq()
         self.stop_live()
         self.lima.stopAcq()
 

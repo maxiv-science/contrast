@@ -78,7 +78,7 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
         """
         The NI card can do on-board live mode.
         """
-        self.dev.Stop()
+        self.stop()
         self.dev.continuous = False
 
     def arm(self):
@@ -101,8 +101,9 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
         self.dev.Start()
 
     def stop(self):
-        self.stop_live()
         self.dev.Stop()
+        while not self.dev.State() == PyTango.DevState.STANDBY:
+            time.sleep(.01)
 
     def busy(self):
         return not (self.dev.State() == PyTango.DevState.STANDBY)

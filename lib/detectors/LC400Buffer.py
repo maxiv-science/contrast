@@ -19,7 +19,7 @@ class LC400Buffer(Detector):
         self.zaxis = zaxis
 
     def initialize(self):
-        pass
+        self.proxy.init()
 
     def stop(self):
         self.proxy.Stop()

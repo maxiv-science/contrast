@@ -97,6 +97,9 @@ class SoftwareScan(object):
         table_line = self.table_line()
         # find and prepare the detectors
         group = Detector.get_active_detectors()
+        if group.busy():
+            print('Detectors are busy: %s' % (', '.join([d.name for d in group if d.busy()])))
+            return
         group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
         # send a header to the recorders
