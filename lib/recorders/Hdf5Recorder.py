@@ -25,7 +25,6 @@ class Hdf5Recorder(Recorder):
             self.fp = None
         else:
             self.fp = h5py.File(filename, 'w')
-        self.dcts_received = 0
 
     def act_on_data(self, dct):
         """
@@ -60,7 +59,7 @@ class Hdf5Recorder(Recorder):
                     # scalars of any type
                     d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=type(val))
             elif isinstance(val, h5py.ExternalLink):
-                # a group of links, do nothing
+                # a new link to be added to a group
                 d = self.fp[name]
             else:
                 # a dataset, just resize
@@ -78,12 +77,11 @@ class Hdf5Recorder(Recorder):
                 val_ = h5py.ExternalLink(
                     filename=os.path.relpath(val_.filename, start=os.path.dirname(self.fp.filename)),
                     path=val_.path)
-                d['%06u' % self.dcts_received] = val_
+                link_key = '%06u' % len(d.keys())
+                d[link_key] = val_
             else:
                 # a dataset
                 d[-1] = val_
-
-        self.dcts_received += 1
 
     def act_on_footer(self):
         """
