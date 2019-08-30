@@ -52,24 +52,45 @@ class PlotRecorder(Recorder):
     def act_on_header(self, dct):
         # start a new scan
         self.nplots += 1
-        self.x, self.y = [], []
-        col = 'bkmrcg'[(self.nplots-1) % 6]
-        self.l = Line2D(xdata=[], ydata=[], color=col, label=str(dct['scannr']))
-        self.ax.add_line(self.l)
-        self.ax.legend()
+        self.x = []
+        self.new_scan = True
+        self.scannr = dct['scannr']
 
     def act_on_data(self, dct):
         # if our data isn't in dct, just move on
         try:
-            self.y.append(dct[self.ydata])
-            if self.xdata is not None:
-                # checking if we have explicit x data
-                self.x.append(dct[self.xdata])
-            else:
-                self.x = range(len(self.y))
-            self.l.set_data(self.x, self.y)
+            new_data = dct[self.ydata]
         except KeyError:
             return
+
+        # be ready to get data that are dicts instead of numbers,
+        # so may as well just work with dicts.
+        if not isinstance(new_data, dict):
+            new_data = {'': new_data}
+
+        # we can only set up lines etc once we know what is actually
+        # in the data.
+        if self.new_scan:
+            self.new_scan = False
+            col = 'bkmrcg'[(self.nplots-1) % 6]
+            styles = {k:['solid', 'dashed', 'dotted', 'dashdot'][i%4] for i, k in enumerate(new_data.keys())}
+            self.lines = {key: Line2D(xdata=[], ydata=[], color=col, linestyle=styles[key], label='%d: %s'%(self.scannr, key)) for key in new_data.keys()}
+            self.y = {key: [] for key in new_data.keys()}
+            for k, l in self.lines.items():
+                self.ax.add_line(l)
+            self.ax.legend()
+
+        # ok treat the actual data
+        for k, v in new_data.items():
+            self.y[k].append(v)
+        if self.xdata is not None:
+            # checking if we have explicit x data
+            self.x.append(dct[self.xdata])
+        else:
+            self.x = range(len(self.y[k]))
+        for k, l in self.lines.items():
+            l.set_data(self.x, self.y[k])
+
         self.ax.relim()
         self.ax.autoscale_view()
         plt.draw()
