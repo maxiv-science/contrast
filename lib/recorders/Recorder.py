@@ -14,6 +14,21 @@ Queue = ctx.Queue
 import time
 import signal
 
+class RecorderHeader(dict):
+    """
+    Helper class to define a specific dict format to send recorders
+    when a new scan starts.
+    """
+    def __init__(self, scannr, path):
+        super(RecorderHeader, self).__init__(scannr=scannr, path=path)
+
+class RecorderFooter(dict):
+    """
+    Helper class to define a specific dict format to send recorders
+    when a new scan finishes.
+    """
+    pass
+
 class Recorder(Gadget, Process):
     """
     Base class for Recorders. Provides the multiprocessing and queuing
@@ -32,9 +47,9 @@ class Recorder(Gadget, Process):
         for dct in dcts:
             if dct is None:
                 self.quit = True
-            elif 'scan_header' in dct.keys():
+            elif isinstance(dct, RecorderHeader):
                 self.act_on_header(dct)
-            elif 'scan_footer' in dct.keys():
+            elif isinstance(dct, RecorderFooter):
                 self.act_on_footer()
             else:
                 self.act_on_data(dct)
@@ -58,8 +73,7 @@ class Recorder(Gadget, Process):
     def act_on_header(self, dct):
         """
         Subclass this. Performs an action when a new scan is started.
-        The key-value pairs of dct are "path":path and "scannr":scannr plus the
-        identifier "scan_header":True.
+        The key-value pairs of dct are "path":path and "scannr":scannr.
         """
         pass
 

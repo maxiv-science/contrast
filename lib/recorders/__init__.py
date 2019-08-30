@@ -1,4 +1,4 @@
-from .Recorder import Recorder, DummyRecorder, active_recorders
+from .Recorder import Recorder, DummyRecorder, active_recorders, RecorderHeader, RecorderFooter
 try:
     from .PlotRecorder import PlotRecorder
 except ImportError:

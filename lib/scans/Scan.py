@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from ..environment import macro, env
-from ..recorders import active_recorders
+from ..recorders import active_recorders, RecorderHeader, RecorderFooter
 from ..detectors import Detector
 
 class SoftwareScan(object):
@@ -104,7 +104,7 @@ class SoftwareScan(object):
         t0 = time.time()
         # send a header to the recorders
         for r in active_recorders():
-            r.queue.put({'scan_header':True, 'scannr': self.scannr, 'path': env.paths.directory})
+            r.queue.put(RecorderHeader(scannr=self.scannr, path=env.paths.directory))
         try:
             for i, pos in enumerate(positions):
                 # move motors
@@ -143,7 +143,7 @@ class SoftwareScan(object):
 
         # tell the recorders that the scan is over
         for r in active_recorders():
-            r.queue.put({'scan_footer':True})
+            r.queue.put(RecorderFooter())
         
     def _generate_positions(self):
         """
