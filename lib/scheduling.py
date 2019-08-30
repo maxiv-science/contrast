@@ -49,5 +49,11 @@ class MaxivInjectionScheduler(DummyScheduler):
     Scheduler which keeps track of storage ring injections at MAX IV.
     Could also check the shutter status, so that closing the safety
     shutter pauses the scan!
+
+    NOTE: It's probably best to write this as an asynchronous
+    thread or process, because it might involve reading network
+    attributes from the other side of the lab. It could do this at
+    1 Hz or so, and the getters could just report on the latest
+    value. That way scanning won't be slowed down.
     """
     pass
