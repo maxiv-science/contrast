@@ -19,8 +19,8 @@ class RecorderHeader(dict):
     Helper class to define a specific dict format to send recorders
     when a new scan starts.
     """
-    def __init__(self, scannr, path):
-        super(RecorderHeader, self).__init__(scannr=scannr, path=path)
+    def __init__(self, scannr, path, snapshot=None):
+        super(RecorderHeader, self).__init__(scannr=scannr, path=path, snapshot=snapshot)
 
 class RecorderFooter(dict):
     """

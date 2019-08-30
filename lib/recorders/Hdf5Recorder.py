@@ -25,12 +25,12 @@ class Hdf5Recorder(Recorder):
             self.fp = None
         else:
             self.fp = h5py.File(filename, 'w')
+            self.act_on_data({'snapshot':dct['snapshot']}, base='entry/')
 
-    def act_on_data(self, dct):
+    def act_on_data(self, dct, base='entry/measurement/'):
         """
         Write data packets to the h5 file.
         """
-        base = 'entry/measurement/'
         if self.fp is None:
             print('** no hdf5 file open, so not writing anything')
             return
@@ -40,7 +40,7 @@ class Hdf5Recorder(Recorder):
             # treat dict values recursively
             if type(val) == dict:
                 new_dct = {key + '/' + str(k): v for k, v in val.items()}
-                self.act_on_data(new_dct)
+                self.act_on_data(new_dct, base=base)
                 continue
 
             # decide where to put the new data
