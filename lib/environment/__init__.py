@@ -1,7 +1,15 @@
+"""
+This module contains the "environment" -- the set of objects that define how
+and when data acquisition is done, what is seen, where data is written, etc.
+It also provides and keeps track of macros.
+
+The module provides a central instance of the Environment class, env.
+"""
+
 from IPython import get_ipython
 ipython = get_ipython()
 
-from . import utils
+from .. import utils
 from .data import PathFixer
 from .scheduling import DummyScheduler
 from .snapshots import MotorSnapshot

@@ -41,11 +41,11 @@ class LsDet(object):
 
 Note that a macro is different from a script. Anyone can easily write a macro, but for composite operations where existing macros are just combined it is faster to write a script. The following is a script, not a macro, but uses a special `runCommand` function to interface with the command line syntax.
 ```
-import lib.environment as env
+from lib.environment import runCommand
 
 for i in range(5):
-    env.runCommand('mv samy %d' % new_y_pos)
-    env.runCommand('ascan samx 0 1 5 .1')
+    runCommand('mv samy %d' % new_y_pos)
+    runCommand('ascan samx 0 1 5 .1')
 
 ```
 

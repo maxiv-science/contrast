@@ -8,10 +8,10 @@ Execute this script with
 
 """
 
-import lib.environment as env
+from lib.environment import runCommand
 
 for i in range(5):
     new_y_pos = i * 1.5 + 2
     print('moving samy to %f' % new_y_pos)
-    env.runCommand('mv samy %d' % new_y_pos)
-    env.runCommand('ascan samx 0 1 5 .1')
+    runCommand('mv samy %d' % new_y_pos)
+    runCommand('ascan samx 0 1 5 .1')
