@@ -68,9 +68,9 @@ if __name__=='__main__':
     sams_x = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-X', name='sams_x')
     sams_y = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Y', name='sams_y')
     sams_z = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Z', name='sams_z')
-    sams_x.limits = (0, 25)
-    sams_y.limits = (0, 25)
-    sams_z.limits = (0, 25)
+    sams_x.dial_limits = (0, 25)
+    sams_y.dial_limits = (0, 25)
+    sams_z.dial_limits = (0, 25)
 
     # some sardana pseudo motors - these should really be reimplemented
     energy = SardanaPoolMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')

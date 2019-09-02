@@ -18,10 +18,10 @@ if __name__=='__main__':
     env.userLevel = 1 # we're not experts!
 
     samx = DummyMotor('samx')
-    samx.limits = (0, 10)
+    samx.dial_limits = (0, 10)
 
     samy = DummyMotor('samy')
-    samy.limits = (-5, 5)
+    samy.dial_limits = (-5, 5)
 
     gap = DummyMotor('gap', userlevel=5)
     gap._format = '%8f'

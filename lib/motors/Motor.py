@@ -13,15 +13,71 @@ class Motor(Gadget):
     """
     General base class for motors.
 
-    Don't forget to call and check the return value of super().move in
-    subclasses, as this checks motor limits!
+    Motors have dial and user positions, which are related by an offset
+    and a scaling factor. The user position is supposed to be used in
+    all macros and movements. The dial position is hard coded in the Motor
+    subclass to closely reflect what the underlying device quotes.
+
+    user = dial * scaling + offset,
+    dial = (user - offset) / scaling
+
+    The user position can be changed, which updates the offset but not
+    the scaling. In the same way, limits on the user position are internally
+    converted to dial limits, such that setting the user position leaves
+    the dial limits unchanged.
+
+    The interface is defined as follows (* means override!):
+      user_position (r/w property)  - the current user position.
+    * dial_position (r/w property)  - the current dial position, setting
+                                      moves the motor with no limit check
+      user_limits (r/w property)    - limits in terms of the current
+                                      user position settings.
+      dial_limits (r/w propery)     - limits on the motor dial position.
+      position()                    - returns user_position
+      move(pos)                     - move motor to user position pos
+    * busy()                        - motor state
+    * stop()                        - halts the motor
+
     """
 
     def __init__(self, *args, **kwargs):
         super(Motor, self).__init__(*args, **kwargs)
         self._uplim = None
         self._lowlim = None
-        self._format = '%.2f'
+        self._scaling = 1.0
+        self._offset = 0.0
+        self._uformat = '%.2f'
+        self._dformat = '%.2f'
+
+    @property
+    def user_position(self):
+        return self.dial_position * self._scaling + self._offset
+
+    @user_position.setter
+    def user_position(self, pos):
+        self._offset = pos - self.dial_position * self._scaling
+
+    @property
+    def user_limits(self):
+        low = self._lowlim * self._scaling + self._offset
+        up = self._uplim * self._scaling + self._offset
+        return (low, up)
+
+    @user_limits.setter
+    def user_limits(self, lims):
+        self._lowlim = lims[0] - self._offset / self._scaling
+        self._uplim = lims[1] - self._offset / self._scaling
+
+    @property
+    def dial_limits(self):
+        return (self._lowlim, self._uplim)
+
+    @dial_limits.setter
+    def dial_limits(self, lims):
+        self._lowlim, self._uplim = lims
+
+    def position(self):
+        return self.user_position
 
     def move(self, pos):
         if self.busy():
@@ -32,29 +88,34 @@ class Motor(Gadget):
         except AssertionError:
             print('Trying to move %s outside its limits!' % self.name)
             return -1
-        except TypeError:
-            pass
-        return 0
+        self.dial_position = (pos - self._offset) / self._scaling
 
-    def position(self):
+    @property
+    def dial_position(self):
+        """
+        Override this! Reads the dial position.
+        """
+        raise NotImplementedError
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        """
+        Override this! Move the motor to dial position.
+        """
         raise NotImplementedError
 
     def busy(self):
+        """
+        Overrides this! Determines if the motor is busy.
+        """
         raise NotImplementedError
 
     def stop(self):
+        """
+        Override this! Stops the motor.
+        """
         raise NotImplementedError
 
-    @property
-    def limits(self):
-        return (self._lowlim, self._uplim)
-
-    @limits.setter
-    def limits(self, lims):
-        lowlim, uplim = lims
-        assert uplim > lowlim
-        self._lowlim = lowlim
-        self._uplim = uplim
 
 class DummyMotor(Motor):
     def __init__(self, *args, **kwargs):
@@ -63,12 +124,9 @@ class DummyMotor(Motor):
         self._oldpos = 0.0
         self._started = 0.0
         self.velocity = 1.0
-    def move(self, pos):
-        if super(DummyMotor, self).move(pos) == 0:
-            self._oldpos = self.position()
-            self._started = time.time()
-            self._aim = pos
-    def position(self):
+
+    @property
+    def dial_position(self):
         dpos = self._aim - self._oldpos
         dt = time.time() - self._started
         T = abs(dpos / self.velocity)
@@ -76,10 +134,18 @@ class DummyMotor(Motor):
             return self._oldpos + dpos * self.velocity * dt / T
         else:
             return self._aim
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        self._oldpos = self.position()
+        self._started = time.time()
+        self._aim = pos
+
     def busy(self):
-        return not np.isclose(self._aim, self.position())
+        return not np.isclose(self._aim, self.dial_position)
+
     def stop(self):
-        self._aim = self.position()
+        self._aim = self.dial_position
 
 @macro
 class Mv(object):
@@ -130,29 +196,18 @@ class Wm(object):
     def __init__(self, *args):
         self.motors = args
     def run(self, *args):
-        names = [m.name for m in self.motors]
-        vals = []
+        titles = ['motor', 'user pos.', 'limits', 'dial pos.', 'limits']
+        table = []
         for m in self.motors:
             try:
-                pos = m._format % m.position()
-                vals.append(pos)
-            except: # can be any number of errors
+                upos = m._uformat % m.user_position
+                dpos = m._dformat % m.dial_position
+                ulims = ('(%s, %s)' % (2*(m._uformat,))) % m.user_limits
+                dlims = ('(%s, %s)' % (2*(m._dformat,))) % m.dial_limits
+                table.append([m.name, upos, ulims, dpos, dlims])
+            except:
                 print('Could not get position of %s' % m.name)
-                vals.append('None')
-        lims = [str(m.limits) for m in self.motors]
-        col1 = max([8,] + [len(s) + 2 for s in names])
-        col2 = max([10,] + [len(s) + 2 for s in vals])
-        col3 = max([8,] + [len(s) + 2 for s in lims])
-        header = ('%%-%ss'%col1) % 'motor' \
-                 + ('%%-%ss'%col2) % 'position' \
-                 + ('%%-%ss'%col3) % 'limits'
-        print('\n' + header)
-        print('-' * len(header))
-        for m, p, l in zip(names, vals, lims):
-            line = ('%%-%ss'%col1) % m \
-                   + ('%%-%ss'%col2) % p \
-                   + ('%%-%ss'%col3) % l
-            print(line)
+        print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
 
 @macro
 class Wa(Wm):
@@ -187,4 +242,19 @@ class SetLim(object):
 
     def run(self):
         for m, l, u in zip(self.motors, self.lowers, self.uppers):
-            m.limits = (l, u)
+            m.user_limits = (l, u)
+
+@macro
+class SetPos(object):
+    """
+    Sets user position on motors.
+
+    setpos <motor1> <pos1> ...
+    """
+    def __init__(self, *args):
+        self.motors = args[::2]
+        self.positions = args[1::2]
+
+    def run(self):
+        for m, p in zip(self.motors, self.positions):
+            m.user_position = p

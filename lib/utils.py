@@ -1,5 +1,27 @@
 from .Gadget import Gadget
 
+def list_to_table(lst, titles, margins=3):
+    """
+    Formats a table from a nested list, where the first index is the row.
+    """
+    result = ''
+    margins = [margins,] * len(titles) if not hasattr(margins, '__iter__') else margins
+    # establish column widths
+    widths = []
+    for i in range(len(titles)):
+        widths.append(max([len(titles[i]),] + [len(row[i]) for row in lst]) + margins[i])
+    # a base format string for every line
+    linebase = ''
+    for w in widths:
+        linebase += ('%%-%ss'%w)
+    # make the header
+    result += linebase % tuple(titles) + '\n'
+    result += '-' * sum(widths) + '\n'
+    # add the table data
+    for row in lst:
+        result += linebase % tuple(row) + '\n'
+    return result
+
 def dict_to_table(dct, titles=('col1', 'col2'), margin=3):
     """
     Formats a dict where key:val is str:str into a two column table.
