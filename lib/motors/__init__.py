@@ -1,4 +1,4 @@
-from .Motor import Motor, DummyMotor
+from .Motor import Motor, DummyMotor, MotorMemorizer
 from .PseudoMotor import PseudoMotor, ExamplePseudoMotor
 
 def all_are_motors(seq):

@@ -20,7 +20,7 @@ def list_to_table(lst, titles, margins=3):
     # add the table data
     for row in lst:
         result += linebase % tuple(row) + '\n'
-    return result
+    return result.strip()
 
 def dict_to_table(dct, titles=('col1', 'col2'), margin=3):
     """

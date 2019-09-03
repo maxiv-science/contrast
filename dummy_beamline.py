@@ -7,7 +7,7 @@ Sets up a mock beamline with dummy motors and detectors.
 # processes etc.
 if __name__=='__main__':
 
-    from lib.motors import DummyMotor
+    from lib.motors import DummyMotor, MotorMemorizer
     from lib.scans import *
     from lib.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
     from lib.environment import env
@@ -41,3 +41,7 @@ if __name__=='__main__':
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
+
+    # this MotorMemorizer keeps track of motor user positions and
+    # limits, and dumps this to file when they are changed.
+    memorizer = MotorMemorizer(name='memorizer', filepath='/tmp/.dummy_beamline_motors')

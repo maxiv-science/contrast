@@ -10,7 +10,7 @@ if __name__=='__main__':
     import lib
     from lib.environment import env
     from lib.recorders import Hdf5Recorder
-    from lib.motors import DummyMotor
+    from lib.motors import DummyMotor, MotorMemorizer
     from lib.motors.LC400 import LC400Motor
     from lib.detectors.LC400Buffer import LC400Buffer
     from lib.motors.SardanaPoolMotor import SardanaPoolMotor
@@ -99,3 +99,5 @@ if __name__=='__main__':
     h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
 
+    # add a memorizer so the motors keep their user positions after a restart
+    memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')

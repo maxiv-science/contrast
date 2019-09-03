@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from collections import OrderedDict
+import os, ast
 
 from ..Gadget import Gadget
 from ..environment import macro, env
@@ -147,6 +148,47 @@ class DummyMotor(Motor):
     def stop(self):
         self._aim = self.dial_position
 
+
+class MotorMemorizer(Gadget):
+    """
+    Memorizes offset and scaling values for Motors.
+    """
+    def __init__(self, filepath=None, **kwargs):
+        super(MotorMemorizer, self).__init__(**kwargs)
+        self.filepath = filepath
+        if filepath and os.path.exists(filepath):
+            self.load()
+
+    def load(self):
+        try:
+            motors = {m.name: m for m in Motor.getinstances()}
+            with open(self.filepath, 'r') as fp:
+                for row in fp:
+                    dct = ast.literal_eval(row)
+                    if dct['name'] in motors:
+                        motors[dct['name']]._offset = dct['_offset']
+                        motors[dct['name']]._scaling = dct['_scaling']
+                        if dct['_lowlim']:
+                            motors[dct['name']]._lowlim = dct['_lowlim']
+                        if dct['_uplim']:
+                            motors[dct['name']]._uplim = dct['_uplim']
+            print('Loaded motor states from %s' % self.filepath)
+        except (FileNotFoundError,):
+            print("Memorizer file %s doesn't exist" % self.filepath)
+
+    def dump(self):
+        try:
+            with open(self.filepath, 'w') as fp:
+                for m in Motor.getinstances():
+                    dct = {'name': m.name,
+                           '_offset': m._offset, '_scaling': m._scaling,
+                           '_lowlim': m._lowlim, '_uplim': m._uplim}
+                    fp.write(str(dct) + '\n')
+            print('Saved motor states to %s' % self.filepath)
+        except (FileNotFoundError,):
+            print("Cant write to %s, doesn't exist")
+
+
 @macro
 class Mv(object):
     """
@@ -171,6 +213,14 @@ class Mv(object):
         except KeyboardInterrupt:
             for m in self.motors:
                 m.stop()
+
+@macro
+class Mvd(object):
+    """
+    Move one or more motors to an abolute dial position.
+    """
+    def run(self):
+        raise NotImplementedError
 
 @macro
 class Mvr(Mv):
@@ -244,6 +294,11 @@ class SetLim(object):
         for m, l, u in zip(self.motors, self.lowers, self.uppers):
             m.user_limits = (l, u)
 
+        # memorize the new state
+        for m in MotorMemorizer.getinstances():
+            m.dump()
+
+
 @macro
 class SetPos(object):
     """
@@ -258,3 +313,7 @@ class SetPos(object):
     def run(self):
         for m, p in zip(self.motors, self.positions):
             m.user_position = p
+
+        # memorize the new state
+        for m in MotorMemorizer.getinstances():
+            m.dump()
