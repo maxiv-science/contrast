@@ -36,6 +36,7 @@ class Motor(Gadget):
       dial_limits (r/w propery)     - limits on the motor dial position.
       position()                    - returns user_position
       move(pos)                     - move motor to user position pos
+                                      while respecting limits
     * busy()                        - motor state
     * stop()                        - halts the motor
 
@@ -60,8 +61,11 @@ class Motor(Gadget):
 
     @property
     def user_limits(self):
-        low = self._lowlim * self._scaling + self._offset
-        up = self._uplim * self._scaling + self._offset
+        if None not in (self._uplim, self._lowlim):
+            low = self._lowlim * self._scaling + self._offset
+            up = self._uplim * self._scaling + self._offset
+        else:
+            low, up = None, None
         return (low, up)
 
     @user_limits.setter
@@ -89,6 +93,8 @@ class Motor(Gadget):
         except AssertionError:
             print('Trying to move %s outside its limits!' % self.name)
             return -1
+        except TypeError:
+            pass
         self.dial_position = (pos - self._offset) / self._scaling
 
     @property
@@ -252,11 +258,16 @@ class Wm(object):
             try:
                 upos = m._uformat % m.user_position
                 dpos = m._dformat % m.dial_position
-                ulims = ('(%s, %s)' % (2*(m._uformat,))) % m.user_limits
-                dlims = ('(%s, %s)' % (2*(m._dformat,))) % m.dial_limits
+                if None in (m._uplim, m._lowlim):
+                    ulims = '(None, None)'
+                    dlims = '(None, None)'
+                else:
+                    ulims = ('(%s, %s)' % (2*(m._uformat,))) % m.user_limits
+                    dlims = ('(%s, %s)' % (2*(m._dformat,))) % m.dial_limits
                 table.append([m.name, upos, ulims, dpos, dlims])
             except:
                 print('Could not get position of %s' % m.name)
+                raise
         print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
 
 @macro

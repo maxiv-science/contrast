@@ -16,11 +16,12 @@ class SardanaPoolMotor(Motor):
         super(SardanaPoolMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
 
-    def move(self, pos):
-        if super(SardanaPoolMotor, self).move(pos) == 0:
-            self.proxy.Position = pos
+    @dial_position.setter
+    def dial_position(self, pos):
+        self.proxy.Position = pos
 
-    def position(self):
+    @property
+    def dial_position(self):
         return self.proxy.Position
 
     def busy(self):
@@ -29,4 +30,3 @@ class SardanaPoolMotor(Motor):
 
     def stop(self):
         self.proxy.stop()
-

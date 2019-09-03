@@ -17,16 +17,16 @@ class TangoAttributeMotor(Motor):
         self.proxy = PyTango.DeviceProxy(device)
         self.attribute = attribute
 
-    def move(self, pos):
-        if super(TangoAttributeMotor, self).move(pos) == 0:
-            self.proxy.write_attribute(self.attribute, pos)
-
-    def position(self):
+    @property
+    def dial_position(self):
         return self.proxy.read_attribute(self.attribute).value
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        self.proxy.write_attribute(self.attribute, pos)
 
     def busy(self):
         return False
 
     def stop(self):
         pass
-

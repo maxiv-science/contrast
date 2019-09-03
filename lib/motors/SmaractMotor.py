@@ -8,31 +8,20 @@ from . import Motor
 class SmaractLinearMotor(Motor):
     """
     Single Smaract motor axis.
-
-    Optionally, you can supply offset and scale numbers.
-    The user position is then calculated from the Smaract
-    server positions as
-        p_user = p_smaract * scale + offset
-    and obviously vice versa when calculating new Smaract
-    values.
     """
 
-    def __init__(self, device, axis, offset=0, scale=1, **kwargs):
+    def __init__(self, device, axis, **kwargs):
         super(SmaractLinearMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
         self.axis = int(axis)
-        self.offset = offset
-        self.scale = scale
 
-    def move(self, pos):
-        if super(SmaractLinearMotor, self).move(pos) == 0:
-            dial = (pos - self.offset) / self.scale
-            self.proxy.Write_position('%d, %f' % (self.axis, dial))
+    @property
+    def dial_position(self):
+        return self.proxy.Read_position(self.axis)
 
-    def position(self):
-        dial = self.proxy.Read_position(self.axis)
-        user = dial * self.scale + self.offset
-        return user
+    @dial_position.setter
+    def dial_position(self, pos):
+        self.proxy.Write_position('%d, %f' % (self.axis, pos))
 
     def busy(self):
         state = self.proxy.channel_status(self.axis)
@@ -42,4 +31,3 @@ class SmaractLinearMotor(Motor):
 
     def stop(self):
         self.proxy.stop_all() # safety first
-

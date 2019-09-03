@@ -15,17 +15,18 @@ class PseudoMotor(Motor):
 	def physicals(self):
 		return [m.position() for m in self.motors]
 
-	def move(self, pos):
-		if super(PseudoMotor, self).move(pos) == 0:
-			physicals = self.calc_physicals(pos, self.position(), self.physicals())
-			for m, pos in zip(self.motors, physicals):
-				if self.dry_run:
-					print('Would move %s to %f' % (m.name, pos))
-				else:
-					m.move(pos)
-
-	def position(self):
+	@property
+	def dial_position(self):
 		return self.calc_pseudo(self.physicals())
+
+	@dial_position.setter
+	def dial_position(self, pos):
+		physicals = self.calc_physicals(pos, self.position(), self.physicals())
+		for m, pos in zip(self.motors, physicals):
+			if self.dry_run:
+				print('Would move %s to %f' % (m.name, pos))
+			else:
+				m.move(pos)
 
 	def busy(self):
 		return True in [m.busy() for m in self.motors]
