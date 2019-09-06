@@ -13,23 +13,36 @@ In this framework, macros are created by writing a class with certain properties
 ```
 In [2]: lsmac
 
-name       class                                        
---------------------------------------------------------
-dscan      <class 'lib.scans.Scan.DScan'>               
-lsrec      <class 'lib.recorders.Recorder.LsRec'>       
-loopscan   <class 'lib.scans.Scan.LoopScan'>            
-lsm        <class 'lib.motors.Motor.LsM'>               
-mv         <class 'lib.motors.Motor.Mv'>                
-lsmac      <class 'lib.environment.LsMac'>              
-lsdet      <class 'lib.detectors.Detector.LsDet'>       
-wm         <class 'lib.motors.Motor.Wm'>                
-wa         <class 'lib.motors.Motor.Wa'>                
-ascan      <class 'lib.scans.Scan.AScan'>               
-mvr        <class 'lib.motors.Motor.Mvr'>               
-liveplot   <class 'lib.recorders.PlotRecorder.LivePlot'>
-lsgrp      <class 'lib.detectors.Detector.LsGrp'>       
+name            class                                          
+---------------------------------------------------------------
+ascan           <class 'lib.scans.AScan.AScan'>                
+ct              <class 'lib.scans.Scan.Ct'>                    
+dmesh           <class 'lib.scans.Mesh.DMesh'>                 
+dscan           <class 'lib.scans.AScan.DScan'>                
+liveplot        <class 'lib.recorders.PlotRecorder.LivePlot'>  
+loopscan        <class 'lib.scans.Scan.LoopScan'>              
+lsdet           <class 'lib.detectors.Detector.LsDet'>         
+lsm             <class 'lib.motors.Motor.LsM'>                 
+lsmac           <class 'lib.environment.LsMac'>                
+lsrec           <class 'lib.recorders.Recorder.LsRec'>         
+mesh            <class 'lib.scans.Mesh.Mesh'>                  
+mv              <class 'lib.motors.Motor.Mv'>                  
+mvd             <class 'lib.motors.Motor.Mvd'>                 
+mvr             <class 'lib.motors.Motor.Mvr'>                 
+npointflyscan   <class 'lib.scans.NpointFlyscan.NpointFlyscan'>
+setlim          <class 'lib.motors.Motor.SetLim'>              
+setpos          <class 'lib.motors.Motor.SetPos'>              
+spiralscan      <class 'lib.scans.Spiral.SpiralScan'>          
+startlive       <class 'lib.detectors.Detector.StartLive'>     
+stoplive        <class 'lib.detectors.Detector.StopLive'>      
+tweak           <class 'lib.scans.Tweak.Tweak'>                
+userlevel       <class 'lib.environment.UserLevel'>            
+wa              <class 'lib.motors.Motor.Wa'>                  
+wm              <class 'lib.motors.Motor.Wm'>                  
 
+Do <macro-name>? (without <>) for more information.
 ```
+
 Note how macros aren't stored in a special library. They are written throughout the library wherever they make sense. For example, in `Detector.py` where the detector base classes are defined, the `lsdet` macro is defined as follows.
 ```
 @macro
