@@ -9,6 +9,7 @@ if __name__=='__main__':
 
     import lib
     from lib.environment import env
+    from lib.environment.data import SdmPathFixer
     from lib.recorders import Hdf5Recorder
     from lib.motors import DummyMotor, MotorMemorizer
     from lib.motors.LC400 import LC400Motor
@@ -20,7 +21,6 @@ if __name__=='__main__':
     from lib.detectors.Xspress3 import Xspress3
     from lib.detectors.Ni6602 import Ni6602CounterCard
     from lib.detectors.AdLink import AdLinkAnalogInput
-    from lib.data import SdmPathFixer
     import os
     
     env.userLevel = 1
