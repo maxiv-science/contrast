@@ -2,6 +2,7 @@ from .Scan import SoftwareScan
 from ..environment import macro, MacroSyntaxError
 from ..motors import all_are_motors
 import numpy as np
+import time
 
 @macro
 class Mesh(SoftwareScan):
