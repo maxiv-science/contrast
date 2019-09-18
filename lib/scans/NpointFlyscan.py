@@ -57,7 +57,7 @@ class NpointFlyscan(Mesh):
         axismap = {'sz': 1, 'sx': 2, 'sy': 3}
         fast_axis = axismap[self.fastmotor.name]
         import PyTango
-        self.scancontrol = PyTango.DeviceProxy("lc400scancontrol/test/1")
+        self.scancontrol = PyTango.DeviceProxy("B303A/CTL/FLYSCAN-02")
         ### note: these Tango attributes might have different names, check in Jive
         self.scancontrol.write_attribute("FlyScanMotorStartPosition", self.fastlimits[0])
         self.scancontrol.write_attribute("FlyScanMotorEndPosition", self.fastlimits[1])

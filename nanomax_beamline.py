@@ -31,12 +31,12 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='NpointLC400/usb/1', axis=2, name='sx')
-    sy = LC400Motor(device='NpointLC400/usb/1', axis=3, name='sy')
-    sz = LC400Motor(device='NpointLC400/usb/1', axis=1, name='sz')
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx')
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz')
 
     # buffered position detector
-    npoint_buff = LC400Buffer(device='LC400ScanControl/test/1', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
+    npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
     npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
 
     # smaracts
