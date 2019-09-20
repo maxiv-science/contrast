@@ -1,9 +1,12 @@
 from .Gadget import Gadget
+from collections import OrderedDict
 
-def list_to_table(lst, titles, margins=3):
+def list_to_table(lst, titles, margins=3, sort=True):
     """
     Formats a table from a nested list, where the first index is the row.
     """
+    if sort:
+        lst = sorted(lst)
     result = ''
     margins = [margins,] * len(titles) if not hasattr(margins, '__iter__') else margins
     # establish column widths
@@ -22,10 +25,12 @@ def list_to_table(lst, titles, margins=3):
         result += linebase % tuple(row) + '\n'
     return result.strip()
 
-def dict_to_table(dct, titles=('col1', 'col2'), margin=3):
+def dict_to_table(dct, titles=('col1', 'col2'), margin=3, sort=True):
     """
     Formats a dict where key:val is str:str into a two column table.
     """
+    if sort:
+        dct = OrderedDict({key:dct[key] for key in sorted(dct.keys())})
     col1width = max([len(str(s)) for s in dct.keys()] + [len(titles[0])])
     col2width = max([len(str(s)) for s in dct.values()] + [len(titles[1])])
     width = col1width + col2width + margin

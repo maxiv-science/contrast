@@ -1,6 +1,5 @@
 import time
 import numpy as np
-from collections import OrderedDict
 import os, ast
 
 from ..Gadget import Gadget
@@ -286,7 +285,7 @@ class LsM(object):
     def run(self):
         dct = {m.name: m.__class__ for m in Motor.getinstances()
                if m.userlevel <= env.userLevel}
-        print(utils.dict_to_table(dct, titles=('name', 'class')))
+        print(utils.dict_to_table(dct, titles=('name', 'class'), sort=True))
 
 @macro
 class SetLim(object):
