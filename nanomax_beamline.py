@@ -58,11 +58,11 @@ if __name__=='__main__':
     attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
     attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
     fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
-    diode_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode_x', userlevel=3)
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
     # controller 3
-    pindiode_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='pindiode_y', userlevel=3)
-    pindiode_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='pindiode_z', userlevel=3)
-    pindiode_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='pindiode_x', userlevel=3)
+    diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)
+    diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)
+    diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)
 
     # some steppers through sardana
     sams_x = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-X', name='sams_x', dial_limits=(0,25))
