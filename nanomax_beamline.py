@@ -31,9 +31,9 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0)
-    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy')
-    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0)
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50))
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50))
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50))
 
     # buffered position detector
     npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
@@ -65,14 +65,17 @@ if __name__=='__main__':
     pindiode_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='pindiode_x', userlevel=3)
 
     # some steppers through sardana
-    sams_x = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-X', name='sams_x')
-    sams_y = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Y', name='sams_y')
-    sams_z = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Z', name='sams_z')
-    sams_x.dial_limits = (0, 25)
-    sams_y.dial_limits = (0, 25)
-    sams_z.dial_limits = (0, 25)
+    sams_x = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-X', name='sams_x', dial_limits=(0,25))
+    sams_y = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Y', name='sams_y', dial_limits=(0,25))
+    sams_z = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Z', name='sams_z', dial_limits=(0,25))
 
-    # some sardana pseudo motors - these should really be reimplemented
+    # SSA through the Pool
+    ssa_gapx = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
+    ssa_gapy = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-GAPYPM', name='ssa_gapy', userlevel=2)
+    ssa_posx = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-POSXPM', name='ssa_posx', userlevel=3)
+    ssa_posy = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-POSYPM', name='ssa_posy', userlevel=3)
+
+    # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy = SardanaPoolMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
 
     # some dummy motors
@@ -99,6 +102,7 @@ if __name__=='__main__':
     h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
 
-    # add a memorizer so the motors keep their user positions after a restart
+    # add a memorizer so the motors keep their user positions and limits after a restart
+    # note that this will overwrite the dial positions set above! delete the file to generate it again.
     memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
 
