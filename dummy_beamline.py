@@ -7,7 +7,7 @@ Sets up a mock beamline with dummy motors and detectors.
 # processes etc.
 if __name__=='__main__':
 
-    from lib.motors import DummyMotor, MotorMemorizer
+    from lib.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
     from lib.scans import *
     from lib.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
     from lib.environment import env
@@ -17,18 +17,20 @@ if __name__=='__main__':
 
     env.userLevel = 1 # we're not experts!
 
-    samx = DummyMotor('samx')
+    samx = DummyMotor(name='samx')
     samx.dial_limits = (0, 10)
 
-    samy = DummyMotor('samy')
+    samy = DummyMotor(name='samy')
     samy.dial_limits = (-5, 5)
 
-    gap = DummyMotor('gap', userlevel=5)
+    gap = DummyMotor(name='gap', userlevel=5)
     gap._format = '%8f'
 
-    det1 = DummyDetector('det1')
-    det2 = DummyWritingDetector('det2')
-    det3 = Dummy1dDetector('det3')
+    diff = ExamplePseudoMotor([samx, samy], name='diff')
+
+    det1 = DummyDetector(name='det1')
+    det2 = DummyWritingDetector(name='det2')
+    det3 = Dummy1dDetector(name='det3')
 
     env.paths.directory = '/tmp'
 
