@@ -31,9 +31,9 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx')
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0)
     sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy')
-    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0)
 
     # buffered position detector
     npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
@@ -101,3 +101,4 @@ if __name__=='__main__':
 
     # add a memorizer so the motors keep their user positions after a restart
     memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
+
