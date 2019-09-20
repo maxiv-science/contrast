@@ -41,12 +41,12 @@ class Motor(Gadget):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super(Motor, self).__init__(*args, **kwargs)
+    def __init__(self, scaling=1.0, offset=0.0, **kwargs):
+        super(Motor, self).__init__(**kwargs)
         self._uplim = None
         self._lowlim = None
-        self._scaling = 1.0
-        self._offset = 0.0
+        self._scaling = scaling
+        self._offset = offset
         self._uformat = '%.2f'
         self._dformat = '%.2f'
 
@@ -156,7 +156,7 @@ class DummyMotor(Motor):
 
 class MotorMemorizer(Gadget):
     """
-    Memorizes offset and scaling values for Motors.
+    Memorizes limits and offset values for Motors.
     """
     def __init__(self, filepath=None, **kwargs):
         super(MotorMemorizer, self).__init__(**kwargs)
@@ -172,7 +172,6 @@ class MotorMemorizer(Gadget):
                     dct = ast.literal_eval(row)
                     if dct['name'] in motors:
                         motors[dct['name']]._offset = dct['_offset']
-                        motors[dct['name']]._scaling = dct['_scaling']
                         if dct['_lowlim']:
                             motors[dct['name']]._lowlim = dct['_lowlim']
                         if dct['_uplim']:
@@ -186,7 +185,7 @@ class MotorMemorizer(Gadget):
             with open(self.filepath, 'w') as fp:
                 for m in Motor.getinstances():
                     dct = {'name': m.name,
-                           '_offset': m._offset, '_scaling': m._scaling,
+                           '_offset': m._offset,
                            '_lowlim': m._lowlim, '_uplim': m._uplim}
                     fp.write(str(dct) + '\n')
             print('Saved motor states to %s' % self.filepath)
@@ -306,7 +305,6 @@ class SetLim(object):
         # memorize the new state
         for m in MotorMemorizer.getinstances():
             m.dump()
-
 
 @macro
 class SetPos(object):
