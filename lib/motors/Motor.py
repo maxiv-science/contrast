@@ -41,10 +41,9 @@ class Motor(Gadget):
 
     """
 
-    def __init__(self, scaling=1.0, offset=0.0, **kwargs):
+    def __init__(self, scaling=1.0, offset=0.0, dial_limits=(None, None), **kwargs):
         super(Motor, self).__init__(**kwargs)
-        self._uplim = None
-        self._lowlim = None
+        self._lowlim, self._uplim = dial_limits
         self._scaling = scaling
         self._offset = offset
         self._uformat = '%.2f'
@@ -61,16 +60,17 @@ class Motor(Gadget):
     @property
     def user_limits(self):
         if None not in (self._uplim, self._lowlim):
-            low = self._lowlim * self._scaling + self._offset
-            up = self._uplim * self._scaling + self._offset
+            l1 = self._lowlim * self._scaling + self._offset
+            l2 = self._uplim * self._scaling + self._offset
         else:
             low, up = None, None
-        return (low, up)
+        return tuple(sorted([l1, l2]))
 
     @user_limits.setter
     def user_limits(self, lims):
-        self._lowlim = lims[0] - self._offset / self._scaling
-        self._uplim = lims[1] - self._offset / self._scaling
+        l1 = (lims[0] - self._offset) / self._scaling
+        l2 = (lims[1] - self._offset) / self._scaling
+        self._lowlim, self._uplim = sorted([l1, l2])
 
     @property
     def dial_limits(self):
@@ -86,15 +86,16 @@ class Motor(Gadget):
     def move(self, pos):
         if self.busy():
             raise Exception('Motor is busy')
+        dial = (pos - self._offset) / self._scaling
         try:
-            assert pos <= self._uplim
-            assert pos >= self._lowlim
+            assert dial <= self._uplim
+            assert dial >= self._lowlim
         except AssertionError:
             print('Trying to move %s outside its limits!' % self.name)
             return -1
         except TypeError:
             pass
-        self.dial_position = (pos - self._offset) / self._scaling
+        self.dial_position = dial
 
     @property
     def dial_position(self):
