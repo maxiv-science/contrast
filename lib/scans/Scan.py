@@ -80,6 +80,12 @@ class SoftwareScan(object):
         """
         pass
 
+    def _while_acquiring(self):
+        """
+        Gets called repeatedly while the detectors detect.
+        """
+        pass
+
     def _before_start(self):
         """
         Gets called for each step.
@@ -121,6 +127,7 @@ class SoftwareScan(object):
                 self._before_start()
                 group.start()
                 while group.busy():
+                    self._while_acquiring()
                     time.sleep(.01)
                 # read detectors and motors
                 dt = time.time() - t0

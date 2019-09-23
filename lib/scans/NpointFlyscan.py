@@ -82,3 +82,10 @@ class NpointFlyscan(Mesh):
         # we need to call Go() on the SC device at some point, maybe here.
         self.scancontrol.Go()
 
+    def _while_acquiring(self):
+        s = ''
+        for d in Detector.get_active_detectors():
+            if d.name in ('xspress3', 'pilatus', 'pilatus1m', 'merlin'):
+                s += ('%s: %u, ' % (d.name, d.lima.last_image_acquired))
+        print(s + '\r', end='')
+
