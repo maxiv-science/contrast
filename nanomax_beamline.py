@@ -21,6 +21,7 @@ if __name__=='__main__':
     from lib.detectors.Xspress3 import Xspress3
     from lib.detectors.Ni6602 import Ni6602CounterCard
     from lib.detectors.AdLink import AdLinkAnalogInput
+    from lib.detectors import Detector
     import os
     
     env.userLevel = 1
@@ -86,6 +87,9 @@ if __name__=='__main__':
     pilatus = Pilatus(name='pilatus', 
                       lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
                       det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
+    pilatus1m = Pilatus(name='pilatus1m',
+                      lima_device='lima/limaccd/B-NANOMAX-PILATUS1M-IPC-01',
+                      det_device='lima/pilatus/B-NANOMAX-PILATUS1M-IPC-01')
     merlin = Merlin(name='merlin',
                     lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
                     det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
@@ -105,4 +109,9 @@ if __name__=='__main__':
     # add a memorizer so the motors keep their user positions and limits after a restart
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
     memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
+
+    # deactivate all the detectors except pilatus as default
+    for d in Detector.getinstances():
+        d.active = False
+    pilatus.active = True
 
