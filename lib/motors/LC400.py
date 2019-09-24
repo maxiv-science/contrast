@@ -37,9 +37,6 @@ class LC400Motor(Motor):
             self.proxy.axis3_position = pos
 
     def busy(self):
-        if self.proxy.State() == PyTango.DevState.STANDBY:
-            # this is much faster than asking if axes are on target!
-            return False
         attribute = 'axis%d_position_on_target' % self.axis
         on_target = self.proxy.read_attribute(attribute).value
         return not on_target
