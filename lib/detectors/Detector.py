@@ -233,3 +233,37 @@ class StopLive(object):
             else:
                 print('%s is not a LiveDetector' % d.name)
 
+@macro
+class Deactivate(object):
+    """
+    Deactivates all detectors or those specified.
+
+    deactivate [<det1> ... <detN>]
+    """
+    def __init__(self, *args):
+        if args:
+            self.dets = args
+        else:
+            self.dets = Detector.getinstances()
+
+    def run(self):
+        for d in self.dets:
+            d.active = False
+
+@macro
+class Activate(object):
+    """
+    Activates all detectors or those specified.
+
+    deactivate [<det1> ... <detN>]
+    """
+    def __init__(self, *args):
+        if args:
+            self.dets = args
+        else:
+            self.dets = Detector.getinstances()
+
+    def run(self):
+        for d in self.dets:
+            d.active = True
+
