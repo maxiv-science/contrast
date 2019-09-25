@@ -1,5 +1,6 @@
 from .Gadget import Gadget
 from collections import OrderedDict
+from fnmatch import filter
 
 def list_to_table(lst, titles, margins=3, sort=True):
     """
@@ -50,11 +51,16 @@ def str_to_args(line):
     Out[11]: [<lib.motors.Motor.DummyMotor at 0x7f6b11b0ba90>, 'hej', 0.05]
 
     """
-    args = line.split()
+    args_in = line.split()
+    args_out = []
     gadget_lookup = {g.name: g for g in Gadget.getinstances()}
-    for i, a in enumerate(args):
-        if a in gadget_lookup.keys():
-            args[i] = gadget_lookup[a]
+    for a in args_in:
+        if ('*' in a) or ('?' in a):
+            matching_names = filter(gadget_lookup.keys(), a)
+            args_out += [gadget_lookup[name] for name in matching_names]
+        elif a in gadget_lookup.keys():
+            args_out.append(gadget_lookup[a])
         else:
-            args[i] = eval(a)
-    return args
+            args_out.append(eval(a))
+    return args_out
+
