@@ -1,19 +1,17 @@
 """
-Provides a Motor interface to the motor Tango devices exposed
-by Sardana's Pool. This is a temporary configuration since
-IcePAP:s for example do not have proper Tango servers.
+Provides a Motor interface to Tango motors.
 """
 
 import PyTango
 from . import Motor
 
-class SardanaPoolMotor(Motor):
+class TangoMotor(Motor):
     """
     Single motor as exposed by Pool. Use for IcePAP:s.
     """
 
     def __init__(self, device, **kwargs):
-        super(SardanaPoolMotor, self).__init__(**kwargs)
+        super(TangoMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
 
     @property
@@ -30,3 +28,4 @@ class SardanaPoolMotor(Motor):
 
     def stop(self):
         self.proxy.stop()
+

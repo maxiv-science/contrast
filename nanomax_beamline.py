@@ -14,7 +14,7 @@ if __name__=='__main__':
     from lib.motors import DummyMotor, MotorMemorizer
     from lib.motors.LC400 import LC400Motor
     from lib.detectors.LC400Buffer import LC400Buffer
-    from lib.motors.SardanaPoolMotor import SardanaPoolMotor
+    from lib.motors.TangoMotor import TangoMotor
     from lib.motors.SmaractMotor import SmaractLinearMotor
     from lib.detectors.Pilatus import Pilatus
     from lib.detectors.Merlin import Merlin
@@ -35,6 +35,15 @@ if __name__=='__main__':
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50))
     sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50))
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50))
+
+    # base motors through sardana
+    basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
+    basey = TangoMotor(device='motor/icepap_ctrl_1_expert/17', name='basey', userlevel=1)
+    basez = TangoMotor(device='motor/icepap_ctrl_1_expert/18', name='basez', userlevel=1)
+
+    # gap and taper
+    ivu_gap = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25))
+    ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05))
 
     # buffered position detector
     npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
@@ -65,19 +74,14 @@ if __name__=='__main__':
     diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)
     diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)
 
-    # some steppers through sardana
-    sams_x = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-X', name='sams_x', dial_limits=(0,25))
-    sams_y = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Y', name='sams_y', dial_limits=(0,25))
-    sams_z = SardanaPoolMotor(device='B303A-E02/DIA/SAMS-01-Z', name='sams_z', dial_limits=(0,25))
-
     # SSA through the Pool
-    ssa_gapx = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
-    ssa_gapy = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-GAPYPM', name='ssa_gapy', userlevel=2)
-    ssa_posx = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-POSXPM', name='ssa_posx', userlevel=3)
-    ssa_posy = SardanaPoolMotor(device='B303A-O/opt/SLIT-01-POSYPM', name='ssa_posy', userlevel=3)
+    ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
+    ssa_gapy = TangoMotor(device='B303A-O/opt/SLIT-01-GAPYPM', name='ssa_gapy', userlevel=2)
+    ssa_posx = TangoMotor(device='B303A-O/opt/SLIT-01-POSXPM', name='ssa_posx', userlevel=3)
+    ssa_posy = TangoMotor(device='B303A-O/opt/SLIT-01-POSYPM', name='ssa_posy', userlevel=3)
 
     # some sardana pseudo motors - these are reimplemented but just need to be configured
-    energy = SardanaPoolMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
+    energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
 
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=2)
