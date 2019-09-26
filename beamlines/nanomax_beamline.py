@@ -7,21 +7,21 @@ Sets up a some actual nanomax hardware.
 # processes etc.
 if __name__=='__main__':
 
-    import lib
-    from lib.environment import env
-    from lib.environment.data import SdmPathFixer
-    from lib.recorders import Hdf5Recorder
-    from lib.motors import DummyMotor, MotorMemorizer
-    from lib.motors.LC400 import LC400Motor
-    from lib.detectors.LC400Buffer import LC400Buffer
-    from lib.motors.TangoMotor import TangoMotor
-    from lib.motors.SmaractMotor import SmaractLinearMotor
-    from lib.detectors.Pilatus import Pilatus
-    from lib.detectors.Merlin import Merlin
-    from lib.detectors.Xspress3 import Xspress3
-    from lib.detectors.Ni6602 import Ni6602CounterCard
-    from lib.detectors.AdLink import AdLinkAnalogInput
-    from lib.detectors import Detector
+    import contrast
+    from contrast.environment import env
+    from contrast.environment.data import SdmPathFixer
+    from contrast.recorders import Hdf5Recorder
+    from contrast.motors import DummyMotor, MotorMemorizer
+    from contrast.motors.LC400 import LC400Motor
+    from contrast.detectors.LC400Buffer import LC400Buffer
+    from contrast.motors.TangoMotor import TangoMotor
+    from contrast.motors.SmaractMotor import SmaractLinearMotor
+    from contrast.detectors.Pilatus import Pilatus
+    from contrast.detectors.Merlin import Merlin
+    from contrast.detectors.Xspress3 import Xspress3
+    from contrast.detectors.Ni6602 import Ni6602CounterCard
+    from contrast.detectors.AdLink import AdLinkAnalogInput
+    from contrast.detectors import Detector
     import os
     
     env.userLevel = 1

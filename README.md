@@ -1,4 +1,4 @@
-# acquisition-framework
+# contrast
 Light weight data acquisition framework for orchestrating beamline experiments.
 
 The code is organized as a library containing various classes. A beamline is set up simply by making instances for detectors, motors, and any other devices directly in ipython. See `dummy_beamline.py` for example.

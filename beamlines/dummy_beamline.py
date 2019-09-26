@@ -7,11 +7,11 @@ Sets up a mock beamline with dummy motors and detectors.
 # processes etc.
 if __name__=='__main__':
 
-    from lib.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
-    from lib.scans import *
-    from lib.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
-    from lib.environment import env
-    from lib.recorders import Hdf5Recorder
+    from contrast.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
+    from contrast.scans import *
+    from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
+    from contrast.environment import env
+    from contrast.recorders import Hdf5Recorder
 
     import os
 
