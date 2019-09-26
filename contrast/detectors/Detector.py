@@ -183,6 +183,13 @@ class LsDet(object):
         dct = {}
         for d in Detector.getinstances():
             name = ('* ' + d.name) if d.active else ('  ' + d.name)
+            try:
+            # rough sense of how each detector is doing
+                if d.busy():
+                    name += ' (busy)'
+            except:
+                name += '  (not responding)'
+            
             dct[name] = d.__class__
         print(utils.dict_to_table(dct, titles=('  name', 'class')))
 
