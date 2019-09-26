@@ -205,6 +205,9 @@ class Mv(object):
     def __init__(self, *args):
         self.motors = args[::2]
         self.targets = np.array(args[1::2])
+
+    def _run_while_waiting(self):
+        pass
     
     def run(self):
         if max(m.userlevel for m in self.motors) > env.userLevel:
@@ -214,6 +217,7 @@ class Mv(object):
             m.move(pos)
         try:
             while True in [m.busy() for m in self.motors]:
+                self._run_while_waiting()
                 time.sleep(.01)
         except KeyboardInterrupt:
             for m in self.motors:
@@ -240,6 +244,28 @@ class Mvr(Mv):
         displacements = np.array(args[1::2])
         current = np.array([m.position() for m in self.motors])
         self.targets = current + displacements
+
+@macro
+class Umv(Mv):
+    """
+    Like mv, except it prints the positions while moving.
+    """
+    def _run_while_waiting(self):
+        l = ['%s: %.2f' % (m.name, m.user_position) for m in self.motors]
+        s = '; '.join(l)
+        print(s + '\r', end='')
+
+    def run(self):
+        # ensures the final position is printed too
+        super(Umv, self).run()
+        self._run_while_waiting()
+
+@macro
+class Umvr(Mvr, Umv):
+    """
+    Like mvr, except it prints the positions while moving.
+    """
+    pass # less is more
 
 @macro
 class Wm(object):
