@@ -41,13 +41,14 @@ class Motor(Gadget):
 
     """
 
-    def __init__(self, scaling=1.0, offset=0.0, dial_limits=(None, None), **kwargs):
+    def __init__(self, scaling=1.0, offset=0.0, dial_limits=(None, None),
+                 user_format='%.2f', dial_format='%.2f', **kwargs):
         super(Motor, self).__init__(**kwargs)
         self._lowlim, self._uplim = dial_limits
         self._scaling = scaling
         self._offset = offset
-        self._uformat = '%.2f'
-        self._dformat = '%.2f'
+        self._uformat = user_format
+        self._dformat = dial_format
 
     @property
     def user_position(self):

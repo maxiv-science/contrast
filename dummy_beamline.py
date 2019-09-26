@@ -23,8 +23,7 @@ if __name__=='__main__':
     samy = DummyMotor(name='samy')
     samy.dial_limits = (-5, 5)
 
-    gap = DummyMotor(name='gap', userlevel=5)
-    gap._format = '%8f'
+    gap = DummyMotor(name='gap', userlevel=5, user_format='%.5f')
 
     diff = ExamplePseudoMotor([samx, samy], name='diff')
 
