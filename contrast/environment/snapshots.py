@@ -18,7 +18,7 @@ class MotorSnapshot(EmptySnapshot):
     Snapshot which consists of all motor values.
     """
     def capture(self):
-        from lib.motors import Motor
+        from contrast.motors import Motor
         dct = {}
         for m in Motor.getinstances():
             try:

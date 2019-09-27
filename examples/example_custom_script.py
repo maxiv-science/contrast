@@ -8,7 +8,7 @@ Execute this script with
 
 """
 
-from lib.environment import runCommand
+from contrast.environment import runCommand
 
 for i in range(5):
     new_y_pos = i * 1.5 + 2
