@@ -125,6 +125,13 @@ class TriggeredDetector(object):
         self.hw_trig = False
         self.hw_trig_n = 1
 
+class BurstDetector(object):
+    """
+    Defines the API for detectors that optionally run in burst mode.
+    """
+    def __init__(self):
+        self.burst_n = 1
+
 class DetectorGroup(object):
     """
     Collection of Detector objects to be acquired together, in a scan

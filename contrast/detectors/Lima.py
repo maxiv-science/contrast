@@ -1,4 +1,4 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, Link
+from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector, Link
 from ..environment import env
 
 import time
@@ -6,7 +6,7 @@ import numpy as np
 import PyTango
 import os
 
-class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
+class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     EXT_TRG_MODE = "EXTERNAL_TRIGGER_MULTI"
 
     def __init__(self, name=None, lima_device=None, det_device=None):
@@ -15,6 +15,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
+        BurstDetector.__init__(self)
 
     def _initialize_det(self):
         """
@@ -85,7 +86,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector):
             self.lima.acq_nb_frames = self.hw_trig_n
         else:
             self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
-            self.lima.acq_nb_frames = 1
+            self.lima.acq_nb_frames = self.burst_n
 
         self.image_number = -1
         self.acqtime = acqtime
