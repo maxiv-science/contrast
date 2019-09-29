@@ -8,7 +8,7 @@ Sets up a some actual nanomax hardware.
 if __name__=='__main__':
 
     import contrast
-    from contrast.environment import env
+    from contrast.environment import env, register_shortcut
     from contrast.environment.data import SdmPathFixer
     from contrast.recorders import Hdf5Recorder
     from contrast.motors import DummyMotor, MotorMemorizer
@@ -119,3 +119,13 @@ if __name__=='__main__':
         d.active = False
     pilatus.active = True
 
+    # some handy shortcuts
+    register_shortcut('diode1in', 'mv diode1_x 0')
+    register_shortcut('diode1out', 'mv diode1_x -40000')
+    register_shortcut('diode2in', 'mv diode2_y 30000')
+    register_shortcut('diode2out', 'mv diode2_y 0')
+    register_shortcut('fsin', 'mv fastshutter_x 0')
+    register_shortcut('fsout', 'mv fastshutter_x -26000')
+    register_shortcut('watten', 'wm attenuator*')
+    register_shortcut('wsample', 'wm base* s?')
+    register_shortcut('wbl', 'wm ivu_* energy ssa_gap*')

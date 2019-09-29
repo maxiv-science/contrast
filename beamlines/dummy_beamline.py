@@ -10,7 +10,7 @@ if __name__=='__main__':
     from contrast.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
     from contrast.scans import *
     from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
-    from contrast.environment import env
+    from contrast.environment import env, register_shortcut
     from contrast.recorders import Hdf5Recorder
 
     import os
@@ -46,3 +46,8 @@ if __name__=='__main__':
     # this MotorMemorizer keeps track of motor user positions and
     # limits, and dumps this to file when they are changed.
     memorizer = MotorMemorizer(name='memorizer', filepath='/tmp/.dummy_beamline_motors')
+
+    # handy shortcuts
+    register_shortcut('wsample', 'wm samx samy')
+    register_shortcut('waaa', 'wa')
+    register_shortcut('zero_sample', 'umv samx 0 samy 0')

@@ -73,6 +73,17 @@ def macro(cls):
     ipython.register_magic_function(fcn, magic_name=name)
     return cls
 
+def register_shortcut(name, command):
+    """
+    Factory function which takes two strings name and command, and creates
+    a shortcut macro from the former to the latter.
+    """
+    def fcn(line):
+        runCommand(command)
+    fcn.__doc__ = "Shortcut: '%s'" % command
+    env.registeredMacros[name] = fcn.__doc__
+    ipython.register_magic_function(fcn, magic_name=name)
+
 class MacroSyntaxError(Exception):
     pass
 
