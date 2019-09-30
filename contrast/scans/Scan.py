@@ -56,6 +56,18 @@ class SoftwareScan(object):
         """
         return self.exposuretime * 5 + 5
 
+    def _before_scan(self):
+        """
+        Placeholder method for users to hook actions onto scan classes after import.
+        """
+        pass
+
+    def _after_scan(self):
+        """
+        Placeholder method for users to hook actions onto scan classes after import.
+        """
+        pass
+
     def _before_move(self):
         """
         Gets called for each step.
@@ -97,6 +109,7 @@ class SoftwareScan(object):
         This method does all the serious interaction with motors,
         detectors, and data recorders.
         """
+        self._before_scan()
         print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
         print(self.header_line())
         positions = self._generate_positions()
@@ -149,6 +162,9 @@ class SoftwareScan(object):
             group.stop()
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
 
+        # do any user-defined cleanup actions
+        self._after_scan()
+
         # tell the recorders that the scan is over
         for r in active_recorders():
             r.queue.put(RecorderFooter())
@@ -196,7 +212,20 @@ class Ct(object):
         """
         self.exposuretime = float(exp_time)
 
+    def _before_ct(self):
+        """
+        Placeholder method for users to hook actions onto scan classes after import.
+        """
+        pass
+
+    def _after_ct(self):
+        """
+        Placeholder method for users to hook actions onto scan classes after import.
+        """
+        pass
+
     def run(self):
+        self._before_ct()
         # find and prepare the detectors
         group = Detector.get_active_detectors()
         group.prepare(self.exposuretime, dataid=None)
@@ -218,3 +247,4 @@ class Ct(object):
             except AttributeError:
                 val_ = val
             print(key, ':', val_)
+        self._after_ct()

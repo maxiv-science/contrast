@@ -51,3 +51,14 @@ if __name__=='__main__':
     register_shortcut('wsample', 'wm samx samy')
     register_shortcut('waaa', 'wa')
     register_shortcut('zero_sample', 'umv samx 0 samy 0')
+
+    # define pre- and post-scan actions, per base class
+    def pre_scan_stuff(slf):
+        print("Maybe open a shutter here?")
+    def post_scan_stuff(slf):
+        print("Maybe close that shutter again?")
+
+    SoftwareScan._before_scan = pre_scan_stuff
+    SoftwareScan._after_scan = post_scan_stuff
+    Ct._before_ct = pre_scan_stuff
+    Ct._after_ct = post_scan_stuff
