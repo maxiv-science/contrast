@@ -45,6 +45,8 @@ class PlotRecorder(Recorder):
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         self._process_queue()
         self.periodic_check()
+        if self.quit:
+            self._close()
 
     def run(self):
         self.init()
