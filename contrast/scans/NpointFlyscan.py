@@ -52,6 +52,7 @@ class NpointFlyscan(Mesh):
             if not d.active:
                 inactive_buffs.append(d)
         self._set_det_active(inactive_buffs, True)
+        self.inactive_buffs = inactive_buffs
 
         # configure the SC device - roughly like this
         axismap = {'sz': 1, 'sx': 2, 'sy': 3}
@@ -70,10 +71,17 @@ class NpointFlyscan(Mesh):
         self.scancontrol.ConfigureStanford()
 
         # run the main part
-        super(NpointFlyscan, self).run()
+        try:
+            super(NpointFlyscan, self).run()
+        except:
+            self._cleanup()
+            raise
 
+        self._cleanup()
+
+    def _cleanup(self):
         # deactivate position buffer detectors that were not active before
-        self._set_det_active(inactive_buffs, False)
+        self._set_det_active(self.inactive_buffs, False)
 
         # set back the triggering state
         self._set_det_trig(False)
