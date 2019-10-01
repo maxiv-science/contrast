@@ -124,7 +124,8 @@ class SoftwareScan(object):
         # send a header to the recorders
         snap = env.snapshot.capture()
         for r in active_recorders():
-            r.queue.put(RecorderHeader(scannr=self.scannr, path=env.paths.directory, snapshot=snap))
+            r.queue.put(RecorderHeader(scannr=self.scannr, path=env.paths.directory,
+                                       snapshot=snap, description=self._command))
         try:
             for i, pos in enumerate(positions):
                 # move motors

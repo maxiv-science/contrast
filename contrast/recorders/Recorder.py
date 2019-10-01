@@ -19,8 +19,11 @@ class RecorderHeader(dict):
     Helper class to define a specific dict format to send recorders
     when a new scan starts.
     """
-    def __init__(self, scannr, path, snapshot=None):
-        super(RecorderHeader, self).__init__(scannr=scannr, path=path, snapshot=snapshot)
+    def __init__(self, scannr, path, snapshot=None, description=None):
+        super(RecorderHeader, self).__init__(scannr=scannr,
+                                             path=path,
+                                             snapshot=snapshot,
+                                             description=description)
 
 class RecorderFooter(dict):
     """
@@ -73,7 +76,7 @@ class Recorder(Gadget, Process):
     def act_on_header(self, dct):
         """
         Subclass this. Performs an action when a new scan is started.
-        The key-value pairs of dct are "path":path and "scannr":scannr.
+        The key-value pairs of dct are defined by RecorderHeader.
         """
         pass
 
