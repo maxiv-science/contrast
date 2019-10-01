@@ -162,6 +162,9 @@ class SoftwareScan(object):
         except KeyboardInterrupt:
             group.stop()
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
+        except:
+            self._after_scan()
+            raise
 
         # do any user-defined cleanup actions
         self._after_scan()
