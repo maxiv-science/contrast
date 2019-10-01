@@ -17,6 +17,33 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
 
+    def _safe_call_command(self, cmd, params=None):
+        """
+        Noticed that lima calls tend to time out for no apparent
+        reason, this works around it by trying again after timeouts
+        but raising all other errors.
+
+        It could be that in the future, this causes errors like
+        'Run prepareAcq before starting acquisition'
+        instead. That would be because startAcq takes effect but doesn't
+        return, in which case calling it again wouldn't be a good idea.
+        If that happens, wrap self.prepare, self.start, etc, in
+        error handling.
+        """
+        ok = False
+        while not ok:
+            try: 
+                self.lima.command_inout(cmd, params)
+                ok = True
+            except PyTango.DevFailed as e:
+                timeout = False
+                for e_ in e.args: 
+                    if 'timeout' in e_.desc.lower():
+                        print('*** Timeout during %s call to %s. Trying again...' % (cmd, self.lima_device_name))
+                        timeout = True
+                if not timeout:
+                    raise
+
     def _initialize_det(self):
         """
         Initialize detector-specific properties such as cutoff energies
@@ -35,7 +62,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
     def initialize(self):
         self.lima = PyTango.DeviceProxy(self.lima_device_name)
-        self.lima.set_timeout_millis(10000)
+        self.lima.set_timeout_millis(3000)
         self.det = PyTango.DeviceProxy(self.det_device_name)
 
         # Make sure the devices are reachable, or this will throw an error
@@ -61,8 +88,8 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         """
         # get out of the fault caused by trigger timeout
         if (self.lima.acq_status == 'Fault') and (self.lima.acq_status_fault_error == 'No error'):
-            self.lima.stopAcq()
-            self.lima.prepareAcq()
+            self._safe_call_command('stopAcq')
+            self._safe_call_command('prepareAcq')
 
         if self.busy():
             raise Exception('%s is busy!' % self.name)
@@ -103,11 +130,11 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         self.image_number += 1
-        self.lima.prepareAcq()
+        self._safe_call_command('prepareAcq')
         while self.busy():
             time.sleep(.005)
         if self.hw_trig:
-            self.lima.startAcq()
+            self._safe_call_command('startAcq')
 
     def start(self):
         """
@@ -117,12 +144,12 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        self.lima.startAcq()
+        self._safe_call_command('startAcq')
 
     def stop(self):
-        self.lima.stopAcq()
+        self._safe_call_command('stopAcq')
         self.stop_live()
-        self.lima.stopAcq()
+        self._safe_call_command('stopAcq')
 
     def busy(self):
         return not self.lima.ready_for_next_acq
