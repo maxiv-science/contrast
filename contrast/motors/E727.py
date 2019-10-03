@@ -32,7 +32,7 @@ class E727Motor(Motor):
 
     @property
     def dial_position(self):
-        return = self._server_position()
+        return self._server_position()
 
     @dial_position.setter
     def dial_position(self, pos):

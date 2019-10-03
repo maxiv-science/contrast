@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="contrast",
     version="0.0.1",
-    author="Alexander Björling",
+    author="Alexander Bjorling",
     author_email="alexander.bjorling@maxiv.lu.se",
     description="Light weight data acquisition framework for orchestrating beamline experiments.",
     long_description=long_description,
