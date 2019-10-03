@@ -26,6 +26,7 @@ class Hdf5Recorder(Recorder):
         else:
             self.fp = h5py.File(filename, 'w')
             self.act_on_data({'snapshot':dct['snapshot']}, base='entry/')
+            self.act_on_data({'description':dct['description']}, base='entry/')
 
     def act_on_data(self, dct, base='entry/measurement/'):
         """

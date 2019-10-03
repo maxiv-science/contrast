@@ -58,6 +58,7 @@ def macro(cls):
             print('Bad input. Usage:')
             print(cls.__doc__)
             return
+        obj._command = line
         obj.run()
     if cls.__doc__:
         fcn.__doc__ = cls.__doc__
