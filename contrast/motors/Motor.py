@@ -252,7 +252,7 @@ class Umv(Mv):
     Like mv, except it prints the positions while moving.
     """
     def _run_while_waiting(self):
-        l = ['%s: %.2f' % (m.name, m.user_position) for m in self.motors]
+        l = ['%s: %s' % (m.name, m._uformat%m.user_position) for m in self.motors]
         s = '; '.join(l)
         print(s + '\r', end='')
 
