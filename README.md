@@ -175,12 +175,23 @@ Out[12]: 3.14
 ```
 but in case you just want to execute a command without having to look up the python object at all, the output from the latest executed macro can always be found attached to the central `env` object.
 ```
-In [14]: from contrast.environment import runCommand
-In [15]: runCommand('wm gap')
+In [13]: wm gap
+motor     user pos.  limits           dial pos.  limits      
+-------------------------------------------------------------
+gap       3.14000    (None, None)     3.14       (None, None)
+
+In [14]: env.lastMacroResult
+Out[14]: 3.14
+```
+
+If you're not on the ipython console but in a script, this still works.
+```
+In [15]: from contrast.environment import runCommand
+In [16]: runCommand('wm gap')
 motor     user pos.  limits           dial pos.  limits
 -------------------------------------------------------------
 gap       3.14000    (None, None)     3.14       (None, None)
 
-In [16]: env.lastMacroResult
-Out[16]: 3.14
+In [17]: env.lastMacroResult
+Out[17]: 3.14
 ```
