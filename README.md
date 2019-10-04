@@ -159,3 +159,28 @@ In[8]: pilatus.lima.saving_mode
 Out[8]: 'MANUAL'
 ```
 
+## getting information out of macros
+Although direct access to python objects allows you to probe the state of Gadgets,
+```
+In [7]: gap.user_position
+Out[7]: 3.14
+```
+it is sometimes convenient to get results from macros. The `run()` method on macros can return usefult information. This can be done by manually constructing and running the macro object,
+```
+In [9]: from contrast.motors.Motor import Wm
+In [10]: obj = Wm(gap)
+In [11]: g = obj.run()
+In [12]: g
+Out[12]: 3.14
+```
+but in case you just want to execute a command without having to look up the python object at all, the output from the latest executed macro can always be found attached to the central `env` object.
+```
+In [14]: from contrast.environment import runCommand
+In [15]: runCommand('wm gap')
+motor     user pos.  limits           dial pos.  limits
+-------------------------------------------------------------
+gap       3.14000    (None, None)     3.14       (None, None)
+
+In [16]: env.lastMacroResult
+Out[16]: 3.14
+```

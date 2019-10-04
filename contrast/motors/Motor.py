@@ -282,7 +282,9 @@ class Wm(object):
         table = []
         for m in self.motors:
             try:
-                upos = m._uformat % m.user_position
+                upos = m.user_position
+                ret = upos
+                upos = m._uformat % upos
                 dpos = m._dformat % m.dial_position
                 if None in (m._uplim, m._lowlim):
                     ulims = '(None, None)'
@@ -294,6 +296,7 @@ class Wm(object):
             except:
                 print('Could not get position of %s' % m.name)
         print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
+        return ret
 
 @macro
 class Wa(Wm):

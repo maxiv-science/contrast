@@ -21,6 +21,7 @@ class Env(object):
     def __init__(self):
         self.registeredMacros = {}
         self.nextScanID = 0
+        self.lastMacroResult = None
         self.userLevel = 5
         self.paths = PathFixer()
         self.scheduler = DummyScheduler()
@@ -61,7 +62,7 @@ def macro(cls):
             print(cls.__doc__)
             return
         obj._command = '%s %s' % (name, line)
-        obj.run()
+        env.lastMacroResult = obj.run()
     if cls.__doc__:
         fcn.__doc__ = cls.__doc__
     else:
