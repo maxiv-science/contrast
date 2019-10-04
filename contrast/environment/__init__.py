@@ -50,6 +50,8 @@ def macro(cls):
     """
     if not ipython: return cls
 
+    name = cls.__name__.lower()
+
     def fcn(line):
         args = utils.str_to_args(line)
         try:
@@ -58,7 +60,7 @@ def macro(cls):
             print('Bad input. Usage:')
             print(cls.__doc__)
             return
-        obj._command = line
+        obj._command = '%s %s' % (name, line)
         obj.run()
     if cls.__doc__:
         fcn.__doc__ = cls.__doc__
@@ -69,7 +71,6 @@ def macro(cls):
     # sanity check
     assert cls.run.__call__
 
-    name = cls.__name__.lower()
     env.registeredMacros[name] = cls
     ipython.register_magic_function(fcn, magic_name=name)
     return cls
