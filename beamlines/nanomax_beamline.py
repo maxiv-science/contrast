@@ -16,6 +16,7 @@ if __name__=='__main__':
     from contrast.detectors.LC400Buffer import LC400Buffer
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
+    from contrast.motors.E727 import E727Motor
     from contrast.detectors.Pilatus import Pilatus
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
@@ -84,6 +85,10 @@ if __name__=='__main__':
     diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)
     diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)
     diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)
+
+    # KB mirror pitch piezos
+    m1fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=2, name='m1fpitch', userlevel=2, dial_limits=(0,30))
+    m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
