@@ -10,7 +10,7 @@ if __name__=='__main__':
     import contrast
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
-    from contrast.recorders import Hdf5Recorder
+    from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
     from contrast.detectors.LC400Buffer import LC400Buffer
@@ -131,6 +131,10 @@ if __name__=='__main__':
     # an hdf5 recorder
     h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
+
+    # a zmq recorder
+    zmqrec = StreamRecorder(name='zmqrec')
+    zmqrec.start()
 
     # add a memorizer so the motors keep their user positions and limits after a restart
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
