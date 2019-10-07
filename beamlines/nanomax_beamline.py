@@ -157,3 +157,4 @@ if __name__=='__main__':
     Ct._before_ct = pre_scan_stuff
     Ct._after_ct = post_scan_stuff
 
+    contrast.wisdom()

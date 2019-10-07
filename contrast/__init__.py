@@ -8,3 +8,11 @@ from . import scans
 from . import Gadget
 from . import utils
 from . import environment
+
+def wisdom():
+    import random
+    with open('contrast/abbreviations') as fp:
+        abbrvs = fp.read().strip().split('\n')
+    ind = random.randint(0, len(abbrvs)-1)
+    print('\nWelcome to contrast,\n')
+    print('   "%s"'%abbrvs[ind])
