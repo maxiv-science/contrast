@@ -114,4 +114,11 @@ class UserLevel(object):
     def run(self):
         pass
 
+@macro
+class Path(object):
+    """
+    Print the current data path.
+    """
+    def run(self):
+        print('Current data path:\n\n   ', env.paths.directory)
 
