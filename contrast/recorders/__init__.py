@@ -9,6 +9,11 @@ try:
 except ImportError:
     print("Note: Hdf5Recorder not available, probably because h5py is missing.")
 
+try:
+    from .StreamRecorder import StreamRecorder
+except ImportError:
+    print("Note: StreamRecorder not available, probably because zmq is missing.")
+
 import os, signal
 def kill_all_recorders():
     for r in Recorder.getinstances():

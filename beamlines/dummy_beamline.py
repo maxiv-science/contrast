@@ -11,7 +11,7 @@ if __name__=='__main__':
     from contrast.scans import *
     from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
     from contrast.environment import env, register_shortcut
-    from contrast.recorders import Hdf5Recorder
+    from contrast.recorders import Hdf5Recorder, StreamRecorder
 
     import os
 
@@ -42,6 +42,10 @@ if __name__=='__main__':
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
     h5rec.start()
+
+    # a zmq recorder
+    zmqrec = StreamRecorder(name='zmqrec')
+    zmqrec.start()
 
     # this MotorMemorizer keeps track of motor user positions and
     # limits, and dumps this to file when they are changed.
