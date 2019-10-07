@@ -1,6 +1,4 @@
 from . import Recorder, RecorderFooter
-from h5py import ExternalLink
-from ..detectors import Link
 import zmq
 
 class StreamRecorder(Recorder):
@@ -30,16 +28,16 @@ class StreamRecorder(Recorder):
     def act_on_header(self, dct):
         """
         Relay information.
+
+        Converts RecorderHeader to plain dict so the receiver doesn't
+        need the contrast library.
         """
-        # convert RecorderHeader to dict so the receiver doesn't need contrast.
         self.socket.send_pyobj(dict(dct))
 
     def act_on_data(self, dct, base='entry/measurement/'):
         """
         Relay information.
         """
-        # convert Link objects to their base class
-        dct = {k: ExternalLink(v.filename, v.path) if isinstance(v, Link) else v for k, v in dct.items()}
         self.socket.send_pyobj(dct)
 
     def act_on_footer(self):

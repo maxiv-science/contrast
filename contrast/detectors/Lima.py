@@ -1,10 +1,11 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector, Link
+from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
 
 import time
 import numpy as np
 import PyTango
 import os
+from h5py import ExternalLink
 
 class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     EXT_TRG_MODE = "EXTERNAL_TRIGGER_MULTI"
@@ -159,5 +160,4 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             return None
         else:
             absfile = os.path.join(self.lima.saving_directory, self.saving_filename)
-            return Link(absfile , self._hdf_path_base % self.image_number)
-
+            return ExternalLink(absfile , self._hdf_path_base % self.image_number)

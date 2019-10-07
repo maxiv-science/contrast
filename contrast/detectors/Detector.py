@@ -4,7 +4,6 @@ from .. import utils
 import numpy as np
 import time
 import threading
-from h5py import ExternalLink
 
 class Detector(Gadget):
     """
@@ -170,16 +169,6 @@ class DetectorGroup(object):
 
     def __len__(self):
         return self.detectors.__len__()
-
-class Link(ExternalLink):
-    """
-    Some detectors write their own data to disk. When that happens,
-    return data should be a link to where the actual data was saved.
-    This class represents such links and is a simple wrapper around
-    h5py.ExternalLink.
-    """
-    def __str__(self):
-        return '<link>'
 
 @macro
 class LsDet(object):

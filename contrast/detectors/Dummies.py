@@ -1,4 +1,4 @@
-from .Detector import Detector, SoftwareLiveDetector, Link
+from .Detector import Detector, SoftwareLiveDetector
 
 import time
 import numpy as np
@@ -66,7 +66,7 @@ class DummyWritingDetector(DummyDetector):
             datapath = 'entry/measurement/data'
             with h5py.File(filename, 'w') as fp:
                 fp[datapath] = np.arange(195*487).reshape((195, 487))
-            self.latest_link = Link(filename, datapath)
+            self.latest_link = h5py.ExternalLink(filename, datapath)
 
     def read(self):
         return self.latest_link
