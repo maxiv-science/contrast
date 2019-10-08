@@ -11,8 +11,8 @@ from . import environment
 
 def wisdom():
     import random
-    with open('contrast/abbreviations') as fp:
-        abbrvs = fp.read().strip().split('\n')
-    ind = random.randint(0, len(abbrvs)-1)
+    from .abbreviations import abbrv
+    ind = random.randint(0, len(abbrv)-1)
     print('\nWelcome to contrast,\n')
-    print('   "%s"'%abbrvs[ind])
+    print('   "%s"'%abbrv[ind])
+
