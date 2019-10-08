@@ -68,4 +68,4 @@ class M2shift(object):
         cmd = 'mvr m2fpitch %f' % (self.dist / -857.0)
         print("Moving the M2 fine pitch piezo like this:\n%s" % cmd)
         runCommand(cmd)
-
+        
