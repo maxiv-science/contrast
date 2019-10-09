@@ -9,6 +9,7 @@ class attenuate(object):
     Sets the attenuators to absorb X percent of the beam depending 
     on the current photon beam enegery.
     """
+
     def __init__(self, attenuate_to=None, how='safe', verbosity=3):
         self.attenuate_to = attenuate_to
         self.how          = how
@@ -78,53 +79,69 @@ class attenuate(object):
         self.T_tot = np.array(self.T_tot)
         self.T_tot = self.T_tot[np.argsort(self.T_tot[:,0])]
 
+    def run_command(self, command):
+        print('currently only printing:', command)                              #fixme: actually run the commands
+
     def run(self):
-        
         self.get_current_energy()
         self.calculate_transmission_of_1um()
         self.calculate_transmission_of_actual_foils()
         self.calcualte_possible_permutations()
         
-        # return the solution for the next smallest possible transmission
+        self.T_min = 1.*self.T_tot[0,0]
+
         try:
-            closest_result = list(filter(lambda i: i[0] <= 1-self.attenuate_to, 
-                                         self.T_tot))[-1]
-            # returns a list of 5 elements: achievable T and the 4 motor settings
-            #print(closest_result)
+            if self.attenuate_to == 'max':
+                print('choosing maximal possible attenuation')
+                self.T_choosen    = 1.*self.T_tot[0,:]
+                self.attenuate_to = 1.-self.T_choosen[0]
 
-            commands = []
-            if self.verbosity>=3 or self.how=='safe':
-                print('aimed for:')
-                print('    absorption  ', self.attenuate_to)
-                print('    transmission', 1-self.attenuate_to)
-                print('    at currently', self.photon_energy, 'eV')
-                print('can achieve:')
-                print('    absorption  ', str(1-closest_result[0])[:5])
-                print('    transmission', str(closest_result[0])[:5])
-                print('with motor setting:')
+            # is the choosen absorption value reachable?
+            elif  ((self.attenuate_to > 1) or 
+                 (round(1-self.T_min,3 ) <= self.attenuate_to)):
+                print('absorption of', self.attenuate_to, 
+                      'cannot be reached')
+                print('instead choosing maximum possible attenuation')
+                self.T_choosen = 1.*self.T_tot[0,:]
 
-                for i_carrier, i_pos in enumerate(closest_result[1:]):
-                    i_pos    = int(i_pos)
-
-                    command  = 'mv ' + str(self.carriers[i_carrier])
-                    command += ' ' + str(self.position[i_pos]).ljust(8)
-                    commands.append(command)
-                    line  = '    ' + command
-
-                    line += '#' + str(self.thickness[i_pos, i_carrier]).rjust(5)
-                    line += ' um of ' + str(self.elements[i_pos])
-                    print(line)
-
-            if self.how=='safe':
-                yes = ['yes', 'y', '1', 'true']
-                user_input =  input('Proceed to move motrors? [Y/n] ').lower()
-                if user_input in yes:
-                    for command in commands:
-                        print(command)                                              #fixme: actually run the commands
+            # which combination gives the closest result?
             else:
-                for command in commands:
-                        print(command)                                              #fixme: actually run the commands
+                self.T_choosen = list(filter(lambda i: i[0] <= 1-self.attenuate_to, 
+                                             self.T_tot))[-1]
+        except ValueError:
+            print("Oops!  That was no valid input")
 
-        except:
-            print('absorption of', self.attenuate_to, 
-                  'cannot be reached safely')
+        # get needed mv motor commands
+        commands = []
+        for i_carrier, i_pos in enumerate(self.T_choosen[1:]):
+            i_pos    = int(i_pos)
+            command  = 'mv ' + str(self.carriers[i_carrier])
+            command += ' ' + str(self.position[i_pos]).ljust(8)
+            commands.append(command)
+
+        # print an output
+        if self.verbosity>=3 or self.how=='safe':
+            print('aimed for:')
+            print('    absorption  ', self.attenuate_to)
+            print('    transmission', max(0, 1-self.attenuate_to))
+            print('    at currently', self.photon_energy, 'eV')
+            print('can achieve:')
+            print('    absorption  ', str(1-self.T_choosen[0]))
+            print('    transmission', str(self.T_choosen[0]))
+            print('with motor setting:')
+
+            for i_carrier, i_pos in enumerate(self.T_choosen[1:]):
+                i_pos = int(i_pos)
+                line  = '    ' + commands[i_carrier]
+                line += '#' + str(self.thickness[i_pos, i_carrier]).rjust(5)
+                line += ' um of ' + str(self.elements[i_pos])
+                print(line)
+
+        # move motors
+        if self.how=='safe':
+            yes = ['yes', 'y', '1', 'true']
+            user_input = input('Proceed to move motrors? [Y/n] ').lower()
+            if user_input in yes:
+                for command in commands: self.run_command(command)
+        else:                                      
+            for command in commands: self.run_command(command)
