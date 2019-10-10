@@ -21,7 +21,6 @@ from contrast.environment import macro, register_shortcut, runCommand
 
 #   ToDo
 #       - read actual photon energy
-#       - activate that motor move commands are actually run
 #       - avoid elements with absorption edges close to the current energy
 
 @macro
@@ -56,7 +55,7 @@ class attenuate(object):
     ############################################################################
 
     absorption_data = {}
-    base  = os.path.dirname(os.path.realpath(__file__))                     #fixme: might change
+    base  = os.path.dirname(os.path.realpath(__file__))
     base += '/attenuation/attenuation_1um_'
     for element in [x for x in elements if not(x==None)]:
         fpath = base + element + '.txt'
@@ -73,7 +72,8 @@ class attenuate(object):
         self.verbosity    = verbosity
 
     def get_current_energy(self):
-        self.photon_energy = 12000                                              #fixme: get energy information from the beamline
+        #runCommand('wm energy')
+        self.photon_energy = 12000
 
     def calculate_transmission_of_1um(self):
         # linear interpolation of T(E) in log log 
@@ -103,8 +103,8 @@ class attenuate(object):
         self.T_tot = self.T_tot[np.argsort(self.T_tot[:,0])]
 
     def run_command(self, command):
-        print('currently only printing:', command)                              #fixme: actually run the commands
-        #runCommand(command)
+        #print('    '+command)
+        runCommand(command)
 
     def run(self):
         self.get_current_energy()
