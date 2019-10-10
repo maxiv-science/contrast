@@ -22,7 +22,6 @@ from contrast.environment import macro, register_shortcut, runCommand
 #   ToDo
 #       - read actual photon energy
 #       - activate that motor move commands are actually run
-#       - check loading of non-code files
 #       - avoid elements with absorption edges close to the current energy
 
 @macro
