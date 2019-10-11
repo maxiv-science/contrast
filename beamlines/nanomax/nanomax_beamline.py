@@ -24,6 +24,7 @@ if __name__=='__main__':
     from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors import Detector
     from nanomax_beamline_macros import *
+    from macro_attenuate import *
     from contrast.scans import SoftwareScan, Ct
     import os
     
