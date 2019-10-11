@@ -106,7 +106,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             prefix = 'scan_%06d_%s' % (dataid, self.name)
             self.lima.saving_prefix = prefix
             self.saving_filename = prefix + self.lima.saving_suffix
-            if os.path.exists(self.saving_filename):
+            if os.path.exists(os.path.join(env.paths.directory, self.saving_filename)):
                 raise Exception('%s hdf5 file already exists' % self.name)
 
         if self.hw_trig:
