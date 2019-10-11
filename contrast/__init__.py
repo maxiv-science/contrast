@@ -12,9 +12,8 @@ from . import environment
 
 def wisdom():
     import random
-    dirpath = os.path.dirname(os.path.realpath(__file__))
-    with open(dirpath+'/abbreviations') as fp:
-        abbrvs = fp.read().strip().split('\n')
-    ind = random.randint(0, len(abbrvs)-1)
+    from .abbreviations import abbrv
+    ind = random.randint(0, len(abbrv)-1)
     print('\nWelcome to contrast,\n')
-    print('   "%s"'%abbrvs[ind])
+    print('   "%s"'%abbrv[ind])
+
