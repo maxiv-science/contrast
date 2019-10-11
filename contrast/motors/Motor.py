@@ -277,6 +277,7 @@ class Wm(object):
     """
     def __init__(self, *args):
         self.motors = args
+        self.out    = True
     def run(self, *args):
         titles = ['motor', 'user pos.', 'limits', 'dial pos.', 'limits']
         table = []
@@ -295,8 +296,19 @@ class Wm(object):
                 table.append([m.name, upos, ulims, dpos, dlims])
             except:
                 print('Could not get position of %s' % m.name)
-        print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
+        if self.out: 
+            print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
         return ret
+@macro
+class Wm_(Wm):
+    """
+    Print the positions of one or more motors but do not print any outPut.
+
+    wm_ <motor1> <motor2> ...
+    """
+    def __init__(self, *args):
+        self.motors = args
+        self.out = False
 
 @macro
 class Wa(Wm):
@@ -306,6 +318,7 @@ class Wa(Wm):
     def __init__(self):
         self.motors = [m for m in Motor.getinstances()
                        if m.userlevel <= env.userLevel]
+        self.out = True
 
 @macro
 class LsM(object):

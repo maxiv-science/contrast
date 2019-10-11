@@ -72,7 +72,7 @@ class attenuate(object):
         self.verbosity    = verbosity
 
     def get_current_energy(self):
-        runCommand('wm energy')
+        runCommand('wm_ energy')
         #print(env)
         self.photon_energy = env.lastMacroResult
 
