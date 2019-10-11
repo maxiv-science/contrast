@@ -17,7 +17,7 @@ imports:
 
 import os
 import numpy as np
-from contrast.environment import macro, register_shortcut, runCommand
+from contrast.environment import env, macro, register_shortcut, runCommand
 
 #   ToDo
 #       - read actual photon energy
@@ -72,8 +72,9 @@ class attenuate(object):
         self.verbosity    = verbosity
 
     def get_current_energy(self):
-        #runCommand('wm energy')
-        self.photon_energy = 12000
+        runCommand('wm energy')
+        #print(env)
+        self.photon_energy = env.lastMacroResult
 
     def calculate_transmission_of_1um(self):
         # linear interpolation of T(E) in log log 
