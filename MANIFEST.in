@@ -1,0 +1,3 @@
+include README.md
+include beamlines/dummy/attenuation/*.txt
+include beamlines/nanomax/attenuation/*.txt

@@ -23,6 +23,24 @@ if __name__=='__main__':
     samy = DummyMotor(name='samy')
     samy.dial_limits = (-5, 5)
 
+    energy = DummyMotor(name='energy')
+    energy.dial_limits   = (5000, 35000)
+    energy.velocity      = 50000
+    energy.dial_position = 10000
+
+    attenuator1_x = DummyMotor(name='attenuator1_x')
+    attenuator2_x = DummyMotor(name='attenuator2_x')
+    attenuator3_x = DummyMotor(name='attenuator3_x')
+    attenuator4_x = DummyMotor(name='attenuator4_x')
+    attenuator1_x.dial_limits = (-42000, 42000)
+    attenuator2_x.dial_limits = (-42000, 42000)
+    attenuator3_x.dial_limits = (-42000, 42000)
+    attenuator4_x.dial_limits = (-42000, 42000)
+    attenuator1_x.velocity = 20000
+    attenuator2_x.velocity = 20000
+    attenuator3_x.velocity = 20000
+    attenuator4_x.velocity = 20000
+
     gap = DummyMotor(name='gap', userlevel=5, user_format='%.5f')
 
     diff = ExamplePseudoMotor([samx, samy], name='diff')
