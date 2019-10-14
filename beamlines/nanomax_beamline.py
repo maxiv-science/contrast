@@ -138,7 +138,7 @@ if __name__=='__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start()
+#    zmqrec.start() # removed for now
 
     # add a memorizer so the motors keep their user positions and limits after a restart
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
