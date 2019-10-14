@@ -102,6 +102,10 @@ if __name__=='__main__':
     oam_z = TangoMotor(device='b303a-e02/dia/om-01-z', name='oam_z', userlevel=4)
     oam_zoom = TangoMotor(device='b303a-e02/dia/om-01-zoom', name='oam_zoom', userlevel=1)
 
+    # beam stop motors
+    bs_x = TangoMotor(device='B303A-E02/DIA/SAMS-01-X', name='bs_x', userlevel=4)
+    bs_y = TangoMotor(device='B303A-E02/DIA/SAMS-01-Y', name='bs_y', userlevel=4)
+
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
 
