@@ -7,7 +7,7 @@ import PyTango
 import time
 from . import Motor
 
-class KukaManager(object):
+class KukaRobot(object):
     """
     Managing class which coordinates movements of the robot
     in polar coordinates. The manager's role is to avoid
@@ -21,6 +21,9 @@ class KukaManager(object):
             KukaMotor(manager=self, name=names[1]),
             KukaMotor(manager=self, name=names[2]),]
         self.last_move = 0.0
+
+    def __iter__(self):
+        return self.polar_motors.__iter__()
 
     def motor2index(self, motor):
         return self.polar_motors.index(motor)
@@ -59,7 +62,7 @@ class KukaManager(object):
 
 class KukaMotor(Motor):
     """
-    Single motor as exposed by the KukaManager class above.
+    Single motor as exposed by the KukaRobot class above.
     """
 
     def __init__(self, manager, **kwargs):
