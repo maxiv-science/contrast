@@ -17,6 +17,7 @@ if __name__=='__main__':
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.E727 import E727Motor
+    from contrast.motors.KukaMotor import KukaManager
     from contrast.detectors.Pilatus import Pilatus
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
@@ -90,6 +91,10 @@ if __name__=='__main__':
     # KB mirror pitch piezos
     m1fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=2, name='m1fpitch', userlevel=2, dial_limits=(0,30))
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
+
+    # Robot
+    kuka = KukaManager('B303-EH2/CTL/DM-02-ROBOT')
+    gamma, delta, radius = kuka.polar_motors
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
