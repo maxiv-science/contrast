@@ -42,36 +42,36 @@ class NpointFlyscan(Mesh):
             print('%s the position buffer detector %s' % (verb, d.name))
 
     def run(self):
-        # start by setting up triggering on all compatible detectors
-        self._set_det_trig(True)
-
-        # As a convenience, make sure any LC400Buffer detectors are active
-        from ..detectors.LC400Buffer import LC400Buffer
-        inactive_buffs = []
-        for d in LC400Buffer.getinstances():
-            if not d.active:
-                inactive_buffs.append(d)
-        self._set_det_active(inactive_buffs, True)
-        self.inactive_buffs = inactive_buffs
-
-        # configure the SC device - roughly like this
-        axismap = {'sz': 1, 'sx': 2, 'sy': 3}
-        fast_axis = axismap[self.fastmotor.name]
-        import PyTango
-        self.scancontrol = PyTango.DeviceProxy("B303A/CTL/FLYSCAN-02")
-        ### note: these Tango attributes might have different names, check in Jive
-        self.scancontrol.write_attribute("FlyScanMotorStartPosition", self.fastlimits[0])
-        self.scancontrol.write_attribute("FlyScanMotorEndPosition", self.fastlimits[1])
-        self.scancontrol.write_attribute("NumberOfIntervals", self.fastintervals)
-        self.scancontrol.write_attribute("GateWidth", self.exptime)
-        self.scancontrol.write_attribute("GateLatency", self.latency)
-        self.scancontrol.write_attribute("FlyScanMotorAxis", self.fastmotor.axis)
-        self.scancontrol.ConfigureLC400Motion()
-        self.scancontrol.ConfigureLC400Recorder()
-        self.scancontrol.ConfigureStanford()
-
-        # run the main part
         try:
+            # start by setting up triggering on all compatible detectors
+            self._set_det_trig(True)
+
+            # As a convenience, make sure any LC400Buffer detectors are active
+            from ..detectors.LC400Buffer import LC400Buffer
+            inactive_buffs = []
+            for d in LC400Buffer.getinstances():
+                if not d.active:
+                    inactive_buffs.append(d)
+            self._set_det_active(inactive_buffs, True)
+            self.inactive_buffs = inactive_buffs
+
+            # configure the SC device - roughly like this
+            axismap = {'sz': 1, 'sx': 2, 'sy': 3}
+            fast_axis = axismap[self.fastmotor.name]
+            import PyTango
+            self.scancontrol = PyTango.DeviceProxy("B303A/CTL/FLYSCAN-02")
+            ### note: these Tango attributes might have different names, check in Jive
+            self.scancontrol.write_attribute("FlyScanMotorStartPosition", self.fastlimits[0])
+            self.scancontrol.write_attribute("FlyScanMotorEndPosition", self.fastlimits[1])
+            self.scancontrol.write_attribute("NumberOfIntervals", self.fastintervals)
+            self.scancontrol.write_attribute("GateWidth", self.exptime)
+            self.scancontrol.write_attribute("GateLatency", self.latency)
+            self.scancontrol.write_attribute("FlyScanMotorAxis", self.fastmotor.axis)
+            self.scancontrol.ConfigureLC400Motion()
+            self.scancontrol.ConfigureLC400Recorder()
+            self.scancontrol.ConfigureStanford()
+
+            # run the main part
             super(NpointFlyscan, self).run()
         except:
             self._cleanup()
