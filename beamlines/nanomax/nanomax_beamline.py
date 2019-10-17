@@ -17,6 +17,7 @@ if __name__=='__main__':
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.E727 import E727Motor
+    from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
@@ -91,6 +92,9 @@ if __name__=='__main__':
     m1fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=2, name='m1fpitch', userlevel=2, dial_limits=(0,30))
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
+    # Robot
+    gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
     ssa_gapy = TangoMotor(device='B303A-O/opt/SLIT-01-GAPYPM', name='ssa_gapy', userlevel=2)
@@ -102,6 +106,10 @@ if __name__=='__main__':
     oam_y = TangoMotor(device='b303a-e02/dia/om-01-y', name='oam_y', userlevel=4)
     oam_z = TangoMotor(device='b303a-e02/dia/om-01-z', name='oam_z', userlevel=4)
     oam_zoom = TangoMotor(device='b303a-e02/dia/om-01-zoom', name='oam_zoom', userlevel=1)
+
+    # beam stop motors
+    bs_x = TangoMotor(device='B303A-E02/DIA/SAMS-01-X', name='bs_x', userlevel=4)
+    bs_y = TangoMotor(device='B303A-E02/DIA/SAMS-01-Y', name='bs_y', userlevel=4)
 
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
@@ -135,7 +143,7 @@ if __name__=='__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start()
+#    zmqrec.start() # removed for now
 
     # add a memorizer so the motors keep their user positions and limits after a restart
     # note that this will overwrite the dial positions set above! delete the file to generate it again.

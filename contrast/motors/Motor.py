@@ -296,6 +296,7 @@ class Wm(object):
                 table.append([m.name, upos, ulims, dpos, dlims])
             except:
                 print('Could not get position of %s' % m.name)
+                ret = None
         if self.out: 
             print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
         return ret
