@@ -24,6 +24,7 @@ if __name__=='__main__':
     from contrast.detectors.Ni6602 import Ni6602CounterCard
     from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors import Detector
+    from contrast.detectors.DG645 import StanfordTriggerSource
     from nanomax_beamline_macros import *
     from macro_attenuate import *
     from contrast.scans import SoftwareScan, Ct
@@ -117,6 +118,9 @@ if __name__=='__main__':
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=2)
     dummy2 = DummyMotor(name='dummy2', userlevel=2)
+
+    # The delay generator as a software source for hardware triggers
+    stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01') 
 
     # detectors
     pilatus = Pilatus(name='pilatus', 
