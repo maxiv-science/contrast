@@ -8,13 +8,13 @@ class StanfordTriggerSource(TriggerSource):
     time.
     """
     def __init__(self, name=None, device_name=None):
-        super(StanfordTriggerSource, self).__init__(name=name)
         self.device_name = device_name
+        super(StanfordTriggerSource, self).__init__(name=name)
 
     def initialize(self):
         self.proxy = PyTango.DeviceProxy(self.device_name)
 
-    def prepare(self, acqtime):
+    def prepare(self, acqtime, dataid):
         self.proxy.TriggerSource = 5
         self.proxy.BurstMode = False
         self.proxy.OutputABWidth = acqtime
@@ -28,3 +28,4 @@ class StanfordTriggerSource(TriggerSource):
 
     def start(self):
         self.proxy.TriggerSingle()
+
