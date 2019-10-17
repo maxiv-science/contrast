@@ -21,12 +21,12 @@ class Detector(Gadget):
             print('Failed to initialize %s. Run "%s.initialize()" to try again and perhaps learn more.' % (self.name, self.name))
 
     @classmethod
-    def get_active_detectors(cls):
+    def get_active(cls):
         """
         Returns a DetectorGroup instance containing the currently active
         detectors.
         """
-        return DetectorGroup(*[d for d in cls.getinstances() if d.active])
+        return DetectorGroup(*[d for d in cls.getinstances() if (d.active and not isinstance(d, TriggerSource))])
     
     def prepare(self, acqtime, dataid):
         """
@@ -68,6 +68,29 @@ class Detector(Gadget):
 
     def read(self):
         raise NotImplementedError
+
+class TriggerSource(Detector):
+    """
+    A TriggerSource is a device which follows the Detector API, but
+    which does not produce data. It can be seen as a lightweight
+    Detector subclass, where some of the methods are not mandatory.
+    """
+    @classmethod
+    def get_active(cls):
+        """
+        Returns a DetectorGroup instance containing the currently active
+        detectors.
+        """
+        return DetectorGroup(*[d for d in cls.getinstances() if d.active])
+
+    def stop(self):
+        pass
+
+    def busy(self):
+        pass
+
+    def read(self):
+        pass
 
 class LiveDetector(object):
     """
@@ -170,6 +193,9 @@ class DetectorGroup(object):
     def __len__(self):
         return self.detectors.__len__()
 
+    def __add__(self, other):
+        return DetectorGroup(*self.detectors, *other.detectors)
+
 @macro
 class LsDet(object):
     """
@@ -178,6 +204,27 @@ class LsDet(object):
     def run(self):
         dct = {}
         for d in Detector.getinstances():
+            if isinstance(d, TriggerSource):
+                continue
+            name = ('* ' + d.name) if d.active else ('  ' + d.name)
+            try:
+            # rough sense of how each detector is doing
+                if d.busy():
+                    name += ' (busy)'
+            except:
+                name += '  (not responding)'
+
+            dct[name] = d.__class__
+        print(utils.dict_to_table(dct, titles=('  name', 'class')))
+
+@macro
+class LsTrig(object):
+    """
+    List available trigger sources.
+    """
+    def run(self):
+        dct = {}
+        for d in TriggerSource.getinstances():
             name = ('* ' + d.name) if d.active else ('  ' + d.name)
             try:
             # rough sense of how each detector is doing
@@ -205,7 +252,7 @@ class StartLive(object):
             self.exptime = .1
             self.dets = args
         if not self.dets:
-            self.dets = [d for d in Detector.get_active_detectors() if isinstance(d, LiveDetector)]
+            self.dets = [d for d in Detector.get_active() if isinstance(d, LiveDetector)]
 
     def run(self):
         for d in self.dets:
@@ -227,7 +274,7 @@ class StopLive(object):
         if args:
             self.dets = args
         else:
-            self.dets = [d for d in Detector.get_active_detectors() if isinstance(d, LiveDetector)]
+            self.dets = [d for d in Detector.get_active() if isinstance(d, LiveDetector)]
 
     def run(self):
         for d in self.dets:

@@ -30,7 +30,7 @@ class NpointFlyscan(Mesh):
             raise
 
     def _set_det_trig(self, on):
-        for d in Detector.get_active_detectors():
+        for d in Detector.get_active():
             if isinstance(d, TriggeredDetector):
                 d.hw_trig = on
                 d.hw_trig_n = self.fastintervals + 1
@@ -92,7 +92,7 @@ class NpointFlyscan(Mesh):
 
     def _while_acquiring(self):
         s = ''
-        for d in Detector.get_active_detectors():
+        for d in Detector.get_active():
             if d.name in ('xspress3', 'pilatus', 'pilatus1m', 'merlin'):
                 s += ('%s: %u, ' % (d.name, d.lima.last_image_acquired))
         print(s + '\r', end='')
