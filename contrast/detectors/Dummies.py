@@ -1,4 +1,4 @@
-from .Detector import Detector, SoftwareLiveDetector
+from .Detector import Detector, SoftwareLiveDetector, TriggerSource
 
 import time
 import numpy as np
@@ -84,3 +84,7 @@ class DummyDictDetector(DummyDetector):
             self._started = time.time()
         except AttributeError:
             raise Exception('Detector not prepared!')
+
+class DummyTriggerSource(TriggerSource):
+    def initialize(self):
+        pass

@@ -2,7 +2,7 @@ import time
 import numpy as np
 from ..environment import macro, env
 from ..recorders import active_recorders, RecorderHeader, RecorderFooter
-from ..detectors import Detector
+from ..detectors import Detector, TriggerSource
 
 class SoftwareScan(object):
     """
@@ -25,15 +25,15 @@ class SoftwareScan(object):
 
     def header_line(self):
         motor_names = [m.name for m in self.motors]
-        group = Detector.get_active_detectors()
-        det_names = [d.name for d in group]
-        header = '#       ' + len(motor_names) * '%-8s' + len(group) * '%-14s' + 'dt'
-        line = '-' * (8 + len(motor_names) * 8 + len(group) * 16 + 8)
+        det_group = Detector.get_active()
+        det_names = [d.name for d in det_group]
+        header = '#       ' + len(motor_names) * '%-8s' + len(det_group) * '%-14s' + 'dt'
+        line = '-' * (8 + len(motor_names) * 8 + len(det_group) * 16 + 8)
         return ('\n' + header + '\n' + line) % tuple(motor_names + det_names)
 
     def table_line(self):
-        group = Detector.get_active_detectors()
-        return '%-8d' + len(self.motors) * '%-8.2f' + len(group) * '%-12s  ' + '%-8.2f'
+        det_group = Detector.get_active()
+        return '%-8d' + len(self.motors) * '%-8.2f' + len(det_group) * '%-12s  ' + '%-8.2f'
 
     def format_number(self, nr):
         if isinstance(nr, dict):
@@ -115,9 +115,11 @@ class SoftwareScan(object):
         positions = self._generate_positions()
         table_line = self.table_line()
         # find and prepare the detectors
-        group = Detector.get_active_detectors()
+        det_group = Detector.get_active()
+        trg_group = TriggerSource.get_active()
+        group = det_group + trg_group
         if group.busy():
-            print('Detectors are busy: %s' % (', '.join([d.name for d in group if d.busy()])))
+            print('These gadgets are busy: %s' % (', '.join([d.name for d in group if d.busy()])))
             return
         group.prepare(self.exposuretime, self.scannr)
         t0 = time.time()
@@ -140,13 +142,13 @@ class SoftwareScan(object):
                 # start detectors
                 self._before_start()
                 group.start()
-                while group.busy():
+                while det_group.busy():
                     self._while_acquiring()
                     time.sleep(.01)
                 # read detectors and motors
                 dt = time.time() - t0
                 dct = {'dt': dt}
-                for d in group:
+                for d in det_group:
                     dct[d.name] = d.read()
                 for m in self.motors:
                     dct[m.name] = m.position()
@@ -156,7 +158,7 @@ class SoftwareScan(object):
                 # print spec-style info
                 print(table_line % tuple([i] + 
                       [m.position() for m in self.motors]
-                      + [self.format_number(dct[d.name]) for d in group] 
+                      + [self.format_number(dct[d.name]) for d in det_group]
                       + [dt]))
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
         except KeyboardInterrupt:
@@ -231,7 +233,8 @@ class Ct(object):
     def run(self):
         self._before_ct()
         # find and prepare the detectors
-        group = Detector.get_active_detectors()
+        det_group = Detector.get_active()
+        group = det_group + TriggerSource.get_active()
         group.prepare(self.exposuretime, dataid=None)
         # arm and start detectors
         group.arm()
@@ -242,7 +245,7 @@ class Ct(object):
             time.sleep(.01)
         # read detectors and motors
         dct = {}
-        for d in group:
+        for d in det_group:
             dct[d.name] = d.read()
         # print results
         for key, val in dct.items():
