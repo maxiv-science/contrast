@@ -47,7 +47,7 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
             time.sleep(.1)
             self.dev.init()
 
-    def prepare(self, acqtime, dataid):
+    def prepare(self, acqtime, dataid, n_starts):
         """
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.

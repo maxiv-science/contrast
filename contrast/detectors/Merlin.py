@@ -24,9 +24,9 @@ class Merlin(LimaDetector):
         self.det.write_attribute('operatingEnergy', value)
 
     def prepare(self, *args, **kwargs):
-        super(Merlin, self).prepare(*args, **kwargs)
         if self.hw_trig:
             self.det.write_attribute('triggerStartType', "RISING_EDGE_TTL")
         else:
             self.det.write_attribute('triggerStartType', "INTERNAL")
+        super(Merlin, self).prepare(*args, **kwargs)
 

@@ -21,6 +21,7 @@ class SoftwareScan(object):
         self.motors = []   # list of motors, to be filled by subclass
         self.exposuretime = exposuretime
         self.scannr = env.nextScanID
+        self.n_positions = None
         env.nextScanID += 1
 
     def header_line(self):
@@ -121,7 +122,7 @@ class SoftwareScan(object):
         if group.busy():
             print('These gadgets are busy: %s' % (', '.join([d.name for d in group if d.busy()])))
             return
-        group.prepare(self.exposuretime, self.scannr)
+        group.prepare(self.exposuretime, self.scannr, self.n_positions)
         t0 = time.time()
         # send a header to the recorders
         snap = env.snapshot.capture()
@@ -235,11 +236,9 @@ class Ct(object):
         # find and prepare the detectors
         det_group = Detector.get_active()
         group = det_group + TriggerSource.get_active()
-        group.prepare(self.exposuretime, dataid=None)
+        group.prepare(self.exposuretime, dataid=None, n_starts=1)
         # arm and start detectors
         group.arm()
-        while group.busy():
-            time.sleep(.01)
         group.start()
         while group.busy():
             time.sleep(.01)

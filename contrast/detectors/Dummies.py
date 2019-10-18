@@ -48,8 +48,8 @@ class Dummy1dDetector(DummyDetector):
             raise Exception('Detector not prepared!')
 
 class DummyWritingDetector(DummyDetector):
-    def prepare(self, acqtime, dataid):
-        super(DummyWritingDetector, self).prepare(acqtime, dataid)
+    def prepare(self, acqtime, dataid, n_starts):
+        super(DummyWritingDetector, self).prepare(acqtime, dataid, n_starts)
         if dataid is None:
             self.filename_base = None
         else:
