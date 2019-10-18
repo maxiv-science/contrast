@@ -26,6 +26,7 @@ if __name__=='__main__':
     from contrast.detectors import Detector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from nanomax_beamline_macros import *
+    from NpointFlyscan import NpointFlyscan
     from macro_attenuate import *
     from contrast.scans import SoftwareScan, Ct
     import os

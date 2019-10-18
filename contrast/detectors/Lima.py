@@ -1,5 +1,6 @@
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
+from ..environment import macro
 
 import time
 import numpy as np
@@ -209,4 +210,29 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                 return ExternalLink(absfile , self._hdf_path_base % 0)
             else:
                 return ExternalLink(absfile , self._hdf_path_base % self.arm_number)
+
+@macro
+class Lima_hybrid_on(object):
+    """
+    Turn on 'hybrid triggering' for the specified Lima device,
+    or for all Lima devices if nothing is specified.
+    """
+    VAL = True
+    def __init__(self, *args):
+        if args:
+            self.dets = args
+        else:
+            self.dets = Detector.getinstances()
+
+    def run(self):
+        for d in self.dets:
+            d.hybrid_mode = self.VAL
+
+@macro
+class Lima_hybrid_off(Lima_hybrid_on):
+    """
+    Turn on 'hybrid triggering' for the specified Lima device,
+    or for all Lima devices if nothing is specified.
+    """
+    VAL = False
 

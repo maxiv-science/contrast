@@ -1,7 +1,7 @@
-from .Mesh import Mesh
-from ..motors import all_are_motors
-from ..environment import macro, MacroSyntaxError
-from ..detectors import Detector, TriggeredDetector
+from contrast.scans.Mesh import Mesh
+from contrast.motors import all_are_motors
+from contrast.environment import macro, MacroSyntaxError, runCommand
+from contrast.detectors import Detector, TriggeredDetector
 
 @macro
 class NpointFlyscan(Mesh):
@@ -35,25 +35,15 @@ class NpointFlyscan(Mesh):
                 d.hw_trig = on
                 d.hw_trig_n = self.fastintervals + 1
 
-    def _set_det_active(self, dets, on):
-        for d in dets:
-            d.active = on
-            verb = {True: 'Activated', False: 'Deactivated'}[on]
-            print('%s the position buffer detector %s' % (verb, d.name))
-
     def run(self):
         try:
             # start by setting up triggering on all compatible detectors
             self._set_det_trig(True)
 
-            # As a convenience, make sure any LC400Buffer detectors are active
-            from ..detectors.LC400Buffer import LC400Buffer
-            inactive_buffs = []
-            for d in LC400Buffer.getinstances():
-                if not d.active:
-                    inactive_buffs.append(d)
-            self._set_det_active(inactive_buffs, True)
-            self.inactive_buffs = inactive_buffs
+            # Activate the LC400 buffer and deactivate the stanford box
+            runCommand('deactivate stanford')
+            runCommand('activate npoint_buff')
+            runCommand('lima_hybrid_off')
 
             # configure the SC device - roughly like this
             axismap = {'sz': 1, 'sx': 2, 'sy': 3}
@@ -80,8 +70,8 @@ class NpointFlyscan(Mesh):
         self._cleanup()
 
     def _cleanup(self):
-        # deactivate position buffer detectors that were not active before
-        self._set_det_active(self.inactive_buffs, False)
+        # deactivate position buffer
+        runCommand('deactivate npoint_buff')
 
         # set back the triggering state
         self._set_det_trig(False)
