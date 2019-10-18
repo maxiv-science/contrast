@@ -133,7 +133,7 @@ class SoftwareLiveDetector(LiveDetector):
 
     def _start(self, acqtime):
         self.stopped = False
-        self.prepare(acqtime, None)
+        self.prepare(acqtime, None, 1)
         while not self.stopped:
             self.arm()
             self.start()
