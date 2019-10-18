@@ -14,7 +14,7 @@ class StanfordTriggerSource(TriggerSource):
     def initialize(self):
         self.proxy = PyTango.DeviceProxy(self.device_name)
 
-    def prepare(self, acqtime, dataid):
+    def prepare(self, acqtime, *args, **kwargs):
         self.proxy.TriggerSource = 5
         self.proxy.BurstMode = False
         self.proxy.OutputABWidth = acqtime
