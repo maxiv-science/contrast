@@ -142,6 +142,8 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self.lima.acq_nb_frames = self.burst_n
 
         if self.hybrid_mode:
+            if self.burst_n != 1:
+                raise Exception('burst_n > 1 and hybrid mode makes no sense')
             self.lima.acq_trigger_mode = self.EXT_TRG_MODE
             self.lima.acq_nb_frames = n_starts
 
