@@ -11,7 +11,6 @@ Welcome to Contrast's documentation!
    :caption: Contents:
 
 
-
 Indices and tables
 ==================
 

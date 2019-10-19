@@ -28,6 +28,7 @@ author = 'Alexander Björling'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+        'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -37,6 +38,8 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+autodoc_mock_imports = ['PyTango']
 
 
 # -- Options for HTML output -------------------------------------------------
