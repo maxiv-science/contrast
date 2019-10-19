@@ -1,10 +1,11 @@
-contrast package
-================
+API reference
+=============
 
 Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 3
 
    contrast.detectors
    contrast.environment
