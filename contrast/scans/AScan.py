@@ -25,6 +25,7 @@ class AScan(SoftwareScan):
             for i in range(int((len(args) - 2) / 3)):
                 self.motors.append(args[3*i])
                 self.limits.append([float(m) for m in args[3*i+1:3*i+3]])
+            self.n_positions = self.intervals + 1
             assert all_are_motors(self.motors)
             assert (len(args) - 2) % 3 == 0
         except:

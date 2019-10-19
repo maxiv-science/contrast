@@ -24,14 +24,14 @@ class SpiralScan(DScan):
             SoftwareScan.__init__(self, float(exptime))
             self.motors = [m1, m2]
             self.stepsize = float(stepsize)
-            self.npos = int(npos)
+            self.n_positions = int(npos)
             assert all_are_motors(self.motors)
         except:
             raise MacroSyntaxError
 
     def _generate_positions(self):
         starting = [m.position() for m in self.motors]
-        for t in range(self.npos):
+        for t in range(self.n_positions):
             A = self.stepsize * np.sqrt(t/np.pi)
             B = np.sqrt(4*np.pi*t)
             yield {self.motors[0].name: starting[0] + A * np.cos(B),

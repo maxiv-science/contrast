@@ -1,5 +1,6 @@
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
+from ..environment import macro
 
 import time
 import numpy as np
@@ -11,8 +12,17 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
     EXT_TRG_MODE = "EXTERNAL_TRIGGER_MULTI"
 
     def __init__(self, name=None, lima_device=None, det_device=None):
+        """
+        Lima is sometimes very slow to finish writing data, which is why this
+        gadget has a 'hybrid mode', where Lima is started only once, and sequential
+        arm/start calls to this gadget only increment counters. The busy state
+        is set based on Lima's last_image_acquired compared to these counters,
+        and does not reflect the state of the Lima device.
+        """
         self.lima_device_name = lima_device
         self.det_device_name = det_device
+        self._hybrid_mode = False
+        self.n_starts = -1
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
@@ -54,6 +64,15 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         pass
 
     @property
+    def hybrid_mode(self):
+        return self._hybrid_mode
+
+    @hybrid_mode.setter
+    def hybrid_mode(self, val):
+        self._hybrid_mode = bool(val)
+        self.arm_number = -1
+
+    @property
     def energy(self):
         return -1
 
@@ -82,7 +101,10 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         self.lima.latency_time = 0.0
         self._initialize_det()
 
-    def prepare(self, acqtime, dataid):
+        self.hybrid_mode = False
+        self.arm_number = -1
+
+    def prepare(self, acqtime, dataid, n_starts):
         """
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
@@ -91,6 +113,9 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         if (self.lima.acq_status == 'Fault') and (self.lima.acq_status_fault_error == 'No error'):
             self._safe_call_command('stopAcq')
             self._safe_call_command('prepareAcq')
+
+        self.arm_number = -1
+        self.n_starts = n_starts
 
         if self.busy():
             raise Exception('%s is busy!' % self.name)
@@ -116,9 +141,19 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
             self.lima.acq_nb_frames = self.burst_n
 
-        self.image_number = -1
+        if self.hybrid_mode:
+            if self.burst_n != 1:
+                raise Exception('burst_n > 1 and hybrid mode makes no sense')
+            self.lima.acq_trigger_mode = self.EXT_TRG_MODE
+            self.lima.acq_nb_frames = n_starts
+
         self.acqtime = acqtime
         self.lima.acq_expo_time = acqtime
+
+        if self.hybrid_mode:
+            time.sleep(.1)
+            self._safe_call_command('prepareAcq')
+            self._safe_call_command('startAcq')
 
         while self.busy():
             print(self.name, 'slept 5 ms while waiting for prepare')
@@ -128,11 +163,13 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         """
         Start the detector if hardware triggered, just prepareAcq otherwise.
         """
+        self.arm_number += 1
+        if self.hybrid_mode:
+            return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        self.image_number += 1
         self._safe_call_command('prepareAcq')
-        while self.busy():
+        while not self.lima.ready_for_next_acq:
             time.sleep(.005)
         if self.hw_trig:
             self._safe_call_command('startAcq')
@@ -141,11 +178,14 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         """
         Start acquisition when software triggered.
         """
-        if self.hw_trig:
+        if self.hw_trig or self.hybrid_mode:
             return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        self._safe_call_command('startAcq')
+        if self.hybrid_mode and self.lima.last_image_acquired > -1:
+            return
+        else:
+            self._safe_call_command('startAcq')
 
     def stop(self):
         self._safe_call_command('stopAcq')
@@ -153,11 +193,48 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         self._safe_call_command('stopAcq')
 
     def busy(self):
-        return not self.lima.ready_for_next_acq
+        if self.hybrid_mode: 
+            if self.arm_number + 1 < self.n_starts:
+                return self.arm_number > self.lima.last_image_acquired
+            elif not self.lima.ready_for_next_acq:
+                print('%s waiting for Lima...' % self.name)
+                time.sleep(.5)
+                return True
+        else:
+            return not self.lima.ready_for_next_acq
 
     def read(self):
         if self.saving_filename is None:
             return None
         else:
             absfile = os.path.join(self.lima.saving_directory, self.saving_filename)
-            return ExternalLink(absfile , self._hdf_path_base % self.image_number)
+            if self.hybrid_mode:
+                return ExternalLink(absfile , self._hdf_path_base % 0)
+            else:
+                return ExternalLink(absfile , self._hdf_path_base % self.arm_number)
+
+@macro
+class Lima_hybrid_on(object):
+    """
+    Turn on 'hybrid triggering' for the specified Lima device,
+    or for all Lima devices if nothing is specified.
+    """
+    VAL = True
+    def __init__(self, *args):
+        if args:
+            self.dets = args
+        else:
+            self.dets = Detector.getinstances()
+
+    def run(self):
+        for d in self.dets:
+            d.hybrid_mode = self.VAL
+
+@macro
+class Lima_hybrid_off(Lima_hybrid_on):
+    """
+    Turn on 'hybrid triggering' for the specified Lima device,
+    or for all Lima devices if nothing is specified.
+    """
+    VAL = False
+

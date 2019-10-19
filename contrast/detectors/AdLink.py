@@ -22,7 +22,7 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
         self.dev.write_attribute("NumOfDisplayableTriggers", -1)
         self.dev.write_attribute("ChannelSamplesPerTrigger", 100)
 
-    def prepare(self, acqtime, dataid):
+    def prepare(self, acqtime, dataid, n_starts):
         """
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.

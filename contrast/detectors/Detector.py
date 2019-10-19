@@ -28,13 +28,15 @@ class Detector(Gadget):
         """
         return DetectorGroup(*[d for d in cls.getinstances() if (d.active and not isinstance(d, TriggerSource))])
     
-    def prepare(self, acqtime, dataid):
+    def prepare(self, acqtime, dataid, n_starts=None):
         """
         Run before acquisition, once per scan.
-            acqtime: exposure time for which to prepare
-            dataid:  some way of identifying the data to
-                     collected, useful for detectors that
-                     write their own data files.
+            acqtime:  exposure time for which to prepare
+            dataid:   some way of identifying the data to
+                      collected, useful for detectors that
+                      write their own data files.
+            n_starts: the number of subsequent start
+                      commands to expect, None if unknown.
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
@@ -131,7 +133,7 @@ class SoftwareLiveDetector(LiveDetector):
 
     def _start(self, acqtime):
         self.stopped = False
-        self.prepare(acqtime, None)
+        self.prepare(acqtime, None, 1)
         while not self.stopped:
             self.arm()
             self.start()
@@ -166,9 +168,9 @@ class DetectorGroup(object):
         for arg in args:
             self.detectors.append(arg)
 
-    def prepare(self, acqtime, dataid):
+    def prepare(self, acqtime, dataid, n_starts):
         for d in self:
-            d.prepare(acqtime, dataid)
+            d.prepare(acqtime, dataid, n_starts)
 
     def arm(self):
         for d in self:
