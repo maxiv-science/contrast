@@ -26,18 +26,19 @@ class Motor(Gadget):
     converted to dial limits, such that setting the user position leaves
     the dial limits unchanged.
 
-    The interface is defined as follows (* means override!):
-      user_position (r/w property)  - the current user position.
-    * dial_position (r/w property)  - the current dial position, setting
-                                      moves the motor with no limit check
-      user_limits (r/w property)    - limits in terms of the current
-                                      user position settings.
-      dial_limits (r/w propery)     - limits on the motor dial position.
-      position()                    - returns user_position
-      move(pos)                     - move motor to user position pos
-                                      while respecting limits
-    * busy()                        - motor state
-    * stop()                        - halts the motor
+    The interface is defined as follows (* means override!): ::
+
+          user_position (r/w property)  - the current user position.
+        * dial_position (r/w property)  - the current dial position, setting
+                                          moves the motor with no limit check
+          user_limits (r/w property)    - limits in terms of the current
+                                          user position settings.
+          dial_limits (r/w propery)     - limits on the motor dial position.
+          position()                    - returns user_position
+          move(pos)                     - move motor to user position pos
+                                          while respecting limits
+        * busy()                        - motor state
+        * stop()                        - halts the motor
 
     """
 
@@ -303,9 +304,9 @@ class Wm(object):
 @macro
 class Wm_(Wm):
     """
-    Print the positions of one or more motors but do not print any outPut.
+    Print the positions of one or more motors but do not print any output.::
 
-    wm_ <motor1> <motor2> ...
+        wm_ <motor1> <motor2> ...
     """
     def __init__(self, *args):
         self.motors = args

@@ -31,12 +31,10 @@ class Detector(Gadget):
     def prepare(self, acqtime, dataid, n_starts=None):
         """
         Run before acquisition, once per scan.
-            acqtime:  exposure time for which to prepare
-            dataid:   some way of identifying the data to
-                      collected, useful for detectors that
-                      write their own data files.
-            n_starts: the number of subsequent start
-                      commands to expect, None if unknown.
+
+        :param acqtime: Acquisition time
+        :param dataid: Data identifier, a scan id, for example.
+        :param n_starts: The number of start commands which we expect to issue.
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
