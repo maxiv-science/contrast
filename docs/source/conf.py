@@ -30,10 +30,12 @@ author = 'Alexander Björling'
 extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.viewcode',
+        'sphinx.ext.inheritance_diagram',
+        'sphinx_automodapi.automodapi',
 #        'sphinx.ext.autosectionlabel',
         'IPython.sphinxext.ipython_console_highlighting',
-        'IPython.sphinxext.ipython_directive'
-]
+        'IPython.sphinxext.ipython_directive',
+        ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -45,6 +47,9 @@ exclude_patterns = []
 
 autodoc_mock_imports = ['PyTango']
 
+latex_elements = {
+    'papersize': 'a4paper',
+    }
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -58,7 +63,20 @@ html_theme = 'classic' #'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-# Build a document listing the built-in macros:
+# -- Special handling of macro classes ---------------------------------------
+def label_macros(app, what, name, obj, options, lines):
+    """ Find macros and mark them as such in the docs. """
+    from contrast.environment import env
+    if what == 'class':
+        name = obj.__name__.lower()
+        if name in env.registeredMacros:
+            lines.insert(0, '')
+            lines.insert(0, '**This class generates the macro `%s`**' % name)
+
+def setup(app):
+    app.connect('autodoc-process-docstring', label_macros)
+
+# -- Build a document listing the built-in macros ----------------------------
 from contrast.environment import env
 from collections import OrderedDict
 dct = env.registeredMacros
