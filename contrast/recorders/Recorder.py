@@ -8,8 +8,11 @@ from multiprocessing import get_context
 # than 'fork' so you have to be careful only to call Recorder.start()
 # from main, see the example scripts.
 ctx = get_context('spawn')
-Process = ctx.Process
 Queue = ctx.Queue
+
+class Process(ctx.Process):
+    """ Dummy for cleaning up the inheritance documentation. """
+    pass
 
 import time
 import signal
