@@ -1,18 +1,6 @@
 """
-
-:platform: Unix, Windows
-:synopsis: macro to automatically absorb X percent of the bea using the 
-           absorbers at the NanoMAX beamline
-:last changed: 2019-10-10
-:author: Maik Kahnt <maik.kahnt@maxiv.lu.se>
-
-imports:
---------
-
-* os
-* numpy
-* contrast
-
+Module providing a macro to automatically absorb X percent of the
+beam using the absorbers at the NanoMAX beamline
 """
 
 import os
@@ -72,7 +60,7 @@ class attenuate(object):
         self.verbosity    = verbosity
 
     def get_current_energy(self):
-        runCommand('wm_ energy')
+        runCommand('wms energy')
         #print(env)
         self.photon_energy = env.lastMacroResult
 

@@ -187,9 +187,9 @@ class SoftwareScan(object):
 class LoopScan(SoftwareScan):
     """
     A software scan with no motor movements. Number of exposures is
-    <intervals> + 1, for consistency with ascan, dscan etc.
+    <intervals> + 1, for consistency with ascan, dscan etc. ::
 
-    loopscan <intervals> <exp_time>
+        loopscan <intervals> <exp_time>
     """
     def __init__(self, intervals, exposuretime=1.0):
         """
@@ -209,9 +209,9 @@ class Ct(object):
     """
     Make a single acquisition on the active detectors without recording
     data. Optional argument <exp_time> specifies exposure time, the default
-    is 1.0.
+    is 1.0. ::
 
-    ct [<exp_time>]
+        ct [<exp_time>]
     """
     def __init__(self, exp_time=1, print_nd=True):
         """

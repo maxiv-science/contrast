@@ -7,9 +7,9 @@ import time
 @macro
 class AScan(SoftwareScan):
     """
-    Software scan one or more motors in parallel.
+    Software scan one or more motors in parallel. ::
         
-    ascan <motor1> <start> <stop> ... <intervals> <exp_time>
+        ascan <motor1> <start> <stop> ... <intervals> <exp_time>
     """
 
     def __init__(self, *args):
@@ -44,9 +44,9 @@ class AScan(SoftwareScan):
 class DScan(AScan):
     """
     Software scan one or more motors in parallel, with positions
-    relative to each motor's current one. Moves back afterwards.
+    relative to each motor's current one. Moves back afterwards. ::
 
-    dscan <motor1> <start> <stop> <intervals> ... <exp_time>
+        dscan <motor1> <start> <stop> <intervals> ... <exp_time>
     """
     def _generate_positions(self):
         current = {m.name:m.position() for m in self.motors}

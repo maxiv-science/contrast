@@ -9,9 +9,9 @@ import time
 class SpiralScan(DScan):
     """
     Software scan across a 2D Archimedes spiral centered on the 
-    current position.
+    current position. ::
         
-    spiralscan <motor1> <motor2> <stepsize> <positions> <exp_time>
+        spiralscan <motor1> <motor2> <stepsize> <positions> <exp_time>
     """
 
     def __init__(self, m1, m2, stepsize, npos, exptime):

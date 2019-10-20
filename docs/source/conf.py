@@ -30,6 +30,9 @@ author = 'Alexander Björling'
 extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.viewcode',
+#        'sphinx.ext.autosectionlabel',
+        'IPython.sphinxext.ipython_console_highlighting',
+        'IPython.sphinxext.ipython_directive'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -54,3 +57,17 @@ html_theme = 'classic' #'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Build a document listing the built-in macros:
+from contrast.environment import env
+from collections import OrderedDict
+dct = env.registeredMacros
+dct = OrderedDict({key:dct[key] for key in sorted(dct.keys())})
+with open('macros.rst', 'w') as fp:
+    fp.write('Built-in macros\n')
+    fp.write('===============\n\n')
+    for name, macro in dct.items():
+        fp.write('%s\n' % name)
+        fp.write('-'*len(name) + '\n')
+        fp.write(macro.__doc__)
+        fp.write('\n\n')

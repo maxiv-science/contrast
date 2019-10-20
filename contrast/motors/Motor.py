@@ -199,9 +199,9 @@ class MotorMemorizer(Gadget):
 @macro
 class Mv(object):
     """
-    Move one or more motors.
+    Move one or more motors. ::
 
-    mvr <motor1> <position1> <motor2> <position2> ...
+        mvr <motor1> <position1> <motor2> <position2> ...
 
     """
     def __init__(self, *args):
@@ -228,7 +228,7 @@ class Mv(object):
 @macro
 class Mvd(object):
     """
-    Move one or more motors to an abolute dial position.
+    Move one or more motors to an abolute dial position. Not implemented.
     """
     def run(self):
         raise NotImplementedError
@@ -236,9 +236,9 @@ class Mvd(object):
 @macro
 class Mvr(Mv):
     """
-    Move one or more motors relative to their current positions.
+    Move one or more motors relative to their current positions. ::
 
-    mvr <motor1> <position1> <motor2> <position2> ...
+        mvr <motor1> <position1> <motor2> <position2> ...
 
     """
     def __init__(self, *args):
@@ -250,7 +250,8 @@ class Mvr(Mv):
 @macro
 class Umv(Mv):
     """
-    Like mv, except it prints the positions while moving.
+    Like mv, but prints the current position while moving, and returns
+    when the move is complete.
     """
     def _run_while_waiting(self):
         l = ['%s: %s' % (m.name, m._uformat%m.user_position) for m in self.motors]
@@ -265,16 +266,16 @@ class Umv(Mv):
 @macro
 class Umvr(Mvr, Umv):
     """
-    Like mvr, except it prints the positions while moving.
+    Like umv, but in positions relative to the current ones.
     """
     pass # less is more
 
 @macro
 class Wm(object):
     """
-    Print the positions of one or more motors.
+    Print the positions of one or more motors. ::
 
-    wm <motor1> <motor2> ...
+        wm <motor1> <motor2> ...
     """
     def __init__(self, *args):
         self.motors = args
@@ -302,11 +303,11 @@ class Wm(object):
             print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
         return ret
 @macro
-class Wm_(Wm):
+class WmS(Wm):
     """
-    Print the positions of one or more motors but do not print any output.::
+    Silent 'where motor'. Print the positions of one or more motors but do not print any output. ::
 
-        wm_ <motor1> <motor2> ...
+        wms <motor1> <motor2> ...
     """
     def __init__(self, *args):
         self.motors = args
@@ -335,9 +336,9 @@ class LsM(object):
 @macro
 class SetLim(object):
     """
-    Set limits on motors.
+    Set limits on motors. ::
 
-    setlim <motor1> <lower 1> <upper 1> ...
+        setlim <motor1> <lower 1> <upper 1> ...
     """
     def __init__(self, *args):
         self.motors = args[::3]
@@ -355,9 +356,9 @@ class SetLim(object):
 @macro
 class SetPos(object):
     """
-    Sets user position on motors.
+    Sets user position on motors. ::
 
-    setpos <motor1> <pos1> ...
+        setpos <motor1> <pos1> ...
     """
     def __init__(self, *args):
         self.motors = args[::2]

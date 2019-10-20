@@ -49,7 +49,6 @@ def macro(cls):
     The name of the class converted to lower case will be used for the
     magic command used to launch the macro.
     """
-    if not ipython: return cls
 
     name = cls.__name__.lower()
 
@@ -73,6 +72,7 @@ def macro(cls):
     assert cls.run.__call__
 
     env.registeredMacros[name] = cls
+    if not ipython: return cls
     ipython.register_magic_function(fcn, magic_name=name)
     return cls
 
@@ -102,9 +102,9 @@ class LsMac(object):
 @macro
 class UserLevel(object):
     """
-    Get or set the current user level
+    Get or set the current user level. ::
 
-    userlevel [<level>]
+        userlevel [<level>]
     """
     def __init__(self, level=None):
         if level is None:

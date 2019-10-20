@@ -240,9 +240,9 @@ class LsTrig(object):
 class StartLive(object):
     """
     Starts software live mode on listed eligible detectors. If none
-    are listed, all active and eligible detectors are started.
+    are listed, all active and eligible detectors are started. ::
 
-    startlive [<det1> ... <detN> <exposure time>]
+        startlive [<det1> ... <detN> <exposure time>]
     """
     def __init__(self, *args):
         try:
@@ -265,10 +265,10 @@ class StartLive(object):
 class StopLive(object):
     """
     Stops software live mode on listed eligible detectors. If
-	no arguments are given, all active live detectors are
-	stopped.
+    no arguments are given, all active live detectors are
+    stopped. ::
 
-    stoplive [<det1> ... <detN>]
+        stoplive [<det1> ... <detN>]
     """
     def __init__(self, *args):
         if args:
@@ -286,9 +286,9 @@ class StopLive(object):
 @macro
 class Deactivate(object):
     """
-    Deactivates all detectors or those specified.
+    Deactivates all detectors or those specified. ::
 
-    deactivate [<det1> ... <detN>]
+        deactivate [<det1> ... <detN>]
     """
     def __init__(self, *args):
         if args:
@@ -303,9 +303,9 @@ class Deactivate(object):
 @macro
 class Activate(object):
     """
-    Activates all detectors or those specified.
+    Activates all detectors or those specified. ::
 
-    deactivate [<det1> ... <detN>]
+        activate [<det1> ... <detN>]
     """
     def __init__(self, *args):
         if args:

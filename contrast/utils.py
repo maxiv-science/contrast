@@ -47,9 +47,16 @@ def str_to_args(line):
     names of Gadget instances to actual objects, and evaluates
     other expressions. For example,
 
-    In [11]: str_to_args("samx 'hej' 1./20")
-    Out[11]: [<lib.motors.Motor.DummyMotor at 0x7f6b11b0ba90>, 'hej', 0.05]
+    .. ipython::
 
+        In [11]: from contrast.motors import DummyMotor
+
+        In [12]: from contrast.utils import str_to_args
+
+        In [13]: samx = DummyMotor(name='samx')
+
+        In [14]: str_to_args("samx 'hej' 1./20")
+        Out[14]: [<contrast.motors.Motor.DummyMotor at 0x7efe164d4f98>, 'hej', 0.05]
     """
     args_in = line.split()
     args_out = []
