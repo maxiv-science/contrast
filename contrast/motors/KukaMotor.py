@@ -1,6 +1,7 @@
 """
-Provides a Motor interface to the NanoMAX Kuka robot's Tango device,
-https://gitlab.maxiv.lu.se/nanomax/dev-maxiv-kuka_robot
+Provides a Motor interface to the `MAX IV Kuka robot Tango device`_.
+
+.. _MAX IV Kuka robot Tango device: https://gitlab.maxiv.lu.se/nanomax/dev-maxiv-kuka_robot
 """
 
 import PyTango
@@ -9,12 +10,22 @@ from . import Motor
 
 class KukaRobot(object):
     """
-    Managing class which coordinates movements of the robot
-    in polar coordinates. The manager's role is to avoid
-    trying to move more than one robot motor at a time, which
-    would not be compatible with the controller.
+    Managing class which coordinates movements of the robot in polar
+    coordinates. The manager's role is to avoid trying to move more than one
+    robot motor at a time, which would not be compatible with the controller.
+
+    This class owns three ``KukaMotor`` instances, which are returned on
+    iteration::
+
+        gamma, delta, radius = KukaRobot('path/to/device', names=['gamma, 'delta', 'radius'])
     """
     def __init__(self, tango_path, names=['gamma', 'delta', 'radius']):
+        """
+        :param tango_path: Path to the underlying Tango device
+        :type tango_path: str
+        :param names: Names to assign to the three polar motors
+        :type names: list, tuple
+        """
         self.proxy = PyTango.DeviceProxy(tango_path)
         self.polar_motors = [
             KukaMotor(manager=self, name=names[0]),
@@ -36,10 +47,14 @@ class KukaRobot(object):
 
     def move_me(self, motor, pos):
         """
-        For now, this method just blocks until the device
-        is standing still. Should perhaps be threaded or so,
-        but works like this for scanning for example gamma
-        and delta in a mesh.
+        Method which makes sure that only one polar axis is moved at a time.
+        For now, this is done by blocking until the device is standing still.
+        Should perhaps be threaded or so, but works like this for scanning for
+        example the two polar angles in a mesh.
+
+        :param motor: Motor instance to move, typically ``self`` for the calling ``KukaMotor``.
+        :param pos: Target position
+        :type pos: float
         """
         while self.busy():
             time.sleep(.5)
@@ -62,10 +77,14 @@ class KukaRobot(object):
 
 class KukaMotor(Motor):
     """
-    Single motor as exposed by the KukaRobot class above.
+    Single motor as exposed by the ``KukaRobot`` class.
     """
 
     def __init__(self, manager, **kwargs):
+        """
+        :param manager: Managing ``KukaRobot`` instance
+        :param ``**kwargs``: Passed on to the base class constructor
+        """
         super(KukaMotor, self).__init__(**kwargs)
         self.manager = manager
 
@@ -85,8 +104,11 @@ class KukaMotor(Motor):
 
     def move(self, pos):
         """
-        This motor needs to override the base class move, because
-        move commands must be accepted even if the motor is busy.
+        This motor needs to override the base class move, because move
+        commands must be accepted even if the motor is busy.
+
+        :param pos: Target position
+        :type pos: float
         """
         dial = (pos - self._offset) / self._scaling
         try:

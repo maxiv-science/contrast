@@ -11,6 +11,13 @@ class E727Motor(Motor):
     """
 
     def __init__(self, device, axis, **kwargs):
+        """
+        :param device: Path to the Tango device
+        :type device: str
+        :param axis: Axis number of the E727 controller
+        :type axis: int
+        :param ``**kwargs``: Passed to the ``Motor`` base class
+        """
         super(E727Motor, self).__init__(**kwargs)
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(device)

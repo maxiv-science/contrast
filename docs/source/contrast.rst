@@ -1,6 +1,13 @@
 API reference
 =============
 
+Module contents
+---------------
+
+.. automodule:: contrast
+   :members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -21,7 +28,6 @@ contrast.Gadget module
 
 .. automodule:: contrast.Gadget
    :members:
-   :undoc-members:
    :show-inheritance:
 
 contrast.abbreviations module
@@ -29,7 +35,6 @@ contrast.abbreviations module
 
 .. automodule:: contrast.abbreviations
    :members:
-   :undoc-members:
    :show-inheritance:
 
 contrast.utils module
@@ -37,14 +42,4 @@ contrast.utils module
 
 .. automodule:: contrast.utils
    :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: contrast
-   :members:
-   :undoc-members:
    :show-inheritance:

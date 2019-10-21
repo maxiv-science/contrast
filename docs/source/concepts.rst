@@ -12,13 +12,13 @@ Contrast conceptually does three things,
 ``Gadget`` and its subclasses
 -----------------------------
 
-Contrast classes which represent specific beamline components (hardware or software) inherit from the common ``Gadget`` base class. Its most important subclasses are ``Motor`` (primarily for affecting some aspect of reality), ``Detector`` (for measuring some facet of the universe) and ``Recorder`` (for saving or passing on data).
+Contrast classes which represent specific beamline components (hardware or software) inherit from the common ``Gadget`` base class. Its most important subclasses are ``Motor`` (primarily for affecting some aspect of reality), ``Detector`` (for measuring some facet of the universe) and ``Recorder`` (for saving or passing on gathered data).
 
 .. inheritance-diagram:: contrast.motors.Motor.Motor contrast.detectors.Detector.TriggerSource contrast.recorders.Recorder.Recorder
     :parts: 1
     :top-classes: contrast.recorders.Recorder.Process
 
-Instead of keeping central registries or databases, Contrast keeps track of ``Gadget`` objects through instance tracking and inheritance. The base class or any of its children can report what instances exist, and calling the ``getinstances()`` method of classes at different levels serves to filter out the objects of interest. An example follows. ::
+Instead of keeping central registries or databases, Contrast keeps track of ``Gadget`` objects through instance tracking and inheritance. The base class or any of its children can report what instances of it exist, and calling the ``getinstances()`` method of classes at different levels serves to filter out the objects of interest. An example follows. ::
 
     In [1]: [m.name for m in Motor.getinstances()]
     Out[1]: ['gap', 'samy', 'samx']
@@ -31,6 +31,10 @@ Instead of keeping central registries or databases, Contrast keeps track of ``Ga
 
 Motors
 ~~~~~~
+
+Classes which inherit ``Motor`` represent physical motors or other devices which can be represented by numerical values (a bias voltage or beam energy, perhaps). The ``Motor`` class defines a simple API for moving the motor and reading its position. 
+
+Motors have dial and user positions, where the dial position should correspond closely to the physical position of the underlying hardware. The user position can be set at runtime to meaningful values. For example, a microscope translation stage might be set to zero when focusing on a sample plane. The dial and user positions are related by a scaling factor and an offset, handled by the ``Motor`` base class. Motor limits are stored internally in dial positions, so that they remain physically identical after changing the user position. The ``motors`` module defines convenience macros for moving, listing and reading motors, as well as defining user positions.
 
 Detectors
 ~~~~~~~~~
@@ -49,7 +53,7 @@ The ``lsrec`` macro lists currently running recorders. ::
     name           class                                            
     ----------------------------------------------------------------
     hdf5recorder   <class 'lib.recorders.Hdf5Recorder.Hdf5Recorder'>
-    name           <class 'lib.recorders.PlotRecorder.PlotRecorder'>
+    plot1          <class 'lib.recorders.PlotRecorder.PlotRecorder'>
 
 
 Macros

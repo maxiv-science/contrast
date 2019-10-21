@@ -45,7 +45,10 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+autoclass_content = 'both' # docstring from both class and constructor
 autodoc_mock_imports = ['PyTango']
+autodoc_member_order = 'bysource' # in the source code order, not alphabetically
+autodoc_inherit_docstrings = False
 
 latex_elements = {
     'papersize': 'a4paper',

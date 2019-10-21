@@ -6,9 +6,6 @@ from ..Gadget import Gadget
 from ..environment import macro, env
 from .. import utils
 
-class MotorLimitException(Exception):
-    pass
-
 class Motor(Gadget):
     """
     General base class for motors.
@@ -16,34 +13,27 @@ class Motor(Gadget):
     Motors have dial and user positions, which are related by an offset
     and a scaling factor. The user position is supposed to be used in
     all macros and movements. The dial position is hard coded in the Motor
-    subclass to closely reflect what the underlying device quotes.
+    subclass to closely reflect what the underlying device quotes. ::
 
-    user = dial * scaling + offset,
-    dial = (user - offset) / scaling
+        user = dial * scaling + offset,
+        dial = (user - offset) / scaling
 
     The user position can be changed, which updates the offset but not
     the scaling. In the same way, limits on the user position are internally
     converted to dial limits, such that setting the user position leaves
     the dial limits unchanged.
-
-    The interface is defined as follows (* means override!): ::
-
-          user_position (r/w property)  - the current user position.
-        * dial_position (r/w property)  - the current dial position, setting
-                                          moves the motor with no limit check
-          user_limits (r/w property)    - limits in terms of the current
-                                          user position settings.
-          dial_limits (r/w propery)     - limits on the motor dial position.
-          position()                    - returns user_position
-          move(pos)                     - move motor to user position pos
-                                          while respecting limits
-        * busy()                        - motor state
-        * stop()                        - halts the motor
-
     """
 
     def __init__(self, scaling=1.0, offset=0.0, dial_limits=(None, None),
                  user_format='%.2f', dial_format='%.2f', **kwargs):
+        """
+        :param scaling: Scaling factor from dial to user position
+        :param offset: Offset from scaled dial to user position
+        :param dial_limits: Motor limits in dial positions
+        :param user_format: Format string for presenting user positions
+        :param dial_format: Format string for presenting dial positions
+        :param kwargs: Passed on to base class constructor
+        """
         super(Motor, self).__init__(**kwargs)
         self._lowlim, self._uplim = dial_limits
         self._scaling = scaling
@@ -102,31 +92,36 @@ class Motor(Gadget):
     @property
     def dial_position(self):
         """
-        Override this! Reads the dial position.
+        Override this property, which sets or gets the dial position.
+
+        :rtype: float
         """
         raise NotImplementedError
 
     @dial_position.setter
     def dial_position(self, pos):
-        """
-        Override this! Move the motor to dial position.
-        """
         raise NotImplementedError
 
     def busy(self):
         """
-        Overrides this! Determines if the motor is busy.
+        Overrides this method, which reports on whether or not the motor
+        is busy.
+
+        :rtype: bool
         """
         raise NotImplementedError
 
     def stop(self):
         """
-        Override this! Stops the motor.
+        Override this method, which stops the motor.
         """
         raise NotImplementedError
 
 
 class DummyMotor(Motor):
+    """
+    Dummy motor which can be harmlessly moved with a velocity of 1 / s.
+    """
     def __init__(self, *args, **kwargs):
         super(DummyMotor, self).__init__(*args, **kwargs)
         self._aim = 0.0
@@ -159,15 +154,24 @@ class DummyMotor(Motor):
 
 class MotorMemorizer(Gadget):
     """
-    Memorizes limits and offset values for Motors.
+    Saves or loads motor scaling, offsets, and limits to or from file.
     """
     def __init__(self, filepath=None, **kwargs):
+        """
+        :param filepath: Path to file where motor information will be dumped
+        :type filepath: str
+        :param ``**kwargs``: Passed on to the base class
+        """
         super(MotorMemorizer, self).__init__(**kwargs)
         self.filepath = filepath
         if filepath and os.path.exists(filepath):
             self.load()
 
     def load(self):
+        """
+        Loads memorized motor configurations from ``self.filepath``, and
+        applies to matching motors.
+        """
         try:
             motors = {m.name: m for m in Motor.getinstances()}
             with open(self.filepath, 'r') as fp:
@@ -184,6 +188,9 @@ class MotorMemorizer(Gadget):
             print("Memorizer file %s doesn't exist" % self.filepath)
 
     def dump(self):
+        """
+        Dumps motor configurations for all motors to ``self.filepath``.
+        """
         try:
             with open(self.filepath, 'w') as fp:
                 for m in Motor.getinstances():
@@ -194,7 +201,6 @@ class MotorMemorizer(Gadget):
             print('Saved motor states to %s' % self.filepath)
         except (FileNotFoundError,):
             print("Cant write to %s, doesn't exist")
-
 
 @macro
 class Mv(object):
@@ -339,6 +345,8 @@ class SetLim(object):
     Set limits on motors. ::
 
         setlim <motor1> <lower 1> <upper 1> ...
+
+    Also saves new limits to all available ``MotorMemorizer`` objects.
     """
     def __init__(self, *args):
         self.motors = args[::3]
@@ -359,6 +367,9 @@ class SetPos(object):
     Sets user position on motors. ::
 
         setpos <motor1> <pos1> ...
+
+    Also saves new user positions to all available ``MotorMemorizer``
+    objects.
     """
     def __init__(self, *args):
         self.motors = args[::2]

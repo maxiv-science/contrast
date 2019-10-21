@@ -149,6 +149,8 @@ setlim
     Set limits on motors. ::
 
         setlim <motor1> <lower 1> <upper 1> ...
+
+    Also saves new limits to all available ``MotorMemorizer`` objects.
     
 
 setpos
@@ -157,6 +159,9 @@ setpos
     Sets user position on motors. ::
 
         setpos <motor1> <pos1> ...
+
+    Also saves new user positions to all available ``MotorMemorizer``
+    objects.
     
 
 spiralscan
