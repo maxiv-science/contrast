@@ -2,7 +2,10 @@ from .Lima import LimaDetector
 from ..environment import env
 
 import numpy as np
-import PyTango
+try:
+    import PyTango
+except ModuleNotFoundError:
+    pass
 import os
 
 class Xspress3(LimaDetector):

@@ -46,19 +46,28 @@ User levels
 
 All ``Gadget`` instances have an associated user level. This means that certain motors can be hidden and protected while others are exposed through the macros. In this example, two sample motors are available to everyone while the undulator gap is higher level. This is not a security feature but meant to simplify the environment and reduce the risk of mistakes. ::
 
-    In [7]: env.userLevel
-    Out[7]: 1
+    In [4]: %userlevel
+    Current userlevel: 1
 
-    In [8]: wa
-    samy 0.0
-    samx 0.0
+    In [5]: wa
+    motor     user pos.  limits            dial pos.  limits       
+    ---------------------------------------------------------------
+    samx      0.00       (0.00, 10.00)     0.00       (0.00, 10.00)
+    samy      0.00       (-5.00, 5.00)     0.00       (-5.00, 5.00)
 
-    In [9]: env.userLevel = 5
+    In [6]: %userlevel 5
 
-    In [10]: wa
-    samy 0.0
-    gap 0.0
-    samx 0.0
+    In [7]: wa
+    motor     user pos.  limits            dial pos.  limits       
+    ---------------------------------------------------------------
+    gap       0.00000    (None, None)      0.00       (None, None) 
+    samx      0.00       (0.00, 10.00)     0.00       (0.00, 10.00)
+    samy      0.00       (-5.00, 5.00)     0.00       (-5.00, 5.00)
+
+Defining custom macros
+----------------------
+
+Where to put your own macros. Absolute imports. ``%run``
 
 Getting information out of macros
 ---------------------------------

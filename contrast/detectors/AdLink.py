@@ -1,5 +1,8 @@
 from .Detector import Detector, TriggeredDetector
-import PyTango
+try:
+    import PyTango
+except ModuleNotFoundError:
+    pass
 import numpy as np
 
 class AdLinkAnalogInput(Detector, TriggeredDetector):

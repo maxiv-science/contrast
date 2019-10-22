@@ -9,6 +9,8 @@ Contrast conceptually does three things,
 2. Provides shorthand macros to do orchestrated operations on these devices.
 3. Keeps track of the environment in which the instrument is run.
 
+The framework runs locally in an IPython interpreter. This allows simple interactions between all beamline components. Parallelization is avoided in the interest of simplicity, with the exception of the data handling/streaming/writing machinery, which would otherwise slow down the acquisition loop.
+
 ``Gadget`` and its subclasses
 -----------------------------
 
@@ -38,6 +40,16 @@ Motors have dial and user positions, where the dial position should correspond c
 
 Detectors
 ~~~~~~~~~
+
+The ``Detector`` base class defines the API for classes representing all detectors and input devices. To operate a detector, the methods ``prepare()``, ``arm()``, ``start()`` are called, with ``read()`` called after the acquisition has finished.
+
+Detectors come in many forms, and the ``Detector`` objects can return data of any type. Usually, numbers, small arrays, or Python ``dict`` objects are used, as these are easily written to hdf5 files in a hierarchical way. Detectors which produce large data rates write directly to disk or stream their data to a receiver, and therefore return hdf5 links instead of real data.
+
+Variants of ``Detector`` can be constructed by inheriting the base classes for hardware-triggered detectors, those that can run autonomously in live mode, and those that can take bursts of measurements. The inheritance structure for a small set of ``Detector`` subclasses is illustrated below.
+
+.. inheritance-diagram:: contrast.detectors.Pilatus.Pilatus contrast.detectors.Merlin contrast.detectors.Xspress3 contrast.detectors.Ni6602 contrast.detectors.AdLink.AdLinkAnalogInput
+    :parts: 1
+    :top-classes: contrast.recorders.Recorder.Process
 
 Recorders
 ~~~~~~~~~
