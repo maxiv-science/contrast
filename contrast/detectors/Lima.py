@@ -83,6 +83,10 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
     def energy(self, val):
         pass
 
+    def start_live(self, acqtime=1.0):
+        self.hybrid_mode = False
+        super(LimaDetector, self).start_live(acqtime)
+
     def initialize(self):
         self.lima = PyTango.DeviceProxy(self.lima_device_name)
         self.lima.set_timeout_millis(3000)
