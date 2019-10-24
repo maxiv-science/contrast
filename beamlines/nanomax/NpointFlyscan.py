@@ -78,7 +78,15 @@ class NpointFlyscan(Mesh):
 
     def _before_start(self):
         # we need to call Go() on the SC device at some point, maybe here.
-        self.scancontrol.Go()
+        ok = False
+        while not ok:
+            try:
+                self.scancontrol.Go()
+                ok = True
+            except:
+                print('***** scancontrol Go() failed, is the piexo having trouble settling? trying again...')
+                import time
+                time.sleep(.1)
 
     def _while_acquiring(self):
         s = ''
