@@ -69,6 +69,10 @@ Defining custom macros
 
 Where to put your own macros. Absolute imports. ``%run``
 
+    Overwrite these methods:
+        __init__ (which reads in the scan parameters) and
+        _generate_positions (which generates the line scan, mesh, spiral, or what ever you like)
+
 Getting information out of macros
 ---------------------------------
 

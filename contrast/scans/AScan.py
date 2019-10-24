@@ -13,9 +13,6 @@ class AScan(SoftwareScan):
     """
 
     def __init__(self, *args):
-        """
-        Parse arguments.
-        """
         self.motors = []
         self.limits = []
         try:

@@ -9,7 +9,7 @@ Contrast conceptually does three things,
 2. Provides shorthand macros to do orchestrated operations on these devices.
 3. Keeps track of the environment in which the instrument is run.
 
-The framework runs locally in an IPython interpreter. This allows simple interactions between all beamline components. Parallelization is avoided in the interest of simplicity, with the exception of the data handling/streaming/writing machinery, which would otherwise slow down the acquisition loop.
+The framework runs locally in an IPython interpreter. This allows simple interactions between all beamline components. Parallelization is avoided in the interest of simplicity, with the exception of the data handling/streaming/writing machinery, which would otherwise slow down the light-weight acquisition loop.
 
 ``Gadget`` and its subclasses
 -----------------------------
@@ -41,11 +41,11 @@ Motors have dial and user positions, where the dial position should correspond c
 Detectors
 ~~~~~~~~~
 
-The ``Detector`` base class defines the API for classes representing all detectors and input devices. To operate a detector, the methods ``prepare()``, ``arm()``, ``start()`` are called, with ``read()`` called after the acquisition has finished.
+The ``Detector`` base class defines the API for classes representing all detectors and data collecting devices. To operate a detector, the methods ``prepare()``, ``arm()``, ``start()`` are called, with ``read()`` called after the acquisition has finished.
 
 Detectors come in many forms, and the ``Detector`` objects can return data of any type. Usually, numbers, small arrays, or Python ``dict`` objects are used, as these are easily written to hdf5 files in a hierarchical way. Detectors which produce large data rates write directly to disk or stream their data to a receiver, and therefore return hdf5 links instead of real data.
 
-Variants of ``Detector`` can be constructed by inheriting the base classes for hardware-triggered detectors, those that can run autonomously in live mode, and those that can take bursts of measurements. The inheritance structure for a small set of ``Detector`` subclasses is illustrated below.
+Variants of ``Detector`` can be constructed by inheriting the base classes for hardware-triggered detectors, those that can run autonomously in live mode, and those that can take bursts of measurements with internal timing. The inheritance structure for a small set of ``Detector`` subclasses is shown below for illustration.
 
 .. inheritance-diagram:: contrast.detectors.Pilatus.Pilatus contrast.detectors.Merlin contrast.detectors.Xspress3 contrast.detectors.Ni6602 contrast.detectors.AdLink.AdLinkAnalogInput
     :parts: 1
@@ -54,9 +54,21 @@ Variants of ``Detector`` can be constructed by inheriting the base classes for h
 Recorders
 ~~~~~~~~~
 
-Data is captured by recorders. Recorders are run in separate processes and get data through queues, avoiding holding up the main acquisition loop because of I/O. They can do anything with the data, for example saving to ``hdf5`` files, live plotting, or streaming. See the ``Hdf5Recorder``, ``PlotRecorder``, and ``StreamRecorder`` classes for examples.
+Data is captured by recorders. Recorders are run in separate processes and get data through queues to avoid holding up the main acquisition loop. They can do anything with the data, for example saving to ``hdf5`` files, live plotting, or streaming. See the ``Hdf5Recorder``, ``PlotRecorder``, and ``StreamRecorder`` classes for examples.
 
-Note how easy it is to write these recorders, and how easy it would be to integrate online data analysis.
+Note how easy it is to write these recorders, and how easy it would be to integrate online data analysis. The recorder simply grabs data from an incoming queue, while the data collection routine places collected data in the queues of all running recorders. As an example, here's how ``SoftwareScan`` and its derivatives gather and distribute data. ::
+
+    # read detectors and motors
+    dt = time.time() - t0
+    dct = {'dt': dt}
+    for d in det_group:
+        dct[d.name] = d.read()
+    for m in self.motors:
+        dct[m.name] = m.position()
+
+    # pass data to recorders
+    for r in active_recorders():
+        r.queue.put(dct)
 
 The ``lsrec`` macro lists currently running recorders. ::
 

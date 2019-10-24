@@ -32,7 +32,7 @@ class Motor(Gadget):
         :param dial_limits: Motor limits in dial positions
         :param user_format: Format string for presenting user positions
         :param dial_format: Format string for presenting dial positions
-        :param kwargs: Passed on to base class constructor
+        :param ``**kwargs``: Passed on to base class constructor
         """
         super(Motor, self).__init__(**kwargs)
         self._lowlim, self._uplim = dial_limits

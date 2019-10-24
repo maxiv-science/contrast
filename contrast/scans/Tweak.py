@@ -37,9 +37,6 @@ class Tweak(Mesh):
     """
 
     def __init__(self, *args):
-        """
-        Parse arguments.
-        """
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)

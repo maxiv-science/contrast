@@ -30,6 +30,7 @@ contrast.scans.Scan module
 
 .. automodule:: contrast.scans.Scan
    :members:
+   :private-members:
    :show-inheritance:
 
 contrast.scans.Spiral module

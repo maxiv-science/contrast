@@ -6,17 +6,19 @@ from ..detectors import Detector, TriggerSource
 
 class SoftwareScan(object):
     """
-    Base class for the normal sardana-style software-controlled scan. Respects
-    the availability and deadlines managed by env.scheduler.
-
-    Overwrite these methods:
-        __init__ (which reads in the scan parameters) and
-        _generate_positions (which generates the line scan, mesh, spiral, or what ever you like)
+    Base class for the normal sardana-style software-controlled scan.
+    Respects the availability and deadlines managed by env.scheduler,
+    honours env.shapshot, and acts on all active detectors, trigger
+    sources, and recorders.
     """
 
     def __init__(self, exposuretime):
         """
-        The constructor should parse parameters.
+        The constructor should parse the parameters of the derived
+        macro.
+
+        :param exposuretime: Exposure time to pass on to detectors etc.
+        :type exposuretime: float
         """
         self.motors = []   # list of motors, to be filled by subclass
         self.exposuretime = exposuretime
@@ -50,28 +52,35 @@ class SoftwareScan(object):
 
     def _calc_time_needed(self):
         """
-        Suggestion for how to organize topup avoidance. You could 
-        also look at how long acquisitions have tended to take. Or
-        you could try to estimate the time needed based on the
-        input parameters.
+        Estimates the time needed for performing the next acquisition.
+        This can be done based on the input parameters, or on the timing
+        of previous points.
         """
         return self.exposuretime * 5 + 5
 
     def _before_scan(self):
         """
-        Placeholder method for users to hook actions onto scan classes after import.
+        Placeholder method for users to hook actions onto scan classes
+        after import. For example opening a shutter::
+
+            def pre_scan_stuff(slf):
+                print("Maybe open a shutter here?")
+            SoftwareScan._before_scan = pre_scan_stuff
         """
         pass
 
     def _after_scan(self):
         """
-        Placeholder method for users to hook actions onto scan classes after import.
+        Placeholder method for users to hook actions onto scan classes
+        after import, see ``_before_scan``.
         """
         pass
 
     def _before_move(self):
         """
-        Gets called for each step.
+        Gets called for each step, and can be used for example to check
+        that the instrument is ready for the next acquisition, that
+        there is beam in the machine, etc.
         """
 
         # Example implementation of topup avoidance
@@ -89,26 +98,27 @@ class SoftwareScan(object):
 
     def _before_arm(self):
         """
-        Gets called for each step.
+        Gets called for each step. See ``_before_move``.
         """
         pass
 
     def _while_acquiring(self):
         """
-        Gets called repeatedly while the detectors detect.
+        Gets called repeatedly while the detectors detect. Useful for
+        printing a progress bar, for example.
         """
         pass
 
     def _before_start(self):
         """
-        Gets called for each step.
+        Gets called for each step. See ``_before_move``.
         """
         pass
 
     def run(self):
         """
-        This method does all the serious interaction with motors,
-        detectors, and data recorders.
+        This is the main acquisition loop where interaction with motors,
+        detectors and other ``Gadget`` objects happens.
         """
         self._before_scan()
         print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
@@ -178,8 +188,10 @@ class SoftwareScan(object):
         
     def _generate_positions(self):
         """
-        Function or generator which returns or yields an iterable of
-        dicts {motorA.name: posA, motorB.name: posB, ...}
+        *Override this method.* Function or generator which returns or
+        yields an iterable of dicts, ::
+
+            {motorA.name: posA, motorB.name: posB, ...}
         """
         raise NotImplementedError
 
@@ -192,9 +204,6 @@ class LoopScan(SoftwareScan):
         loopscan <intervals> <exp_time>
     """
     def __init__(self, intervals, exposuretime=1.0):
-        """
-        Parse arguments.
-        """
         super(LoopScan, self).__init__(float(exposuretime))
         self.intervals = intervals
         self.motors = []
@@ -214,9 +223,6 @@ class Ct(object):
         ct [<exp_time>]
     """
     def __init__(self, exp_time=1, print_nd=True):
-        """
-        Parse arguments.
-        """
         self.exposuretime = float(exp_time)
 
     def _before_ct(self):
