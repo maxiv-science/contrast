@@ -174,10 +174,16 @@ if __name__=='__main__':
     pilatus.active = True
 
     # define pre- and post-scan actions, per scan base class
+    import PyTango
+    import time
+    shutter = PyTango.DeviceProxy('B303A-O/PSS/BS-01')
     def pre_scan_stuff(slf):
+        shutter.open()
+        time.sleep(3)
         runCommand('fsopen')
         runCommand('stoplive')
     def post_scan_stuff(slf):
+        shutter.close()
         runCommand('fsclose')
 
     SoftwareScan._before_scan = pre_scan_stuff
