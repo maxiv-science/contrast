@@ -168,9 +168,23 @@ class DetectorGroup(object):
         for arg in args:
             self.detectors.append(arg)
 
-    def prepare(self, acqtime, dataid, n_starts):
+    def prepare(self, acqtime, dataid, n_starts, trials=1, trial_delay=1.):
+        """
+        Sort of safely prepare all methods, trying again if it fails.
+        """
         for d in self:
-            d.prepare(acqtime, dataid, n_starts)
+            ok = False
+            tried = 0
+            while not ok:
+                try:
+                    d.prepare(acqtime, dataid, n_starts)
+                    ok = True
+                except:
+                    tried += 1
+                    print('*** problem calling prepare() on %s, trying again in %f s...' % (d.name, trial_delay))
+                    time.sleep(trial_delay)
+                    if tried == trials:
+                        raise
 
     def arm(self):
         for d in self:
