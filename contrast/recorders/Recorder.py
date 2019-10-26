@@ -47,7 +47,7 @@ class Recorder(Gadget, Process):
         :param ``**kwargs``: Passed on to base class constructor
         """
         Process.__init__(self)
-        Gadget.__init__(self, name=name)
+        Gadget.__init__(self, **kwargs)
         ctx = get_context('spawn')
         self.queue = ctx.Queue()
         self.delay = delay
