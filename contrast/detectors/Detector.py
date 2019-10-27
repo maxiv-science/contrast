@@ -190,9 +190,20 @@ class DetectorGroup(object):
         for d in self:
             d.arm()
 
-    def start(self):
+    def start(self, trials=1, trial_delay=1.):
         for d in self:
-            d.start()
+            ok = False
+            tried = 0
+            while not ok:
+                try:
+                    d.start()
+                    ok = True
+                except:
+                    tried += 1
+                    print('*** problem calling start() on %s, trying again in %f s...' % (d.name, trial_delay))
+                    time.sleep(trial_delay)
+                    if tried == trials:
+                        raise
 
     def stop(self):
         for d in self:

@@ -142,7 +142,7 @@ class SoftwareScan(object):
                 group.arm()
                 # start detectors
                 self._before_start()
-                group.start()
+                group.start(trials=100)
                 while det_group.busy():
                     self._while_acquiring()
                     time.sleep(.01)
