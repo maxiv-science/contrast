@@ -21,7 +21,6 @@ project = 'Contrast'
 copyright = '2019, Alexander Björling'
 author = 'Alexander Björling'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -36,6 +35,8 @@ extensions = [
         'IPython.sphinxext.ipython_console_highlighting',
         'IPython.sphinxext.ipython_directive',
         ]
+
+master_doc = 'index'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
