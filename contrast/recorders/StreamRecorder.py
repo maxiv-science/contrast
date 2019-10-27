@@ -32,16 +32,16 @@ class StreamRecorder(Recorder):
         Converts RecorderHeader to plain dict so the receiver doesn't
         need the contrast library.
         """
-        self.socket.send_pyobj(dict(dct))
+        self.socket.send_pyobj(dict(dct), protocol=2)
 
     def act_on_data(self, dct, base='entry/measurement/'):
         """
         Relay information.
         """
-        self.socket.send_pyobj(dct)
+        self.socket.send_pyobj(dct, protocol=2)
 
     def act_on_footer(self):
         """
         Relay information.
         """
-        self.socket.send_pyobj({})
+        self.socket.send_pyobj({}, protocol=2)
