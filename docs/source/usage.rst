@@ -12,7 +12,7 @@ Launching a beamline
 Detector selection
 ------------------
 
-Detectors have an ``active`` attribute which determines if they are included in data acquisition such as scans. The macro ``lsdet`` indicates if each detector is active with an asterisk. ::
+Detectors have an ``active`` attribute which determines if they are included in data acquisition such as scans. The macro ``%lsdet`` indicates if each detector is active with an asterisk. ::
 
     In [2]: lsdet
 
@@ -67,11 +67,29 @@ All ``Gadget`` instances have an associated user level. This means that certain 
 Defining custom macros
 ----------------------
 
-Where to put your own macros. Absolute imports. ``%run``
+To write your own macro, simply write a class exposing an ``__init__`` and a ``run`` method, and decorate it with ``@macro`` as above. The ``__init__`` method gets the macro command-line arguments as positional arguments, while ``run`` should take no arguments. So, for example, the macro defined as::
 
-    Overwrite these methods:
-        __init__ (which reads in the scan parameters) and
-        _generate_positions (which generates the line scan, mesh, spiral, or what ever you like)
+    In [12]: from contrast.environment import macro
+
+    In [13]: @macro
+        ...: class My_Macro(object):
+        ...:     """ My test macro """
+        ...:     def __init__(self, arg1, arg2):
+        ...:         self.arg1 = arg1
+        ...:         self.arg2 = arg2
+        ...:     def run(self):
+        ...:         print(self.arg1, self.arg2)
+        ...:         
+
+can be run like this. ::
+
+    In [14]: %my_macro 1 2
+    1 2
+
+Place your macro in your favourite folder, and make sure to use absolute imports (``from contrast...``). Load the macro by running the file in your
+ipython interpreter. ::
+
+    %run /path/to/macro/file.py
 
 Getting information out of macros
 ---------------------------------

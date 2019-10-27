@@ -146,29 +146,6 @@ A macro is different from a script. Anyone can easily write a macro, but for com
         runCommand('mv samy %d' % new_y_pos)
         runCommand('ascan samx 0 1 5 .1')
 
-Writing a new macro
-~~~~~~~~~~~~~~~~~~~
-
-To write your own macro, simply write a class exposing an ``__init__`` and a ``run`` method, and decorate it with ``@macro`` as above. The ``__init__`` method gets the macro command-line arguments as positional arguments, while ``run`` should take no arguments. So, for example, the macro defined as::
-
-    In [12]: from contrast.environment import macro
-
-    In [13]: @macro
-        ...: class My_Macro(object):
-        ...:     """ My test macro """
-        ...:     def __init__(self, arg1, arg2):
-        ...:         self.arg1 = arg1
-        ...:         self.arg2 = arg2
-        ...:     def run(self):
-        ...:         print(self.arg1, self.arg2)
-        ...:         
-
-can be run like this. ::
-
-    In [14]: %my_macro 1 2
-    1 2
-
-
 The environment object
 ----------------------
 
@@ -186,7 +163,7 @@ Attribute               Role
 =====================   ======
 ``nextScanID``          The scan number of the next acquisition. Updated by the acquisition macros.
 ``lastMacroResult``     Optionally, macro ``run()`` methods can return data. Any time a macro is run, its return data is stored here.
-``userLevel``           As a matter of caution rather than security, each ``Motor`` object is associated with a user level. Any convention can be used, but at NanoMAX, 1 means basic and 5 means dangerous. The current user level limits what motors can be moved and listed. As such, user levels are also a way of providing a simpler collection of motors to users. See also the ``%userlevel`` macro.
+``userLevel``           The current user level limits what motors can be moved and listed. See the section on Usage.
 ``paths``               A ``PathFixer`` object, which manages data paths. By default, this object simple takes the data path as an attribute, but custom subclasses can be written which grab the path from other parts of the controls system, like at NanoMAX.
 ``scheduler``           An object which is able to tell (i) if the instrument is available (or if the storage ring is down, perhaps), and (ii) if there are any deadlines coming up (like if the storage ring is about to be topped up). This can be used to pause data acquisition when the instrument is not available, for example. By default this object does nothing, but custom subclasses can handle any particular conditions at the beamline.
 ``snapshot``            An object which gathers a snaphot of the instrument prior to data acquisition, and passes this data to the recorders. By default captures the positions of all motors.
