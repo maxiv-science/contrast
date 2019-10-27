@@ -31,7 +31,7 @@ extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.viewcode',
         'sphinx.ext.inheritance_diagram',
-        'sphinx_automodapi.automodapi',
+#        'sphinx_automodapi.automodapi',
 #        'sphinx.ext.autosectionlabel',
         'IPython.sphinxext.ipython_console_highlighting',
         'IPython.sphinxext.ipython_directive',
