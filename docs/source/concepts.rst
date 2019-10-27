@@ -128,7 +128,7 @@ In this framework, macros are created by writing a class with certain properties
 
     Do <macro-name>? (without <>) for more information.
 
-Note how macros aren't stored in a special library. They are written throughout the library wherever they make sense. For example, in ``Detector.py`` where the detector base classes are defined, the ``lsdet`` macro is defined as follows.
+Macros aren't stored in a special library. They are written throughout the library wherever they make sense. For example, in ``Detector.py`` where the detector base classes are defined, the ``lsdet`` macro is defined as follows.
 
 ::
 
@@ -138,7 +138,7 @@ Note how macros aren't stored in a special library. They are written throughout 
             dct = {d.name: d.__class__ for d in Detector.getinstances()}
             print(utils.dict_to_table(dct, titles=('name', 'class')))
 
-Also note that a macro is different from a script. Anyone can easily write a macro, but for composite operations where existing macros are just combined it is faster to write a script. The following is a script, not a macro, but uses a special ``runCommand`` function to interface with the command line syntax. ::
+A macro is different from a script. Anyone can easily write a macro, but for composite operations where existing macros are just combined it is faster to write a script. The following is a script, not a macro, but uses a special ``runCommand`` function to interface with the command line syntax. ::
 
     from lib.environment import runCommand
 
@@ -146,14 +146,48 @@ Also note that a macro is different from a script. Anyone can easily write a mac
         runCommand('mv samy %d' % new_y_pos)
         runCommand('ascan samx 0 1 5 .1')
 
+Writing a new macro
+~~~~~~~~~~~~~~~~~~~
+
+To write your own macro, simply write a class exposing an ``__init__`` and a ``run`` method, and decorate it with ``@macro`` as above. The ``__init__`` method gets the macro command-line arguments as positional arguments, while ``run`` should take no arguments. So, for example, the macro defined as::
+
+    In [12]: from contrast.environment import macro
+
+    In [13]: @macro
+        ...: class My_Macro(object):
+        ...:     """ My test macro """
+        ...:     def __init__(self, arg1, arg2):
+        ...:         self.arg1 = arg1
+        ...:         self.arg2 = arg2
+        ...:     def run(self):
+        ...:         print(self.arg1, self.arg2)
+        ...:         
+
+can be run like this. ::
+
+    In [14]: %my_macro 1 2
+    1 2
+
+
 The environment object
 ----------------------
 
-No global environment variables are used. Instead, a central object in the environment module is used to store values such as scan number etc. ::
+No global environment variables are used. Instead, a central object in the environment module is used to manage the overall logistics of the beamline. This includes things like paths and scan numbers::
 
     In [24]: from lib.environment import env
 
     In [25]: env.nextScanID
     Out[25]: 1
 
-In fact, the central object ``env`` manages the overall logistics of the beamline. For example, where to save data, what macros are registered, whether there are events like storage ring topups to keep track of, how to capture the state of the istrument before gathering data, etc. For each of these tasks, ``env`` keeps references to such manager objects that handle the specifics of the configured instrument.
+The central ``env`` object has the following attributes which relate to beamline configuration and behaviour.
+
+=====================   ======
+Attribute               Role
+=====================   ======
+``nextScanID``          The scan number of the next acquisition. Updated by the acquisition macros.
+``lastMacroResult``     Optionally, macro ``run()`` methods can return data. Any time a macro is run, its return data is stored here.
+``userLevel``           As a matter of caution rather than security, each ``Motor`` object is associated with a user level. Any convention can be used, but at NanoMAX, 1 means basic and 5 means dangerous. The current user level limits what motors can be moved and listed. As such, user levels are also a way of providing a simpler collection of motors to users. See also the ``%userlevel`` macro.
+``paths``               A ``PathFixer`` object, which manages data paths. By default, this object simple takes the data path as an attribute, but custom subclasses can be written which grab the path from other parts of the controls system, like at NanoMAX.
+``scheduler``           An object which is able to tell (i) if the instrument is available (or if the storage ring is down, perhaps), and (ii) if there are any deadlines coming up (like if the storage ring is about to be topped up). This can be used to pause data acquisition when the instrument is not available, for example. By default this object does nothing, but custom subclasses can handle any particular conditions at the beamline.
+``snapshot``            An object which gathers a snaphot of the instrument prior to data acquisition, and passes this data to the recorders. By default captures the positions of all motors.
+=====================   ======
