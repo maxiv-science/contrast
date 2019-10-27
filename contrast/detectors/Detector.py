@@ -24,19 +24,19 @@ class Detector(Gadget):
     def get_active(cls):
         """
         Returns a DetectorGroup instance containing the currently active
-        detectors.
+        ``Detector`` instances.
         """
         return DetectorGroup(*[d for d in cls.getinstances() if (d.active and not isinstance(d, TriggerSource))])
     
     def prepare(self, acqtime, dataid, n_starts=None):
         """
         Run before acquisition, once per scan.
-            acqtime:  exposure time for which to prepare
-            dataid:   some way of identifying the data to
-                      collected, useful for detectors that
-                      write their own data files.
-            n_starts: the number of subsequent start
-                      commands to expect, None if unknown.
+
+        :param acqtime: Acquisition time
+        :type acqtime: float
+        :param dataid: Data identifier, a scan id, for example.
+        :param n_starts: The number of start commands we expect to issue.
+        :type n_starts: int
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
@@ -58,30 +58,39 @@ class Detector(Gadget):
 
     def initialize(self):
         """
-        Mandatory method for initializing a detector.
+        Override this method, which initializes the detector.
         """
         raise NotImplementedError
 
     def stop(self):
+        """
+        Override this method, stops the dector.
+        """
         raise NotImplementedError
 
     def busy(self):
+        """
+        Override this method, returns the busy state.
+        """
         raise NotImplementedError
 
     def read(self):
+        """
+        Override this method, returns the data.
+        """
         raise NotImplementedError
 
 class TriggerSource(Detector):
     """
-    A TriggerSource is a device which follows the Detector API, but
-    which does not produce data. It can be seen as a lightweight
-    Detector subclass, where some of the methods are not mandatory.
+    A TriggerSource is a device which follows the ``Detector`` API,
+    but which does not produce data. It can be seen as a lightweight
+    ``Detector`` subclass, where some of the methods are not mandatory.
     """
     @classmethod
     def get_active(cls):
         """
         Returns a DetectorGroup instance containing the currently active
-        detectors.
+        ``TriggerSource`` instances.
         """
         return DetectorGroup(*[d for d in cls.getinstances() if d.active])
 
@@ -103,29 +112,44 @@ class LiveDetector(object):
         pass
 
     def start_live(self, acqtime=1.0):
+        """
+        Override this method.
+        """
         raise NotImplementedError
 
     def stop_live(self):
         """
-        This method should be made harmless, so that it can be
-        run even if the detector is not running.
+        Override this method.
+
+        Should be made harmless, so that it can be run even if the
+        detector is not running.
         """
         raise NotImplementedError
 
 class SoftwareLiveDetector(LiveDetector):
     """
-    Implements software live mode.
+    Implements a software live mode, where detectors that do not provide
+    a monitoring mode get started repeatedly from a background thread.
     """
     def __init__(self):
         self.thread = None
         self.stopped = False
 
     def start_live(self, acqtime=1.0):
+        """
+        Starts background acquisition.
+
+        :param acqtime: Acquisition time.
+        :type acqtime: float
+        """
         if self.thread is not None: self.stop_live()
         self.thread = threading.Thread(target=self._start, args=(acqtime,))
         self.thread.start()
 
     def stop_live(self):
+        """
+        Stops background acquisition.
+        """
         if self.thread is None: return
         self.stopped = True
         self.thread.join()
@@ -151,40 +175,61 @@ class TriggeredDetector(object):
 
 class BurstDetector(object):
     """
-    Defines the API for detectors that optionally run in burst mode.
+    Defines the API for detectors that optionally run in burst mode,
+    so that an autonomous train of measurements is made for one
+    arm/start command.
     """
     def __init__(self):
         self.burst_n = 1
 
 class DetectorGroup(object):
     """
-    Collection of Detector objects to be acquired together, in a scan
-    for example. Convenience class to call prepare, arm, busy etc
+    Collection of ``Detector`` objects to be acquired together, in a
+    scan for example. Convenience class to call prepare, arm, busy etc
     in shorthand.
     """
 
     def __init__(self, *args):
+        """
+        :param ``*args``: Sequence of ``Detector`` instances
+        """
         self.detectors = list()
         for arg in args:
             self.detectors.append(arg)
 
     def prepare(self, acqtime, dataid, n_starts):
+        """
+        Runs ``prepare`` on each of the constituent ``Detector``
+        instances.
+        """
         for d in self:
             d.prepare(acqtime, dataid, n_starts)
 
     def arm(self):
+        """
+        Arms all constituent devices.
+        """
         for d in self:
             d.arm()
 
     def start(self):
+        """
+        Starts all constituent devices.
+        """
         for d in self:
             d.start()
 
     def stop(self):
+        """
+        Stops all constituent devices.
+        """
         for d in self:
             d.stop()
 
     def busy(self):
+        """
+        Checks if one or more of the  constituent devices is busy.
+        """
         for d in self:
             if d.busy(): return True
         return False
@@ -242,9 +287,9 @@ class LsTrig(object):
 class StartLive(object):
     """
     Starts software live mode on listed eligible detectors. If none
-    are listed, all active and eligible detectors are started.
+    are listed, all active and eligible detectors are started. ::
 
-    startlive [<det1> ... <detN> <exposure time>]
+        startlive [<det1> ... <detN> <exposure time>]
     """
     def __init__(self, *args):
         try:
@@ -267,10 +312,10 @@ class StartLive(object):
 class StopLive(object):
     """
     Stops software live mode on listed eligible detectors. If
-	no arguments are given, all active live detectors are
-	stopped.
+    no arguments are given, all active live detectors are
+    stopped. ::
 
-    stoplive [<det1> ... <detN>]
+        stoplive [<det1> ... <detN>]
     """
     def __init__(self, *args):
         if args:
@@ -288,9 +333,9 @@ class StopLive(object):
 @macro
 class Deactivate(object):
     """
-    Deactivates all detectors or those specified.
+    Deactivates all detectors or those specified. ::
 
-    deactivate [<det1> ... <detN>]
+        deactivate [<det1> ... <detN>]
     """
     def __init__(self, *args):
         if args:
@@ -305,9 +350,9 @@ class Deactivate(object):
 @macro
 class Activate(object):
     """
-    Activates all detectors or those specified.
+    Activates all detectors or those specified. ::
 
-    deactivate [<det1> ... <detN>]
+        activate [<det1> ... <detN>]
     """
     def __init__(self, *args):
         if args:

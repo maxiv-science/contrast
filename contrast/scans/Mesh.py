@@ -7,15 +7,12 @@ import time
 @macro
 class Mesh(SoftwareScan):
     """
-    Software scan on a regular grid of N motors.
+    Software scan on a regular grid of N motors. ::
         
-    mesh <motor1> <start> <stop> <intervals> ... <exp_time>
+        mesh <motor1> <start> <stop> <intervals> ... <exp_time>
     """
 
     def __init__(self, *args):
-        """
-        Parse arguments.
-        """
         self.motors = []
         self.limits = []
         self.intervals = []
@@ -47,9 +44,9 @@ class Mesh(SoftwareScan):
 class DMesh(Mesh):
     """
     Software scan on a regular grid of N motors, with positions relative
-    to each motor's current one. Moves motors back at the end.
+    to each motor's current one. Moves motors back at the end. ::
 
-    dmesh <motor1> <start> <stop> <intervals> ... <exp_time>
+        dmesh <motor1> <start> <stop> <intervals> ... <exp_time>
     """
     def _generate_positions(self):
         current = {m.name:m.position() for m in self.motors}

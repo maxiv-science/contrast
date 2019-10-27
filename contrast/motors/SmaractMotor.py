@@ -1,5 +1,5 @@
 """
-Provides a Motor subclass for Smaracts.
+Provides a ``Motor`` subclass for Smaract positioners.
 """
 
 import PyTango
@@ -11,6 +11,13 @@ class SmaractLinearMotor(Motor):
     """
 
     def __init__(self, device, axis, **kwargs):
+        """
+        :param device: Path to the MCS Tango device
+        :type device: str
+        :param axis: Axis number on the controller
+        :type axis: int
+        :param ``**kwargs``: Passed on to the ``Motor`` base class
+        """
         super(SmaractLinearMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
         self.axis = int(axis)
