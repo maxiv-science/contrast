@@ -1,3 +1,8 @@
+"""
+Provides the ``Recorder`` base class as well as recorder subclasses for
+writing, streaming and plotting data.
+"""
+
 from .Recorder import Recorder, DummyRecorder, active_recorders, RecorderHeader, RecorderFooter
 try:
     from .PlotRecorder import PlotRecorder

@@ -31,15 +31,12 @@ class Tweak(Mesh):
     """
     An interactive scan where motor positions are chosen manually for
     each point. Useful for tweaking motors and reading the currently
-    active detectors after each step.
+    active detectors after each step. ::
 
-    tweak <motor1> <stepsize1> [<motor2> <stepsize2>] <exp_time>
+        tweak <motor1> <stepsize1> [<motor2> <stepsize2>] <exp_time>
     """
 
     def __init__(self, *args):
-        """
-        Parse arguments.
-        """
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)

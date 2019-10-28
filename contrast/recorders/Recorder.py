@@ -8,8 +8,11 @@ from multiprocessing import get_context
 # than 'fork' so you have to be careful only to call Recorder.start()
 # from main, see the example scripts.
 ctx = get_context('spawn')
-Process = ctx.Process
 Queue = ctx.Queue
+
+class Process(ctx.Process):
+    """ Dummy for cleaning up the inheritance documentation. """
+    pass
 
 import time
 import signal
@@ -37,9 +40,14 @@ class Recorder(Gadget, Process):
     Base class for Recorders. Provides the multiprocessing and queuing
     functionality.
     """
-    def __init__(self, name=None, delay=.1):
+    def __init__(self, delay=.1, **kwargs):
+        """
+        :param delay: Sleep time for the queue checking loop.
+        :type delay: float
+        :param ``**kwargs``: Passed on to base class constructor
+        """
         Process.__init__(self)
-        Gadget.__init__(self, name=name)
+        Gadget.__init__(self, **kwargs)
         ctx = get_context('spawn')
         self.queue = ctx.Queue()
         self.delay = delay
@@ -58,6 +66,9 @@ class Recorder(Gadget, Process):
                 self.act_on_data(dct)
 
     def run(self):
+        """
+        The main loop of the recorder.
+        """
         # ignore SIGINT signals from ctrl-C in the main process
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         self.init()
@@ -69,41 +80,42 @@ class Recorder(Gadget, Process):
 
     def init(self):
         """
-        Subclass this. Initialize (open windows, open files, ...)
+        *Override this.* Use this method to Initialize the recorder
+        (open windows, open files, etc.).
         """
         pass
 
     def act_on_header(self, dct):
         """
-        Subclass this. Performs an action when a new scan is started.
+        *Override this.* Performs an action when a new scan is started.
         The key-value pairs of dct are defined by RecorderHeader.
         """
         pass
 
     def act_on_data(self, dct):
         """
-        Subclass this. Performs an action when a new data package is
-        received. The keys of dct are detector and motor names, the values
-        are their readings at one particular point in the scan.
+        *Override this.* Performs an action when a new data package is
+        received. The keys of dct are detector and motor names, the
+        values are their readings at one particular point in the scan.
         """
         pass
 
     def act_on_footer(self):
         """
-        Subclass this. Performs an action when a scan ends.
+        *Override this.* Performs an action when a scan ends.
         """
         pass
 
     def periodic_check(self):
         """
-        Subclass if you like. A function which gets called on every iteration
-        of the recorder. Useful for example for checking if files should be
-        closed or whether a plot window still exists.
+        A function which gets called on every iteration of the recorder.
+        Useful for example for checking if files should be closed or
+        whether a plot window still exists.
         """
 
     def _close(self):
         """
-        Subclass this. Clean up (close windows, close files...)
+        *Override this.* Clean up (close windows, close files...)
         """
         pass
 
@@ -116,6 +128,9 @@ class Recorder(Gadget, Process):
 
 
 class DummyRecorder(Recorder):
+    """
+    Dummy recorder for practise.
+    """
     def act_on_header(self, dct):
         print('got a header! am told to write scan %d to %s' % (dct['scannr'], dct['path']))
     def act_on_data(self, dct):
@@ -129,6 +144,11 @@ class DummyRecorder(Recorder):
 
 
 def active_recorders():
+    """
+    Utilify function which returns a list of currently running
+    ``Recorder`` objects.
+
+    """
     return [r for r in Recorder.getinstances() if r.is_alive()]
 
 @macro
