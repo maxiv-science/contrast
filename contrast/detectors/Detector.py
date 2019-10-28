@@ -186,7 +186,7 @@ class DetectorGroup(object):
     """
     Collection of ``Detector`` objects to be acquired together, in a
     scan for example. Convenience class to call prepare, arm, busy etc
-    in shorthand.
+    in shorthand. Provides some safe measures too.
     """
 
     def __init__(self, *args):
@@ -197,13 +197,24 @@ class DetectorGroup(object):
         for arg in args:
             self.detectors.append(arg)
 
-    def prepare(self, acqtime, dataid, n_starts):
+    def prepare(self, acqtime, dataid, n_starts, trials=1, trial_delay=1.):
         """
         Runs ``prepare`` on each of the constituent ``Detector``
         instances.
         """
         for d in self:
-            d.prepare(acqtime, dataid, n_starts)
+            ok = False
+            tried = 0
+            while not ok:
+                try:
+                    d.prepare(acqtime, dataid, n_starts)
+                    ok = True
+                except:
+                    tried += 1
+                    print('*** problem calling prepare() on %s, trying again in %f s...' % (d.name, trial_delay))
+                    time.sleep(trial_delay)
+                    if tried == trials:
+                        raise
 
     def arm(self):
         """
@@ -212,12 +223,23 @@ class DetectorGroup(object):
         for d in self:
             d.arm()
 
-    def start(self):
+    def start(self, trials=1, trial_delay=1.):
         """
         Starts all constituent devices.
         """
         for d in self:
-            d.start()
+            ok = False
+            tried = 0
+            while not ok:
+                try:
+                    d.start()
+                    ok = True
+                except:
+                    tried += 1
+                    print('*** problem calling start() on %s, trying again in %f s...' % (d.name, trial_delay))
+                    time.sleep(trial_delay)
+                    if tried == trials:
+                        raise
 
     def stop(self):
         """

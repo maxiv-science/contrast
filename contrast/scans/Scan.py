@@ -132,7 +132,7 @@ class SoftwareScan(object):
         if group.busy():
             print('These gadgets are busy: %s' % (', '.join([d.name for d in group if d.busy()])))
             return
-        group.prepare(self.exposuretime, self.scannr, self.n_positions)
+        group.prepare(self.exposuretime, self.scannr, self.n_positions, trials=100)
         t0 = time.time()
         # send a header to the recorders
         snap = env.snapshot.capture()
@@ -152,7 +152,7 @@ class SoftwareScan(object):
                 group.arm()
                 # start detectors
                 self._before_start()
-                group.start()
+                group.start(trials=100)
                 while det_group.busy():
                     self._while_acquiring()
                     time.sleep(.01)

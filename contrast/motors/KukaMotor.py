@@ -31,7 +31,6 @@ class KukaRobot(object):
             KukaMotor(manager=self, name=names[0]),
             KukaMotor(manager=self, name=names[1]),
             KukaMotor(manager=self, name=names[2]),]
-        self.last_move = 0.0
 
     def __iter__(self):
         return self.polar_motors.__iter__()
@@ -60,7 +59,6 @@ class KukaRobot(object):
             time.sleep(.5)
         target = self._safe_get_pos().copy()
         target[self.motor2index(motor)] = pos
-        self.last_move = time.time()
         self.proxy.position = target
 
     def where_am_i(self, motor):
@@ -68,12 +66,7 @@ class KukaRobot(object):
         return current[self.motor2index(motor)]
 
     def busy(self):
-        if not (self.proxy.State() == PyTango.DevState.ON):
-            return True
-        elif (time.time() - self.last_move) < 5.0:
-            return True
-        else:
-            return False
+        return not (self.proxy.State() == PyTango.DevState.ON)
 
 class KukaMotor(Motor):
     """
