@@ -11,6 +11,12 @@ class LC400Motor(Motor):
     """
 
     def __init__(self, device, axis, **kwargs):
+        """
+        :param device: Path to the underlying Tango device.
+        :type device: str
+        :param axis: Axis number on the Tango controller
+        :param ``**kwargs``: Passed on to the base class constructor
+        """
         super(LC400Motor, self).__init__(**kwargs)
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(device)

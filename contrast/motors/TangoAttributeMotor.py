@@ -7,12 +7,19 @@ from . import Motor
 
 class TangoAttributeMotor(Motor):
     """
-    Motor interface to any Tango attribute, so that anything can
-    be scanned. These motors cannot be stopped and are never
-    considered busy.
+    Motor interface to any Tango attribute, so that anything can be
+    scanned. These motors cannot be stopped and are never considered
+    busy.
     """
 
     def __init__(self, device, attribute, **kwargs):
+        """
+        :param device: Path to the Tango device
+        :type device: str
+        :param attribute: Name of the Tango attribute
+        :type attribute: str
+        :param ``**kwargs``: Passed to the ``Motor`` base class
+        """
         super(TangoAttributeMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
         self.attribute = attribute

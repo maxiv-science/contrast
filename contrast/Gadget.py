@@ -9,11 +9,6 @@ class Gadget(object):
     all instances. The class method getinstances() on each subclass then
     filters and returns instances of that class or its children.
 
-    So:
-    [g.name for g in Gadget.getinstances()]         # is a list of all motors, detectors, and all else.
-    [m.name for m in Motor.getinstances()]          # is a list of all motors.
-    [m.name for m in DummyMotor.getinstances()]     # is a list of all dummy motors.
-
     """
 
     _base_class_instances = set()
@@ -28,7 +23,11 @@ class Gadget(object):
     @classmethod
     def getinstances(cls):
         """
-        Smart method stolen from effbot.org and modified.
+        Returns a generator over all instances of this class and its children. ::
+
+            [g.name for g in Gadget.getinstances()]      # a list of all motors, detectors, etc.
+            [m.name for m in Motor.getinstances()]       # a list of all motors.
+            [m.name for m in DummyMotor.getinstances()]  # a list of all dummy motors.
         """
         dead = set()
         for ref in cls._base_class_instances:

@@ -4,7 +4,10 @@ from ..environment import macro
 
 import time
 import numpy as np
-import PyTango
+try:
+    import PyTango
+except ModuleNotFoundError:
+    pass
 import os
 from h5py import ExternalLink
 

@@ -1,5 +1,8 @@
 from .Detector import Detector, LiveDetector, TriggeredDetector
-import PyTango
+try:
+    import PyTango
+except ModuleNotFoundError:
+    pass
 import time
 
 PROP_MAP = {1: 'counter01', 2: 'counter02', 3: 'counter03'}
