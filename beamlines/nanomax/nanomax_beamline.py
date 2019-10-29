@@ -19,7 +19,6 @@ if __name__=='__main__':
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus
-    from contrast.detectors.SimplePilatus import SimplePilatus
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Ni6602 import Ni6602CounterCard
@@ -139,7 +138,6 @@ if __name__=='__main__':
     stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01') 
 
     # detectors
-    pilatus_test = SimplePilatus(name='pilatus_test', devname='test/alebjo/pilatusproxy')
     pilatus = Pilatus(name='pilatus', 
                       lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
                       det_device='lima/pilatus/b-nanomax-mobile-ipc-01')

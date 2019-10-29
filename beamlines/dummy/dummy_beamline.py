@@ -13,7 +13,6 @@ if __name__=='__main__':
     from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
     from contrast.environment import env, register_shortcut
     from contrast.recorders import Hdf5Recorder, StreamRecorder
-    from dummy_ptycho import *
     import os
 
     env.userLevel = 1 # we're not experts!
