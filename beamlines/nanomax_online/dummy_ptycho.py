@@ -29,7 +29,8 @@ class Dummy_Ptycho(object):
         # create data parameter branch
         data = u.Param()
         data.shape = 256
-        data.num_frames = 200
+        data.num_frames = 400
+        data.density = .1
         data.min_frames = 1
         data.label=None
         data.psize=172e-6
@@ -77,7 +78,7 @@ class Dummy_Ptycho(object):
                 # print spec-style info
                 print('%-6u%-10.4f%-10.4f%10s' % (n, dct['x']*1e6, dct['y']*1e6, dct['diff'].shape))
                 n += 1
-                time.sleep(.1)
+                time.sleep(.2)
 
         except KeyboardInterrupt:
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
