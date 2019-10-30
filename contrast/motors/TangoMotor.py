@@ -29,7 +29,8 @@ class TangoMotor(Motor):
 
     def busy(self):
         state = self.proxy.State()
-        return not (state == PyTango.DevState.ON)
+        acceptable = (PyTango.DevState.ON, PyTango.DevState.ALARM)
+        return not (state in acceptable)
 
     def stop(self):
         self.proxy.stop()
