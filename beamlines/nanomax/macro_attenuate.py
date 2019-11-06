@@ -16,6 +16,12 @@ class attenuate(object):
     """
     Sets the attenuators to absorb X percent of the beam depending 
     on the current photon beam enegery.
+
+    usage / examples:
+        %attenuate                 # show current attenuator setting / value
+        %attenuate 0.2             # attenuate to 20% beam intensity
+        %attenuate 0.1 ['Si','Al'] # attenuate to 10% but only use Si and Al
+                                   # ['Al','Ti','Si','Cu','Fe','Mo','Ta','Ag'] 
     """
 
     ############################################################################
