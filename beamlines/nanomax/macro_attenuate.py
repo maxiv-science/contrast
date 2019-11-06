@@ -8,8 +8,8 @@ import numpy as np
 from contrast.environment import env, macro, register_shortcut, runCommand
 
 #   ToDo
-#       - read actual photon energy
 #       - avoid elements with absorption edges close to the current energy
+#       - way of printing the closest possible absorption values
 
 @macro
 class attenuate(object):
