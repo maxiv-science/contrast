@@ -8,7 +8,7 @@ from h5py import ExternalLink
 import requests
 import json
 import zmq
-import threading
+from threading import Thread
 
 class StreamReceiver:
     """
@@ -44,6 +44,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.api_version = api_version
         self._hdf_path_base = 'entry_%04d/measurement/Eiger/data'
         self.shape = shape
+        self.acqthread = None
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
@@ -52,7 +53,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def initialize(self):
         self.session = requests.Session()
         self.session.trust_env = False
-        self.receiver = StreamReceiver()
+        self.receiver = StreamReceiver('1.2.3.4')
 
         # set up the detector
         self._set('detector', 'config/threshold/1/mode', 'enabled')
@@ -83,7 +84,9 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             print(response.text)
 
     def busy(self):
-        return not self._get('detector', 'status/state')['value'] == 'idle'
+        if self.acqthread and self.acqthread.is_alive():
+            return True            
+        return not self._get('detector', 'status/state')['value'] in ('idle', 'ready')
 
     @property
     def compression(self):
@@ -126,31 +129,36 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             self._set('detector', 'config/ntrigger', self.hw_trig_n)
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
-        filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
-        path = os.path.join(env.paths.directory, filename)
-        self.dpath = path
+            self._set('detector', 'config/ntrigger', n_starts)
+        if not dataid:
+            self.dpath = None
+        else:
+            filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
+            path = os.path.join(env.paths.directory, filename)
+            self.dpath = path
         self.dtype = 'uint%u' % self._get('detector', 'config/bit_depth_image')['value']
+        self._set('detector', 'command/arm')
 
     def arm(self):
         """
         Start the detector if hardware triggered, just prepareAcq otherwise.
         """
-        if not self.receiver.arm(self.dpath, self.shape, self.dtype):
-            raise Exception('Bad things happened here')
-        self._set('detector', 'command/arm')
+        pass
+#        if not self.receiver.arm(self.dpath, self.shape, self.dtype):
+#            raise Exception('The zmq receiver is broken')
 
     def start(self):
         """
         Start acquisition when software triggered.
         """
         if not self.hw_trig:
-            raise NotImplementedError
-            self._set('detector', 'command/trigger') # BLOCKS! FIX.
-            self._set('detector', 'command/disarm')
+            self.acqthread = Thread(target=self._set, args=('detector', 'command/trigger'))
+            self.acqthread.start()
 
     def stop(self):
-        raise NotImplementedError
+        self._set('detector', 'command/disarm') # there's also cancel - not sure which to use
 
     def read(self):
-        return ExternalLink(self.dpath , self._hdf_path_base % self.arm_number)
+        return -1
+#        return ExternalLink(self.dpath , self._hdf_path_base % self.arm_number)
 
