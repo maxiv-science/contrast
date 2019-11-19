@@ -89,13 +89,13 @@ class SpecTable(object):
             data_width = len(str(v)) + 1
             header_width = len(k)
             w = max(data_width, header_width)
-            h = ('%%%us'%w)%k
+            h = ('%% %us'%w)%k
             return ' '*len(h),  h, '%%%ud'%w
         elif k=='dt':
             fmt = '%6.3f'
             return 6*' ', '%6s'%k, fmt
         elif isinstance(v, float):
-            fmt = '%.3e'
+            fmt = '% .3e'
             data_width = len(fmt%1)
             header_width = len(k)
             w = max(data_width, header_width)
