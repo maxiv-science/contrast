@@ -35,8 +35,7 @@ class Mesh(SoftwareScan):
             positions.append(np.linspace(self.limits[i][0],
                                          self.limits[i][1],
                                          self.intervals[i]+1))
-        grids = np.meshgrid(*reversed(positions))
-        grids = [l for l in reversed(grids)] # fastest last
+        grids = np.meshgrid(*positions)
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
 
