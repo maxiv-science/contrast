@@ -7,15 +7,15 @@ import PyTango
 from contrast.environment import macro, register_shortcut, runCommand
 
 # some handy shortcuts
-register_shortcut('diode1in', 'mv diode1_x 0')
-register_shortcut('diode1out', 'mv diode1_x -40000')
-register_shortcut('diode2in', 'mv diode2_y 30000')
-register_shortcut('diode2out', 'mv diode2_y 0')
-register_shortcut('fsin', 'mv fastshutter_x 0')
-register_shortcut('fsout', 'mv fastshutter_x -26000')
+register_shortcut('diode1in', 'umv diode1_x 0')
+register_shortcut('diode1out', 'umv diode1_x -40000')
+register_shortcut('diode2in', 'umv diode2_y 30000')
+register_shortcut('diode2out', 'umv diode2_y 0')
+register_shortcut('fsin', 'umv fastshutter_x 0')
+register_shortcut('fsout', 'umv fastshutter_x -26000')
 register_shortcut('watten', 'wm attenuator*')
 register_shortcut('wsample', 'wm base* s?')
-register_shortcut('wbl', 'wm ivu_* energy ssa_gap*')
+register_shortcut('wbl', 'wm ivu_* energy mono_x2per ssa_gap*')
 
 @macro
 class FsOpen(object):
@@ -29,6 +29,10 @@ class FsOpen(object):
             print("Fastshutter is now opened")
         except:
             print("Fastshutter could not be opened")
+        # Workaround: as long as the fast shutter is at the wrong height,
+        # use one of the slit blades in DM4 instead
+        print("Moving seh_top blade out")
+        runCommand('umv seh_top 3000')
 
 @macro
 class FsClose(object):
@@ -42,6 +46,11 @@ class FsClose(object):
             print("Fastshutter is now closed")
         except:
             print("Fastshutter could not be closed")
+        # Workaround: as long as the fast shutter is at the wrong height,
+        # use one of the slit blades in DM4 instead
+        print("Moving seh_top blade in")
+        runCommand('umv seh_top 0')
+
 
 @macro
 class M1shift(object):
