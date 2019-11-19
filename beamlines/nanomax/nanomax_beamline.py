@@ -176,14 +176,11 @@ if __name__=='__main__':
     # define pre- and post-scan actions, per scan base class
     import PyTango
     import time
-    shutter = PyTango.DeviceProxy('B303A-O/PSS/BS-01')
     def pre_scan_stuff(slf):
-        shutter.open()
-        time.sleep(3)
         runCommand('fsopen')
+        time.sleep(1)
         runCommand('stoplive')
     def post_scan_stuff(slf):
-        shutter.close()
         runCommand('fsclose')
 
     SoftwareScan._before_scan = pre_scan_stuff

@@ -29,6 +29,10 @@ class FsOpen(object):
             print("Fastshutter is now opened")
         except:
             print("Fastshutter could not be opened")
+        # Workaround: as long as the fast shutter is at the wrong height,
+        # use one of the slit blades in DM4 instead
+        print("Moving seh_top blade out")
+        runCommand('umv seh_top 3000')
 
 @macro
 class FsClose(object):
@@ -42,6 +46,11 @@ class FsClose(object):
             print("Fastshutter is now closed")
         except:
             print("Fastshutter could not be closed")
+        # Workaround: as long as the fast shutter is at the wrong height,
+        # use one of the slit blades in DM4 instead
+        print("Moving seh_top blade in")
+        runCommand('umv seh_top 0')
+
 
 @macro
 class M1shift(object):
