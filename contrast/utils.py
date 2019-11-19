@@ -140,7 +140,10 @@ class SpecTable(object):
         self._line_format = '  '.join(formats)
         h1 = '  '.join(headers1)
         h2 = '  '.join(headers2)
-        return '\n'.join([h1, h2])
+        if h1.strip():
+            return '\n'.join([h1, h2])
+        else:
+            return h2
 
     def fill_line(self, dct):
         """

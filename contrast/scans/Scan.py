@@ -35,7 +35,9 @@ class SoftwareScan(object):
         dct.move_to_end('     #', last=False)
         if i == 0:
             self.table = SpecTable()
-            print('\n'+self.table.header_lines(dct))
+            header = self.table.header_lines(dct)
+            print('\n'+header)
+            print('-'*len(header.split('\n')[-1]))
         print(self.table.fill_line(dct))
         if self.n_positions and self.print_progress:
             timeleft = str(datetime.timedelta(seconds=(self.n_positions-i)*dct['dt']/(i+1))).split('.')[0]
