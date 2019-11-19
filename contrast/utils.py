@@ -1,6 +1,8 @@
 from .Gadget import Gadget
 from collections import OrderedDict
 from fnmatch import filter
+import h5py
+import numpy as np
 
 def list_to_table(lst, titles, margins=3, sort=True):
     """
@@ -71,3 +73,89 @@ def str_to_args(line):
             args_out.append(eval(a))
     return args_out
 
+
+class SpecTable(object):
+    """
+    A dyamic table, for use when the column titles and one data row are
+    known.
+    """
+
+    def format_pair(self, k, v):
+        """
+        Return two title strings and a format string corresponding to
+        the k:v pair.
+        """
+        if isinstance(v, int):
+            data_width = len(str(v)) + 1
+            header_width = len(k)
+            w = max(data_width, header_width)
+            h = ('%%%us'%w)%k
+            return ' '*len(h),  h, '%%%ud'%w
+        elif k=='dt':
+            fmt = '%6.3f'
+            return 6*' ', '%6s'%k, fmt
+        elif isinstance(v, float):
+            fmt = '%.3e'
+            data_width = len(fmt%1)
+            header_width = len(k)
+            w = max(data_width, header_width)
+            spaces = ' '*(w-data_width)
+            h = ('%%%us'%w)%k
+            return ' '*len(h),  h, spaces+fmt
+        elif isinstance(v, dict):
+            results = [self.format_pair(k_, v_) for k_, v_ in v.items()]
+            keys = '  '.join([str(r[-2]) for r in results])
+            fmts = '  '.join([str(r[-1]) for r in results])
+            h1 = ('%%.%us'%(len(keys))) % k
+            pl = (len(keys)-len(h1)) // 2
+            pr = (len(keys)-len(h1)) - pl
+            h1 = '.' * pl + h1 + '.' * pr
+            return h1, keys, fmts
+        elif isinstance(v, h5py.ExternalLink):
+            data_width = len('hdf5-link')
+            header_width = len(k)
+            w = max(data_width, header_width)
+            h = ('%%%us'%w)%k
+            return ' '*len(h), h, '%%%us'%w
+        else:
+            fmt = '%12.12s'
+            w = len(fmt%1)
+            h = ('%%%us'%w)%k
+            return ' '*len(h), h, fmt
+
+    def header_lines(self, dct):
+        """
+        Takes a dict of {header: value} pairs, and returns a header
+        line. At the same time it calculates the format string for
+        subsequent data lines.
+        """
+        headers1 = []
+        headers2 = []
+        formats = []
+        for k, v in dct.items():
+            h1, h2, f = self.format_pair(k, v)
+            headers1.append(h1)
+            headers2.append(h2)
+            formats.append(f)
+        self._line_format = '  '.join(formats)
+        h1 = '  '.join(headers1)
+        h2 = '  '.join(headers2)
+        return '\n'.join([h1, h2])
+
+    def fill_line(self, dct):
+        """
+        Takes a data dict and returns a data line.
+        """
+        if not hasattr(self, '_line_format'):
+            self.header_lines(dct)
+        vals = []
+        for v in dct.values():
+            if isinstance(v, dict):
+                vals += list(v.values())
+            elif isinstance(v, h5py.ExternalLink):
+                vals += ['hdf5-link']
+            elif isinstance(v, np.ndarray):
+                vals += [str(v.shape)]
+            else:
+                vals.append(v)
+        return self._line_format % tuple(vals)

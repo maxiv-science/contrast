@@ -25,6 +25,7 @@ class NpointFlyscan(Mesh):
             self.fastintervals = int(args[3])
             self.exptime = float(args[-2])
             self.latency = float(args[-1])
+            self.print_progress = False
         except:
             #raise MacroSyntaxError
             raise
