@@ -1,8 +1,11 @@
 import time
+import datetime
 import numpy as np
 from ..environment import macro, env
 from ..recorders import active_recorders, RecorderHeader, RecorderFooter
 from ..detectors import Detector, TriggerSource
+from ..utils import SpecTable
+from collections import OrderedDict
 
 class SoftwareScan(object):
     """
@@ -24,31 +27,19 @@ class SoftwareScan(object):
         self.exposuretime = exposuretime
         self.scannr = env.nextScanID
         self.n_positions = None
+        self.print_progress = True
         env.nextScanID += 1
 
-    def header_line(self):
-        motor_names = [m.name for m in self.motors]
-        det_group = Detector.get_active()
-        det_names = [d.name for d in det_group]
-        header = '#       ' + len(motor_names) * '%-8s' + len(det_group) * '%-14s' + 'dt'
-        line = '-' * (8 + len(motor_names) * 8 + len(det_group) * 16 + 8)
-        return ('\n' + header + '\n' + line) % tuple(motor_names + det_names)
-
-    def table_line(self):
-        det_group = Detector.get_active()
-        return '%-8d' + len(self.motors) * '%-8.2f' + len(det_group) * '%-12s  ' + '%-8.2f'
-
-    def format_number(self, nr):
-        if isinstance(nr, dict):
-            return '<%d-dict>' % len(nr)
-        try:
-            return '%8s' % (nr.shape,)
-        except:
-            pass
-        try:
-            return '%8e' % nr
-        except TypeError:
-            return str(nr)[-8:]
+    def output(self, i, dct):
+        dct['     #'] = i
+        dct.move_to_end('     #', last=False)
+        if i == 0:
+            self.table = SpecTable()
+            print('\n'+self.table.header_lines(dct))
+        print(self.table.fill_line(dct))
+        if self.n_positions and self.print_progress:
+            timeleft = str(datetime.timedelta(seconds=(self.n_positions-i)*dct['dt']/(i+1))).split('.')[0]
+            print('Time left: %s\r' % timeleft, end='')
 
     def _calc_time_needed(self):
         """
@@ -122,9 +113,7 @@ class SoftwareScan(object):
         """
         self._before_scan()
         print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
-        print(self.header_line())
         positions = self._generate_positions()
-        table_line = self.table_line()
         # find and prepare the detectors
         det_group = Detector.get_active()
         trg_group = TriggerSource.get_active()
@@ -158,19 +147,17 @@ class SoftwareScan(object):
                     time.sleep(.01)
                 # read detectors and motors
                 dt = time.time() - t0
-                dct = {'dt': dt}
-                for d in det_group:
-                    dct[d.name] = d.read()
+                dct = OrderedDict()
                 for m in self.motors:
                     dct[m.name] = m.position()
+                for d in det_group:
+                    dct[d.name] = d.read()
+                dct['dt'] = dt
                 # pass data to recorders
                 for r in active_recorders():
                     r.queue.put(dct)
                 # print spec-style info
-                print(table_line % tuple([i] + 
-                      [m.position() for m in self.motors]
-                      + [self.format_number(dct[d.name]) for d in det_group]
-                      + [dt]))
+                self.output(i, dct)
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
         except KeyboardInterrupt:
             group.stop()
