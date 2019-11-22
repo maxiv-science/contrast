@@ -58,16 +58,33 @@ def str_to_args(line):
         In [14]: str_to_args("samx 'hej' 1./20")
         Out[14]: [<contrast.motors.Motor.DummyMotor at 0x7efe164d4f98>, 'hej', 0.05]
     """
-    args_in = line.split()
-    args_out = []
+    args_in    = line.split()
+    args_out   = []
+    kwargs_out = {}
     gadget_lookup = {g.name: g for g in Gadget.getinstances()}
     for a in args_in:
-        if ('*' in a) or ('?' in a):
-            matching_names = filter(gadget_lookup.keys(), a)
-            args_out += [gadget_lookup[name] for name in matching_names]
-        elif a in gadget_lookup.keys():
-            args_out.append(gadget_lookup[a])
+        if '=' in a:
+            pass
+            kwargs_out[a.split('=')[0]] = eval(a.split('=')[1])
         else:
-            args_out.append(eval(a))
+            if ('*' in a) or ('?' in a):
+                matching_names = filter(gadget_lookup.keys(), a)
+                args_out += [gadget_lookup[name] for name in matching_names]
+            elif a in gadget_lookup.keys():
+                args_out.append(gadget_lookup[a])
+            else:
+                args_out.append(eval(a))
     return args_out
 
+def str_to_kwargs(line):
+    """
+    Handy function which reads a list of keyword arguments
+    """
+    args_in    = line.split()
+    kwargs_out = {}
+    for a in args_in:
+        if '=' in a:
+            kwargs_out[a.split('=')[0]] = eval(a.split('=')[1])
+        else:
+            pass
+    return kwargs_out

@@ -23,6 +23,11 @@ if __name__=='__main__':
     samy = DummyMotor(name='samy')
     samy.dial_limits = (-5, 5)
 
+    samr = DummyMotor(name='samr')
+    samr.dial_limits = (-180, 180)
+    samr.velocity = 30
+
+
     energy = DummyMotor(name='energy')
     energy.dial_limits   = (5000, 35000)
     energy.velocity      = 50000
