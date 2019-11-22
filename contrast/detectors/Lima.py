@@ -50,7 +50,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                         print('*** Timeout during %s call to %s. Trying again...' % (cmd, self.lima_device_name))
                         timeout = True
                     elif 'run prepareacq before starting' in e_.desc.lower():
-                        print('*** StartAcq called twice. Moving on...')
+                        print('*** StartAcq called twice on %s. Moving on...'%self.name)
                         doublecall = True
                         ok = True
                 if not timeout or doublecall:
@@ -198,15 +198,19 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         self._safe_call_command('stopAcq')
 
     def busy(self):
-        if self.hybrid_mode: 
-            if self.arm_number + 1 < self.n_starts:
-                return self.arm_number > self.lima.last_image_acquired
-            elif not self.lima.ready_for_next_acq:
-                print('%s waiting for Lima...' % self.name)
-                time.sleep(.5)
-                return True
-        else:
-            return not self.lima.ready_for_next_acq
+        try:
+            if self.hybrid_mode: 
+                if self.arm_number + 1 < self.n_starts:
+                    return self.arm_number > self.lima.last_image_acquired
+                elif not self.lima.ready_for_next_acq:
+                    print('%s waiting for Lima...' % self.name)
+                    time.sleep(.5)
+                    return True
+            else:
+                return not self.lima.ready_for_next_acq
+        except PyTango.DevFailed:
+            print('*** %s busy() failed, returning True...'%self.name)
+            return True
 
     def read(self):
         if self.saving_filename is None:
