@@ -36,13 +36,6 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         Noticed that lima calls tend to time out for no apparent
         reason, this works around it by trying again after timeouts
         but raising all other errors.
-
-        It could be that in the future, this causes errors like
-        'Run prepareAcq before starting acquisition'
-        instead. That would be because startAcq takes effect but doesn't
-        return, in which case calling it again wouldn't be a good idea.
-        If that happens, wrap self.prepare, self.start, etc, in
-        error handling.
         """
         ok = False
         while not ok:
@@ -51,11 +44,16 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                 ok = True
             except PyTango.DevFailed as e:
                 timeout = False
+                doublecall = False
                 for e_ in e.args: 
                     if 'timeout' in e_.desc.lower():
                         print('*** Timeout during %s call to %s. Trying again...' % (cmd, self.lima_device_name))
                         timeout = True
-                if not timeout:
+                    elif 'run prepareacq before starting' in e_.desc.lower():
+                        print('*** StartAcq called twice. Moving on...')
+                        doublecall = True
+                        ok = True
+                if not timeout or doublecall:
                     raise
 
     def _initialize_det(self):
