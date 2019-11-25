@@ -54,8 +54,7 @@ def macro(cls):
     name = cls.__name__.lower()
 
     def fcn(line):
-        args   = utils.str_to_args(line)
-        kwargs = utils.str_to_kwargs(line)
+        args, kwargs = utils.str_to_args(line)
         try:
             obj = cls(*args, **kwargs)
         except MacroSyntaxError:

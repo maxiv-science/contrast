@@ -12,12 +12,11 @@ class Mesh(SoftwareScan):
     mesh <motor1> <start> <stop> <intervals> ... <exp_time>
     """
 
-    def __init__(self, *args, **kwargs):
-
+    def __init__(self, *args, jitter=0):
         self.motors = []
         self.limits = []
         self.intervals = []
-        self.kwargs = kwargs
+        self.jitter = jitter
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)
@@ -39,26 +38,22 @@ class Mesh(SoftwareScan):
         grids = np.meshgrid(*reversed(positions))
         grids = [l for l in reversed(grids)] # fastest last
 
-        if 'jitter' in self.kwargs.keys():
-            if self.kwargs['jitter']!=0:
+        if self.jitter:
+            step_sizes = []
+            for i, motor in enumerate(self.motors):
+                d = np.abs(self.limits[i][0]-self.limits[i][1])
+                n = self.intervals[i]
+                step_sizes.append(d / n)
 
-                step_sizes = []
-                for i, motor in enumerate(self.motors):
-                    d = np.abs(self.limits[i][0]-self.limits[i][1])
-                    n = self.intervals[i]
-                    step_sizes.append(1.*d/n)
+            rel_jitter = np.random.uniform(low  = -.5*self.jitter,
+                                           high = .5*self.jitter,
+                                           size = np.shape(grids))
 
-                rel_jitter = np.random.uniform(low  = -.5*self.kwargs['jitter'],
-                                               high = .5*self.kwargs['jitter'],
-                                               size = np.shape(grids))
-
-                print(np.min(rel_jitter),np.max(rel_jitter))
-                for i, step_size in enumerate(step_sizes):
-                    grids[i] += rel_jitter[i]*step_sizes[i] 
+            for i, step_size in enumerate(step_sizes):
+                grids[i] += rel_jitter[i] * step_size
 
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
-        
 
 
 @macro
