@@ -31,6 +31,37 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
 
+    def _safe_write(self, attr, val):
+        ok = False
+        while not ok:
+            try:
+                self.lima.write_attribute(attr, val)
+                ok = True
+            except PyTango.DevFailed as e:
+                timeout = False
+                for e_ in e.args:
+                    if 'timeout' in e_.desc.lower():
+                        print('*** Timeout when writing attribute %s on %s. Trying again...' % (attr, self.lima_device_name))
+                        timeout = True
+                if not timeout:
+                    raise
+
+    def _safe_read(self, attr):
+        ok = False
+        while not ok:
+            try:
+                result = self.lima.read_attribute(attr).value
+                ok = True
+            except PyTango.DevFailed as e:
+                timeout = False
+                for e_ in e.args:
+                    if 'timeout' in e_.desc.lower():
+                        print('*** Timeout when reading attribute %s on %s. Trying again...' % (attr, self.lima_device_name))
+                        timeout = True
+                if not timeout:
+                    raise
+        return result
+
     def _safe_call_command(self, cmd, params=None):
         """
         Noticed that lima calls tend to time out for no apparent
@@ -39,7 +70,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         """
         ok = False
         while not ok:
-            try: 
+            try:
                 self.lima.command_inout(cmd, params)
                 ok = True
             except PyTango.DevFailed as e:
@@ -49,10 +80,11 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                     if 'timeout' in e_.desc.lower():
                         print('*** Timeout during %s call to %s. Trying again...' % (cmd, self.lima_device_name))
                         timeout = True
-                    elif 'run prepareacq before starting' in e_.desc.lower():
+                    if 'run prepareacq before starting' in e_.desc.lower():
                         print('*** StartAcq called twice on %s. Moving on...'%self.name)
                         doublecall = True
-                        ok = True
+                        if not timeout:
+                            ok = True
                 if not timeout or doublecall:
                     raise
 
@@ -115,7 +147,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         number of images etc.
         """
         # get out of the fault caused by trigger timeout
-        if (self.lima.acq_status == 'Fault') and (self.lima.acq_status_fault_error == 'No error'):
+        if (self._safe_read('acq_status') == 'Fault') and (self._safe_read('acq_status_fault_error') == 'No error'):
             self._safe_call_command('stopAcq')
             self._safe_call_command('prepareAcq')
 
@@ -127,33 +159,33 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
         if dataid is None:
             # no saving
-            self.lima.saving_mode = "MANUAL" # no saving
+            self._safe_write('saving_mode', "MANUAL") # no saving
             self.saving_filename = None
         else:
             # saving
-            self.lima.saving_directory = env.paths.directory
-            self.lima.saving_mode = "AUTO_FRAME"
+            self._safe_write('saving_directory', env.paths.directory)
+            self._safe_write('saving_mode', "AUTO_FRAME")
             prefix = 'scan_%06d_%s' % (dataid, self.name)
-            self.lima.saving_prefix = prefix
-            self.saving_filename = prefix + self.lima.saving_suffix
+            self._safe_write('saving_prefix', prefix)
+            self.saving_filename = prefix + self._safe_read('saving_suffix')
             if os.path.exists(os.path.join(env.paths.directory, self.saving_filename)):
                 raise Exception('%s hdf5 file already exists' % self.name)
 
         if self.hw_trig:
-            self.lima.acq_trigger_mode = self.EXT_TRG_MODE
-            self.lima.acq_nb_frames = self.hw_trig_n
+            self._safe_write('acq_trigger_mode', self.EXT_TRG_MODE)
+            self._safe_write('acq_nb_frames', self.hw_trig_n)
         else:
-            self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
-            self.lima.acq_nb_frames = self.burst_n
+            self._safe_write('acq_trigger_mode', "INTERNAL_TRIGGER")
+            self._safe_write('acq_nb_frames', self.burst_n)
 
         if self.hybrid_mode:
             if self.burst_n != 1:
                 raise Exception('burst_n > 1 and hybrid mode makes no sense')
-            self.lima.acq_trigger_mode = self.EXT_TRG_MODE
-            self.lima.acq_nb_frames = n_starts
+            self._safe_write('acq_trigger_mode', self.EXT_TRG_MODE)
+            self._safe_write('acq_nb_frames', n_starts)
 
         self.acqtime = acqtime
-        self.lima.acq_expo_time = acqtime
+        self._safe_write('acq_expo_time', acqtime)
 
         if self.hybrid_mode:
             time.sleep(.1)
@@ -174,7 +206,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         self._safe_call_command('prepareAcq')
-        while not self.lima.ready_for_next_acq:
+        while not self._safe_read('ready_for_next_acq'):
             time.sleep(.005)
         if self.hw_trig:
             self._safe_call_command('startAcq')
@@ -187,7 +219,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        if self.hybrid_mode and self.lima.last_image_acquired > -1:
+        if self.hybrid_mode and self._safe_read('last_image_acquired') > -1:
             return
         else:
             self._safe_call_command('startAcq')
@@ -198,25 +230,21 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         self._safe_call_command('stopAcq')
 
     def busy(self):
-        try:
-            if self.hybrid_mode: 
-                if self.arm_number + 1 < self.n_starts:
-                    return self.arm_number > self.lima.last_image_acquired
-                elif not self.lima.ready_for_next_acq:
-                    print('%s waiting for Lima...' % self.name)
-                    time.sleep(.5)
-                    return True
-            else:
-                return not self.lima.ready_for_next_acq
-        except PyTango.DevFailed:
-            print('*** %s busy() failed, returning True...'%self.name)
-            return True
+        if self.hybrid_mode:
+            if self.arm_number + 1 < self.n_starts:
+                return self.arm_number > self._safe_read('last_image_acquired')
+            elif not self._safe_read('ready_for_next_acq'):
+                print('%s waiting for Lima...' % self.name)
+                time.sleep(.5)
+                return True
+        else:
+            return not self._safe_read('ready_for_next_acq')
 
     def read(self):
         if self.saving_filename is None:
             return None
         else:
-            absfile = os.path.join(self.lima.saving_directory, self.saving_filename)
+            absfile = os.path.join(self._safe_read('saving_directory'), self.saving_filename)
             if self.hybrid_mode:
                 return ExternalLink(absfile , self._hdf_path_base % 0)
             else:
