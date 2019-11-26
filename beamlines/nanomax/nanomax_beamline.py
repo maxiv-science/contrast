@@ -185,10 +185,16 @@ if __name__=='__main__':
     import PyTango
     import time
     def pre_scan_stuff(slf):
+        basex.proxy.PowerOn = False
+        basey.proxy.PowerOn = False
+        basez.proxy.PowerOn = False
         runCommand('fsopen')
         time.sleep(1)
         runCommand('stoplive')
     def post_scan_stuff(slf):
+        basex.proxy.PowerOn = True
+        basey.proxy.PowerOn = True
+        basez.proxy.PowerOn = True
         runCommand('fsclose')
 
     SoftwareScan._before_scan = pre_scan_stuff
