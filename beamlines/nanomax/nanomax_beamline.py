@@ -20,6 +20,7 @@ if __name__=='__main__':
     from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus
     from contrast.detectors.Merlin import Merlin
+    from contrast.detectors.Andor import Andor
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Ni6602 import Ni6602CounterCard
     from contrast.detectors.AdLink import AdLinkAnalogInput
@@ -154,6 +155,9 @@ if __name__=='__main__':
     xspress3 = Xspress3(name='xspress3',
                         lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
                         det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
+    andor = Andor(name='andor',
+                   lima_device='lima/limaccds/andortest',
+                   det_device='lima/andor3/andortest')
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
 
