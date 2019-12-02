@@ -14,28 +14,25 @@ class StreamReceiver:
     """
     Helper class for the Eiger.
     """
-    def __init__(self, receiver_ip, receiver_port=9997):
+    def __init__(self, receiver_ip):
         self.context = zmq.Context()
         self.req_socket = self.context.socket(zmq.REQ)
-        self.req_socket.connect('tcp://%s:%u' % (receiver_ip, receiver_port))
-
-    def arm(self, filename, shape, dtype):
-        self.req_socket.send_json({'command': 'arm',
-                                   'filename': filename,
-                                   'type': dtype,
-                                   'shape': shape})
+        self.req_socket.connect('tcp://%s:9997' %receiver_ip)
+    
+    def prepare(self, filename):
+        self.req_socket.send_json({'command': 'prepare', 
+                                   'filename': filename})
         print('send msg')
-        if self.req_socket.poll(1000):
+        if self.req_socket.poll(2000):
             print(self.req_socket.recv())
             return True
         else:
             return False
 
-
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def __init__(self, name=None, ip_address='172.16.126.91', api_version='1.8.0',
-                 shape=[2068, 2162], receiver_ip=''):
+                 shape=[2068, 2162], receiver_ip='172.18.1.245'):
         """
         Class to interact directly with the Eiger Simplon API.
         """
@@ -53,7 +50,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def initialize(self):
         self.session = requests.Session()
         self.session.trust_env = False
-        self.receiver = StreamReceiver('1.2.3.4')
+        self.receiver = StreamReceiver(self.receiver_ip)
 
         # set up the detector
         self._set('detector', 'config/threshold/1/mode', 'enabled')
@@ -61,6 +58,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('stream', 'config/mode', 'enabled')
         self._set('filewriter', 'config/mode', 'disabled')
         self._set('monitor', 'config/mode', 'enabled')
+        self._set('stream', 'config/header_detail', 'all')
+        self._set('detector', 'config/counting_mode', 'retrigger')
 
     def _get(self, subsystem, key):
         response = self.session.get('http://%s/%s/api/%s/%s' %(self.dcu_ip, subsystem, self.api_version, key))
@@ -121,6 +120,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
+        print('prepare: dataid =', dataid)
         self._set('detector', 'config/nimages', self.burst_n)
         self._set('detector', 'config/count_time', acqtime)
         self._set('detector', 'config/count_time', acqtime+1e-6)
@@ -130,7 +130,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
             self._set('detector', 'config/ntrigger', n_starts)
-        if not dataid:
+        if dataid is None:
             self.dpath = None
         else:
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
@@ -138,14 +138,16 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             self.dpath = path
         self.dtype = 'uint%u' % self._get('detector', 'config/bit_depth_image')['value']
         self._set('detector', 'command/arm')
+        self.arm_number = -1
 
     def arm(self):
         """
         Start the detector if hardware triggered, just prepareAcq otherwise.
         """
-        pass
-#        if not self.receiver.arm(self.dpath, self.shape, self.dtype):
-#            raise Exception('The zmq receiver is broken')
+        self.arm_number += 1
+        print('arm, path =', self.dpath)
+        if not self.receiver.prepare(filename=self.dpath):
+            raise Exception('The zmq receiver is broken')
 
     def start(self):
         """
@@ -159,6 +161,4 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('detector', 'command/disarm') # there's also cancel - not sure which to use
 
     def read(self):
-        return -1
-#        return ExternalLink(self.dpath , self._hdf_path_base % self.arm_number)
-
+        return ExternalLink(self.dpath , self._hdf_path_base % self.arm_number)
