@@ -140,14 +140,15 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('detector', 'command/arm')
         self.arm_number = -1
 
+        print('arm, path =', self.dpath)
+        if not self.receiver.prepare(filename=self.dpath):
+            raise Exception('The zmq receiver is broken')
+
     def arm(self):
         """
         Start the detector if hardware triggered, just prepareAcq otherwise.
         """
         self.arm_number += 1
-        print('arm, path =', self.dpath)
-        if not self.receiver.prepare(filename=self.dpath):
-            raise Exception('The zmq receiver is broken')
 
     def start(self):
         """
