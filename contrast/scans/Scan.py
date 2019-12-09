@@ -195,6 +195,7 @@ class LoopScan(SoftwareScan):
     def __init__(self, intervals, exposuretime=1.0):
         super(LoopScan, self).__init__(float(exposuretime))
         self.intervals = intervals
+        self.n_positions = intervals + 1
         self.motors = []
 
     def _generate_positions(self):
