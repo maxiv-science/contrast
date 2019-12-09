@@ -1,3 +1,8 @@
+"""
+This currently arms the eiger on every software step, which is sub-optimal. To be fixed
+later, but the receiver has to be updated too.
+"""
+
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
 
@@ -22,9 +27,9 @@ class StreamReceiver:
     def prepare(self, filename):
         self.req_socket.send_json({'command': 'prepare', 
                                    'filename': filename})
-        print('send msg')
-        if self.req_socket.poll(2000):
-            print(self.req_socket.recv())
+#        print('send msg')
+        if self.req_socket.poll(10000):
+            self.req_socket.recv()
             return True
         else:
             return False
@@ -53,6 +58,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.receiver = StreamReceiver(self.receiver_ip)
 
         # set up the detector
+        self._set('detector', 'command/disarm')
+        self._set('detector', 'command/cancel') # who knows
         self._set('detector', 'config/threshold/1/mode', 'enabled')
         self._set('detector', 'config/threshold/2/mode', 'disabled')
         self._set('stream', 'config/mode', 'enabled')
@@ -74,10 +81,10 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def _set(self, subsystem, key, value=None):
         url = 'http://%s/%s/api/%s/%s' %(self.dcu_ip, subsystem, self.api_version, key)
-        if value:
-            payload = {'value': value}
-        else:
+        if value is None:
             payload = None
+        else:
+            payload = {'value': value}
         response = self.session.put(url, json=payload)
         if response.status_code != 200:
             print(response.text)
@@ -101,11 +108,31 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def energy(self):
-        return self._get('detector', 'config/photon_energy')['value']
+        return self._get('detector', 'config/photon_energy')['value'] / 1000
 
     @energy.setter
     def energy(self, val):
-        self._set('detector', 'config/photon_energy', float(val))
+        if (val < 4) or (val > 30):
+            print('Bad energy value, should be in keV and between 4-30')
+            return
+        val = float(val)*1000
+        self._set('detector', 'config/photon_energy', val)
+
+    @property
+    def mask_applied(self):
+        return self._get('detector', 'config/pixel_mask_applied')['value']
+
+    @mask_applied.setter
+    def mask_applied(self, val):
+        self._set('detector', 'config/pixel_mask_applied', val)
+
+    @property
+    def pixel_splitting(self):
+        return self._get('detector', 'config/virtual_pixel_correction_applied')['value']
+
+    @pixel_splitting.setter
+    def pixel_splitting(self, val):
+        self._set('detector', 'config/virtual_pixel_correction_applied', val)
 
     @property
     def threshold(self):
@@ -120,40 +147,40 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
-        print('prepare: dataid =', dataid)
         self._set('detector', 'config/nimages', self.burst_n)
-        self._set('detector', 'config/count_time', acqtime)
-        self._set('detector', 'config/count_time', acqtime+1e-6)
+        self._set('detector', 'config/frame_time', acqtime)
+        self._set('detector', 'config/count_time', acqtime - 100.0e-9)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
             self._set('detector', 'config/ntrigger', self.hw_trig_n)
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
-            self._set('detector', 'config/ntrigger', n_starts)
+##            self._set('detector', 'config/ntrigger', n_starts)
+            self._set('detector', 'config/ntrigger', 1) ### temporary
         if dataid is None:
-            self.dpath = None
+            self.dpath = ''
         else:
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             path = os.path.join(env.paths.directory, filename)
             self.dpath = path
         self.dtype = 'uint%u' % self._get('detector', 'config/bit_depth_image')['value']
-        self._set('detector', 'command/arm')
+##        self._set('detector', 'command/arm')
         self.arm_number = -1
-
-        print('arm, path =', self.dpath)
-        if not self.receiver.prepare(filename=self.dpath):
-            raise Exception('The zmq receiver is broken')
 
     def arm(self):
         """
         Start the detector if hardware triggered, just prepareAcq otherwise.
         """
+        if not self.receiver.prepare(filename=self.dpath):
+            raise Exception('The zmq receiver is broken')
+        self._set('detector', 'command/arm') 
         self.arm_number += 1
 
     def start(self):
         """
         Start acquisition when software triggered.
         """
+
         if not self.hw_trig:
             self.acqthread = Thread(target=self._set, args=('detector', 'command/trigger'))
             self.acqthread.start()
