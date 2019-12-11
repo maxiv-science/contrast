@@ -135,13 +135,13 @@ class DummyMotor(Motor):
         dt = time.time() - self._started
         T = abs(dpos / self.velocity)
         if dt < T:
-            return self._oldpos + dpos * self.velocity * dt / T
+            return self._oldpos + dpos * dt / T
         else:
             return self._aim
 
     @dial_position.setter
     def dial_position(self, pos):
-        self._oldpos = self.position()
+        self._oldpos = self.dial_position
         self._started = time.time()
         self._aim = pos
 
