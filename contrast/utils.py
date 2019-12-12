@@ -46,8 +46,8 @@ def dict_to_table(dct, titles=('col1', 'col2'), margin=3, sort=True):
 def str_to_args(line):
     """
     Handy function which splits a list of arguments, translates
-    names of Gadget instances to actual objects, and evaluates
-    other expressions. For example,
+    names of Gadget instances to actual objects, evaluates expressions
+    that can be evaluated, and accepts the rest as strings. For example,
 
     .. ipython::
 
@@ -57,7 +57,7 @@ def str_to_args(line):
 
         In [13]: samx = DummyMotor(name='samx')
 
-        In [14]: str_to_args("samx 'hej' 1./20")
+        In [14]: str_to_args("samx hej 1./20")
         Out[14]: [<contrast.motors.Motor.DummyMotor at 0x7efe164d4f98>, 'hej', 0.05]
     """
     args_in = line.split()
@@ -70,7 +70,10 @@ def str_to_args(line):
         elif a in gadget_lookup.keys():
             args_out.append(gadget_lookup[a])
         else:
-            args_out.append(eval(a))
+            try:
+                args_out.append(eval(a))
+            except NameError:
+                args_out.append(a)
     return args_out
 
 
