@@ -32,7 +32,7 @@ class FsOpen(object):
         # Workaround: as long as the fast shutter is at the wrong height,
         # use one of the slit blades in DM4 instead
         print("Moving seh_top blade out")
-        runCommand('umv seh_top 6000')
+        runCommand('umv seh_top 10000')
 
 @macro
 class FsClose(object):
@@ -49,7 +49,7 @@ class FsClose(object):
         # Workaround: as long as the fast shutter is at the wrong height,
         # use one of the slit blades in DM4 instead
         print("Moving seh_top blade in")
-        runCommand('umv seh_top 0')
+        runCommand('umv seh_top 4000')
 
 
 @macro
