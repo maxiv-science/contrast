@@ -44,6 +44,9 @@ if __name__=='__main__':
     sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50))
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50))
 
+    # Xerion rotation stage
+    sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
+
     # base motors through sardana
     basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
     basey = TangoMotor(device='motor/icepap_ctrl_1_expert/17', name='basey', userlevel=1)
@@ -59,8 +62,31 @@ if __name__=='__main__':
     ivu_gap = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05))
 
-    # other sardana motors
-    mono_x2per = TangoMotor(device='b303a-o/opt/mono-perml', name='mono_x2per', userlevel=2, dial_limits=(-.1, .1))
+    # Diamond filter motors, sitting in diagnostics module 1
+    bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=4, dial_limits=(-36.04, 36.77))
+    bl_filter_2 = TangoMotor(device='b303a-o/opt/flt-02-yml', name='bl_filter_2', userlevel=4, dial_limits=(-36.24, 38.46))
+
+    # Vertical focusing mirror motors
+    vfm_x = TangoMotor(device='b303a-o/opt/mir-01-xml', name='vfm_x', userlevel=4, dial_limits=(-4.53, 1.2), user_format='%.3f')
+    vfm_y = TangoMotor(device='b303a-o/opt/mir-01-yml', name='vfm_y', userlevel=4, dial_limits=(-15.24, 15.91), user_format='%.3f')
+    vfm_pit = TangoMotor(device='b303a-o/opt/mir-01-pitml', name='vfm_pit', userlevel=4, dial_limits=(2.65, 2.85), user_format='%.3f')
+    vfm_yaw = TangoMotor(device='b303a-o/opt/mir-01-yawml', name='vfm_yaw', userlevel=4, dial_limits=(-1.43, 1.42), user_format='%.3f')
+
+    # Horizontal focusing mirror motors
+    hfm_x = TangoMotor(device='b303a-o/opt/mir-02-xml', name='hfm_x', userlevel=4, dial_limits=(-2.05, 0.1), user_format='%.3f')
+    hfm_y = TangoMotor(device='b303a-o/opt/mir-02-yml', name='hfm_y', userlevel=4, dial_limits=(-15.33, 14.71), user_format='%.3f')
+    hfm_pit = TangoMotor(device='b303a-o/opt/mir-02-pitml', name='hfm_pit', userlevel=4, dial_limits=(2.65, 2.85), user_format='%.3f')
+    hfm_bend = TangoMotor(device='b303a-o/opt/mir-02-bendml', name='hfm_bend', userlevel=4)
+
+    # Monochromator motors
+    mono_x = TangoMotor(device='b303a-o/opt/mono-xml', name='mono_x', userlevel=4, dial_limits=(-2.4, 3.87), user_format='%.3f')
+    mono_bragg = TangoMotor(device='b303a-o/opt/MONO-BRAGML', name='mono_bragg', userlevel=4, dial_limits=(4.0, 27.46))
+    mono_x2per = TangoMotor(device='b303a-o/opt/mono-perml', name='mono_x2per', userlevel=2, dial_limits=(-.1, .1), user_format='%.3f')
+    mono_x2pit = TangoMotor(device='b303a-o/opt/mono-pitml', name='mono_x2pit', userlevel=4, dial_limits=(-1.21, 1.21), user_format='%.3f')
+    mono_x2rol = TangoMotor(device='b303a-o/opt/mono-rolml', name='mono_x2prol', userlevel=4, dial_limits=(-0.8, 0.79), user_format='%.3f')
+
+    # Nanobpm motor. Positions the bpm vertically in the beam. Almost never moved. Should be at 2.5 mm
+    nanobpm_y = TangoMotor(device='b303a-o/dia/bpx-01', name='nanobpm_y', userlevel=4, dial_limits=(-0.1, 23.1))
 
     # buffered position detector
     npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
@@ -129,8 +155,8 @@ if __name__=='__main__':
     bs_y = TangoMotor(device='B303A-E02/DIA/SAMS-01-Y', name='bs_y', userlevel=4)
 
     # detector motors
-    detx = TangoMotor(device='motor/icepap_ctrl_1_user/11', name='detx', userlevel=1)
-    dety = TangoMotor(device='motor/icepap_ctrl_1_user/12', name='dety', userlevel=1)
+    #detx = TangoMotor(device='motor/icepap_ctrl_1_user/11', name='detx', userlevel=1)
+    #dety = TangoMotor(device='motor/icepap_ctrl_1_user/12', name='dety', userlevel=1)
 
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
