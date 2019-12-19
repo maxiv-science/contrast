@@ -87,7 +87,7 @@ class SpecTable(object):
         """
         if isinstance(v, int):
             data_width = len(str(v)) + 1
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%% %us'%w)%k
             return ' '*len(h),  h, '%%%ud'%w
@@ -97,7 +97,7 @@ class SpecTable(object):
         elif isinstance(v, float):
             fmt = '% .3e'
             data_width = len(fmt%1)
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             spaces = ' '*(w-data_width)
             h = ('%%%us'%w)%k
@@ -113,7 +113,7 @@ class SpecTable(object):
             return h1, keys, fmts
         elif isinstance(v, h5py.ExternalLink):
             data_width = len('hdf5-link')
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%%%us'%w)%k
             return ' '*len(h), h, '%%%us'%w
