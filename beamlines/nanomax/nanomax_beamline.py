@@ -25,6 +25,7 @@ if __name__=='__main__':
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Ni6602 import Ni6602CounterCard
     from contrast.detectors.AdLink import AdLinkAnalogInput
+    from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors import Detector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from nanomax_beamline_macros import *
@@ -189,6 +190,7 @@ if __name__=='__main__':
     # eiger_cosaxs = Eiger(name='eiger_cosaxs', ip_address='172.16.126.92', receiver_ip='127.0.0.1') # <- cc2
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
+    albaem0 = AlbaEM(name='albaem0', device='test/alebjo/albaem')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
