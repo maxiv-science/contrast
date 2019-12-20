@@ -190,7 +190,8 @@ if __name__=='__main__':
     # eiger_cosaxs = Eiger(name='eiger_cosaxs', ip_address='172.16.126.92', receiver_ip='127.0.0.1') # <- cc2
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
-    albaem0 = AlbaEM(name='albaem0', device='test/alebjo/albaem')
+    alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
+    alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
