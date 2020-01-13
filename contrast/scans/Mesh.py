@@ -19,7 +19,8 @@ class Mesh(SoftwareScan):
         self.motors = []
         self.limits = []
         self.intervals = []
-        self.jitter = jitter
+        self.kwargs = kwargs
+
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)
@@ -42,7 +43,6 @@ class Mesh(SoftwareScan):
         grids = np.meshgrid(*reversed(positions))
         grids = [l for l in reversed(grids)] # fastest last
 
-
         if 'jitter' in self.kwargs.keys():
             print('[!] jittered grid postions by factor:', self.kwargs['jitter'])
             if self.kwargs['jitter']!=0:
@@ -53,11 +53,11 @@ class Mesh(SoftwareScan):
                     n = self.intervals[i]
                     step_sizes.append(1.*d/n)
 
-            rel_jitter = np.random.uniform(low  = -.5*self.jitter,
-                                           high = .5*self.jitter,
+                rel_jitter = np.random.uniform(low  = -.5*self.kwargs['jitter'],
+                                           high = .5*self.kwargs['jitter'],
                                            size = np.shape(grids))
-            for i, step_size in enumerate(step_sizes):
-                grids[i] += rel_jitter[i] * step_size
+                for i, step_size in enumerate(step_sizes):
+                    grids[i] += rel_jitter[i] * step_size
 
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
