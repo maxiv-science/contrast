@@ -10,13 +10,12 @@ class Mesh(SoftwareScan):
     Software scan on a regular grid of N motors. ::
         
         mesh <motor1> <start> <stop> <intervals> ... <exp_time>
+
+    optional key word arguments:
+        jitter: float ... Randomizes perfect grid positions.
     """
 
-<<<<<<< HEAD
     def __init__(self, *args, **kwargs):
-=======
-    def __init__(self, *args, jitter=0):
->>>>>>> Unified args/kwargs macro parsing
         self.motors = []
         self.limits = []
         self.intervals = []
@@ -43,7 +42,7 @@ class Mesh(SoftwareScan):
         grids = np.meshgrid(*reversed(positions))
         grids = [l for l in reversed(grids)] # fastest last
 
-<<<<<<< HEAD
+
         if 'jitter' in self.kwargs.keys():
             print('[!] jittered grid postions by factor:', self.kwargs['jitter'])
             if self.kwargs['jitter']!=0:
@@ -53,26 +52,12 @@ class Mesh(SoftwareScan):
                     d = np.abs(self.limits[i][0]-self.limits[i][1])
                     n = self.intervals[i]
                     step_sizes.append(1.*d/n)
-=======
-        if self.jitter:
-            step_sizes = []
-            for i, motor in enumerate(self.motors):
-                d = np.abs(self.limits[i][0]-self.limits[i][1])
-                n = self.intervals[i]
-                step_sizes.append(d / n)
->>>>>>> Unified args/kwargs macro parsing
 
             rel_jitter = np.random.uniform(low  = -.5*self.jitter,
                                            high = .5*self.jitter,
                                            size = np.shape(grids))
-
-<<<<<<< HEAD
-                for i, step_size in enumerate(step_sizes):
-                    grids[i] += rel_jitter[i]*step_sizes[i] 
-=======
             for i, step_size in enumerate(step_sizes):
                 grids[i] += rel_jitter[i] * step_size
->>>>>>> Unified args/kwargs macro parsing
 
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}

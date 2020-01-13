@@ -23,6 +23,10 @@ if __name__=='__main__':
     samy = DummyMotor(name='samy')
     samy.dial_limits = (-5, 5)
 
+    samr = DummyMotor(name='samr')
+    samr.dial_limits = (-180, 180)
+    samr.velocity = 30
+
     basex = DummyMotor(name='basex')
     basex.dial_limits = (-8000, 8000)
     basex.velocity      = 10000
@@ -39,7 +43,6 @@ if __name__=='__main__':
     sy.dial_limits = (-50, 50)
     sz = DummyMotor(name='sz')
     sz.dial_limits = (-50, 50)
-
     sr = DummyMotor(name='sr')
     sr.dial_limits = (-180, 180)
     sr.velocity = 30
