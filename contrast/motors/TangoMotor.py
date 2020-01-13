@@ -29,8 +29,16 @@ class TangoMotor(Motor):
 
     def busy(self):
         state = self.proxy.State()
-        acceptable = (PyTango.DevState.ON, PyTango.DevState.ALARM)
-        return not (state in acceptable)
+        if state == PyTango.DevState.ON:
+            return False
+        elif state == PyTango.DevState.ALARM:
+            lim1 = self.proxy.read_attribute('StatusLim-').value
+            lim2 = self.proxy.read_attribute('StatusLim+').value
+            if lim1 or lim2:
+                # probably just a limit switch, then
+                return False
+        else:
+            return True
 
     def stop(self):
         self.proxy.stop()

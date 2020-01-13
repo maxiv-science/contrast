@@ -15,6 +15,7 @@ class Pilatus(LimaDetector):
 
     def _initialize_det(self):
         self.energy = 10.0
+        self.burst_latency = 0.003
 
     @property
     def energy(self):

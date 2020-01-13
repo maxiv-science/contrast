@@ -38,3 +38,27 @@ class SmaractLinearMotor(Motor):
 
     def stop(self):
         self.proxy.stop_all() # safety first
+
+class SmaractRotationMotor(SmaractLinearMotor):
+    @property
+    def dial_position(self):
+        result = eval(self.proxy.Arbitrary_command('GA%u'%self.axis))
+        pos = int(result[2])
+        rev = int(result[3])
+        sign = 1 if (rev == 0) else 1
+        if rev == 0:
+            pos = pos * 1e-6
+        else:
+            pos = pos * 1e-6 - 360
+        return pos
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        if pos < 0:
+            rev = -1
+            pos = (pos + 360) * 1e6
+        else:
+            rev = 0
+            pos = pos * 1e6
+        self.proxy.Write_angle('%d, %u, %u' % (self.axis, int(pos), rev))
+

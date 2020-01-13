@@ -17,6 +17,7 @@ class Merlin(LimaDetector):
         self.energy = 10.0
         self.det.write_attribute('gain', 'HGM')
         self.det.write_attribute('depth', 'BPP24')
+        self.burst_latency = 0.002
 
     @property
     def energy(self):
