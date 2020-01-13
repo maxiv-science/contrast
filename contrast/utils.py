@@ -43,9 +43,9 @@ def dict_to_table(dct, titles=('col1', 'col2'), margin=3, sort=True):
 
 def str_to_args(line):
     """
-    Handy function which splits a list of arguments, translates
-    names of Gadget instances to actual objects, and evaluates
-    other expressions. For example,
+    Handy function which splits a list of arguments and keyword
+    arguments, translates names of Gadget instances to actual objects,
+    and evaluates other expressions. For example,
 
     .. ipython::
 
@@ -58,14 +58,20 @@ def str_to_args(line):
         In [14]: str_to_args("samx 'hej' 1./20")
         Out[14]: [<contrast.motors.Motor.DummyMotor at 0x7efe164d4f98>, 'hej', 0.05]
     """
-    args_in    = line.split()
-    args_out   = []
+    args_in = line.split()
+    args_out = []
     kwargs_out = {}
     gadget_lookup = {g.name: g for g in Gadget.getinstances()}
     for a in args_in:
         if '=' in a:
-            pass
-            kwargs_out[a.split('=')[0]] = eval(a.split('=')[1])
+            key, val = a.split('=')
+            if ('*' in val) or ('?' in val):
+                matching_names = filter(gadget_lookup.keys(), val)
+                kwargs_out[key] = [gadget_lookup[name] for name in matching_names]
+            elif val in gadget_lookup.keys():
+                kwargs_out[key] = gadget_lookup[val]
+            else:
+                kwargs_out[key] = eval(val)
         else:
             if ('*' in a) or ('?' in a):
                 matching_names = filter(gadget_lookup.keys(), a)
@@ -74,17 +80,4 @@ def str_to_args(line):
                 args_out.append(gadget_lookup[a])
             else:
                 args_out.append(eval(a))
-    return args_out
-
-def str_to_kwargs(line):
-    """
-    Handy function which reads a list of keyword arguments
-    """
-    args_in    = line.split()
-    kwargs_out = {}
-    for a in args_in:
-        if '=' in a:
-            kwargs_out[a.split('=')[0]] = eval(a.split('=')[1])
-        else:
-            pass
-    return kwargs_out
+    return args_out, kwargs_out
