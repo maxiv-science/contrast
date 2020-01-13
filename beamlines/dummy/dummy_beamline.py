@@ -23,10 +23,26 @@ if __name__=='__main__':
     samy = DummyMotor(name='samy')
     samy.dial_limits = (-5, 5)
 
-    samr = DummyMotor(name='samr')
-    samr.dial_limits = (-180, 180)
-    samr.velocity = 30
+    basex = DummyMotor(name='basex')
+    basex.dial_limits = (-8000, 8000)
+    basex.velocity      = 10000
+    basey = DummyMotor(name='basey')
+    basey.dial_limits = (-8000, 8000)
+    basey.velocity      = 10000
+    basez = DummyMotor(name='basez')
+    basez.dial_limits = (-8000, 8000)
+    basez.velocity      = 10000
 
+    sx = DummyMotor(name='sx')
+    sx.dial_limits = (-50, 50)
+    sy = DummyMotor(name='sy')
+    sy.dial_limits = (-50, 50)
+    sz = DummyMotor(name='sz')
+    sz.dial_limits = (-50, 50)
+
+    sr = DummyMotor(name='sr')
+    sr.dial_limits = (-180, 180)
+    sr.velocity = 30
 
     energy = DummyMotor(name='energy')
     energy.dial_limits   = (5000, 35000)
