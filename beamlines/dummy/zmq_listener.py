@@ -16,26 +16,30 @@ class zmq_listener(object):
         self.socket.setsockopt(zmq.SUBSCRIBE, b"") # subscribe to all topics
         self.verbosity    = verbosity                          
         self.running      = True
+
+        if self.verbosity >= 1:
+            print('\n'*5)
+            print('#'*80)
+            print('# started ZMQ listener:', 'tcp://'+host+':'+str(port))
+
+            print('#'*80)
+
         self.run()
 
     def run(self):
 
         while self.running:
             try:
+                # read the recieved message
                 _metadata = self.socket.recv_pyobj()
 
-                #do something with the data
+                
                 print('#'*80)
                 print('# message recieved at '+self.date_time_string())
                 print('#'*80)
-                #print(_metadata)
+
+                # just nicely print it out
                 self.pretty_print(_metadata, indent=1)
-
-                #for key in _metadata.keys():
-                #	print(key)
-
-                # wait 5 seconds
-                #time.sleep(5)
  
             except KeyboardInterrupt:
                 self.stop_client()
@@ -62,7 +66,6 @@ class zmq_listener(object):
             #    print('\t' * indent + str(key) + ' : '+str(np.shape(value)))
             else:
                 print('\t' * indent + str(key) + ' : '+str(value))
-                #print('\t' * (indent+1) + str(value))
 
 #####################################
 ## when run as a main
@@ -70,13 +73,9 @@ class zmq_listener(object):
 
 if __name__ == '__main__':
 
-    print('\n'*5)
-    print('#'*80)
-
     host      = 'localhost'
     port      = 5556
     verbosity = 1
-
-    listener  = zmq_listener(host, port, verbosity)
+    listener  = zmq_listener(host=host, port=port, verbosity=verbosity)
 
     print('#'*80)
