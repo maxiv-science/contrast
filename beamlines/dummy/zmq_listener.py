@@ -1,15 +1,7 @@
-#import zmq
-#context = zmq.Context()
-#socket = context.socket(zmq.SUB)
-#socket.connect ("tcp://localhost:5556")
-#socket.setsockopt(zmq.SUBSCRIBE, b"") # subscribe to all topics
-#while True:
-#    messagedata = socket.recv_pyobj()
-#    print(messagedata)
-
 import zmq
 import sys
 import time
+import numpy
 
 #####################################
 ## zmq listener
@@ -27,8 +19,6 @@ class zmq_listener(object):
         self.run()
 
     def run(self):
-
-    	
 
         while self.running:
             try:
@@ -68,6 +58,8 @@ class zmq_listener(object):
             if isinstance(value, dict):
                 print('\t' * indent + str(key)+ ' : ')
                 self.pretty_print(value, indent+1)
+            #elif isinstance(value, numpy.ndarray):
+            #    print('\t' * indent + str(key) + ' : '+str(np.shape(value)))
             else:
                 print('\t' * indent + str(key) + ' : '+str(value))
                 #print('\t' * (indent+1) + str(value))
@@ -81,8 +73,6 @@ if __name__ == '__main__':
     print('\n'*5)
     print('#'*80)
 
-    # as descirbed here: 
-    #     https://confluence.desy.de/display/FSP06/Online+Data+Processing
     host      = 'localhost'
     port      = 5556
     verbosity = 1

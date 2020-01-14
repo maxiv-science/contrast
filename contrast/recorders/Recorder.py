@@ -22,8 +22,9 @@ class RecorderHeader(dict):
     Helper class to define a specific dict format to send recorders
     when a new scan starts.
     """
-    def __init__(self, scannr, path, snapshot=None, description=None):
+    def __init__(self, scannr, path, snapshot=None, description=None, status=None):
         super(RecorderHeader, self).__init__(scannr=scannr,
+                                             status=status,
                                              path=path,
                                              snapshot=snapshot,
                                              description=description)
@@ -33,7 +34,13 @@ class RecorderFooter(dict):
     Helper class to define a specific dict format to send recorders
     when a new scan finishes.
     """
-    pass
+    #pass
+    def __init__(self, scannr, path, snapshot=None, description=None, status=None):
+        super(RecorderFooter, self).__init__(scannr=scannr,
+                                             status=status,
+                                             path=path,
+                                             snapshot=snapshot,
+                                             description=description)
 
 class Recorder(Gadget, Process):
     """
@@ -61,7 +68,7 @@ class Recorder(Gadget, Process):
             elif isinstance(dct, RecorderHeader):
                 self.act_on_header(dct)
             elif isinstance(dct, RecorderFooter):
-                self.act_on_footer()
+                self.act_on_footer(dct)
             else:
                 self.act_on_data(dct)
 
@@ -100,7 +107,7 @@ class Recorder(Gadget, Process):
         """
         pass
 
-    def act_on_footer(self):
+    def act_on_footer(self, dct):
         """
         *Override this.* Performs an action when a scan ends.
         """
@@ -135,8 +142,8 @@ class DummyRecorder(Recorder):
         print('got a header! am told to write scan %d to %s' % (dct['scannr'], dct['path']))
     def act_on_data(self, dct):
         print('found this!', dct)
-    def act_on_footer(self):
-        print('scan over, apparently')
+    def act_on_footer(self, dct):
+        print('scan %d at %s over, apparently' % (dct['scannr'], dct['path']))
     def init(self):
         print('opening')
     def _close(self):
