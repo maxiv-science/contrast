@@ -202,7 +202,7 @@ if __name__=='__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-#    zmqrec.start() # removed for now
+    zmqrec.start() # removed for now
 
     # add a memorizer so the motors keep their user positions and limits after a restart
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
@@ -229,6 +229,7 @@ if __name__=='__main__':
         basey.proxy.PowerOn = True
         basez.proxy.PowerOn = True
         runCommand('fsclose')
+        #pass
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
