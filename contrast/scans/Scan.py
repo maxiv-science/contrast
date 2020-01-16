@@ -253,8 +253,11 @@ class Ct(object):
         # arm and start detectors
         group.arm()
         group.start()
-        while group.busy():
-            time.sleep(.01)
+        try:
+            while group.busy():
+                time.sleep(.01)
+        except KeyboardInterrupt:
+            group.stop()
         # read detectors and motors
         dct = {}
         for d in det_group:
