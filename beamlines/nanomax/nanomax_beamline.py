@@ -18,11 +18,11 @@ if __name__=='__main__':
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
-    from contrast.detectors.Pilatus import Pilatus
-    from contrast.detectors.Merlin import Merlin
-    from contrast.detectors.Andor import Andor
+    from contrast.detectors.Lima import LimaPilatus
+    from contrast.detectors.Lima import LimaMerlin
+    from contrast.detectors.Lima import LimaAndor
+    from contrast.detectors.Lima import LimaXspress3
     from contrast.detectors.Eiger import Eiger
-    from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Ni6602 import Ni6602CounterCard
     from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors.AlbaEM import AlbaEM
@@ -171,21 +171,21 @@ if __name__=='__main__':
     stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
-    pilatus = Pilatus(name='pilatus',
-                      lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
-                      det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
-    # pilatus1m = Pilatus(name='pilatus1m',
-    #                  lima_device='lima/limaccd/B-NANOMAX-PILATUS1M-IPC-01',
-    #                  det_device='lima/pilatus/B-NANOMAX-PILATUS1M-IPC-01')
-    merlin = Merlin(name='merlin',
-                    lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
-                    det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
-    xspress3 = Xspress3(name='xspress3',
-                        lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
-                        det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
-    # andor = Andor(name='andor',
-    #               lima_device='lima/limaccds/andortest',
-    #               det_device='lima/andor3/andortest')
+    pilatus = LimaPilatus(name='pilatus',
+                          lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
+                          det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
+    pilatus1m = LimaPilatus(name='pilatus1m',
+                     lima_device='lima/limaccd/B-NANOMAX-PILATUS1M-IPC-01',
+                     det_device='lima/pilatus/B-NANOMAX-PILATUS1M-IPC-01')
+    merlin = LimaMerlin(name='merlin',
+                        lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
+                        det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
+    xspress3 = LimaXspress3(name='xspress3',
+                            lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
+                            det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
+    # andor = LimaAndor(name='andor',
+    #                   lima_device='lima/limaccds/andortest',
+    #                   det_device='lima/andor3/andortest')
     # eiger = Eiger(name='eiger', ip_address='172.16.126.91', receiver_ip='127.0.0.1') # <- cc2
     # eiger_cosaxs = Eiger(name='eiger_cosaxs', ip_address='172.16.126.92', receiver_ip='127.0.0.1') # <- cc2
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')

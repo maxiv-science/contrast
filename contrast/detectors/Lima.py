@@ -250,6 +250,78 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             else:
                 return ExternalLink(absfile , self._hdf_path_base % self.arm_number)
 
+class LimaPilatus(LimaDetector):
+    """
+    Pilatus specific LimaDetector.
+    """
+    def __init__(self, *args, **kwargs):
+        super(LimaPilatus, self).__init__(*args, **kwargs)
+        self._hdf_path_base = 'entry_%04d/measurement/Pilatus/data'
+
+    def _initialize_det(self):
+        self.energy = 10.0
+        self.burst_latency = 0.003
+
+    @property
+    def energy(self):
+        return self.det.energy_threshold
+        
+    @energy.setter
+    def energy(self, value):
+        if value < 4.5 or value > 36:
+            raise ValueError('Requested value is outside the Pilatus range of 4.5-36 keV')
+        self.det.write_attribute('energy_threshold', value)
+
+class LimaMerlin(LimaDetector):
+    """
+    Merlin specific LimaDetector.
+    """
+    def __init__(self, *args, **kwargs):
+        super(LimaMerlin, self).__init__(*args, **kwargs)
+        self._hdf_path_base = 'entry_%04d/measurement/Merlin/data'
+
+    def _initialize_det(self):
+        self.energy = 10.0
+        self.det.write_attribute('gain', 'HGM')
+        self.det.write_attribute('depth', 'BPP24')
+        self.burst_latency = 0.002
+
+    @property
+    def energy(self):
+        return self.det.operatingEnergy
+        
+    @energy.setter
+    def energy(self, value):
+        self.det.write_attribute('operatingEnergy', value)
+
+    def prepare(self, *args, **kwargs):
+        if self.hw_trig:
+            self.det.write_attribute('triggerStartType', "RISING_EDGE_TTL")
+        else:
+            self.det.write_attribute('triggerStartType', "INTERNAL")
+        super(LimaMerlin, self).prepare(*args, **kwargs)
+
+class LimaAndor(LimaDetector):
+    """
+    Andor specific LimaDetector.
+    """
+    def __init__(self, *args, **kwargs):
+        super(LimaAndor, self).__init__(*args, **kwargs)
+        self._hdf_path_base = 'entry_%04d/measurement/Andor/data/array'
+
+    def _initialize_det(self):
+        self.lima.user_detector_name = 'Andor'
+
+class LimaXspress3(LimaDetector):
+    """
+    Xspress3 specific LimaDetector.
+    """
+    EXT_TRG_MODE = "EXTERNAL_GATE"
+
+    def __init__(self, *args, **kwargs):
+        super(LimaXspress3, self).__init__(*args, **kwargs)
+        self._hdf_path_base = 'entry_%04d/measurement/xspress3/data'
+
 @macro
 class Lima_hybrid_on(object):
     """
