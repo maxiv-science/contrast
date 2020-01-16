@@ -18,7 +18,7 @@ if __name__=='__main__':
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
-    from contrast.detectors.Lima import LimaPilatus
+    from contrast.detectors.Pilatus import Pilatus
     from contrast.detectors.Lima import LimaMerlin
     from contrast.detectors.Lima import LimaAndor
     from contrast.detectors.Lima import LimaXspress3
@@ -171,12 +171,10 @@ if __name__=='__main__':
     stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
-    pilatus = LimaPilatus(name='pilatus',
-                          lima_device='lima/limaccd/b-nanomax-mobile-ipc-01',
-                          det_device='lima/pilatus/b-nanomax-mobile-ipc-01')
-    pilatus1m = LimaPilatus(name='pilatus1m',
-                     lima_device='lima/limaccd/B-NANOMAX-PILATUS1M-IPC-01',
-                     det_device='lima/pilatus/B-NANOMAX-PILATUS1M-IPC-01')
+    pilatus = Pilatus(name='pilatus',
+                      device='staff/alebjo/pilatus100k')
+    pilatus1m = Pilatus(name='pilatus1m',
+                        device='staff/alebjo/pilatus1m')
     merlin = LimaMerlin(name='merlin',
                         lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
                         det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
