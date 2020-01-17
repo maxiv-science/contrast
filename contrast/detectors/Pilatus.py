@@ -26,6 +26,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def initialize(self):
         self.proxy = PyTango.DeviceProxy(self.device_name)
+        # set a long Tango timeout, as the Pilatus doesn't stop during frames.
+        self.proxy.set_timeout_millis(60000)
         self.burst_latency = .003
 
     @property
@@ -56,6 +58,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             fn = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.saving_file = os.path.join(path, fn)
             if os.path.exists(self.saving_file):
+                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
         self.proxy.exptime = acqtime
