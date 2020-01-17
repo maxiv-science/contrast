@@ -93,8 +93,11 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.proxy.exposure(self.saving_file)
 
     def stop(self):
-        self.proxy.stop()
-        self.stop_live()
+        try:
+            self.proxy.stop()
+            self.stop_live()
+        except PyTango.DevFailed as e:
+            print('\n', e.args[0].desc)
 
     def busy(self):
         return not (self.proxy.State() == PyTango.DevState.ON)
