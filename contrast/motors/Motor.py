@@ -6,6 +6,9 @@ from ..Gadget import Gadget
 from ..environment import macro, env
 from .. import utils
 
+# a central list of defined bookmarks, to avoid garbage collection
+bookmark_refs = []
+
 class Motor(Gadget):
     """
     General base class for motors.
@@ -152,9 +155,29 @@ class DummyMotor(Motor):
         self._aim = self.dial_position
 
 
+class MotorBookmark(object):
+    """
+    A bookmark is a set of motor dial positions which together have some
+    significance, for example a sample position or an attenuetor
+    combination.
+    """
+    def __init__(self, name, motors, positions=None):
+        """
+        :param name: Name given to the MotorBookmark
+        :param motors: The motor instances to bookmark.
+        :type motors: list, tuple
+        :param positions: List of positions to bookmark.
+        :type positions: list, tuple
+        """
+        self.name = name
+        if positions is None:
+            positions = [m.dial_position for m in motors]
+        self.dct = {m:p for m,p in zip(motors, positions)}
+
 class MotorMemorizer(Gadget):
     """
-    Saves or loads motor scaling, offsets, and limits to or from file.
+    Saves or loads motor scaling, offsets, and limits, as well as any
+    defined bookmarks to or from file.
     """
     def __init__(self, filepath=None, **kwargs):
         """
@@ -178,12 +201,30 @@ class MotorMemorizer(Gadget):
                 for row in fp:
                     dct = ast.literal_eval(row)
                     if dct['name'] in motors:
+                        # this is an existing motor!
                         motors[dct['name']]._offset = dct['_offset']
                         if dct['_lowlim']:
                             motors[dct['name']]._lowlim = dct['_lowlim']
                         if dct['_uplim']:
                             motors[dct['name']]._uplim = dct['_uplim']
-            print('Loaded motor states from %s' % self.filepath)
+                    elif '_offset' not in dct.keys():
+                        # this is a bookmark!
+                        motor_names = list(dct.keys())
+                        motor_names.remove('name')
+                        available_motors = list(Motor.getinstances())
+                        motor_objs = []
+                        bail = False
+                        for m in motor_names:
+                            match = [m_ for m_ in available_motors if m_.name==m]
+                            if not len(match):
+                                print('Could not find motor %s, ignoring bookmark %s'%(m, dct['name']))
+                                bail = True
+                                break
+                            motor_objs.append(match[0])
+                        if bail:
+                            break
+                        bookmark_refs.append(MotorBookmark(name=dct['name'], motors=motor_objs, positions=[dct[n] for n in motor_names]))
+            print('Loaded motor states and bookmarks from %s' % self.filepath)
         except (FileNotFoundError,):
             print("Memorizer file %s doesn't exist" % self.filepath)
 
@@ -198,7 +239,11 @@ class MotorMemorizer(Gadget):
                            '_offset': m._offset,
                            '_lowlim': m._lowlim, '_uplim': m._uplim}
                     fp.write(str(dct) + '\n')
-            print('Saved motor states to %s' % self.filepath)
+                for b in bookmark_refs:
+                    dct = {m.name:p for m,p in b.dct.items()}
+                    dct['name'] = b.name
+                    fp.write(str(dct) + '\n')
+            print('Saved motor states and bookmarks to %s' % self.filepath)
         except (FileNotFoundError,):
             print("Cant write to %s, doesn't exist")
 
@@ -378,6 +423,95 @@ class SetPos(object):
     def run(self):
         for m, p in zip(self.motors, self.positions):
             m.user_position = p
+
+        # memorize the new state
+        for m in MotorMemorizer.getinstances():
+            m.dump()
+
+class BookmarkMacroBase(object):
+    """
+    Base class for bookmark macros, which parses arguments into a list
+    of MotorBookmark objects. If none are given, all bookmarks are
+    included.
+    """
+    def __init__(self, *args):
+        if len(args) == 0:
+            self.bookmarks = bookmark_refs.copy()
+            self.specific = False
+            return
+
+        self.specific = True
+        self.bookmarks = []
+        for name in args:
+            for b in bookmark_refs:
+                if b.name == name:
+                    self.bookmarks.append(b)
+
+@macro
+class LsBook(BookmarkMacroBase):
+    """
+    Lists the currently defined bookmarks or the contents of a specific
+    bookmark. ::
+
+        lsbook [<bookmark name>]
+    """
+    def run(self):
+        if self.specific:
+            dct = {m.name:(p*m._scaling+m._offset) for m,p in self.bookmarks[0].dct.items()}
+            print(utils.dict_to_table(dct, titles=('motor', 'user pos.'), sort=True))
+        else:
+            dct = {b.name: ', '.join([k.name for k in b.dct.keys()]) for b in bookmark_refs}
+            print(utils.dict_to_table(dct, titles=('name', 'members'), sort=True))
+
+@macro
+class Bookmark(object):
+    """
+    Bookmarks the specified motors at their current dial positions. ::
+
+        bookmark <'bookmark name'> <motor 1> <motor 2> ...
+
+    Also saves existing bookmarks to all available ``MotorMemorizer``
+    objects.
+    """
+    def __init__(self, name, *args):
+        self.name = name
+        self.motors = args
+
+    def run(self):
+        existing = [b for b in bookmark_refs if b.name==self.name]
+        [bookmark_refs.remove(b) for b in existing]
+        bookmark_refs.append(MotorBookmark(name=self.name, motors=self.motors,
+            positions=[m.dial_position for m in self.motors]))
+
+        # memorize the new state
+        for m in MotorMemorizer.getinstances():
+            m.dump()
+
+@macro
+class Restore(BookmarkMacroBase):
+    """
+    Restore a bookmarked position by moving all motors there.
+    """
+    def run(self):
+        if not self.specific:
+            return
+        dct = {m:(p*m._scaling+m._offset) for m,p in self.bookmarks[0].dct.items()}
+        args = [val for pair in dct.items() for val in pair]
+        umv = Umv(*args)
+        umv.run()
+
+@macro
+class RmBook(BookmarkMacroBase):
+    """
+    Delete one or all bookmarks defined with the bookmark command. ::
+
+        rmbook [<bookmark 1> <bookmark 2> ...]
+
+    Also updates all available ``MotorMemorizer`` instances.
+    """
+    def run(self):
+        for b in self.bookmarks:
+            bookmark_refs.remove(b)
 
         # memorize the new state
         for m in MotorMemorizer.getinstances():
