@@ -181,6 +181,7 @@ class BurstDetector(object):
     """
     def __init__(self):
         self.burst_n = 1
+        self.burst_latency = 0.0
 
 class DetectorGroup(object):
     """

@@ -128,8 +128,11 @@ class SoftwareScan(object):
         # send a header to the recorders
         snap = env.snapshot.capture()
         for r in active_recorders():
-            r.queue.put(RecorderHeader(scannr=self.scannr, path=env.paths.directory,
-                                       snapshot=snap, description=self._command))
+            r.queue.put(RecorderHeader(scannr=self.scannr, 
+                                       status='started',
+                                       path=env.paths.directory,
+                                       snapshot=snap, 
+                                       description=self._command))
         try:
             for i, pos in enumerate(positions):
                 # move motors
@@ -161,9 +164,26 @@ class SoftwareScan(object):
                 # print spec-style info
                 self.output(i, dct)
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
+
+            # tell the recorders that the scan is over
+            for r in active_recorders():
+                r.queue.put(RecorderFooter(scannr=self.scannr,
+                                           status='finished',
+                                           path=env.paths.directory,
+                                           snapshot=snap, 
+                                           description=self._command))
+
         except KeyboardInterrupt:
             group.stop()
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
+
+            # tell the recorders that the scan was interrupted
+            for r in active_recorders():
+                r.queue.put(RecorderFooter(scannr=self.scannr,
+                                           status='interrupted',
+                                           path=env.paths.directory,
+                                           snapshot=snap, 
+                                           description=self._command))
         except:
             self._after_scan()
             raise
@@ -171,9 +191,6 @@ class SoftwareScan(object):
         # do any user-defined cleanup actions
         self._after_scan()
 
-        # tell the recorders that the scan is over
-        for r in active_recorders():
-            r.queue.put(RecorderFooter())
         
     def _generate_positions(self):
         """
@@ -195,6 +212,7 @@ class LoopScan(SoftwareScan):
     def __init__(self, intervals, exposuretime=1.0):
         super(LoopScan, self).__init__(float(exposuretime))
         self.intervals = intervals
+        self.n_positions = intervals + 1
         self.motors = []
 
     def _generate_positions(self):
@@ -235,8 +253,11 @@ class Ct(object):
         # arm and start detectors
         group.arm()
         group.start()
-        while group.busy():
-            time.sleep(.01)
+        try:
+            while group.busy():
+                time.sleep(.01)
+        except KeyboardInterrupt:
+            group.stop()
         # read detectors and motors
         dct = {}
         for d in det_group:

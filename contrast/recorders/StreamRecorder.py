@@ -40,8 +40,8 @@ class StreamRecorder(Recorder):
         """
         self.socket.send_pyobj(dct)
 
-    def act_on_footer(self):
+    def act_on_footer(self, dct):
         """
         Relay information.
         """
-        self.socket.send_pyobj({})
+        self.socket.send_pyobj(dict(dct))

@@ -45,9 +45,10 @@ def dict_to_table(dct, titles=('col1', 'col2'), margin=3, sort=True):
 
 def str_to_args(line):
     """
-    Handy function which splits a list of arguments, translates
-    names of Gadget instances to actual objects, evaluates expressions
-    that can be evaluated, and accepts the rest as strings. For example,
+    Handy function which splits a list of arguments and keyword
+    arguments, translates names of Gadget instances to actual objects,
+    evaluates expressions that can be evaluated, and accepts the rest as
+    strings. For example,
 
     .. ipython::
 
@@ -62,20 +63,30 @@ def str_to_args(line):
     """
     args_in = line.split()
     args_out = []
+    kwargs_out = {}
     gadget_lookup = {g.name: g for g in Gadget.getinstances()}
     for a in args_in:
-        if ('*' in a) or ('?' in a):
-            matching_names = filter(gadget_lookup.keys(), a)
-            args_out += [gadget_lookup[name] for name in matching_names]
-        elif a in gadget_lookup.keys():
-            args_out.append(gadget_lookup[a])
+        if '=' in a:
+            key, val = a.split('=')
+            if ('*' in val) or ('?' in val):
+                matching_names = filter(gadget_lookup.keys(), val)
+                kwargs_out[key] = [gadget_lookup[name] for name in matching_names]
+            elif val in gadget_lookup.keys():
+                kwargs_out[key] = gadget_lookup[val]
+            else:
+                kwargs_out[key] = eval(val)
         else:
-            try:
-                args_out.append(eval(a))
-            except NameError:
-                args_out.append(a)
-    return args_out
-
+            if ('*' in a) or ('?' in a):
+                matching_names = filter(gadget_lookup.keys(), a)
+                args_out += [gadget_lookup[name] for name in matching_names]
+            elif a in gadget_lookup.keys():
+                args_out.append(gadget_lookup[a])
+            else:
+                try:
+                    args_out.append(eval(a))
+                except NameError:
+                    args_out.append(a)
+    return args_out, kwargs_out
 
 class SpecTable(object):
     """
@@ -90,7 +101,7 @@ class SpecTable(object):
         """
         if isinstance(v, int):
             data_width = len(str(v)) + 1
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%% %us'%w)%k
             return ' '*len(h),  h, '%%%ud'%w
@@ -100,7 +111,7 @@ class SpecTable(object):
         elif isinstance(v, float):
             fmt = '% .3e'
             data_width = len(fmt%1)
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             spaces = ' '*(w-data_width)
             h = ('%%%us'%w)%k
@@ -116,7 +127,7 @@ class SpecTable(object):
             return h1, keys, fmts
         elif isinstance(v, h5py.ExternalLink):
             data_width = len('hdf5-link')
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%%%us'%w)%k
             return ' '*len(h), h, '%%%us'%w
@@ -165,3 +176,4 @@ class SpecTable(object):
             else:
                 vals.append(v)
         return self._line_format % tuple(vals)
+

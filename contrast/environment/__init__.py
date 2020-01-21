@@ -53,9 +53,9 @@ def macro(cls):
     name = cls.__name__.lower()
 
     def fcn(line):
-        args = utils.str_to_args(line)
+        args, kwargs = utils.str_to_args(line)
         try:
-            obj = cls(*args)
+            obj = cls(*args, **kwargs)
         except MacroSyntaxError:
             print('Bad input. Usage:')
             print(cls.__doc__)

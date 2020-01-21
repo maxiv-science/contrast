@@ -84,7 +84,7 @@ class Hdf5Recorder(Recorder):
                 # a dataset
                 d[-1] = val_
 
-    def act_on_footer(self):
+    def act_on_footer(self, dct):
         """
         Closes the file after the scan.
         """
