@@ -6,7 +6,7 @@ as these might have special dependencies that aren't available
 everywhere.
 """
 
-from .Motor import Motor, DummyMotor, MotorMemorizer
+from .Motor import Motor, DummyMotor, MotorMemorizer, MotorBookmark
 from .PseudoMotor import PseudoMotor, ExamplePseudoMotor
 
 def all_are_motors(seq):
