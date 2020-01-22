@@ -184,8 +184,7 @@ if __name__=='__main__':
     # andor = LimaAndor(name='andor',
     #                   lima_device='lima/limaccds/andortest',
     #                   det_device='lima/andor3/andortest')
-    # eiger = Eiger(name='eiger', ip_address='172.16.126.91', receiver_ip='127.0.0.1') # <- cc2
-    # eiger_cosaxs = Eiger(name='eiger_cosaxs', ip_address='172.16.126.92', receiver_ip='127.0.0.1') # <- cc2
+    eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
     alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
@@ -209,8 +208,7 @@ if __name__=='__main__':
     # deactivate all the detectors except pilatus as default
     for d in Detector.getinstances():
         d.active = False
-    pilatus.active = True
-    xspress3.active = True
+    eiger.active = True
 
     # define pre- and post-scan actions, per scan base class
     import PyTango
