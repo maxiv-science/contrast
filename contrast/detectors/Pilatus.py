@@ -1,7 +1,7 @@
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
+from ..recorders.Hdf5Recorder import Link
 import os
-from h5py import ExternalLink
 
 try:
     import PyTango
@@ -22,7 +22,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
-        self._hdf_path_base = 'entry_%04d/measurement/Pilatus/data'
+        self._hdf_path = 'entry/measurement/Pilatus/data'
 
     def initialize(self):
         self.proxy = PyTango.DeviceProxy(self.device_name)
@@ -106,5 +106,4 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if self.saving_file == '':
             return None
         else:
-            return ExternalLink(self.saving_file , self._hdf_path_base % self.arm_number)
-
+            return {'frames': Link(self.saving_file , self._hdf_path, universal=True)}
