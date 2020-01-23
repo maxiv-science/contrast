@@ -162,7 +162,7 @@ class SoftwareScan(object):
                 for r in active_recorders():
                     r.queue.put(dct)
                 # print spec-style info
-                self.output(i, dct)
+                self.output(i, dct.copy())
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
 
             # tell the recorders that the scan is over

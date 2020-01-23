@@ -10,7 +10,7 @@ if __name__=='__main__':
     import contrast
     from contrast.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
     from contrast.scans import *
-    from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector
+    from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector, DummyWritingDetector2
     from contrast.environment import env, register_shortcut
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     import os
@@ -72,6 +72,7 @@ if __name__=='__main__':
     det1 = DummyDetector(name='det1')
     det2 = DummyWritingDetector(name='det2')
     det3 = Dummy1dDetector(name='det3')
+    det4 = DummyWritingDetector2(name='det4')
 
     env.paths.directory = '/tmp'
 
