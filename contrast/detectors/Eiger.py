@@ -1,7 +1,3 @@
-"""
-This currently arms the eiger on every software step, which is sub-optimal.
-"""
-
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
 
