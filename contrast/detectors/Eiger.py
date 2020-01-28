@@ -141,7 +141,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.dpath = os.path.join(env.paths.directory, filename)
             if os.path.exists(self.dpath):
-                raise Exception('%s target file already exists!'%self.name)
+                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                raise Exception('%s hdf5 file already exists' % self.name)
         self._set('stream', 'config/header_appendix', json.dumps({'filename': self.dpath}))
         self._set('detector', 'command/arm')
         self.n_started = 0
@@ -166,7 +167,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def read(self):
         if self.dpath:
-            ret = {'frames': Link(self.dpath , self._hdf_path, universal=True)}
+            ret = {'frames': Link(self.dpath , self._hdf_path, universal=True),
+                   'thumbs:': None,}
         else:
             ret = None
         return ret

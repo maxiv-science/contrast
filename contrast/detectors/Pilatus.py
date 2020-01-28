@@ -106,4 +106,6 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if self.saving_file == '':
             return None
         else:
-            return {'frames': Link(self.saving_file , self._hdf_path, universal=True)}
+            return {'frames': Link(self.saving_file , self._hdf_path, universal=True),
+                    'thumbs:': None,}
+
