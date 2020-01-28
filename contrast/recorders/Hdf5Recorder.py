@@ -48,6 +48,10 @@ class Hdf5Recorder(Recorder):
         for key, val in dct.items():
             name = base + key
 
+            # allow Nones:
+            if val is None:
+                val = 'None'
+
             # treat dict values recursively
             if type(val) == dict:
                 new_dct = {key + '/' + str(k): v for k, v in val.items()}

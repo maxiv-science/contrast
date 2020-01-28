@@ -163,17 +163,20 @@ class SpecTable(object):
         """
         Takes a data dict and returns a data line.
         """
+        return self._line_format % self.list_values(dct)
+
+    def list_values(self, dct):
         if not hasattr(self, '_line_format'):
             self.header_lines(dct)
         vals = []
         for v in dct.values():
             if isinstance(v, dict):
-                vals += list(v.values())
+                vals += list(self.list_values(v))
             elif isinstance(v, h5py.ExternalLink):
                 vals += ['hdf5-link']
             elif isinstance(v, np.ndarray):
                 vals += [str(v.shape)]
             else:
                 vals.append(v)
-        return self._line_format % tuple(vals)
+        return tuple(vals)
 

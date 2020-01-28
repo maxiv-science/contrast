@@ -4,12 +4,12 @@ later, but the receiver has to be updated too.
 """
 
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from ..recorders.Hdf5Recorder import Link
 from ..environment import env
 
 import time
 import numpy as np
 import os
-from h5py import ExternalLink
 import requests
 import json
 import zmq
@@ -24,7 +24,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         """
         self.host = host
         self.api_version = api_version
-        self._hdf_path_base = 'entry_%04d/measurement/Eiger/data'
+        self._hdf_path = 'entry/measurement/Eiger/data'
         self.acqthread = None
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
@@ -131,7 +131,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('detector', 'config/count_time', acqtime - 100.0e-9)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
-            self._set('detector', 'config/ntrigger', self.hw_trig_n)
+            self._set('detector', 'config/ntrigger', int(self.hw_trig_n * n_starts))
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
             self._set('detector', 'config/ntrigger', int(n_starts)) # np.int64 isn't json serializable
@@ -140,17 +140,18 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         else:
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.dpath = os.path.join(env.paths.directory, filename)
+            if os.path.exists(self.dpath):
+                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                raise Exception('%s hdf5 file already exists' % self.name)
         self._set('stream', 'config/header_appendix', json.dumps({'filename': self.dpath}))
-        if not self.hw_trig:
-            self._set('detector', 'command/arm')
+        self._set('detector', 'command/arm')
         self.n_started = 0
 
     def arm(self):
         """
-        Arm the detector once per software cycle if flyscan mode.
+        The Eiger is armed only once.
         """
-        if self.hw_trig:
-            self._set('detector', 'command/arm')
+        pass
 
     def start(self):
         """
@@ -166,7 +167,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def read(self):
         if self.dpath:
-            ret = ExternalLink(self.dpath , self._hdf_path_base % 0)
+            ret = {'frames': Link(self.dpath , self._hdf_path, universal=True),
+                   'thumbs:': None,}
         else:
             ret = None
         return ret
