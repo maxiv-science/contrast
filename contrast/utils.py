@@ -45,9 +45,10 @@ def dict_to_table(dct, titles=('col1', 'col2'), margin=3, sort=True):
 
 def str_to_args(line):
     """
-    Handy function which splits a list of arguments, translates
-    names of Gadget instances to actual objects, and evaluates
-    other expressions. For example,
+    Handy function which splits a list of arguments and keyword
+    arguments, translates names of Gadget instances to actual objects,
+    evaluates expressions that can be evaluated, and accepts the rest as
+    strings. For example,
 
     .. ipython::
 
@@ -57,22 +58,35 @@ def str_to_args(line):
 
         In [13]: samx = DummyMotor(name='samx')
 
-        In [14]: str_to_args("samx 'hej' 1./20")
+        In [14]: str_to_args("samx hej 1./20")
         Out[14]: [<contrast.motors.Motor.DummyMotor at 0x7efe164d4f98>, 'hej', 0.05]
     """
     args_in = line.split()
     args_out = []
+    kwargs_out = {}
     gadget_lookup = {g.name: g for g in Gadget.getinstances()}
     for a in args_in:
-        if ('*' in a) or ('?' in a):
-            matching_names = filter(gadget_lookup.keys(), a)
-            args_out += [gadget_lookup[name] for name in matching_names]
-        elif a in gadget_lookup.keys():
-            args_out.append(gadget_lookup[a])
+        if '=' in a:
+            key, val = a.split('=')
+            if ('*' in val) or ('?' in val):
+                matching_names = filter(gadget_lookup.keys(), val)
+                kwargs_out[key] = [gadget_lookup[name] for name in matching_names]
+            elif val in gadget_lookup.keys():
+                kwargs_out[key] = gadget_lookup[val]
+            else:
+                kwargs_out[key] = eval(val)
         else:
-            args_out.append(eval(a))
-    return args_out
-
+            if ('*' in a) or ('?' in a):
+                matching_names = filter(gadget_lookup.keys(), a)
+                args_out += [gadget_lookup[name] for name in matching_names]
+            elif a in gadget_lookup.keys():
+                args_out.append(gadget_lookup[a])
+            else:
+                try:
+                    args_out.append(eval(a))
+                except NameError:
+                    args_out.append(a)
+    return args_out, kwargs_out
 
 class SpecTable(object):
     """
@@ -87,17 +101,17 @@ class SpecTable(object):
         """
         if isinstance(v, int):
             data_width = len(str(v)) + 1
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
-            h = ('%%%us'%w)%k
+            h = ('%% %us'%w)%k
             return ' '*len(h),  h, '%%%ud'%w
         elif k=='dt':
             fmt = '%6.3f'
             return 6*' ', '%6s'%k, fmt
         elif isinstance(v, float):
-            fmt = '%.3e'
+            fmt = '% .3e'
             data_width = len(fmt%1)
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             spaces = ' '*(w-data_width)
             h = ('%%%us'%w)%k
@@ -113,7 +127,7 @@ class SpecTable(object):
             return h1, keys, fmts
         elif isinstance(v, h5py.ExternalLink):
             data_width = len('hdf5-link')
-            header_width = len(k)
+            header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%%%us'%w)%k
             return ' '*len(h), h, '%%%us'%w
@@ -149,16 +163,20 @@ class SpecTable(object):
         """
         Takes a data dict and returns a data line.
         """
+        return self._line_format % self.list_values(dct)
+
+    def list_values(self, dct):
         if not hasattr(self, '_line_format'):
             self.header_lines(dct)
         vals = []
         for v in dct.values():
             if isinstance(v, dict):
-                vals += list(v.values())
+                vals += list(self.list_values(v))
             elif isinstance(v, h5py.ExternalLink):
                 vals += ['hdf5-link']
             elif isinstance(v, np.ndarray):
                 vals += [str(v.shape)]
             else:
                 vals.append(v)
-        return self._line_format % tuple(vals)
+        return tuple(vals)
+

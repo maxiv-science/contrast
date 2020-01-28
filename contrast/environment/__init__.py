@@ -42,7 +42,7 @@ def macro(cls):
     * Take all arguments in the constructor. The arguments can be Gadget
       objects and this decorator will find the objects from their names
       as entered on the command line. They can also be python expressions
-      like 1+1 or 1./20.
+      like 1+1 or 1./20, and are converted to strings otherwise.
     * Provide a run method which takes no arguments and executes the 
       scan or whatever.
 
@@ -53,9 +53,9 @@ def macro(cls):
     name = cls.__name__.lower()
 
     def fcn(line):
-        args = utils.str_to_args(line)
+        args, kwargs = utils.str_to_args(line)
         try:
-            obj = cls(*args)
+            obj = cls(*args, **kwargs)
         except MacroSyntaxError:
             print('Bad input. Usage:')
             print(cls.__doc__)

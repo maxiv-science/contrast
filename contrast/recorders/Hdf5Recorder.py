@@ -4,6 +4,16 @@ import time
 import numpy as np
 import os
 
+class Link(h5py.ExternalLink):
+    """
+    Helper class which wraps a h5py.ExternalLink, but which also
+    informs the Hdf5Recorder about whether there will be one link per
+    scan (universal=True) or one link per position (universal=False).
+    """
+    def __init__(self, *args, universal=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.universal = universal
+
 class Hdf5Recorder(Recorder):
     """
     Recorder which writes to hdf5 files.
@@ -38,53 +48,70 @@ class Hdf5Recorder(Recorder):
         for key, val in dct.items():
             name = base + key
 
+            # allow Nones:
+            if val is None:
+                val = 'None'
+
             # treat dict values recursively
             if type(val) == dict:
                 new_dct = {key + '/' + str(k): v for k, v in val.items()}
                 self.act_on_data(new_dct, base=base)
                 continue
 
-            # decide where to put the new data
-            if not name in self.fp:
-                # create datasets the first time around
-                if isinstance(val, np.ndarray):
-                    # arrays
-                    d = self.fp.create_dataset(name, shape=(1,)+val.shape, maxshape=(None,)+val.shape, dtype=val.dtype)
-                elif isinstance(val, h5py.ExternalLink):
-                    # links
-                    d = self.fp.create_group(name)
-                elif (type(val) == str):
-                    # strings
-                    d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype='S100')
+            # all other data types
+            create = name not in self.fp
+            if isinstance(val, np.ndarray):
+                # arrays are stacked along the first index
+                if create:
+                    d = self.fp.create_dataset(name, shape=val.shape, maxshape=(None,)+val.shape[1:], dtype=val.dtype)
+                    old = 0
                 else:
-                    # scalars of any type
-                    d = self.fp.create_dataset(name, shape=(1,), maxshape=(None,), dtype=type(val))
+                    d = self.fp[name]
+                    old = d.shape[0]
+                    d.resize((old+val.shape[0],) + d.shape[1:])
+                d[old:] = val
+
             elif isinstance(val, h5py.ExternalLink):
-                # a new link to be added to a group
-                d = self.fp[name]
-            else:
-                # a dataset, just resize
-                d = self.fp[name]
+                # links
+                try:
+                    universal = val.universal
+                except AttributeError:
+                    universal = False
+                # we need relative paths
+                val = h5py.ExternalLink(
+                    filename=os.path.relpath(val.filename, start=os.path.dirname(self.fp.filename)),
+                    path=val.path)
+                if create:
+                    if universal:
+                        self.fp[name] = val
+                    else:
+                        d = self.fp.create_group(name)
+                elif not universal:
+                        d = self.fp[name]
+                        link_key = '%06u' % len(d.keys())
+                        d[link_key] = val
+
+            elif (type(val) == str):
+                # strings
+                if create:
+                    d = self.fp.create_dataset(name, shape=(0,), maxshape=(None,), dtype='S100')
+                else:
+                    d = self.fp[name]
+                val = val.encode(encoding='ascii', errors='ignore')
                 d.resize((d.shape[0]+1,) + d.shape[1:])
+                d[-1] = val
 
-            # special case: convert strings
-            val_ = val
-            if type(val) == str:
-                val_ = val.encode(encoding='ascii', errors='ignore')
-
-            # write the data
-            if isinstance(val, h5py.ExternalLink):
-                # a group of links. convert to a path relative to the master h5 file.
-                val_ = h5py.ExternalLink(
-                    filename=os.path.relpath(val_.filename, start=os.path.dirname(self.fp.filename)),
-                    path=val_.path)
-                link_key = '%06u' % len(d.keys())
-                d[link_key] = val_
             else:
-                # a dataset
-                d[-1] = val_
+                # scalars of any type
+                if create:
+                    d = self.fp.create_dataset(name, shape=(0,), maxshape=(None,), dtype=type(val))
+                else:
+                    d = self.fp[name]
+                d.resize((d.shape[0]+1,) + d.shape[1:])
+                d[-1] = val                
 
-    def act_on_footer(self):
+
+    def act_on_footer(self, dct):
         """
         Closes the file after the scan.
         """

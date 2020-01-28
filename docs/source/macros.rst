@@ -17,6 +17,17 @@ ascan
         ascan <motor1> <start> <stop> ... <intervals> <exp_time>
     
 
+bookmark
+--------
+
+    Bookmarks the specified motors at their current dial positions. ::
+
+        bookmark <'bookmark name'> <motor 1> <motor 2> ...
+
+    Also saves existing bookmarks to all available ``MotorMemorizer``
+    objects.
+    
+
 ct
 --
 
@@ -73,6 +84,15 @@ loopscan
     <intervals> + 1, for consistency with ascan, dscan etc. ::
 
         loopscan <intervals> <exp_time>
+    
+
+lsbook
+------
+
+    Lists the currently defined bookmarks or the contents of a specific
+    bookmark. ::
+
+        lsbook [<bookmark name>]
     
 
 lsdet
@@ -141,6 +161,22 @@ path
 ----
 
     Print the current data path.
+    
+
+restore
+-------
+
+    Restore a bookmarked position by moving all motors there.
+    
+
+rmbook
+------
+
+    Delete one or all bookmarks defined with the bookmark command. ::
+
+        rmbook [<bookmark 1> <bookmark 2> ...]
+
+    Also updates all available ``MotorMemorizer`` instances.
     
 
 setlim

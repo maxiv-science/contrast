@@ -1,49 +1,30 @@
+"""
+This currently arms the eiger on every software step, which is sub-optimal. To be fixed
+later, but the receiver has to be updated too.
+"""
+
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from ..recorders.Hdf5Recorder import Link
 from ..environment import env
 
 import time
 import numpy as np
 import os
-from h5py import ExternalLink
 import requests
 import json
 import zmq
 from threading import Thread
 
-class StreamReceiver:
-    """
-    Helper class for the Eiger.
-    """
-    def __init__(self, receiver_ip, receiver_port=9997):
-        self.context = zmq.Context()
-        self.req_socket = self.context.socket(zmq.REQ)
-        self.req_socket.connect('tcp://%s:%u' % (receiver_ip, receiver_port))
-
-    def arm(self, filename, shape, dtype):
-        self.req_socket.send_json({'command': 'arm',
-                                   'filename': filename,
-                                   'type': dtype,
-                                   'shape': shape})
-        print('send msg')
-        if self.req_socket.poll(1000):
-            print(self.req_socket.recv())
-            return True
-        else:
-            return False
-
-
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
-    def __init__(self, name=None, ip_address='172.16.126.91', api_version='1.8.0',
-                 shape=[2068, 2162], receiver_ip=''):
+    def __init__(self, name=None, host='b-nanomax-eiger-dc-1.maxiv.lu.se',
+                 api_version='1.8.0'):
         """
         Class to interact directly with the Eiger Simplon API.
         """
-        self.dcu_ip = ip_address
-        self.receiver_ip = receiver_ip
+        self.host = host
         self.api_version = api_version
-        self._hdf_path_base = 'entry_%04d/measurement/Eiger/data'
-        self.shape = shape
+        self._hdf_path = 'entry/measurement/Eiger/data'
         self.acqthread = None
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
@@ -53,17 +34,21 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def initialize(self):
         self.session = requests.Session()
         self.session.trust_env = False
-        self.receiver = StreamReceiver('1.2.3.4')
+        self.burst_latency = 100e-9
 
         # set up the detector
+        self._set('detector', 'command/disarm')
+        self._set('detector', 'command/cancel') # who knows
         self._set('detector', 'config/threshold/1/mode', 'enabled')
         self._set('detector', 'config/threshold/2/mode', 'disabled')
         self._set('stream', 'config/mode', 'enabled')
         self._set('filewriter', 'config/mode', 'disabled')
         self._set('monitor', 'config/mode', 'enabled')
+        self._set('stream', 'config/header_detail', 'all')
+        self._set('detector', 'config/counting_mode', 'retrigger')
 
-    def _get(self, subsystem, key):
-        response = self.session.get('http://%s/%s/api/%s/%s' %(self.dcu_ip, subsystem, self.api_version, key))
+    def _get(self, subsystem, key, timeout=3.0):
+        response = self.session.get('http://%s/%s/api/%s/%s' %(self.host, subsystem, self.api_version, key), timeout=timeout)
         if response:
             if response.headers['content-type'] == 'application/json':
                 return response.json()
@@ -73,19 +58,19 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             print('error')
             print(response)
 
-    def _set(self, subsystem, key, value=None):
-        url = 'http://%s/%s/api/%s/%s' %(self.dcu_ip, subsystem, self.api_version, key)
-        if value:
-            payload = {'value': value}
-        else:
+    def _set(self, subsystem, key, value=None, timeout=3.0):
+        url = 'http://%s/%s/api/%s/%s' %(self.host, subsystem, self.api_version, key)
+        if value is None:
             payload = None
-        response = self.session.put(url, json=payload)
+        else:
+            payload = {'value': value}
+        response = self.session.put(url, json=payload, timeout=timeout)
         if response.status_code != 200:
             print(response.text)
 
     def busy(self):
         if self.acqthread and self.acqthread.is_alive():
-            return True            
+            return True
         return not self._get('detector', 'status/state')['value'] in ('idle', 'ready')
 
     @property
@@ -102,11 +87,31 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def energy(self):
-        return self._get('detector', 'config/photon_energy')['value']
+        return self._get('detector', 'config/photon_energy')['value'] / 1000
 
     @energy.setter
     def energy(self, val):
-        self._set('detector', 'config/photon_energy', float(val))
+        if (val < 4) or (val > 30):
+            print('Bad energy value, should be in keV and between 4-30')
+            return
+        val = float(val)*1000
+        self._set('detector', 'config/photon_energy', val)
+
+    @property
+    def mask_applied(self):
+        return self._get('detector', 'config/pixel_mask_applied')['value']
+
+    @mask_applied.setter
+    def mask_applied(self, val):
+        self._set('detector', 'config/pixel_mask_applied', val)
+
+    @property
+    def pixel_splitting(self):
+        return self._get('detector', 'config/virtual_pixel_correction_applied')['value']
+
+    @pixel_splitting.setter
+    def pixel_splitting(self, val):
+        self._set('detector', 'config/virtual_pixel_correction_applied', val)
 
     @property
     def threshold(self):
@@ -122,43 +127,49 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         number of images etc.
         """
         self._set('detector', 'config/nimages', self.burst_n)
-        self._set('detector', 'config/count_time', acqtime)
-        self._set('detector', 'config/count_time', acqtime+1e-6)
+        self._set('detector', 'config/frame_time', acqtime)
+        self._set('detector', 'config/count_time', acqtime - 100.0e-9)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
-            self._set('detector', 'config/ntrigger', self.hw_trig_n)
+            self._set('detector', 'config/ntrigger', int(self.hw_trig_n * n_starts))
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
-            self._set('detector', 'config/ntrigger', n_starts)
-        if not dataid:
-            self.dpath = None
+            self._set('detector', 'config/ntrigger', int(n_starts)) # np.int64 isn't json serializable
+        if dataid is None:
+            self.dpath = ''
         else:
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
-            path = os.path.join(env.paths.directory, filename)
-            self.dpath = path
-        self.dtype = 'uint%u' % self._get('detector', 'config/bit_depth_image')['value']
+            self.dpath = os.path.join(env.paths.directory, filename)
+            if os.path.exists(self.dpath):
+                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                raise Exception('%s hdf5 file already exists' % self.name)
+        self._set('stream', 'config/header_appendix', json.dumps({'filename': self.dpath}))
         self._set('detector', 'command/arm')
+        self.n_started = 0
 
     def arm(self):
         """
-        Start the detector if hardware triggered, just prepareAcq otherwise.
+        The Eiger is armed only once.
         """
         pass
-#        if not self.receiver.arm(self.dpath, self.shape, self.dtype):
-#            raise Exception('The zmq receiver is broken')
 
     def start(self):
         """
         Start acquisition when software triggered.
         """
+        self.n_started += 1
         if not self.hw_trig:
-            self.acqthread = Thread(target=self._set, args=('detector', 'command/trigger'))
+            self.acqthread = Thread(target=self._set, args=('detector', 'command/trigger'), kwargs={'timeout':None})
             self.acqthread.start()
 
     def stop(self):
         self._set('detector', 'command/disarm') # there's also cancel - not sure which to use
 
     def read(self):
-        return -1
-#        return ExternalLink(self.dpath , self._hdf_path_base % self.arm_number)
+        if self.dpath:
+            ret = {'frames': Link(self.dpath , self._hdf_path, universal=True),
+                   'thumbs:': None,}
+        else:
+            ret = None
+        return ret
 

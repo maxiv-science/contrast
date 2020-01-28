@@ -10,12 +10,17 @@ class Mesh(SoftwareScan):
     Software scan on a regular grid of N motors. ::
         
         mesh <motor1> <start> <stop> <intervals> ... <exp_time>
+
+    optional key word arguments:
+        jitter: float ... Randomizes perfect grid positions.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.motors = []
         self.limits = []
         self.intervals = []
+        self.kwargs = kwargs
+
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)
@@ -35,9 +40,28 @@ class Mesh(SoftwareScan):
             positions.append(np.linspace(self.limits[i][0],
                                          self.limits[i][1],
                                          self.intervals[i]+1))
-        grids = np.meshgrid(*positions)
+        grids = np.meshgrid(*reversed(positions))
+        grids = [l for l in reversed(grids)] # fastest last
+
+        if 'jitter' in self.kwargs.keys():
+            print('[!] jittered grid postions by factor:', self.kwargs['jitter'])
+            if self.kwargs['jitter']!=0:
+
+                step_sizes = []
+                for i, motor in enumerate(self.motors):
+                    d = np.abs(self.limits[i][0]-self.limits[i][1])
+                    n = self.intervals[i]
+                    step_sizes.append(1.*d/n)
+
+                rel_jitter = np.random.uniform(low  = -.5*self.kwargs['jitter'],
+                                           high = .5*self.kwargs['jitter'],
+                                           size = np.shape(grids))
+                for i, step_size in enumerate(step_sizes):
+                    grids[i] += rel_jitter[i] * step_size
+
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
+
 
 @macro
 class DMesh(Mesh):
