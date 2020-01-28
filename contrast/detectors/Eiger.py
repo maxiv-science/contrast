@@ -131,7 +131,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('detector', 'config/count_time', acqtime - 100.0e-9)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
-            self._set('detector', 'config/ntrigger', self.hw_trig_n)
+            self._set('detector', 'config/ntrigger', int(self.hw_trig_n * n_starts))
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
             self._set('detector', 'config/ntrigger', int(n_starts)) # np.int64 isn't json serializable
