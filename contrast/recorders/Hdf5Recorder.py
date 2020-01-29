@@ -91,6 +91,11 @@ class Hdf5Recorder(Recorder):
                     link_key = '%06u' % len(d.keys())
                     d[link_key] = val
 
+            elif isinstance(val, h5py.VirtualLayout):
+                # layout for a virtual dataset
+                if create:
+                    self.fp.create_virtual_dataset(name, val, fillvalue=-1)
+
             elif (type(val) == str):
                 # strings
                 if create:

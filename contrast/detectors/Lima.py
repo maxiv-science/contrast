@@ -9,7 +9,7 @@ try:
 except ModuleNotFoundError:
     pass
 import os
-from h5py import ExternalLink
+from h5py import VirtualSource, VirtualLayout
 
 class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     EXT_TRG_MODE = "EXTERNAL_TRIGGER_MULTI"
@@ -141,6 +141,30 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         self.hybrid_mode = False
         self.arm_number = -1
 
+    def make_virtual_layout(self):
+        _, bytes, n, m = self.lima.image_sizes
+        dtype = {1: np.uint8, 2: np.uint16, 4:np.uint32, 8:np.uint64}[int(bytes)]
+        # we need to have relative paths in every virtual source object
+        relfile = self.saving_filename
+
+        if self.hw_trig:
+            N = self.n_starts * self.burst_n * self.hw_trig_n
+            layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
+            for i in range(self.n_starts):
+                vsource = VirtualSource(relfile, self._hdf_path_base % i, shape=(self.hw_trig_n,m,n))
+                layout[i*self.hw_trig_n:(i+1)*self.hw_trig_n] = vsource
+        elif self.hybrid_mode:
+            N = self.n_starts * self.burst_n
+            layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
+            vsource = VirtualSource(relfile, self._hdf_path_base % 0, shape=(N, m, n))
+            layout[:] = vsource
+        else:
+            N = self.n_starts * self.burst_n
+            layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
+            for i in range(self.n_starts):
+                layout[i*self.burst_n:(i+1)*self.burst_n] = VirtualSource(relfile, self._hdf_path_base % i, shape=(self.burst_n,m,n))
+        return layout
+
     def prepare(self, acqtime, dataid, n_starts):
         """
         Run before acquisition, once per scan. Set up triggering,
@@ -169,6 +193,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self._safe_write('saving_prefix', prefix)
             self.saving_filename = prefix + self._safe_read('saving_suffix')
             if os.path.exists(os.path.join(env.paths.directory, self.saving_filename)):
+                print('%s hdf5 file already exists' % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
         if self.hw_trig:
@@ -180,6 +205,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
         if self.hybrid_mode:
             if self.burst_n != 1:
+                print('burst_n > 1 and hybrid mode makes no sense')
                 raise Exception('burst_n > 1 and hybrid mode makes no sense')
             self._safe_write('acq_trigger_mode', self.EXT_TRG_MODE)
             self._safe_write('acq_nb_frames', n_starts)
@@ -195,6 +221,11 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         while self.busy():
             print(self.name, 'slept 5 ms while waiting for prepare')
             time.sleep(.005)
+
+        # make a virtual layout to return instead of individual links
+        # to individual datasets
+        if self.saving_filename is not None:
+            self.layout = self.make_virtual_layout()
 
     def arm(self):
         """
@@ -244,11 +275,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         if self.saving_filename is None:
             return None
         else:
-            absfile = os.path.join(self._safe_read('saving_directory'), self.saving_filename)
-            if self.hybrid_mode:
-                return ExternalLink(absfile , self._hdf_path_base % 0)
-            else:
-                return ExternalLink(absfile , self._hdf_path_base % self.arm_number)
+            return {'frames': self.layout}
 
 class LimaPilatus(LimaDetector):
     """
