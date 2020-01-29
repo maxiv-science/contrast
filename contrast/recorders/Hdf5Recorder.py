@@ -86,10 +86,10 @@ class Hdf5Recorder(Recorder):
                         self.fp[name] = val
                     else:
                         d = self.fp.create_group(name)
-                elif not universal:
-                        d = self.fp[name]
-                        link_key = '%06u' % len(d.keys())
-                        d[link_key] = val
+                if not universal:
+                    d = self.fp[name]
+                    link_key = '%06u' % len(d.keys())
+                    d[link_key] = val
 
             elif (type(val) == str):
                 # strings
