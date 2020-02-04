@@ -173,3 +173,20 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             ret = None
         return ret
 
+    def _start(self, acqtime):
+        """
+        The Eiger needs to override this method as it uses software triggers.
+        """
+        self.stopped = False
+        NN = 1000
+        while not self.stopped:
+            self.prepare(acqtime, None, NN)
+            for nn in range(NN):
+                if self.stopped:
+                    self.stop()
+                    break
+                self.arm()
+                self.start()
+                while self.busy():
+                    time.sleep(.05)
+
