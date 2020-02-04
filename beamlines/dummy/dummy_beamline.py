@@ -15,6 +15,9 @@ if __name__=='__main__':
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     import os
 
+    # if you have ptypy installed, you can generate mock ptycho data
+    #from sim_ptycho_scan import *
+
     env.userLevel = 1 # we're not experts!
 
     samx = DummyMotor(name='samx')
