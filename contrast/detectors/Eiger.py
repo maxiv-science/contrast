@@ -14,6 +14,7 @@ import requests
 import json
 import zmq
 from threading import Thread
+from base64 import b64encode, b64decode
 
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
@@ -189,4 +190,30 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 self.start()
                 while self.busy():
                     time.sleep(.05)
+
+    def get_mask(self):
+        """
+        Get the Eiger mask, taken from the example in the manual.
+        """
+        darray = self._get('detector', 'config/pixel_mask', timeout=15)['value']
+        dtype = np.dtype(str(darray['type']))
+        shape = darray['shape']
+        mask = np.frombuffer(b64decode(darray['data']), dtype=dtype).reshape(shape)
+        return mask.copy()
+
+    def set_mask(self, array):
+        """
+        Set the Eiger mask, also adapted from the manual.
+        """
+        data_json = json.dumps({'value': {
+                                '__darray__': (1,0,0),
+                                'type': array.dtype.str,
+                                'shape': array.shape,
+                                'filters': ['base64'],
+                                'data': b64encode(array.data).decode('ascii') } })
+        self._set('detector', 'config/pixel_mask', data_json, timeout=15)
+
+        # arming and disarming stores it:
+        self._set('detector', 'command/arm')
+        self._set('detector', 'command/disarm')
 
