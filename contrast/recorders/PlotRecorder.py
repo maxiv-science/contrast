@@ -6,6 +6,17 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 
+def dict_lookup(dct, path):
+    """
+    Helper to recursively get dct['path']['to']['item'] from
+    dct['path/to/item'].
+    """
+    if '/' in path:
+        pre, post = path.split('/', maxsplit=1)
+        return dict_lookup(dct[pre], post)
+    else:
+        return dct[path]
+
 class PlotRecorder(Recorder):
     """
     Recorder which catches data and plots it with matplotlib.
@@ -61,7 +72,7 @@ class PlotRecorder(Recorder):
     def act_on_data(self, dct):
         # if our data isn't in dct, just move on
         try:
-            new_data = dct[self.ydata]
+            new_data = dict_lookup(dct, self.ydata)
         except KeyError:
             return
 
