@@ -1,5 +1,17 @@
 from . import Recorder, RecorderFooter
+from .Hdf5Recorder import Link
 import zmq
+
+def walk_dict(dct):
+    """
+    A recursive version of dict.items(), which yields
+    (containing-dict, key, val).
+    """
+    for k, v in dct.items():
+        yield dct, k, v
+        if isinstance(v, dict):
+            for d_, k_, v_ in walk_dict(v):
+                yield d_, k_, v_
 
 class StreamRecorder(Recorder):
     """
@@ -36,8 +48,14 @@ class StreamRecorder(Recorder):
 
     def act_on_data(self, dct, base='entry/measurement/'):
         """
-        Relay information.
+        Relay information, but filter out exotic objects like Links.
         """
+        for d, k, v in walk_dict(dct):
+            if isinstance(v, Link):
+                d[k] = {'type':'Link',
+                        'filename':v.filename,
+                        'path':v.path,
+                        'universal':v.universal}
         self.socket.send_pyobj(dct, protocol=2)
 
     def act_on_footer(self, dct):
