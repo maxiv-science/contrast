@@ -42,9 +42,9 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50))
-    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50))
-    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50))
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
     sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
@@ -62,7 +62,7 @@ if __name__=='__main__':
 
     # gap and taper
     ivu_gap = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
-    ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05))
+    ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
 
     # Diamond filter motors, sitting in diagnostics module 1
     bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=4, dial_limits=(-36.04, 36.77))
@@ -101,6 +101,9 @@ if __name__=='__main__':
     skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2)
     skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2)
     kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)
+    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3)
+    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3)
+    pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3)
     # controller 2
     dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
     dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
@@ -214,9 +217,9 @@ if __name__=='__main__':
     import PyTango
     import time
     def pre_scan_stuff(slf):
-        basex.proxy.PowerOn = False
-        basey.proxy.PowerOn = False
-        basez.proxy.PowerOn = False
+        basex.proxy.PowerOn = True
+        basey.proxy.PowerOn = True
+        basez.proxy.PowerOn = True
         runCommand('fsopen')
         time.sleep(1)
         runCommand('stoplive')
