@@ -233,3 +233,13 @@ if __name__=='__main__':
     Ct._after_ct = post_scan_stuff
 
     contrast.wisdom()
+
+    # find the latest scan number and initialize env.nextScanID
+    try:
+        l = os.listdir(env.paths.directory)
+        last = max([int(l_[:-3]) for l_ in l if (len(l_)==9 and l_.endswith('.h5'))])
+        env.nextScanID = last + 1
+        print('\nNote: inferring that the next scan number should be %u' % (last+1))
+    except:
+        pass
+
