@@ -510,6 +510,10 @@ class RmBook(BookmarkMacroBase):
     Also updates all available ``MotorMemorizer`` instances.
     """
     def run(self):
+        if not self.specific:
+            if input('Are you sure you want to remove all bookmarks? [y/n] ') != 'y':
+                return
+
         for b in self.bookmarks:
             bookmark_refs.remove(b)
 
