@@ -305,7 +305,7 @@ class LimaMerlin(LimaDetector):
     """
     def __init__(self, *args, **kwargs):
         super(LimaMerlin, self).__init__(*args, **kwargs)
-        self._hdf_path_base = 'entry_%04d/measurement/Merlin/data'
+        self._hdf_path_base = 'entry_%04d/measurement/Merlin/data/array'
 
     def _initialize_det(self):
         self.energy = 10.0
