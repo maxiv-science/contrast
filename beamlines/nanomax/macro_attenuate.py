@@ -18,10 +18,13 @@ class attenuate(object):
     on the current photon beam enegery.
 
     usage / examples:
-        %attenuate                 # show current attenuator setting / value
-        %attenuate 0.2             # attenuate to 20% beam intensity
-        %attenuate 0.1 ['Si','Al'] # attenuate to 10% but only use Si and Al
-                                   # ['Al','Ti','Si','Cu','Fe','Mo','Ta','Ag'] 
+        %attenuate                  # show current attenuator setting / value
+        %attenuate 0.2              # attenuate to 20% beam intensity
+        %attenuate 0.1 ['Si','Al']  # attenuate to 10% but only use Si and Al
+                                    # ['Al','Ti','Si','Cu','Fe','Mo','Ta','Ag'] 
+        %attenuate 0.2 how='unsafe' # attenuate to 20% beam intensity without
+                                    # manually confirming the motor movement
+                                    # ... for the usement in macros
     """
 
     ############################################################################
@@ -116,7 +119,7 @@ class attenuate(object):
         idx = (np.abs(array - position)).argmin()
         return idx
 
-    def show_current_attenuation(self):
+    def show_current_attenuation(self, printing=True):
         carrier_positions = self.get_current_carrier_positions()
         carrier_indices   = np.array([self.estiamte_carrier_index(pos) for 
                                       pos in carrier_positions])
@@ -127,17 +130,18 @@ class attenuate(object):
         for j, i in enumerate(carrier_indices):
             self.T_currently *= self.transmission[i,j]
         
-        print('currently:')
-        print('    absorption  ', str(1-self.T_currently))
-        print('    transmission', str(self.T_currently))
-        print('with:')
-        for i_carrier, i_pos in enumerate(carrier_indices):
-            i_pos = int(i_pos)
-            line  = '    ' + self.carriers[i_carrier]
-            line += ' '+ str(carrier_positions[i_carrier]).rjust(10)
-            line += ' #' + str(self.thickness[i_pos, i_carrier]).rjust(5)
-            line += ' um of ' + str(self.elements[i_pos])
-            print(line)
+        if printing:
+            print('currently:')
+            print('    absorption  ', str(1-self.T_currently))
+            print('    transmission', str(self.T_currently))
+            print('with:')
+            for i_carrier, i_pos in enumerate(carrier_indices):
+                i_pos = int(i_pos)
+                line  = '    ' + self.carriers[i_carrier]
+                line += ' '+ str(carrier_positions[i_carrier]).rjust(10)
+                line += ' #' + str(self.thickness[i_pos, i_carrier]).rjust(5)
+                line += ' um of ' + str(self.elements[i_pos])
+                print(line)
 
     def input_validation(self):
         if self.attenuate_to == None:
@@ -222,6 +226,16 @@ class attenuate(object):
                 yes = ['yes', 'y', '1', 'true']
                 user_input = input('Proceed to move motrors? [Y/n] ').lower()
                 if user_input in yes:
+
+                    # run all motor movement commands
                     for command in commands: self.run_command(command)
+
+                    # check that the motors have moved to the calculated position
+                    self.show_current_attenuation(printing=False)
+                    if self.T_currently != self.T_choosen[0]:
+                        print('\x1b[0;49;91[ERROR] mattenuation was NOT set\x1b[0m')
+                    else:
+                        print('\x1b[0;49;92msuccessfully set the attenuation\x1b[0m')
+
             else:                                      
                 for command in commands: self.run_command(command)
