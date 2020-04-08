@@ -78,3 +78,28 @@ class M2shift(object):
         print("Moving the M2 fine pitch piezo like this:\n%s" % cmd)
         runCommand(cmd)
 
+@macro
+class NewSample(object):
+    """
+    Shorter / faster way of changing the directory 
+    where the RAW data will be saved.
+    """
+    def __init__(self, sample_name):
+        self.sample_name     = sample_name
+        self.sdm_mac         = PyTango.DeviceProxy("B303A/CTL/SDM-01")
+
+    # ToDo: Consider an option for automated rising index
+    #       eg: 0000_setup, 0001_alignment, 0002_sample_XYZ, ...
+
+    def run(self):
+        self.sdm_mac.Sample  = self.sample_name
+        runCommand('path')
+
+@macro
+class NewSession(NewSample):
+    """
+    Shorter / faster way of changing the directory 
+    where the RAW data will be saved.
+    """
+    # same as NewSample, but in the muscle memmory of MK
+    pass
