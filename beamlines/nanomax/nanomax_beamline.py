@@ -42,7 +42,7 @@ if __name__=='__main__':
                                       'B303A-O/PSS/BS-01',
                                       'B303A-E/PSS/BS-01',])
     
-    env.userLevel = 1
+    env.userLevel = 2
     # chosen these levels here:
     # 1 - simple user
     # 2 - power user
@@ -154,8 +154,8 @@ if __name__=='__main__':
     topm_zoom = TangoMotor(device='b303a-e02/dia/om-02-zoom', name='topm_zoom', userlevel=1)
 
     # goniometer
-    gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=2)
-    gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=2)
+    gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=1)
+    gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=1)
     gonx1 = TangoMotor(device='b303a-e02/dia/gon-01-x1', name='gonx1', userlevel=4)
     gonx2 = TangoMotor(device='b303a-e02/dia/gon-01-x2', name='gonx2', userlevel=4)
     gonx3 = TangoMotor(device='b303a-e02/dia/gon-01-x3', name='gonx3', userlevel=4)
@@ -168,8 +168,8 @@ if __name__=='__main__':
     bs_y = TangoMotor(device='B303A-E02/DIA/SAMS-01-Y', name='bs_y', userlevel=4)
 
     # detector motors
-    #detx = TangoMotor(device='motor/icepap_ctrl_1_user/11', name='detx', userlevel=1)
-    #dety = TangoMotor(device='motor/icepap_ctrl_1_user/12', name='dety', userlevel=1)
+    detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=1)
+    dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=1)
 
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
@@ -190,9 +190,11 @@ if __name__=='__main__':
     xspress3 = LimaXspress3(name='xspress3',
                             lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
                             det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
-    # andor = LimaAndor(name='andor',
-    #                   lima_device='lima/limaccds/andortest',
-    #                   det_device='lima/andor3/andortest')
+    andor = LimaAndor(name='andor',
+                       lima_device='lima/limaccds/andortest',
+                       det_device='lima/andor3/andortest')
+    #andor.lima.image_rotation='90'
+    #andor.lima.image_flip=[True, False]
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
@@ -217,6 +219,7 @@ if __name__=='__main__':
     # deactivate all the detectors except pilatus as default
     for d in Detector.getinstances():
         d.active = False
+    alba2.active = True
     eiger.active = True
 
     # define pre- and post-scan actions, per scan base class
