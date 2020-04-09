@@ -208,31 +208,18 @@ class LoopScan(SoftwareScan):
     <intervals> + 1, for consistency with ascan, dscan etc. ::
 
         loopscan <intervals> <exp_time>
-
-    optional keyword arguments:
-        dark=True ... if the fast shutter is supposed to be closed during
-                      all the exposures -> for darkfield frames 
     """
-    def __init__(self, intervals, exposuretime=1.0, *args, **kwargs):
+    def __init__(self, intervals, exposuretime=1.0):
         super(LoopScan, self).__init__(float(exposuretime))
         self.intervals = intervals
         self.n_positions = intervals + 1
         self.motors = []
-        self.kwargs = kwargs:
 
     def _generate_positions(self):
         self.check_dark()
         # dummy positions with a non existent motor
         for i in range(self.intervals + 1):
             yield {'fake':i}
-
-    def check_dark(self):
-        if 'dark' in self.kwargs.keys():
-            if self.kwargs['dark']==True:
-                def _before_scan(self):
-                    runCommand('fsclose')
-                def _after_scan(self):
-                    runCommand('fsclose')
 
 @macro
 class Ct(object):
