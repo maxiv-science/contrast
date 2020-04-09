@@ -20,7 +20,7 @@ if __name__=='__main__':
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus
-    from contrast.detectors.Lima import LimaMerlin
+    from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Lima import LimaAndor
     from contrast.detectors.Lima import LimaXspress3
     from contrast.detectors.Eiger import Eiger
@@ -186,9 +186,7 @@ if __name__=='__main__':
                       device='staff/alebjo/pilatus100k')
     pilatus1m = Pilatus(name='pilatus1m',
                         device='staff/alebjo/pilatus1m')
-    merlin = LimaMerlin(name='merlin',
-                        lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
-                        det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
+    merlin = Merlin(name='merlin', host='localhost')
     xspress3 = LimaXspress3(name='xspress3',
                             lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
                             det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
