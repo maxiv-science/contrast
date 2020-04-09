@@ -85,7 +85,7 @@ class NpointFlyscan(Mesh):
                 self.scancontrol.Go()
                 ok = True
             except:
-                print('***** scancontrol Go() failed, is the piexo having trouble settling? trying again...')
+                print('***** scancontrol Go() failed, is the piezo having trouble settling? trying again...')
                 import time
                 time.sleep(.1)
 
