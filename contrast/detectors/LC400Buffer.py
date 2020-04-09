@@ -35,7 +35,7 @@ class LC400Buffer(Detector):
 
     def __emergency_recover(self):
         ec0 = PyTango.DeviceProxy('tango/admin/b-v-nanomax-ec-0')
-        ioc = PyTango.DeviceProxy('tango/admin/b303a-a100380-cab03-ctl-ioc-01a')
+        ioc = PyTango.DeviceProxy('tango/admin/b-nanomax-ec-6')
         ec0.HardKillServer('LC400ScanControl/B303A')
         ioc.HardKillServer('NpointLC400/B303A')
         print('Killing the npoint devices and waiting...')
