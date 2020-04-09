@@ -10,6 +10,7 @@ if __name__=='__main__':
     import contrast
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
+    from contrast.environment.scheduling import MaxivScheduler
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
@@ -33,6 +34,13 @@ if __name__=='__main__':
     from macro_attenuate import *
     from contrast.scans import SoftwareScan, Ct
     import os
+
+    # add a scheduler to pause scans when shutters close
+    env.scheduler = MaxivScheduler(
+                        shutter_list=['B303A-FE/VAC/HA-01',
+                                      'B303A-FE/PSS/BS-01',
+                                      'B303A-O/PSS/BS-01',
+                                      'B303A-E/PSS/BS-01',])
     
     env.userLevel = 1
     # chosen these levels here:

@@ -44,16 +44,19 @@ class DummyInjectionScheduler(DummyScheduler):
         return whole_mins * 60 + whole_secs
 
 
-class MaxivInjectionScheduler(DummyScheduler):
+class MaxivScheduler(DummyScheduler):
     """
-    Scheduler which keeps track of storage ring injections at MAX IV.
-    Could also check the shutter status, so that closing the safety
-    shutter pauses the scan!
+    Scheduler to keep track of shutter status at MAX IV, and which
+    should also become capable of avoiding storage ring injections.
 
-    NOTE: It's probably best to write this as an asynchronous
-    thread or process, because it might involve reading network
-    attributes from the other side of the lab. It could do this at
-    1 Hz or so, and the getters could just report on the latest
-    value. That way scanning won't be slowed down.
+    NOTE: Using threaded status checkers here to avoid polling slow
+    devices on the other side of the lab on every step.
     """
-    pass
+    def __init__(self, shutter_list):
+        from .shutters import TangoShutterChecker
+        self.shutter_checker = TangoShutterChecker(*shutter_list)
+        self.shutter_checker.start()
+
+    def _ready(self):
+        return False not in self.shutter_checker.status_list
+
