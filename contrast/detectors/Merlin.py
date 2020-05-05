@@ -143,7 +143,7 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.acqthread.start()
 
     def stop(self):
-        print('SORRY - STOPPING THE MERLIN ISNT IMPLEMENTED...')
+        self.set('stop')
 
     def read(self):
         if self.dpath:
