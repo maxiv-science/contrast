@@ -83,20 +83,23 @@ class SoftwareScan(object):
         enough_time = time_needed < limit if limit else True
         ready = env.scheduler.ready
         found_not_ready = False
-        while not ready or not enough_time:
-            if not enough_time:
-                print('not enough time to complete this measurement, so waiting...')
-            else:
-                if not found_not_ready:
-                    print('Waiting for beamline to become available')
-                    found_not_ready = True
+        try:
+            while not ready or not enough_time:
+                if not enough_time:
+                    print('not enough time to complete this measurement so waiting, press ctrl-c to ignore from now on...')
                 else:
-                    print('.', end='')
-                    sys.stdout.flush()
-            time.sleep(1.)
-            limit = env.scheduler.limit
-            enough_time = time_needed < limit if limit else True
-            ready = env.scheduler.ready
+                    if not found_not_ready:
+                        print('Waiting for beamline to become available, press ctrl-c to ignore from now on...')
+                        found_not_ready = True
+                    else:
+                        print('.', end='')
+                        sys.stdout.flush()
+                time.sleep(1.)
+                limit = env.scheduler.limit
+                enough_time = time_needed < limit if limit else True
+                ready = env.scheduler.ready
+        except KeyboardInterrupt:
+            env.scheduler.disabled = True
 
     def _before_arm(self):
         """

@@ -56,7 +56,11 @@ class MaxivScheduler(DummyScheduler):
         from .shutters import TangoShutterChecker
         self.shutter_checker = TangoShutterChecker(*shutter_list)
         self.shutter_checker.start()
+        self.disabled = False
 
     def _ready(self):
-        return False not in self.shutter_checker.status_list
+        if self.disabled:
+            return True
+        else:
+            return False not in self.shutter_checker.status_list
 
