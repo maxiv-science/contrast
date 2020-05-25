@@ -16,6 +16,7 @@ if __name__=='__main__':
     from contrast.motors.LC400 import LC400Motor
     from contrast.detectors.LC400Buffer import LC400Buffer
     from contrast.motors.TangoMotor import TangoMotor
+    from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
@@ -29,6 +30,7 @@ if __name__=='__main__':
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors import Detector
     from contrast.detectors.DG645 import StanfordTriggerSource
+    from contrast.detectors.Keysight import Keysight2985
     from nanomax_beamline_macros import *
     from NpointFlyscan import NpointFlyscan
     from macro_attenuate import *
@@ -200,6 +202,10 @@ if __name__=='__main__':
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
     alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
     alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
+
+    # The keysight as both a detector (ammeter) and motor (bias voltage)
+    keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
+    keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
