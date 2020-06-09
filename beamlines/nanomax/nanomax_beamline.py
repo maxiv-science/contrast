@@ -95,7 +95,7 @@ if __name__=='__main__':
     mono_bragg = TangoMotor(device='b303a-o/opt/MONO-BRAGML', name='mono_bragg', userlevel=4, dial_limits=(4.0, 27.46))
     mono_x2per = TangoMotor(device='b303a-o/opt/mono-perml', name='mono_x2per', userlevel=2, dial_limits=(-.1, .1), user_format='%.3f')
     mono_x2pit = TangoMotor(device='b303a-o/opt/mono-pitml', name='mono_x2pit', userlevel=4, dial_limits=(-1.21, 1.21), user_format='%.3f')
-    mono_x2rol = TangoMotor(device='b303a-o/opt/mono-rolml', name='mono_x2prol', userlevel=4, dial_limits=(-0.8, 0.79), user_format='%.3f')
+    mono_x2rol = TangoMotor(device='b303a-o/opt/mono-rolml', name='mono_x2rol', userlevel=4, dial_limits=(-0.8, 0.79), user_format='%.3f')
 
     # Nanobpm motor. Positions the bpm vertically in the beam. Almost never moved. Should be at 2.5 mm
     nanobpm_y = TangoMotor(device='b303a-o/dia/bpx-01', name='nanobpm_y', userlevel=4, dial_limits=(-0.1, 23.1))
