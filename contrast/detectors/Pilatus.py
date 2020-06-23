@@ -2,41 +2,32 @@ from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDe
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
+import re
+import time
+import socket
+import select
 
-try:
-    import PyTango
-except ModuleNotFoundError:
-    pass
+BUF_SIZE = 1024
 
 class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
-    Detector class interfacing with the Tango device from pilatus-streamer:
+    Detector class interfacing directly with the pilatus-streamer:
 
     https://gitlab.maxiv.lu.se/nanomax-beamline/pilatus-streamer
     """
-    
 
-    def __init__(self, name=None, device=None):
-        self.device_name = device
+    def __init__(self, hostname, name=None):
         BurstDetector.__init__(self)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
         self._hdf_path = 'entry/measurement/Pilatus/data'
+        self.hostname = hostname
 
     def initialize(self):
-        self.proxy = PyTango.DeviceProxy(self.device_name)
-        # set a long Tango timeout, as the Pilatus doesn't stop during frames.
-        self.proxy.set_timeout_millis(60000)
+        self._initialize_socket()
+        self.imgpath = '/lima_data/'
         self.burst_latency = .003
-
-    @property
-    def energy(self):
-        return self.proxy.energy
-
-    @energy.setter
-    def energy(self, val):
-        self.proxy.energy = val
 
     def prepare(self, acqtime, dataid, n_starts):
         """
@@ -61,8 +52,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'%self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
-        self.proxy.exptime = acqtime
-        self.proxy.expperiod = self.burst_latency + acqtime
+        self.exptime = acqtime
+        self.expperiod = self.burst_latency + acqtime
 
     def arm(self):
         """
@@ -74,12 +65,12 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
         if self.hw_trig and (self.burst_n == 1):
             # each image triggered
-            self.proxy.nimages = self.hw_trig_n
-            self.proxy.extmtrigger(self.saving_file)
+            self.nimages = self.hw_trig_n
+            self._camserver_start(command='extmtrigger', filename=self.saving_file)
         elif self.hw_trig and (self.burst_n > 1):
             # triggered burst mode
-            self.proxy.nimages = self.burst_n
-            self.proxy.exttrigger(self.saving_file)
+            self.nimages = self.burst_n
+            self._camserver_start(command='exttrigger', filename=self.saving_file)
 
     def start(self):
         """
@@ -89,18 +80,41 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        self.proxy.nimages = self.burst_n
-        self.proxy.exposure(self.saving_file)
+        self.nimages = self.burst_n
+        self._camserver_start(command='exposure', filename=self.saving_file)
 
     def stop(self):
-        try:
-            self.proxy.stop()
-            self.stop_live()
-        except PyTango.DevFailed as e:
-            print('\n', e.args[0].desc)
+        if not self.busy():
+            return
+        self.sock.send(b'camcmd k\0')
+        buf = ''
+        while 'OK' not in buf:
+            ready = select.select([self.sock], [], [], 3.)
+            if ready[0]:
+                buf += self.sock.recv(BUF_SIZE).decode(encoding='ascii')
+            else:
+                raise Exception('The camserver didnt accept the stop command. This happens when it is running above 10 Hz or so.')
+        self._started = False
 
     def busy(self):
-        return not (self.proxy.State() == PyTango.DevState.ON)
+        if self.sock is None:
+            return True
+        if not self._started:
+            return False
+
+        ready = select.select([self.sock], [], [], 0.0)
+        if ready[0]:
+            response = self.sock.recv(BUF_SIZE).decode(encoding='ascii')
+            if len(response) == 0:
+                raise Exception('The socket connecting client to streamer is dead')
+            if 'ERR' in response:
+                print('Error! The %s acquisition didnt finish. Causing a ctrl-C...'%self.name)
+                print('This should be done better, we could actually move on to the next line. But for now lets focus on not halting forever.')
+                raise KeyboardInterrupt
+            if response.startswith('7 OK'):
+                self._started = False
+                return False
+        return True
 
     def read(self):
         if self.saving_file == '':
@@ -108,4 +122,127 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         else:
             return {'frames': Link(self.saving_file , self._hdf_path, universal=True),
                     'thumbs:': None,}
+
+    def _initialize_socket(self):
+        try:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(3)
+            self.sock.connect((self.hostname, 8888))
+            self._started = False
+        except:
+            self.sock = None
+
+    def _camserver_start(self, filename='', command='exposure'):
+        """
+        The command argument can be 'exposure', 'extmtrigger',
+        'extenable', 'exttrigger', see the Pilatus manual.
+        """
+        if self.busy():
+            raise Exception('Already running!')
+        allowed = ('exposure', 'extmtrigger', 'extenable', 'exttrigger')
+        assert command in allowed
+        res = self._query('%s %s' % (command, filename), timeout=10)
+        if res is None or (not res.startswith('15 OK')) or ('ERR' in res):
+            raise Exception('Error starting exposure')
+        else:
+            self._started = True
+
+    def _query(self, command, timeout=1):
+        if self.busy():
+            print('Detector measuring, better not...')
+            return ''
+        self._clear_buffer()
+        self.sock.send(bytes(command + '\0', encoding='ascii'))
+        ready = select.select([self.sock], [], [], timeout)
+        if ready[0]:
+            response = self.sock.recv(BUF_SIZE).decode(encoding='ascii')
+        else:
+            response = None
+        return response
+
+    def _clear_buffer(self):
+        """
+        Checks that the connection is OK and clears the buffer.
+        """
+        while True:
+            ready = select.select([self.sock], [], [], 0)
+            if ready[0]:
+                try:
+                    dump = self.sock.recv(BUF_SIZE)
+                except OSError:
+                    self._initialize_socket()
+                    return
+                if len(dump) == 0:
+                    # only happens if the server has been dead
+                    print('something is strange - reinitializing the socket!')
+                    self._initialize_socket()
+            else:
+                break
+
+    def _parse_response(self, data, pattern):
+        match = re.compile(pattern).match(data)
+        ret = match.groups(1)[0] if match else None
+        return ret
+
+    @property
+    def energy(self):
+        res = self._query('setenergy', timeout=20)
+        res = self._parse_response(res, '15 OK Energy setting: (.*) eV')
+        energy = float(res) if res else None
+        return energy
+
+    @energy.setter
+    def energy(self, val):
+        res = self._query('setenergy %f' % value, timeout=20)
+        if res is None or not res.startswith('15 OK'):
+            raise Exception('Error setting energy')
+
+    @property
+    def exptime(self):
+        res = self._query('exptime')
+        res = self._parse_response(res, '15 OK Exposure time set to: (.*) sec.\x18')
+        return float(res)
+
+    @exptime.setter
+    def exptime(self, value):
+        res = self._query('exptime %f' % value)
+        if res is None or not res.startswith('15 OK'):
+            raise Exception('Error setting exptime')
+
+    @property
+    def expperiod(self):
+        res = self._query('expperiod')
+        res = self._parse_response(res, '15 OK Exposure period set to: (.*) sec\x18')
+        return float(res)
+
+    @expperiod.setter
+    def expperiod(self, value):
+        res = self._query('expperiod %f' % value)
+        if res is None or not res.startswith('15 OK'):
+            raise Exception('Error setting expperiod')
+
+    @property
+    def nimages(self):
+        res = self._query('nimages')
+        res = self._parse_response(res, '15 OK N images set to: (\d+)')
+        nimages = int(res) if res else None
+        return nimages
+
+    @nimages.setter
+    def nimages(self, value):
+        res = self._query('nimages %d' % value)
+        if res is None or not res.startswith('15 OK'):
+            raise Exception('Error setting nimages')
+
+    @property
+    def imgpath(self):
+        res = self._query('imgpath')
+        res = self._parse_response(res, '10 OK (.*)\x18')
+        return res
+
+    @imgpath.setter
+    def imgpath(self, value):
+        res = self._query('imgpath %s' % value)
+        if res is None or not res.startswith('10 OK'):
+            raise Exception('Error setting imgpath')
 
