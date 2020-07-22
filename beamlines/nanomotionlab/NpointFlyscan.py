@@ -8,46 +8,33 @@ class NpointFlyscan(Mesh):
     """
     Flyscan macro for the Npoint LC400 setup.
         
-    npointflyscan <fly-motor> <start> <stop> <intervals> <step-motor1> <start1> <stop1> <intervals1> ... <exp time>
+    npointflyscan <fly-motor> <start> <stop> <intervals> <step-motor1> <start1> <stop1> <intervals1> ... <exp time> <latency>
 
     The argument fly-motor must be an instance of the LC400Motor class.
-
-    optional key word arguments:
-        latency: seconds    Latency between acquisitions. If a triggered detector has a longer latency, the longest latency will be used.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args):
         """
         Parse arguments.
         """
         try:
             assert all_are_motors(args[:-2:4])
-            super(NpointFlyscan, self).__init__(*args[4: ], **kwargs)
+            super(NpointFlyscan, self).__init__(*args[4:-1])
             self.fastmotor = args[0]
             self.fastlimits = [float(i) for i in args[1:3]]
             self.fastintervals = int(args[3])
-            self.exptime = float(args[-1])
-            if 'latency' in kwargs.keys():
-                self.latency = kwargs['latency']
-            else:
-                self.latency = 0            
+            self.exptime = float(args[-2])
+            self.latency = float(args[-1])
             self.print_progress = False
         except:
             #raise MacroSyntaxError
             raise
 
     def _set_det_trig(self, on):
-        updated = False
         for d in Detector.get_active():
             if isinstance(d, TriggeredDetector):
                 d.hw_trig = on
                 d.hw_trig_n = self.fastintervals + 1
-                if d.latency is not None:
-                    if self.latency < d.latency:
-                        self.latency = d.latency
-                        updated = True
-        if updated:
-            print("Scan latency updated to %g."%self.latency)
 
     def run(self):
         try:
@@ -57,7 +44,7 @@ class NpointFlyscan(Mesh):
             # Activate the LC400 buffer and deactivate the stanford box
             runCommand('deactivate stanford')
             runCommand('activate npoint_buff')
-            #runCommand('lima_hybrid_off')
+            # runCommand('lima_hybrid_off')
 
             # configure the SC device - roughly like this
             axismap = {'sz': 1, 'sx': 2, 'sy': 3}
