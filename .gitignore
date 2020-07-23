@@ -5,3 +5,4 @@ dist/*
 contrast.egg*
 docs/build
 
+.vscode/*
