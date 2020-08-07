@@ -27,7 +27,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
     def __init__(self, name=None, host='172.16.126.88',
                  ctrl_port=8888, data_port=8889):
         """
-        Class to interact directly with the Eiger Simplon API.
+        Class to interact directly with the PandABox.
         """
         self.host = host
         self.ctrl_port = ctrl_port
@@ -58,7 +58,11 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         """
         Run before acquisition, once per scan.
         """
-        self.query('PULSE1.PULSES=%d' % self.burst_n)
+        if self.hw_trig:
+            self.query('PULSE1.PULSES=%d' % self.hw_trig_n)
+        else:
+            self.query('PULSE1.PULSES=%d' % self.burst_n)
+
         self.query('PULSE1.WIDTH=%f' % acqtime)
         self.query('PULSE1.STEP=%f' % (self.burst_latency+acqtime))
 
@@ -102,7 +106,13 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         # Then put the rest of the data into the same buffer and continue
         n = 0
         data = {ch:[] for ch in channels}
-        while n < self.burst_n:
+        
+        if self.hw_trig:
+            num_points = self.hw_trig_n
+        else:
+            num_points = self.burst_n
+
+        while n < num_points:
             # anything more to read?
             ready = select.select([s], [], [], .1)[0]
             if ready:
