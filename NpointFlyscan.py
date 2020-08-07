@@ -2,6 +2,8 @@ from contrast.scans.Mesh import Mesh
 from contrast.motors import all_are_motors
 from contrast.environment import macro, MacroSyntaxError, runCommand
 from contrast.detectors import Detector, TriggeredDetector
+from LC400Waveform import LC400Waveform
+import time
 
 @macro
 class NpointFlyscan(Mesh):
@@ -17,12 +19,15 @@ class NpointFlyscan(Mesh):
         """
         Parse arguments.
         """
+        print("*** __init__")
         try:
             assert all_are_motors(args[:-2:4])
             super(NpointFlyscan, self).__init__(*args[4:-1])
             self.fastmotor = args[0]
-            self.fastlimits = [float(i) for i in args[1:3]]
-            self.fastintervals = int(args[3])
+            # convert to dial coordinates, as the LC400 operates in dial units
+            self.fastmotorstart = ( float(args[1]) - self.fastmotor._offset ) / self.fastmotor._scaling
+            self.fastmotorend = ( float(args[2]) - self.fastmotor._offset ) / self.fastmotor._scaling
+            self.fastmotorintervals = int(args[3])
             self.exptime = float(args[-2])
             self.latency = float(args[-1])
             self.print_progress = False
@@ -34,34 +39,35 @@ class NpointFlyscan(Mesh):
         for d in Detector.get_active():
             if isinstance(d, TriggeredDetector):
                 d.hw_trig = on
-                d.hw_trig_n = self.fastintervals + 1
+                d.hw_trig_n = self.fastmotorintervals + 1
+                d.burst_latency = self.latency
 
     def run(self):
         try:
             # start by setting up triggering on all compatible detectors
             self._set_det_trig(True)
 
-            # Activate the LC400 buffer and deactivate the stanford box
-            runCommand('deactivate stanford')
-            runCommand('activate npoint_buff')
-            # runCommand('lima_hybrid_off')
+            # Activate the LC400 buffer
+            #runCommand('activate npoint_buff')
 
-            # configure the SC device - roughly like this
-            axismap = {'sz': 1, 'sx': 2, 'sy': 3}
-            fast_axis = axismap[self.fastmotor.name]
-            import PyTango
-            self.scancontrol = PyTango.DeviceProxy("lc400scancontrol/test/1")
-            ### note: these Tango attributes might have different names, check in Jive
-            self.scancontrol.write_attribute("FlyScanMotorStartPosition", self.fastlimits[0])
-            self.scancontrol.write_attribute("FlyScanMotorEndPosition", self.fastlimits[1])
-            self.scancontrol.write_attribute("NumberOfIntervals", self.fastintervals)
-            self.scancontrol.write_attribute("GateWidth", self.exptime)
-            self.scancontrol.write_attribute("GateLatency", self.latency)
-            self.scancontrol.write_attribute("FlyScanMotorAxis", self.fastmotor.axis)
-            self.scancontrol.ConfigureLC400Motion()
-            self.scancontrol.ConfigureLC400Recorder()
-            self.scancontrol.ConfigureStanford()
-            self.scancontrol.ConfigurePandA()
+            # create waveform from scan parameters
+            self.wf = LC400Waveform(self.fastmotor.axis, 
+                               self.fastmotorstart,
+                               self.fastmotorend,
+                               self.fastmotorintervals+1,
+                               self.exptime,
+                               self.latency,
+                               0.5, # acceleration time TODO make this a configurable parameter, e.g via a keyword parameter
+                               )
+            # get JSON config string and send it to the LC400 via the motor.proxy 
+            json = self.wf.json()
+            self.fastmotor.proxy.load_waveform(json)
+
+            # move fast motor to start position of line
+            self.fastmotor.dial_position = self.wf.absolutstartposition
+            # wait for move to finish
+            while self.fastmotor.busy():
+                time.sleep(0.01)
 
             # run the main part
             super(NpointFlyscan, self).run()
@@ -73,20 +79,21 @@ class NpointFlyscan(Mesh):
 
     def _cleanup(self):
         # deactivate position buffer
-        runCommand('deactivate npoint_buff')
+        # runCommand('deactivate npoint_buff')
 
         # set back the triggering state
         self._set_det_trig(False)
 
     def _before_start(self):
-        # we need to call Go() on the SC device at some point, maybe here.
         ok = False
         while not ok:
             try:
-                self.scancontrol.Go()
+                while self.fastmotor.proxy.waveform_is_running:
+                    time.sleep(0.05)
+                self.fastmotor.proxy.start_waveform()
                 ok = True
             except:
-                print('***** scancontrol Go() failed, is the piexo having trouble settling? trying again...')
+                print('***** start_waveform() failed, is the piexo having trouble settling? trying again...')
                 import time
                 time.sleep(.1)
 
