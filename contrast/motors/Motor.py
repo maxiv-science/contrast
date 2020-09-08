@@ -58,7 +58,7 @@ class Motor(Gadget):
             l1 = self._lowlim * self._scaling + self._offset
             l2 = self._uplim * self._scaling + self._offset
         else:
-            low, up = None, None
+            l1, l2 = None, None
         return tuple(sorted([l1, l2]))
 
     @user_limits.setter
