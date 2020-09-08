@@ -58,7 +58,7 @@ if __name__=='__main__':
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
-    sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
+    #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
 
     # base motors through sardana
     basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
@@ -142,7 +142,7 @@ if __name__=='__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
     # Robot
-    gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
@@ -190,9 +190,10 @@ if __name__=='__main__':
 
     # detectors
     pilatus = Pilatus(name='pilatus',
-                      device='staff/alebjo/pilatus100k')
+                     hostname='b-nanomax-mobile-ipc-01')
     pilatus1m = Pilatus(name='pilatus1m',
-                        device='staff/alebjo/pilatus1m')
+                       hostname='b-nanomax-pilatus1m-ipc-01')
+
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = LimaXspress3(name='xspress3',
                             lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
@@ -209,8 +210,8 @@ if __name__=='__main__':
     alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
-    keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
-    keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
+    #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
+    #keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
