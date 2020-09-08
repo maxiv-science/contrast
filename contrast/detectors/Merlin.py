@@ -86,6 +86,8 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
+        if n_starts is None:
+            n_starts = 10000
         self.set('num_frames_per_trigger', self.burst_n)
         self.set('acquisition_time', acqtime * 1000)
         self.set('acquisition_period', (acqtime + self.burst_latency) * 1000)
