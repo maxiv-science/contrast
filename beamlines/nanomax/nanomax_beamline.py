@@ -10,16 +10,19 @@ if __name__=='__main__':
     import contrast
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
+    from contrast.environment.scheduling import MaxivScheduler
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
     from contrast.detectors.LC400Buffer import LC400Buffer
     from contrast.motors.TangoMotor import TangoMotor
+    from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
+    from contrast.motors.SmaractMotor import SmaractRotationMotor
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus
-    from contrast.detectors.Lima import LimaMerlin
+    from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Lima import LimaAndor
     from contrast.detectors.Lima import LimaXspress3
     from contrast.detectors.Eiger import Eiger
@@ -28,13 +31,21 @@ if __name__=='__main__':
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors import Detector
     from contrast.detectors.DG645 import StanfordTriggerSource
+    from contrast.detectors.Keysight import Keysight2985
     from nanomax_beamline_macros import *
     from NpointFlyscan import NpointFlyscan
     from macro_attenuate import *
     from contrast.scans import SoftwareScan, Ct
     import os
+
+    # add a scheduler to pause scans when shutters close
+    env.scheduler = MaxivScheduler(
+                        shutter_list=['B303A-FE/VAC/HA-01',
+                                      'B303A-FE/PSS/BS-01',
+                                      'B303A-O/PSS/BS-01',
+                                      'B303A-E/PSS/BS-01',])
     
-    env.userLevel = 1
+    env.userLevel = 2
     # chosen these levels here:
     # 1 - simple user
     # 2 - power user
@@ -42,12 +53,12 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50))
-    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50))
-    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50))
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
-    sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
+    #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
 
     # base motors through sardana
     basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
@@ -62,7 +73,7 @@ if __name__=='__main__':
 
     # gap and taper
     ivu_gap = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
-    ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05))
+    ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
 
     # Diamond filter motors, sitting in diagnostics module 1
     bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=4, dial_limits=(-36.04, 36.77))
@@ -85,7 +96,7 @@ if __name__=='__main__':
     mono_bragg = TangoMotor(device='b303a-o/opt/MONO-BRAGML', name='mono_bragg', userlevel=4, dial_limits=(4.0, 27.46))
     mono_x2per = TangoMotor(device='b303a-o/opt/mono-perml', name='mono_x2per', userlevel=2, dial_limits=(-.1, .1), user_format='%.3f')
     mono_x2pit = TangoMotor(device='b303a-o/opt/mono-pitml', name='mono_x2pit', userlevel=4, dial_limits=(-1.21, 1.21), user_format='%.3f')
-    mono_x2rol = TangoMotor(device='b303a-o/opt/mono-rolml', name='mono_x2prol', userlevel=4, dial_limits=(-0.8, 0.79), user_format='%.3f')
+    mono_x2rol = TangoMotor(device='b303a-o/opt/mono-rolml', name='mono_x2rol', userlevel=4, dial_limits=(-0.8, 0.79), user_format='%.3f')
 
     # Nanobpm motor. Positions the bpm vertically in the beam. Almost never moved. Should be at 2.5 mm
     nanobpm_y = TangoMotor(device='b303a-o/dia/bpx-01', name='nanobpm_y', userlevel=4, dial_limits=(-0.1, 23.1))
@@ -101,6 +112,9 @@ if __name__=='__main__':
     skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2)
     skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2)
     kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)
+    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3)
+    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3)
+    pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3)
     # controller 2
     dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
     dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
@@ -113,7 +127,11 @@ if __name__=='__main__':
     attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
     attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
     fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
-    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)    
+    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', scaling=-1, userlevel=2)
+    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2)
+    pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
+
     # controller 3
     diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)
     diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)
@@ -124,7 +142,7 @@ if __name__=='__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
     # Robot
-    gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
@@ -143,8 +161,8 @@ if __name__=='__main__':
     topm_zoom = TangoMotor(device='b303a-e02/dia/om-02-zoom', name='topm_zoom', userlevel=1)
 
     # goniometer
-    gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=2)
-    gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=2)
+    gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=1)
+    gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=1)
     gonx1 = TangoMotor(device='b303a-e02/dia/gon-01-x1', name='gonx1', userlevel=4)
     gonx2 = TangoMotor(device='b303a-e02/dia/gon-01-x2', name='gonx2', userlevel=4)
     gonx3 = TangoMotor(device='b303a-e02/dia/gon-01-x3', name='gonx3', userlevel=4)
@@ -157,8 +175,8 @@ if __name__=='__main__':
     bs_y = TangoMotor(device='B303A-E02/DIA/SAMS-01-Y', name='bs_y', userlevel=4)
 
     # detector motors
-    #detx = TangoMotor(device='motor/icepap_ctrl_1_user/11', name='detx', userlevel=1)
-    #dety = TangoMotor(device='motor/icepap_ctrl_1_user/12', name='dety', userlevel=1)
+    detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=1)
+    dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=1)
 
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
@@ -172,23 +190,27 @@ if __name__=='__main__':
 
     # detectors
     pilatus = Pilatus(name='pilatus',
-                      device='staff/alebjo/pilatus100k')
+                     hostname='b-nanomax-mobile-ipc-01')
     pilatus1m = Pilatus(name='pilatus1m',
-                        device='staff/alebjo/pilatus1m')
-    merlin = LimaMerlin(name='merlin',
-                        lima_device='lima/limaccd/b303a-a100384-dia-detpicu-02',
-                        det_device='lima/merlin/b303a-a100384-dia-detpicu-02')
+                       hostname='b-nanomax-pilatus1m-ipc-01')
+    merlin = Merlin(name='merlin', host='localhost')
     xspress3 = LimaXspress3(name='xspress3',
                             lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
                             det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
-    # andor = LimaAndor(name='andor',
-    #                   lima_device='lima/limaccds/andortest',
-    #                   det_device='lima/andor3/andortest')
+    andor = LimaAndor(name='andor',
+                       lima_device='lima/limaccds/andortest',
+                       det_device='lima/andor3/andortest')
+    #andor.lima.image_rotation='90'
+    #andor.lima.image_flip=[True, False]
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
     alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
     alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
+
+    # The keysight as both a detector (ammeter) and motor (bias voltage)
+    #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
+    #keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
@@ -208,15 +230,16 @@ if __name__=='__main__':
     # deactivate all the detectors except pilatus as default
     for d in Detector.getinstances():
         d.active = False
+    alba2.active = True
     eiger.active = True
 
     # define pre- and post-scan actions, per scan base class
     import PyTango
     import time
     def pre_scan_stuff(slf):
-        basex.proxy.PowerOn = False
-        basey.proxy.PowerOn = False
-        basez.proxy.PowerOn = False
+        basex.proxy.PowerOn = True
+        basey.proxy.PowerOn = True
+        basez.proxy.PowerOn = True
         runCommand('fsopen')
         time.sleep(1)
         runCommand('stoplive')
@@ -233,3 +256,13 @@ if __name__=='__main__':
     Ct._after_ct = post_scan_stuff
 
     contrast.wisdom()
+
+    # find the latest scan number and initialize env.nextScanID
+    try:
+        l = os.listdir(env.paths.directory)
+        last = max([int(l_[:-3]) for l_ in l if (len(l_)==9 and l_.endswith('.h5'))])
+        env.nextScanID = last + 1
+        print('\nNote: inferring that the next scan number should be %u' % (last+1))
+    except:
+        pass
+

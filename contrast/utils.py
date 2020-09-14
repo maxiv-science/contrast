@@ -131,6 +131,12 @@ class SpecTable(object):
             w = max(data_width, header_width)
             h = ('%%%us'%w)%k
             return ' '*len(h), h, '%%%us'%w
+        elif isinstance(v, h5py.VirtualLayout):
+            data_width = len('hdf5-vds')
+            header_width = len(str(k))
+            w = max(data_width, header_width)
+            h = ('%%%us'%w)%k
+            return ' '*len(h), h, '%%%us'%w
         else:
             fmt = '%12.12s'
             w = len(fmt%1)
@@ -174,6 +180,8 @@ class SpecTable(object):
                 vals += list(self.list_values(v))
             elif isinstance(v, h5py.ExternalLink):
                 vals += ['hdf5-link']
+            elif isinstance(v, h5py.VirtualLayout):
+                vals += ['hdf5-vds']
             elif isinstance(v, np.ndarray):
                 vals += [str(v.shape)]
             else:

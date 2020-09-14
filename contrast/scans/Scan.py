@@ -6,6 +6,7 @@ from ..recorders import active_recorders, RecorderHeader, RecorderFooter
 from ..detectors import Detector, TriggerSource
 from ..utils import SpecTable
 from collections import OrderedDict
+import sys
 
 class SoftwareScan(object):
     """
@@ -78,16 +79,27 @@ class SoftwareScan(object):
 
         # Example implementation of topup avoidance
         time_needed = self._calc_time_needed()
-        enough_time = time_needed < env.scheduler.limit if env.scheduler.limit else True
+        limit = env.scheduler.limit
+        enough_time = time_needed < limit if limit else True
         ready = env.scheduler.ready
-        while not ready or not enough_time:
-            if not enough_time:
-                print('not enough time to complete this measurement, so waiting...')
-            else:
-                print('Waiting for beamline to become available...')
-            time.sleep(1.)
-            enough_time = time_needed < env.scheduler.limit
-            ready = env.scheduler.ready
+        found_not_ready = False
+        try:
+            while not ready or not enough_time:
+                if not enough_time:
+                    print('not enough time to complete this measurement so waiting, press ctrl-c to ignore from now on...')
+                else:
+                    if not found_not_ready:
+                        print('Waiting for beamline to become available, press ctrl-c to ignore from now on...')
+                        found_not_ready = True
+                    else:
+                        print('.', end='')
+                        sys.stdout.flush()
+                time.sleep(1.)
+                limit = env.scheduler.limit
+                enough_time = time_needed < limit if limit else True
+                ready = env.scheduler.ready
+        except KeyboardInterrupt:
+            env.scheduler.disabled = True
 
     def _before_arm(self):
         """

@@ -92,7 +92,7 @@ class NpointFlyscan(Mesh):
     def _while_acquiring(self):
         s = ''
         for d in Detector.get_active():
-            if d.name in ('xspress3', 'merlin'):
+            if d.name in ('xspress3',):
                 s += ('%s: %u, ' % (d.name, d.lima.last_image_acquired))
         print(s + '\r', end='')
 
