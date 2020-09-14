@@ -20,6 +20,7 @@ if __name__=='__main__':
     from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector, DummyWritingDetector2
     from contrast.detectors import Detector, TriggeredDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
+    from contrast.detectors.PandaBox import PandaBox
     # from nanomax_beamline_macros import *
     from NpointFlyscan import NpointFlyscan
     #from macro_attenuate import *
@@ -34,9 +35,9 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='NPOINTLC400/USB/1', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50))
-    sy = LC400Motor(device='NPOINTLC400/USB/1', axis=3, name='sy', dial_limits=(-50,50))
-    sz = LC400Motor(device='NPOINTLC400/USB/1', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50))
+    sx = LC400Motor(device='NPOINTLC400b/USB/1', axis=2, name='sx', scaling=-1.0, dial_limits=(-101,101))
+    sy = LC400Motor(device='NPOINTLC400b/USB/1', axis=3, name='sy', dial_limits=(-51,51))
+    sz = LC400Motor(device='NPOINTLC400b/USB/1', axis=1, name='sz', scaling=-1.0, dial_limits=(-101,101))
 
     # buffered position detector
     npoint_buff = LC400Buffer(device='lc400scancontrol/test/1', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
@@ -49,15 +50,18 @@ if __name__=='__main__':
     # The delay generator as a software source for hardware triggers
     stanford = StanfordTriggerSource(name='stanford', device_name='test/delay/dly-01')
 
+    # Tha PandABox is a detector/counter for TTLs and encoders, and a trigger source
+    panda = PandaBox(name='panda', host='172.16.123.9')
+    panda.active = True
+    panda.initialize()
+
     # Detectors
     #ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     det1 = DummyDetector(name='det1')
     det2 = DummyWritingDetector(name='det2')
     det3 = Dummy1dDetector(name='det3')
 
-    # deactivate all the detectors except pilatus as default
-    for d in Detector.getinstances():
-        d.active = False
+    det1.active = True
     det2.active = True
     det3.active = True
 
@@ -93,3 +97,4 @@ if __name__=='__main__':
     Ct._after_ct = post_scan_stuff
 
     contrast.wisdom()
+    print("* Welcome to the NanoMotionLab *")
