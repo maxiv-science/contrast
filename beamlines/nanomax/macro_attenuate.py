@@ -224,7 +224,7 @@ class attenuate(object):
             # move motors
             if self.how=='safe':
                 yes = ['yes', 'y', '1', 'true']
-                user_input = input('Proceed to move motrors? [Y/n] ').lower()
+                user_input = input('Proceed to move motors? [Y/n] ').lower()
                 if user_input in yes:
 
                     # run all motor movement commands

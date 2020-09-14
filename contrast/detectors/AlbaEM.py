@@ -28,9 +28,12 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
-        self.acqtime = acqtime
         if self.busy():
             raise Exception('%s is busy!' % self.name)
+        if self.hw_trig:
+            self.dev.hw_prepare((acqtime, self.hw_trig_n, 1)) # trigger on DIO_1
+        else:
+            self.dev.sw_prepare((acqtime, self.burst_n, self.burst_latency))
 
     def start_live(self, acqtime=1.0):
         """
@@ -52,7 +55,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         if self.hw_trig:
-            self.dev.hw_measure((self.acqtime, self.hw_trig_n, 1)) # trigger on DIO_1
+            self.dev.measure()
 
     def start(self):
         """
@@ -62,7 +65,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
             return
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        self.dev.sw_measure((self.acqtime, self.burst_n, self.burst_latency))
+        self.dev.measure()
 
     def stop(self):
         self.dev.stop()

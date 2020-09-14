@@ -59,7 +59,17 @@ class KukaRobot(object):
             time.sleep(.5)
         target = self._safe_get_pos().copy()
         target[self.motor2index(motor)] = pos
-        self.proxy.position = target
+        ok = False
+        while not ok:
+            try:
+                self.proxy.position = target
+                ok = True
+            except PyTango.DevFailed:
+                print('robot movement failed. reinizializing etc...')
+                self.proxy.Init()
+                time.sleep(1)
+                self.proxy.Connect()
+                time.sleep(1)
 
     def where_am_i(self, motor):
         current = self._safe_get_pos()
