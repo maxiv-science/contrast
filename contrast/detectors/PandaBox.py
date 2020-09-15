@@ -125,8 +125,13 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
                 for k, v in zip(channels, vals):
                     if b'END' in v:
                         data[k].append(None)
+                        n = num_points
+                        break
                     data[k].append(float(v))
                 n += 1
+
+        for k, v in data.items():
+            data[k] = np.array(v)
 
         self.data = data
         self.query('*PCAP.DISARM=')

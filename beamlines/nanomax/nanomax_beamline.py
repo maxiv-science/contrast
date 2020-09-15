@@ -29,6 +29,7 @@ if __name__=='__main__':
     from contrast.detectors.Ni6602 import Ni6602CounterCard
     from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors.AlbaEM import AlbaEM
+    from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
@@ -53,9 +54,9 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
-    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
-    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
     #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
@@ -101,9 +102,10 @@ if __name__=='__main__':
     # Nanobpm motor. Positions the bpm vertically in the beam. Almost never moved. Should be at 2.5 mm
     nanobpm_y = TangoMotor(device='b303a-o/dia/bpx-01', name='nanobpm_y', userlevel=4, dial_limits=(-0.1, 23.1))
 
-    # buffered position detector
-    npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
-    npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
+    # buffered position detector - internal position recording is
+    # not configured in the NpointFlyscan macro right now!
+    #npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
+    #npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
 
     # smaracts
     # controller 1
@@ -208,6 +210,7 @@ if __name__=='__main__':
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
     alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
     alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
+    panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
     #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
