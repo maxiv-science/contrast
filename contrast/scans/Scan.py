@@ -32,6 +32,10 @@ class SoftwareScan(object):
         env.nextScanID += 1
 
     def output(self, i, dct):
+        # ignore dicts that are too long
+        for k, v in dct.items():
+            if type(v) == dict and len(v) > 4:
+                dct[k] = {'...':'...'}
         dct['     #'] = i
         dct.move_to_end('     #', last=False)
         if i == 0:
