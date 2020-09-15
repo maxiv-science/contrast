@@ -94,14 +94,9 @@ class NpointFlyscan(Mesh):
                 self.fastmotor.proxy.start_waveform()
                 ok = True
             except:
-<<<<<<< HEAD
                 n += 1
                 if n >= 10:
                     print('***** start_waveform() failed %u times, is the piexo having trouble settling? trying again...'%n)
-=======
-                print('***** scancontrol Go() failed, is the piezo having trouble settling? trying again...')
-                import time
->>>>>>> master
                 time.sleep(.1)
 
     def _while_acquiring(self):
