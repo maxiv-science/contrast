@@ -30,7 +30,7 @@ if __name__=='__main__':
     from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
-    from contrast.detectors import Detector
+    from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
     from nanomax_beamline_macros import *
@@ -210,7 +210,12 @@ if __name__=='__main__':
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
     alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
     alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
+
+    # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
+    pseudo = PseudoDetector(name='pseudo',
+                            variables={'c1':'panda0/INENC1.VAL_Mean', 'c2':'panda0/INENC2.VAL_Mean', 'c3':'panda0/INENC3.VAL_Mean'},
+                            expression={'x':'c2', 'y':'-c3', 'z':'c1'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
     #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
@@ -231,11 +236,11 @@ if __name__=='__main__':
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
     memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
 
-    # deactivate all the detectors except pilatus as default
+    # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    alba2.active = True
-    eiger.active = True
+    for d in [alba2, eiger, panda0, pseudo]:
+        d.active = True
 
     # define pre- and post-scan actions, per scan base class
     import PyTango
