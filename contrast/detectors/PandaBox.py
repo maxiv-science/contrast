@@ -21,6 +21,7 @@ from threading import Thread
 import select
 
 SOCK_RECV = 4096
+RECV_DELAY = 1e-4
 
 class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
@@ -114,7 +115,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
         while n < num_points:
             # anything more to read?
-            ready = select.select([s], [], [], .1)[0]
+            ready = select.select([s], [], [], RECV_DELAY)[0]
             if ready:
                 buff += s.recv(SOCK_RECV)
 
