@@ -53,7 +53,7 @@ class NpointFlyscan(Mesh):
             runCommand('activate panda0')
 
             # create waveform from scan parameters
-            self.wf = LC400Waveform(self.fastmotor.axis,
+            wf = LC400Waveform(self.fastmotor.axis,
                                self.fastmotorstart,
                                self.fastmotorend,
                                self.fastmotorintervals+1,
@@ -61,12 +61,16 @@ class NpointFlyscan(Mesh):
                                self.latency,
                                self.acctime,
                                )
-            # get JSON config string and send it to the LC400 via the motor.proxy
-            json = self.wf.json()
+            # reset all the channels before proceeding (otherwise the output trigger breaks)
+            resets = wf.reset_json()
+            for r in resets:
+                self.fastmotor.proxy.load_waveform(r)
+            # get the real JSON config string and send it to the LC400 via the motor.proxy
+            json = wf.json()
             self.fastmotor.proxy.load_waveform(json)
 
             # move fast motor to start position of line
-            self.fastmotor.dial_position = self.wf.absolutstartposition
+            self.fastmotor.dial_position = wf.absolutstartposition
             # wait for move to finish
             while self.fastmotor.busy():
                 time.sleep(0.01)

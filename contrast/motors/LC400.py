@@ -180,6 +180,36 @@ class LC400Waveform(object):
         res = [i - offset for i in x]
         return res
 
+    def reset_json(self):
+        """
+        Create three waveform jsons which deconfigure each channel:
+           r1, r2, r2 = reset_json()
+        """
+        js = []
+        for ax in ('axis1', 'axis2', 'axis3'):
+            data = {}
+            data["generator"] = "pointlist2"
+            data["version"] = "2.0"
+            data["ClockScaling"] = 1+1 # a bug in the LC400 Tango Server substracts 1, se we have to add 1
+            data["TotalPoints"] = 1
+            data["EndLinePoint"] = 1 # is this needed?
+            data["FlyScanAxis"] = int(ax[-1])
+            # Trigger on/off indeces
+            triggers = {}
+            triggers["count"] = 1
+            triggers["on"] = [0,]
+            triggers["off"] = [0,]
+            # function definition of output pins
+            # we use pin 9 (Out 4) to create the start trigger
+            output_pins = {}
+            output_pins["9"] = {"polarity": 0, 
+                                "function": 0}
+            data[ax] = {"triggers": triggers,
+                                   "output_pins": output_pins,
+                                   "positions": [0.,]}
+            js.append(json.dumps(data))
+        return js
+
     def json(self):
         # create json string for LC400 waveform configuration
         data = {}
