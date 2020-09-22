@@ -33,6 +33,8 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if self.hw_trig:
             self.dev.hw_prepare((acqtime, self.hw_trig_n, 1)) # trigger on DIO_1
         else:
+            if self.burst_n > 1:
+                acqtime -= self.burst_latency
             self.dev.sw_prepare((acqtime, self.burst_n, self.burst_latency))
 
     def start_live(self, acqtime=1.0):

@@ -52,6 +52,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'%self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
+        if self.burst_n > 1:
+            acqtime -= self.burst_latency
         self.exptime = acqtime
         self.expperiod = self.burst_latency + acqtime
 

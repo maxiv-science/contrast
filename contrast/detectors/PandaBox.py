@@ -59,6 +59,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         """
         Run before acquisition, once per scan.
         """
+        print('%s preparing. hw_trig=%s, hw_trig_n=%s, burst_n=%s, burst_latency=%s'%(self.name, self.hw_trig, self.hw_trig_n, self.burst_n, self.burst_latency))
         if self.hw_trig:
             self.query('PULSE1.PULSES=%d' % self.hw_trig_n)
         else:

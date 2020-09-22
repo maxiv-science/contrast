@@ -181,9 +181,9 @@ class BurstDetector(object):
     """
     def __init__(self):
         # let child classes set these if they want
-        if not hasattr(self, burst_n):
+        if not hasattr(self, 'burst_n'):
             self.burst_n = 1
-        if not hasattr(self, burst_latency):
+        if not hasattr(self, 'burst_latency'):
             self.burst_latency = 0.0
 
 class DetectorGroup(object):
