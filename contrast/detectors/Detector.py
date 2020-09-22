@@ -180,8 +180,11 @@ class BurstDetector(object):
     arm/start command.
     """
     def __init__(self):
-        self.burst_n = 1
-        self.burst_latency = 0.0
+        # let child classes set these if they want
+        if not hasattr(self, burst_n):
+            self.burst_n = 1
+        if not hasattr(self, burst_latency):
+            self.burst_latency = 0.0
 
 class DetectorGroup(object):
     """
