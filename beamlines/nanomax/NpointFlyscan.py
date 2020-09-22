@@ -34,6 +34,7 @@ class NpointFlyscan(Mesh):
             self.latency = float(args[-1])
             self.print_progress = False
             self.acctime = kwargs['acctime'] if 'acctime' in kwargs.keys() else 0.5
+            self.panda = [d for d in Detector.get_active() if d.name=='panda0'][0]
         except:
             #raise MacroSyntaxError
             raise
@@ -45,7 +46,7 @@ class NpointFlyscan(Mesh):
                 d.hw_trig = on
                 d.hw_trig_n = self.fastmotorintervals + 1
         # special treatment for the panda0 which rules all
-        panda = [d for d in Detector.get_active() if d.name=='panda0'][0]
+        panda = self.panda
         if on:
             self.old_burst_n = panda.burst_n
             self.old_burst_lat = panda.burst_latency
@@ -62,7 +63,7 @@ class NpointFlyscan(Mesh):
             self._set_det_trig(True)
 
             # we'll also need the pandabox
-            runCommand('activate panda0')
+            self.panda.active = True
 
             # create waveform from scan parameters
             wf = LC400Waveform(self.fastmotor.axis,
@@ -114,6 +115,12 @@ class NpointFlyscan(Mesh):
                 if n >= 10:
                     print('***** start_waveform() failed %u times, is the piexo having trouble settling? trying again...'%n)
                 time.sleep(.1)
+
+        # in burst mode, acquisition times are interpreted as acquisition
+        # periods. in this case, since the panda box is in burst mode bur
+        # the other detector probably aren't, we should add the latency
+        # to the pandabox.
+        self.panda.prepare(self.exptime+self.latency, self.scannr, self.n_positions)
 
     def _while_acquiring(self):
         s = ''
