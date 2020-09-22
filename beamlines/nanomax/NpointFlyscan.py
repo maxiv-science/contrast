@@ -39,10 +39,22 @@ class NpointFlyscan(Mesh):
             raise
 
     def _set_det_trig(self, on):
+        # set up all triggered detectors
         for d in Detector.get_active():
-            if isinstance(d, TriggeredDetector):
+            if isinstance(d, TriggeredDetector) and not d.name=='panda0':
                 d.hw_trig = on
                 d.hw_trig_n = self.fastmotorintervals + 1
+        # special treatment for the panda0 which rules all
+        panda = [d for d in Detector.get_active() if d.name=='panda0'][0]
+        if on:
+            self.old_burst_n = panda.burst_n
+            self.old_burst_lat = panda.burst_latency
+            panda.burst_n = self.fastmotorintervals + 1
+            panda.burst_latency = self.latency
+            panda.hw_trig_n = 1
+        else:
+            panda.burst_n = self.old_burst_n
+            panda.burst_latency = self.old_burst_lat
 
     def run(self):
         try:

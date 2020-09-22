@@ -37,7 +37,6 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         Detector.__init__(self, name=name)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
-        self.burst_latency = .003 # placeholder to avoid 0s
 
     def initialize(self):
         self.ctrl_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,12 +58,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         """
         Run before acquisition, once per scan.
         """
-        print('%s preparing. hw_trig=%s, hw_trig_n=%s, burst_n=%s, burst_latency=%s'%(self.name, self.hw_trig, self.hw_trig_n, self.burst_n, self.burst_latency))
-        if self.hw_trig:
-            self.query('PULSE1.PULSES=%d' % self.hw_trig_n)
-        else:
-            self.query('PULSE1.PULSES=%d' % self.burst_n)
-
+        self.query('PULSE1.PULSES=%d' % self.burst_n)
         self.query('PULSE1.WIDTH=%f' % acqtime)
         self.query('PULSE1.STEP=%f' % (self.burst_latency+acqtime))
 
@@ -109,10 +103,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         n = 0
         data = {ch:[] for ch in channels}
         
-        if self.hw_trig:
-            num_points = self.hw_trig_n
-        else:
-            num_points = self.burst_n
+        num_points = self.hw_trig_n * self.burst_n
 
         while n < num_points:
             # anything more to read?
