@@ -129,7 +129,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         """
         self._set('detector', 'config/nimages', self.burst_n)
         self._set('detector', 'config/frame_time', acqtime)
-        self._set('detector', 'config/count_time', acqtime - 100.0e-9)
+        self._set('detector', 'config/count_time', acqtime - self.burst_latency)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
             self._set('detector', 'config/ntrigger', int(self.hw_trig_n * n_starts))

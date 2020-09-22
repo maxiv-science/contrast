@@ -29,7 +29,8 @@ if __name__=='__main__':
     from contrast.detectors.Ni6602 import Ni6602CounterCard
     from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors.AlbaEM import AlbaEM
-    from contrast.detectors import Detector
+    from contrast.detectors.PandaBox import PandaBox
+    from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
     from nanomax_beamline_macros import *
@@ -53,9 +54,9 @@ if __name__=='__main__':
     # 4 - potentially dangerous
 
     # sample piezos
-    sx = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
-    sy = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
-    sz = LC400Motor(device='B303A/CTL/PZCU-LC400', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
     #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
@@ -101,9 +102,10 @@ if __name__=='__main__':
     # Nanobpm motor. Positions the bpm vertically in the beam. Almost never moved. Should be at 2.5 mm
     nanobpm_y = TangoMotor(device='b303a-o/dia/bpx-01', name='nanobpm_y', userlevel=4, dial_limits=(-0.1, 23.1))
 
-    # buffered position detector
-    npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
-    npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
+    # buffered position detector - internal position recording is
+    # not configured in the NpointFlyscan macro right now!
+    #npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
+    #npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
 
     # smaracts
     # controller 1
@@ -138,6 +140,7 @@ if __name__=='__main__':
     diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)
 
     # KB mirror pitch piezos
+    m1froll = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=1, name='m1froll', userlevel=2, dial_limits=(0,30))
     m1fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=2, name='m1fpitch', userlevel=2, dial_limits=(0,30))
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
@@ -208,6 +211,12 @@ if __name__=='__main__':
     alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
     alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
 
+    # The pandabox and some related pseudodetectors
+    panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
+    pseudo = PseudoDetector(name='pseudo',
+                            variables={'c1':'panda0/INENC1.VAL_Mean', 'c2':'panda0/INENC2.VAL_Mean', 'c3':'panda0/INENC3.VAL_Mean'},
+                            expression={'x':'c2', 'y':'-c3', 'z':'c1'})
+
     # The keysight as both a detector (ammeter) and motor (bias voltage)
     #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
     #keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
@@ -227,11 +236,11 @@ if __name__=='__main__':
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
     memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
 
-    # deactivate all the detectors except pilatus as default
+    # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    alba2.active = True
-    eiger.active = True
+    for d in [alba2, eiger, panda0, pseudo]:
+        d.active = True
 
     # define pre- and post-scan actions, per scan base class
     import PyTango

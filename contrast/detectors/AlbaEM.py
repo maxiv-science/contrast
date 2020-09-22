@@ -30,8 +30,10 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
+        if self.burst_n > 1 or self.hw_trig_n > 1:
+            acqtime -= self.burst_latency
         if self.hw_trig:
-            self.dev.hw_prepare((acqtime, self.hw_trig_n, 1)) # trigger on DIO_1
+            self.dev.hw_prepare((acqtime, self.hw_trig_n * self.burst_n, 1)) # trigger on DIO_1
         else:
             self.dev.sw_prepare((acqtime, self.burst_n, self.burst_latency))
 

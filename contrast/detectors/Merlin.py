@@ -89,6 +89,8 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if n_starts is None:
             n_starts = 10000
         self.set('num_frames_per_trigger', self.burst_n)
+        if not self.gapless and (self.burst_n > 1):
+            acqtime -= self.burst_latency
         self.set('acquisition_time', acqtime * 1000)
         self.set('acquisition_period', (acqtime + self.burst_latency) * 1000)
         self.set('counterdepth', 24)
