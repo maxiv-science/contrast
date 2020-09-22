@@ -232,7 +232,6 @@ class LoopScan(SoftwareScan):
         self.motors = []
 
     def _generate_positions(self):
-        self.check_dark()
         # dummy positions with a non existent motor
         for i in range(self.intervals + 1):
             yield {'fake':i}
