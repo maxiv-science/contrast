@@ -120,25 +120,33 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.set('filename', self.dpath)
         if not self.gapless:
             self.set('arm')
-        self.n_started = 0
 
     def arm(self):
         """
         The Merlin is armed only once.
         """
-        pass
+        if not self.hw_trig:
+            return
+
+        if self.gapless:
+            nframes = self.burst_n
+            self.set('arm') # this actually starts the detector
+            time.sleep(.1)
+        else:
+            nframes = self.hw_trig_n * self.burst_n
+        self.acqthread = Thread(target=self.set, args=('start', nframes))
+        self.acqthread.start()
 
     def start(self):
         """
         Start acquisition.
         """
-        self.n_started += 1
+        if self.hw_trig:
+            return
         # how many frames will this particular start() call cause?
         if self.gapless:
             nframes = self.burst_n
             self.set('arm') # this actually starts the detector
-        elif self.hw_trig:
-            nframes = self.hw_trig_n * self.burst_n
         else:
             nframes = self.burst_n
         # the following command will issue a soft trigger if applicable,
