@@ -212,7 +212,9 @@ if __name__=='__main__':
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     pseudo = PseudoDetector(name='pseudo',
-                            variables={'c1':'panda0/INENC1.VAL_Mean', 'c2':'panda0/INENC2.VAL_Mean', 'c3':'panda0/INENC3.VAL_Mean'},
+                            variables={'c1':'panda0/INENC1.VAL_Mean',
+                                       'c2':'panda0/INENC2.VAL_Mean',
+                                       'c3':'panda0/INENC3.VAL_Mean' },
                             expression={'x':'c2', 'y':'-c3', 'z':'c1'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
@@ -227,8 +229,8 @@ if __name__=='__main__':
     h5rec.start()
 
     # a zmq recorder
-    zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start() # removed for now
+#    zmqrec = StreamRecorder(name='zmqrec')
+#    zmqrec.start() # removed for now
 
     # add a memorizer so the motors keep their user positions and limits after a restart
     # note that this will overwrite the dial positions set above! delete the file to generate it again.
