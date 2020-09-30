@@ -194,8 +194,6 @@ if __name__=='__main__':
     # detectors
     pilatus = Pilatus(name='pilatus',
                      hostname='b-nanomax-mobile-ipc-01')
-    pilatus1m = Pilatus(name='pilatus1m',
-                       hostname='b-nanomax-pilatus1m-ipc-01')
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = LimaXspress3(name='xspress3',
                             lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
