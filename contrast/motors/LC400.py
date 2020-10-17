@@ -76,8 +76,10 @@ class LC400Waveform(object):
         # waveform parameters
         self.axis = axis
         self.axisname = "axis%i" % axis
+        stepsize = (endpoint-startpoint)/(scanpoints-1)
+        print("step size: ", stepsize)
         self.startpoint = startpoint
-        self.endpoint = endpoint
+        self.endpoint = endpoint + stepsize
         self.scanpoints = scanpoints # scanpoints is intervals+1
         self.exposuretime = exposuretime
         self.latencytime = latencytime
@@ -89,7 +91,8 @@ class LC400Waveform(object):
             self.decelerationtime = decelerationtime
 
         # calculate linear velocity
-        self.velocity = (self.endpoint - self.startpoint)/ ((self.scanpoints-1) * (exposuretime+latencytime))
+        self.velocity = (self.endpoint - self.startpoint)/ ((self.scanpoints) * (exposuretime+latencytime))
+        print(f"velocity: {self.velocity:0.3} microns/s")
 
         # set start velocity
         if startvelocity is None:
@@ -120,9 +123,9 @@ class LC400Waveform(object):
         # define start cycle of linear phase.
         # This is the time when the LC 400 creates the trigger to start the pandabox for position recording and triggering of other detectors
         self.linearstartindex = math.ceil(self.accelerationtime/self.effectiveclockcycle)
-        # start point of the waveform in absolut coordinates of the scanner
+        # start point of the waveform in absolute coordinates of the scanner
         self.absolutstartposition = self.accelerationphase(0)
-        print("start position of line is at :", self.absolutstartposition)
+        print("start position of line is at:", self.absolutstartposition)
         print("scan points: ", self.scanpoints)
 
     def accelerationphase(self, t):
@@ -235,3 +238,4 @@ class LC400Waveform(object):
                                 "positions": self.waveform()}
 
         return json.dumps(data)
+
