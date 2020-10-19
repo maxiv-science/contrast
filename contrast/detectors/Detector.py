@@ -151,14 +151,15 @@ class SoftwareLiveDetector(LiveDetector):
         Stops background acquisition.
         """
         if self.thread is None: return
+        self.stop()
         self.stopped = True
         self.thread.join()
         self.thread = None
 
     def _start(self, acqtime):
         self.stopped = False
-        self.prepare(acqtime, None, 1)
         while not self.stopped:
+            self.prepare(acqtime, None, 1)
             self.arm()
             self.start()
             while self.busy():
