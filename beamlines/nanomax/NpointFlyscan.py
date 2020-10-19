@@ -53,6 +53,7 @@ class NpointFlyscan(Mesh):
             panda.burst_n = self.fastmotorintervals + 1
             panda.burst_latency = self.latency
             panda.hw_trig_n = 1
+            panda.hw_trig = on
         else:
             panda.burst_n = self.old_burst_n
             panda.burst_latency = self.old_burst_lat
