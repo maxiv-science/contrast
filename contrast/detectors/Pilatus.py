@@ -195,7 +195,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         return energy
 
     @energy.setter
-    def energy(self, val):
+    def energy(self, value):
         res = self._query('setenergy %f' % value, timeout=TIMEOUT)
         if res is None or not res.startswith('15 OK'):
             raise Exception('Error setting energy')
