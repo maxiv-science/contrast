@@ -54,9 +54,9 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         # arming and numbers of frames
         self.proxy.exposure_time = acqtime
         if self.burst_n == 1:
-            self.proxy.start()
             self.proxy.trigger_mode = 'Software'
             self.proxy.frame_count = n_starts
+            self.proxy.start()
         else:
             self.proxy.trigger_mode = 'Internal'
             self.proxy.frame_count = self.burst_n
