@@ -48,6 +48,7 @@ class NpointFlyscan(Mesh):
         # special treatment for the panda0 which rules all
         panda = self.panda
         if on:
+            self.old_hw_trig = panda.hw_trig
             self.old_burst_n = panda.burst_n
             self.old_burst_lat = panda.burst_latency
             panda.burst_n = self.fastmotorintervals + 1
@@ -57,6 +58,7 @@ class NpointFlyscan(Mesh):
         else:
             panda.burst_n = self.old_burst_n
             panda.burst_latency = self.old_burst_lat
+            panda.hw_trig = self.old_hw_trig
 
     def run(self):
         try:
