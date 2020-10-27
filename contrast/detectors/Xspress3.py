@@ -108,7 +108,7 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
                         return False
                 return True
             except PyTango.DevFailed:
-                print('%s.busy(): failed to talk to my Tango device, trying again...')
+                print('%s.busy(): failed to talk to my Tango device, trying again...'%self.name)
                 time.sleep(.5)
 
     def read(self):
