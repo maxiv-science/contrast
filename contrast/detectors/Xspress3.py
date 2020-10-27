@@ -3,6 +3,7 @@ from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
 import PyTango
+import time
 
 class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
@@ -34,7 +35,7 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         if dataid is None:
             # no saving
             self.saving_file = ''
-            self.proxy.WriteHdf5 = False
+            self.proxy.DestinationFileName = self.saving_file
         else:
             # saving
             path = env.paths.directory
@@ -44,7 +45,6 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
                 print('%s: this hdf5 file exists, I am raising an error now'%self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
             self.proxy.DestinationFileName = self.saving_file
-            self.proxy.WriteHdf5 = True
 
         # arming and numbers of frames
         if self.burst_n > 1:
@@ -98,13 +98,18 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         self.proxy.Stop()
 
     def busy(self):
-        st = self.proxy.State()
-        if st == PyTango.DevState.STANDBY:
-            return False
-        elif st == PyTango.DevState.RUNNING:
-            if self.proxy.nFramesAcquired == self.expected_total:
-                return False
-        return True
+        while True:
+            try:
+                st = self.proxy.State()
+                if st == PyTango.DevState.STANDBY:
+                    return False
+                elif st == PyTango.DevState.RUNNING:
+                    if self.proxy.nFramesAcquired == self.expected_total:
+                        return False
+                return True
+            except PyTango.DevFailed:
+                print('%s.busy(): failed to talk to my Tango device, trying again...')
+                time.sleep(.5)
 
     def read(self):
         if self.saving_file == '':
