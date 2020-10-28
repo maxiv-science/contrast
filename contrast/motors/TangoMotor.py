@@ -37,8 +37,7 @@ class TangoMotor(Motor):
             if lim1 or lim2:
                 # probably just a limit switch, then
                 return False
-        else:
-            return True
+        return True
 
     def stop(self):
         self.proxy.stop()
