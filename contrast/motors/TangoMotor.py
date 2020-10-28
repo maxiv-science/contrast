@@ -27,6 +27,22 @@ class TangoMotor(Motor):
     def dial_position(self, pos):
         self.proxy.Position = pos
 
+    @property
+    def dial_limits(self):
+        """
+        Overridden to expose the limits on the Pool motor.
+        """
+        _min = float(self.proxy.get_attribute_config("position").min_alarm)
+        _max = float(self.proxy.get_attribute_config("position").max_alarm)
+        return _min, _max
+
+    @dial_limits.setter
+    def dial_limits(self, lims):
+        config = self.proxy.get_attribute_config("position")
+        config.alarms.min_alarm = str(lims[0])
+        config.alarms.max_alarm = str(lims[1])
+        self.proxy.set_attribute_config(config)
+
     def busy(self):
         state = self.proxy.State()
         if state == PyTango.DevState.ON:
