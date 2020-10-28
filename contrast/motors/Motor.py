@@ -54,9 +54,10 @@ class Motor(Gadget):
 
     @property
     def user_limits(self):
-        if None not in (self._uplim, self._lowlim):
-            l1 = self._lowlim * self._scaling + self._offset
-            l2 = self._uplim * self._scaling + self._offset
+        _lowlim, _uplim = self.dial_limits
+        if None not in (_uplim, _lowlim):
+            l1 = _lowlim * self._scaling + self._offset
+            l2 = _uplim * self._scaling + self._offset
         else:
             l1, l2 = None, None
         return tuple(sorted([l1, l2]))
@@ -65,7 +66,7 @@ class Motor(Gadget):
     def user_limits(self, lims):
         l1 = (lims[0] - self._offset) / self._scaling
         l2 = (lims[1] - self._offset) / self._scaling
-        self._lowlim, self._uplim = sorted([l1, l2])
+        self.dial_limits = sorted([l1, l2])
 
     @property
     def dial_limits(self):
@@ -83,8 +84,9 @@ class Motor(Gadget):
             raise Exception('Motor is busy')
         dial = (pos - self._offset) / self._scaling
         try:
-            assert dial <= self._uplim
-            assert dial >= self._lowlim
+            _lowlim, _uplim = self.dial_position
+            assert dial <= _uplim
+            assert dial >= _lowlim
         except AssertionError:
             print('Trying to move %s outside its limits!' % self.name)
             return -1
@@ -203,10 +205,8 @@ class MotorMemorizer(Gadget):
                     if dct['name'] in motors:
                         # this is an existing motor!
                         motors[dct['name']]._offset = dct['_offset']
-                        if dct['_lowlim']:
-                            motors[dct['name']]._lowlim = dct['_lowlim']
-                        if dct['_uplim']:
-                            motors[dct['name']]._uplim = dct['_uplim']
+                        if dct['dial_limits']:
+                            motors[dct['name']].dial_limits = dct['dial_limits']
                     elif '_offset' not in dct.keys():
                         # this is a bookmark!
                         motor_names = list(dct.keys())
@@ -237,7 +237,7 @@ class MotorMemorizer(Gadget):
                 for m in Motor.getinstances():
                     dct = {'name': m.name,
                            '_offset': m._offset,
-                           '_lowlim': m._lowlim, '_uplim': m._uplim}
+                           'dial_limits': m.dial_limits}
                     fp.write(str(dct) + '\n')
                 for b in bookmark_refs:
                     dct = {m.name:p for m,p in b.dct.items()}
@@ -340,7 +340,7 @@ class Wm(object):
                 ret = upos
                 upos = m._uformat % upos
                 dpos = m._dformat % m.dial_position
-                if None in (m._uplim, m._lowlim):
+                if None in m.dial_limits:
                     ulims = '(None, None)'
                     dlims = '(None, None)'
                 else:

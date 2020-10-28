@@ -114,9 +114,10 @@ class KukaMotor(Motor):
         :type pos: float
         """
         dial = (pos - self._offset) / self._scaling
+        _lowlim, _uplim = self.dial_limits
         try:
-            assert dial <= self._uplim
-            assert dial >= self._lowlim
+            assert dial <= _uplim
+            assert dial >= _lowlim
         except AssertionError:
             print('Trying to move %s outside its limits!' % self.name)
             return -1
