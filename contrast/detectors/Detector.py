@@ -143,6 +143,7 @@ class SoftwareLiveDetector(LiveDetector):
         :type acqtime: float
         """
         if self.thread is not None: self.stop_live()
+        self.stopped = False
         self.thread = threading.Thread(target=self._start, args=(acqtime,))
         self.thread.start()
 
@@ -150,14 +151,16 @@ class SoftwareLiveDetector(LiveDetector):
         """
         Stops background acquisition.
         """
+        # if the thread has been stopped or never started
         if self.thread is None: return
-        self.stop()
+        # if the thread has died by itself for some reason
+        if not self.thread.is_alive(): return
         self.stopped = True
+        self.stop()
         self.thread.join()
         self.thread = None
 
     def _start(self, acqtime):
-        self.stopped = False
         while not self.stopped:
             self.prepare(acqtime, None, 1)
             self.arm()
