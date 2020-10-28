@@ -257,8 +257,6 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
     def stop(self):
         self._safe_call_command('stopAcq')
-        self.stop_live()
-        self._safe_call_command('stopAcq')
 
     def busy(self):
         if self.hybrid_mode:
