@@ -18,6 +18,7 @@ class TangoMotor(Motor):
         """
         super(TangoMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
 
     @property
     def dial_position(self):

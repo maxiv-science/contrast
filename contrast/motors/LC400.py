@@ -27,6 +27,7 @@ class LC400Motor(Motor):
         super(LC400Motor, self).__init__(**kwargs)
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
         self.axis = axis
         self._format = '%.3f'
 

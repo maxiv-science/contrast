@@ -27,6 +27,7 @@ class KukaRobot(object):
         :type names: list, tuple
         """
         self.proxy = PyTango.DeviceProxy(tango_path)
+        self.proxy.set_source(PyTango.DevSource.DEV)
         self.polar_motors = [
             KukaMotor(manager=self, name=names[0]),
             KukaMotor(manager=self, name=names[1]),
