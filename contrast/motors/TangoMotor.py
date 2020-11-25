@@ -33,13 +33,21 @@ class TangoMotor(Motor):
         """
         Overridden to expose the limits on the Pool motor.
         """
-        _min = float(self.proxy.get_attribute_config("position").min_value)
-        _max = float(self.proxy.get_attribute_config("position").max_value)
+        try:
+            _min = float(self.proxy.get_attribute_config("position").min_value)
+            _max = float(self.proxy.get_attribute_config("position").max_value)
+        except ValueError:
+            _min, _max = None, None
         return _min, _max
 
     @dial_limits.setter
     def dial_limits(self, lims):
         config = self.proxy.get_attribute_config("position")
+        lims = list(lims)
+        if lims[0] is None:
+            lims[0] = 'Not specified'
+        if lims[1] is None:
+            lims[1] = 'Not specified'
         config.min_value = str(lims[0])
         config.max_value = str(lims[1])
         self.proxy.set_attribute_config(config)
