@@ -48,14 +48,17 @@ class NpointFlyscan(Mesh):
         # special treatment for the panda0 which rules all
         panda = self.panda
         if on:
+            self.old_hw_trig = panda.hw_trig
             self.old_burst_n = panda.burst_n
             self.old_burst_lat = panda.burst_latency
             panda.burst_n = self.fastmotorintervals + 1
             panda.burst_latency = self.latency
             panda.hw_trig_n = 1
+            panda.hw_trig = on
         else:
             panda.burst_n = self.old_burst_n
             panda.burst_latency = self.old_burst_lat
+            panda.hw_trig = self.old_hw_trig
 
     def run(self):
         try:
@@ -125,7 +128,7 @@ class NpointFlyscan(Mesh):
     def _while_acquiring(self):
         s = ''
         for d in Detector.get_active():
-            if d.name in ('xspress3',):
-                s += ('%s: %u, ' % (d.name, d.lima.last_image_acquired))
+            # it would be nice to print some numbers here
+            pass
         print(s + '\r', end='')
 

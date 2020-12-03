@@ -11,7 +11,12 @@ def get_dict_recursive(dct, key):
         base, newkey = key.split('/', maxsplit=1)
         return get_dict_recursive(dct[base], newkey)
     else:
-        return dct[key]
+        try:
+            ret = dct[key]
+        except KeyError:
+            # int keys would have been converted to strings
+            ret = dct[int(key)]
+        return ret
 
 class PseudoDetector(Detector):
     """

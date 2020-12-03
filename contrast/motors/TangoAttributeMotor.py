@@ -12,7 +12,7 @@ class TangoAttributeMotor(Motor):
     busy.
     """
 
-    def __init__(self, device, attribute, **kwargs):
+    def __init__(self, device, attribute, force_read=True, **kwargs):
         """
         :param device: Path to the Tango device
         :type device: str
@@ -22,6 +22,8 @@ class TangoAttributeMotor(Motor):
         """
         super(TangoAttributeMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
+        if force_read:
+            self.proxy.set_source(PyTango.DevSource.DEV)
         self.attribute = attribute
 
     @property
