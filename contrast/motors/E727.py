@@ -21,6 +21,7 @@ class E727Motor(Motor):
         super(E727Motor, self).__init__(**kwargs)
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
         self.axis = axis
         if axis == 1:
             self._mvrelfunc = self.proxy.move_relative1

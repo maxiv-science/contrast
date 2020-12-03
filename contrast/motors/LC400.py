@@ -27,6 +27,7 @@ class LC400Motor(Motor):
         super(LC400Motor, self).__init__(**kwargs)
         assert axis in (1, 2, 3)
         self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
         self.axis = axis
         self._format = '%.3f'
 
@@ -123,6 +124,7 @@ class LC400Waveform(object):
         # define start cycle of linear phase.
         # This is the time when the LC 400 creates the trigger to start the pandabox for position recording and triggering of other detectors
         self.linearstartindex = math.ceil(self.accelerationtime/self.effectiveclockcycle)
+        print("triggger start index: ", self.linearstartindex)
         # start point of the waveform in absolute coordinates of the scanner
         self.absolutstartposition = self.accelerationphase(0)
         print("start position of line is at:", self.absolutstartposition)
@@ -176,7 +178,7 @@ class LC400Waveform(object):
 
         if len(x) > self.MAXPOINTS:
             raise Exception("waveform too long")
-        
+        print(f"points in wafeform : {len(x)}")
         # offset whole waveform so it starts at 0.
         # Waveforms in the LC400 are relative motions with respect to the physical start position of the motor
         offset = self.accelerationphase(0)
@@ -238,4 +240,3 @@ class LC400Waveform(object):
                                 "positions": self.waveform()}
 
         return json.dumps(data)
-

@@ -20,6 +20,7 @@ class SmaractLinearMotor(Motor):
         """
         super(SmaractLinearMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
         self.axis = int(axis)
 
     @property

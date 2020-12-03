@@ -23,9 +23,11 @@ class FsOpen(object):
     Opens the fast shutter.
     """
     def run(self):
-        fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
+        #fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
         try:
-            fastshutter.write_attribute("Shutter",False)
+            #fastshutter.write_attribute("Shutter",False)
+            #decive is B303A-EH/CTL/PZCU-04B303A-EH/CTL/PZCU-04
+            runCommand('umv seh_left 1000')
             print("Fastshutter is now opened")
         except:
             print("Fastshutter could not be opened")
@@ -36,9 +38,10 @@ class FsClose(object):
     Closes the fast shutter.
     """
     def run(self):
-        fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
+        #fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
         try:
-            fastshutter.write_attribute("Shutter",True)
+            #fastshutter.write_attribute("Shutter",True)
+            runCommand('umv seh_left -4000')
             print("Fastshutter is now closed")
         except:
             print("Fastshutter could not be closed")
