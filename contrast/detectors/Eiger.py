@@ -75,6 +75,11 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         return not self._get('detector', 'status/state')['value'] in ('idle', 'ready')
 
     @property
+    def max_count_rate(self):
+        val = self._get('detector', 'config/countrate_correction_count_cutoff')['value']
+        return int(val)
+
+    @property
     def compression(self):
         val = self._get('detector', 'config/compression')['value']
         return val == 'bslz4'
