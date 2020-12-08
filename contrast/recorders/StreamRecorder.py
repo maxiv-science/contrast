@@ -1,6 +1,7 @@
 from . import Recorder, RecorderFooter
 from .Hdf5Recorder import Link
 import zmq
+import time
 
 def walk_dict(dct):
     """
@@ -29,6 +30,7 @@ class StreamRecorder(Recorder):
     """
     def __init__(self, name=None, port=5556):
         super(StreamRecorder, self).__init__(name=name)
+        self.last_heartbeat = time.time()
         self.port = port
 
     def run(self):
@@ -55,7 +57,8 @@ class StreamRecorder(Recorder):
                 d[k] = {'type':'Link',
                         'filename':v.filename,
                         'path':v.path,
-                        'universal':v.universal}
+                        'universal':v.universal,
+                        'status':'running'}   
         self.socket.send_pyobj(dct, protocol=2)
 
     def act_on_footer(self, dct):
@@ -63,3 +66,9 @@ class StreamRecorder(Recorder):
         Relay information.
         """
         self.socket.send_pyobj(dict(dct), protocol=2)
+
+    def periodic_check(self):
+        check_time = time.time()
+        if check_time - self.last_heartbeat > 10.:
+            self.socket.send_pyobj({'status':'heartbeat'})
+            self.last_heartbeat = check_time
