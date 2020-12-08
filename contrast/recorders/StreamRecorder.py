@@ -57,8 +57,8 @@ class StreamRecorder(Recorder):
                 d[k] = {'type':'Link',
                         'filename':v.filename,
                         'path':v.path,
-                        'universal':v.universal,
-                        'status':'running'}   
+                        'universal':v.universal} 
+        dct['status']='running'   
         self.socket.send_pyobj(dct, protocol=2)
 
     def act_on_footer(self, dct):
