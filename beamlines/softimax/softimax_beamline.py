@@ -1,7 +1,6 @@
 """
 Sets up a Soft beamline with real motors and detectors.
 """
-
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
@@ -11,6 +10,7 @@ if __name__=='__main__':
     from contrast.environment import env
     from contrast.recorders import Hdf5Recorder
     from contrast.motors.TangoMotor import TangoMotor
+    from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors.Andor3 import Andor3
 
     env.userLevel = 1 # we're not experts!

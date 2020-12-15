@@ -27,7 +27,7 @@ class PandaBoxSofti(PandaBox):
         """
         self.ctrl_sock.sendall(bytes(f'SEQ{seq_N}.TABLE<\n', 'ascii'))
         for element in table:
-            panda.ctrl_sock.sendall(bytes(str(element) + '\n', 'ascii'))
+            self.ctrl_sock.sendall(bytes(str(element) + '\n', 'ascii'))
         self.ctrl_sock.sendall(bytes('\n', 'ascii'))
         return self.ctrl_sock.recv(SOCK_RECV).decode()
     
@@ -45,7 +45,7 @@ class PandaBoxSofti(PandaBox):
         else:
             return False
 
-    def _pcomp_prepare(pre_start, start, stop, N_intervals, forward=True, width_coef = 1):
+    def _pcomp_prepare(self, pre_start, start, stop, N_intervals, forward=True, width_coef = 1):
         '''
         This function is used to prepare the Panda PCOMP blocks according to the needed scan paprameters.
         The pre_start, start, and stop values are in microns.
@@ -89,11 +89,18 @@ class PandaBoxSofti(PandaBox):
                 field = 'PCOMP1.' + field_name
             else:
                 field = 'PCOMP2.' + field_name
-            resp = panda.query(f'{field}={value}')
+            resp = self.query(f'{field}={value}')
             print(f'{field}={value} has been sent, response: {resp}')
-        resp = panda.query('SRGATE1.FORCE_RST=')
+        resp = self.query('SRGATE1.FORCE_RST=')
         print(f'SRGATE1 RESET {resp}')
-        resp = panda.query('SRGATE1.FORCE_SET=')
+        resp = self.query('SRGATE1.FORCE_SET=')
         print(f'SRGATE1 SET {resp}')
         return forward
     
+    def _pcap_enable(self, enable=True):
+        if enable:
+            resp = self.query('PCAP.ENABLE=ONE')
+            print('PCAP ENABLED', resp)
+        else:
+            resp = self.query('PCAP.ENABLE=ZERO')
+            print('PCAP DISABLED', resp)
