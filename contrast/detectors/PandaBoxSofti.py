@@ -7,6 +7,7 @@ This class assumes that:
 3) flickering the "A" bit causes a trigger.
 
 """
+from .PandaBox import PandaBox, SOCK_RECV
 from typing import List
 import math
 
@@ -39,7 +40,7 @@ class PandaBoxSofti(PandaBox):
         backward_start = int(backward_start*1000)
         forward_start = int(forward_start*1000)
         table = [1507329, backward_start, 5, 5, 6815745, forward_start, 5, 5]
-        resp = send_table(table)
+        resp = self.send_table(table)
         if resp == 'OK':
             return True
         else:
@@ -82,7 +83,8 @@ class PandaBoxSofti(PandaBox):
         if forward:
             send_parameters = {"PRE_START": int(pre_start), "START": int(start)-width, "WIDTH": width, "STEP": step, "PULSES": pulses}
         else:
-            send_parameters = {"PRE_START": int(pre_start), "START": int(start+step), "WIDTH": width, "STEP": step, "PULSES": pulses+1}               
+            pulses +=1
+            send_parameters = {"PRE_START": int(pre_start), "START": int(start+step), "WIDTH": width, "STEP": step, "PULSES": pulses}               
         for parameter in send_parameters.items():
             field_name, value = parameter
             if forward:
@@ -95,7 +97,7 @@ class PandaBoxSofti(PandaBox):
         print(f'SRGATE1 RESET {resp}')
         resp = self.query('SRGATE1.FORCE_SET=')
         print(f'SRGATE1 SET {resp}')
-        return forward
+        return pulses
     
     def _pcap_enable(self, enable=True):
         if enable:
@@ -104,3 +106,11 @@ class PandaBoxSofti(PandaBox):
         else:
             resp = self.query('PCAP.ENABLE=ZERO')
             print('PCAP DISABLED', resp)
+    
+    def _prepare_line_scan(self, pre_start, start, stop, N_intervals):
+        forward_start = start - 2*(stop-start)/N_intervals
+        self._seq1_prepare(forward_start=forward_start, backward_start=stop)
+        pulses_f = self._pcomp_prepare(pre_start=pre_start, start=start, stop=stop, N_intervals=N_intervals, forward=True)
+        pulses_b = self._pcomp_prepare(pre_start=pre_start, start=stop, stop=start, N_intervals=N_intervals, forward=False)
+        self.burst_n = pulses_f + pulses_b
+        self._pcap_enable(True)
