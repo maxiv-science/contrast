@@ -10,10 +10,11 @@ if __name__=='__main__':
     from contrast.environment import env
     from contrast.recorders import Hdf5Recorder
     from contrast.motors.TangoMotor import TangoMotor
-    from contrast.detectors.PandaBox import PandaBox
+    from contrast.detectors.PandaBoxSofti import PandaBoxSofti
+    from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.Andor3 import Andor3
 
-    env.userLevel = 1 # we're not experts!
+    env.userLevel = 5 # we're not experts!
     env.paths.directory = '/tmp'
 
     # the Hdf5Recorder later gets its path from the env object
@@ -26,5 +27,19 @@ if __name__=='__main__':
 
     # detectors
     andor = Andor3(device='b318a/andor3device/test', name='andor')
+    panda0 = PandaBoxSofti(name='panda0')
+    pseudo = PseudoDetector(name='pseudo',
+                            variables={'enc_x':'panda0/INENC1.VAL_Value',
+                                       'enc_y':'panda0/INENC2.VAL_Value',
+                                       'c1':'panda0/COUNTER1.OUT_DIFF',
+                                       'c2':'panda0/COUNTER2.OUT_DIFF',
+                                       'c3':'panda0/COUNTER3.OUT_DIFF'},
+                            expression={'x':'enc_x', 'y':'enc_z', 'count1':'c1', 'count2':'c2', 'count3':'c3'})
+
+     # default detector selection
+    for d in Detector.getinstances():
+        d.active = False
+    for d in [panda0, pseudo]:
+        d.active = True
 
     contrast.wisdom()

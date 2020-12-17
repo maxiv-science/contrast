@@ -107,7 +107,12 @@ class PandaBoxSofti(PandaBox):
             resp = self.query('PCAP.ENABLE=ZERO')
             print('PCAP DISABLED', resp)
     
-    def _prepare_line_scan(self, pre_start, start, stop, N_intervals):
+    def prepare_line_scan(self, pre_start, start, stop, N_intervals):
+        '''
+        This function prepares all of the needed Panda blocks for a continious(fly) line scan according to the provided
+        start(µm), stop(µm), and N_intervals values. In case of 2D scans, it has to be called only once to prepare
+        the first line. All the subsequent lines should be acuired simply via arm() function. 
+        '''
         forward_start = start - 2*(stop-start)/N_intervals
         self._seq1_prepare(forward_start=forward_start, backward_start=stop)
         pulses_f = self._pcomp_prepare(pre_start=pre_start, start=start, stop=stop, N_intervals=N_intervals, forward=True)
