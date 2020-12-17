@@ -1,0 +1,11 @@
+The PandaBox functionality at Softimax relies on a specific layout called 'pos_trig' that has to be copied to the PandaBox if it is lost for some reason.
+
+It can be copied vie scp, like e.g.:
+
+scp pos_trig_date_time.json root@b-softimax-panda-0.maxiv.lu.se:/opt/share/designs/PANDA/pos_trig.json
+
+The currently used one can be copied to the local machine like this:
+
+scp root@b-softimax-panda-0.maxiv.lu.se:/opt/share/designs/PANDA/pos_trig.json ./pos_trig_date_time.json
+
+To do the copying you need to have an ssh-key preliminary copied to the PandaBox.
