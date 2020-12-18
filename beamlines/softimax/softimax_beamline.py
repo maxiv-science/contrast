@@ -6,11 +6,12 @@ Sets up a Soft beamline with real motors and detectors.
 # processes etc.
 if __name__=='__main__':
 
+    import os
     import contrast
     from contrast.environment import env
     from contrast.recorders import Hdf5Recorder
     from contrast.motors.TangoMotor import TangoMotor
-    from contrast.detectors.PandaBoxSofti import PandaBoxSofti
+    from contrast.detectors.PandaBoxSofti import PandaBoxSofti, PandaBox0D
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.Andor3 import Andor3
 
@@ -35,11 +36,21 @@ if __name__=='__main__':
                                        'c2':'panda0/COUNTER2.OUT_DIFF',
                                        'c3':'panda0/COUNTER3.OUT_DIFF'},
                             expression={'x':'enc_x', 'y':'enc_z', 'count1':'c1', 'count2':'c2', 'count3':'c3'})
+    diode = PandaBox0D(name='diode', type='diode')
+    pmt = PandaBox0D(name='pmt', type='PMT')
 
      # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo]:
+    for d in [diode, pmt]:
         d.active = True
 
     contrast.wisdom()
+
+    try:
+        l = os.listdir(env.paths.directory)
+        last = max([int(l_[:-3]) for l_ in l if (len(l_)==9 and l_.endswith('.h5'))])
+        env.nextScanID = last + 1
+        print('\nNote: inferring that the next scan number should be %u' % (last+1))
+    except Exception as e:
+        print(e)

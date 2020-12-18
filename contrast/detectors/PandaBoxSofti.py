@@ -9,7 +9,7 @@ This class assumes that:
 """
 from .PandaBox import PandaBox, SOCK_RECV
 from typing import List
-import math
+import math, time
 
 class PandaBoxSofti(PandaBox):
     
@@ -119,3 +119,110 @@ class PandaBoxSofti(PandaBox):
         pulses_b = self._pcomp_prepare(pre_start=pre_start, start=stop, stop=start, N_intervals=N_intervals, forward=False)
         self.burst_n = pulses_f + pulses_b
         self._pcap_enable(True)
+
+    def prepare(self, pre_start, start, stop, N_intervals):
+        """
+        Run before acquisition, once per scan.
+        """
+        self.prepare_line_scan(pre_start, start, stop, N_intervals)
+    
+    def start(self):
+        """
+        Start acquisition when software triggered.
+        """
+        if self.busy():
+            raise Exception('%s is busy!' % self.name)
+
+class PandaBox0D(PandaBox):
+    
+    def __init__(self, name=None, type='diode', host='b-softimax-panda-0.maxiv.lu.se',
+                 ctrl_port=8888, data_port=8889):
+        """
+        A PandaBox subclasses for 0D detectors, i.e. Photodiode and PMT
+        The type can be either 'diode' or 'PMT'
+        This class assumes that:
+            1) COUNTER5 is connected to TTLIN5 that is in turn connected to the Alba voltage output for the photodiode
+            2) COUNTER6 is connected to TTLIN6 that is in turn connected to the V2F on BlackFreq, which is connected to the PMT
+            3) Dwell time is set via PULSE2.WIDTH given in ms
+            4) The acquisition is software triggered by PULSE2.TRIG=ONE and should be set to PULSE2.TRIG=ZERO before the next acquisition cycle
+        """
+        super().__init__(name=name, host=host, ctrl_port=ctrl_port, data_port=data_port)
+        if type == 'diode':
+            self.query_str = 'COUNTER5.OUT?'
+        elif type == 'PMT':
+            self.query_str = 'COUNTER6.OUT?'
+        else:
+            self.query_str = 'COUNTER5.OUT?'
+        
+        self._dwell = 0
+        self.acq_run = False
+    
+    def _reset(self):
+        """
+        Resets the detector before each new acquisiton.
+        """
+        return self.query('PULSE2.TRIG=ZERO')
+    
+    def _trig(self):
+        """
+        Resets the detector before each new acquisiton.
+        """
+        return self.query('PULSE2.TRIG=ONE')
+
+    @property
+    def dwell(self):
+        """
+        Sets dwell time via PULSE2.WIDTH, dwell in ms.
+
+        """
+        return self._dwell
+
+    @dwell.setter
+    def dwell(self, dwell):
+        """
+        Sets dwell time via PULSE2.WIDTH, dwell in ms.
+
+        """
+        self._dwell = dwell
+        self.query(f'PULSE2.WIDTH={self._dwell}')
+    
+    def get_intensity(self):
+        """
+        Reads the intensity from COUNTER5 that is connected to the photodiode
+        """
+        self.acq_run = True
+        self._reset()
+        self._trig()
+        time.sleep(self._dwell/1000)
+        resp = self.query(self.query_str).split('=')
+        if resp[0] == 'OK ':
+            self.acq_run = False
+            return int(resp[1])
+        else:
+            self.acq_run = False
+            return None
+    
+    def arm(self):
+        pass
+
+    def busy(self):
+        if self.acq_run:
+            return True
+        else:
+            return False
+
+    def prepare(self, acqtime, dataid, n_starts):
+        self.dwell = int(acqtime*1000)
+
+    def start(self):
+        """
+        Start acquisition when software triggered.
+        """
+        if self.busy():
+            raise Exception('%s is busy!' % self.name)
+
+    def stop(self):
+        pass
+
+    def read(self):
+        return self.get_intensity()
