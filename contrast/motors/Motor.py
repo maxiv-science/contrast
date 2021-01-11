@@ -332,6 +332,7 @@ class Wm(object):
         self.motors = args
         self.out    = True
     def run(self, *args):
+        ret = None
         titles = ['motor', 'user pos.', 'limits', 'dial pos.', 'limits']
         table = []
         for m in self.motors:
