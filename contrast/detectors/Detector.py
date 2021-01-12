@@ -218,6 +218,8 @@ class DetectorGroup(object):
                 try:
                     d.prepare(acqtime, dataid, n_starts)
                     ok = True
+                except AssertionError:
+                    raise
                 except:
                     tried += 1
                     print('*** problem calling prepare() on %s, trying again in %f s...' % (d.name, trial_delay))
@@ -243,6 +245,8 @@ class DetectorGroup(object):
                 try:
                     d.start()
                     ok = True
+                except AssertionError:
+                    raise
                 except:
                     tried += 1
                     print('*** problem calling start() on %s, trying again in %f s...' % (d.name, trial_delay))
