@@ -176,6 +176,7 @@ class TriggeredDetector(object):
     def __init__(self):
         self.hw_trig = False
         self.hw_trig_n = 1
+        self.arm_once = False
 
 class BurstDetector(object):
     """
