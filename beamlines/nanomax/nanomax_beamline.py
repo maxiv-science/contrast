@@ -206,8 +206,8 @@ if __name__=='__main__':
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
     ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
-    alba0 = AlbaEM(name='alba0', device='test/alebjo/alba0')
-    alba2 = AlbaEM(name='alba2', device='test/alebjo/alba2')
+    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
 
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
