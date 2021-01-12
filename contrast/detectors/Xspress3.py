@@ -47,8 +47,6 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
             self.proxy.DestinationFileName = self.saving_file
 
         # arming and numbers of frames
-        if self.burst_n > 1:
-            acqtime -= self.burst_latency
         self.proxy.ExposureTime = acqtime
         self.proxy.nFramesPerTrigger = self.burst_n
         self.proxy.LatencyTime = self.burst_latency

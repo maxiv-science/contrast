@@ -240,9 +240,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         Run once per sw position
         """
         if (self.hw_trig and not self.arm_once):
-            # THIS WILL CHANGE:
-            dummy_latency = self.acqtime / 2
-            self.em.arm(self.acqtime-dummy_latency, self.hw_trig_n, True)
+            self.em.arm(self.acqtime, self.hw_trig_n, True)
 
     def start(self):
         """

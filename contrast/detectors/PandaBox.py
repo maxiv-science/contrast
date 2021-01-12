@@ -34,6 +34,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         self.ctrl_port = ctrl_port
         self.data_port = data_port
         self.acqthread = None
+        self.burst_latency = .003
         Detector.__init__(self, name=name)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
@@ -58,8 +59,6 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         """
         Run before acquisition, once per scan.
         """
-        if self.burst_n > 1:
-            acqtime -= self.burst_latency
         self.query('PULSE1.PULSES=%d' % self.burst_n)
         self.query('PULSE1.WIDTH=%f' % acqtime)
         self.query('PULSE1.STEP=%f' % (self.burst_latency+acqtime))
