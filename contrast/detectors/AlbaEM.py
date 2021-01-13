@@ -193,17 +193,18 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     (as of SW version 2.0.04) does not allow for triggered burst
     acquisition, as reflected in the code.
     """
-    def __init__(self, name=None, host=None, port=5025,
-                 max_data_points=1000, trig_source='DIO_1'):
+    def __init__(self, name=None, **kwargs):
+        self.kwargs = kwargs
         Detector.__init__(self, name=name)
         LiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
 
     def initialize(self):
-        self.em = Electrometer()
+        self.em = Electrometer(**self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
+        self.n_started_since_rearm = 0
 
     def prepare(self, acqtime, dataid, n_starts):
         """
@@ -212,15 +213,34 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         """
         self.acqtime = acqtime
         self.n_started = 0
+        self.n_starts = n_starts
         if self.busy():
             raise Exception('%s is busy!' % self.name)
-        if self.hw_trig and (self.burst_n > 1):
-            print("***** NOTE: The Alba EM can''t handle hardware-triggered burst acquisitions!")
-            print('Going to set burst_n=1 and continue...')
-        # here we have to work around the maximum number of points on
-        # the electrometer.
-        if (self.hw_trig and self.arm_once) or (not self.hw_trig and self.burst_n==1):
-            self.em.arm(acqtime, n_starts, self.hw_trig)
+        msg = "The Alba EM cannot handle hardware-triggered burst acquisitions!"
+        assert not (self.hw_trig and (self.burst_n > 1)), msg
+        if self.do_rearm:
+            self.armed_so_far = 0
+            self.rearm()
+
+    @property
+    def do_rearm(self):
+        """
+        This checks whether to arm the EM for several SW starts, which also
+        implies continually rearming every self.em._max_data_points steps,
+        to work around the tiny buffer of the thing.
+        """
+        return (self.hw_trig and self.arm_once) or (not self.hw_trig and self.burst_n==1)
+
+    def rearm(self):
+        """
+        Workaround allowing longer triggered scans than the tiny EM
+        buffer allows.
+        """
+        triggers_left = self.n_starts - self.n_started
+        this_batch = min(triggers_left, self.em._max_data_points)
+        self.em.arm(self.acqtime, this_batch, self.hw_trig)
+        self.n_started_since_rearm = 0
+        self.armed_so_far += this_batch
 
     def start_live(self, acqtime=1.0):
         """
@@ -241,12 +261,15 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         """
         if (self.hw_trig and not self.arm_once):
             self.em.arm(self.acqtime, self.hw_trig_n, True)
+        if self.do_rearm and (self.n_started == self.armed_so_far):
+            self.rearm()
 
     def start(self):
         """
         Start acquisition when software triggered.
         """
         self.n_started += 1
+        self.n_started_since_rearm += 1
         if self.hw_trig:
             return
         elif self.burst_n > 1:
@@ -266,16 +289,20 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
             return False
         if (self.hw_trig and not self.arm_once) or (self.burst_n > 1):
             return st in BUSY_STATES
-        else:
-            return (self.em.ndata < self.n_started)
+        elif self.do_rearm:
+            return (self.em.ndata < self.n_started_since_rearm)
+        assert(False), "Should never get here!"
 
     def read(self):
         if (self.hw_trig and not self.arm_once) or (self.burst_n > 1):
             dt, arr = self.em.read(timestamps=True)
             res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
             res['ts'] = dt
-        else:
-            dt, arr = self.em.read(first=self.n_started-1, number=1, timestamps=True)
+        elif self.do_rearm:
+            first = self.n_started_since_rearm - 1
+            dt, arr = self.em.read(first=first, number=1, timestamps=True)
             res = {i+1: arr[0, i] for i in range(NUM_CHAN)}
             res['ts'] = dt[0]
+        else:
+            assert(False), 'Should never get here!'
         return res
