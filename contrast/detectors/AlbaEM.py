@@ -31,7 +31,6 @@ class Electrometer(object):
         # require SW version 2.0.04, below that soft triggers are broken
         # and below 2.0.0 data indexing is wrong.
         assert self.version >= (2, 0, 4), "Requires on-board SW version 2.0.04 or higher."
-        self.hw_arm_once = False
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -185,10 +184,10 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
 
     The specifics of the EM enables these four cases, each of which
     causes a different triggering and readout behaviour below:
-    * HW triggered, armed once at the top, expecting one trigger per SW step.
-    * HW triggered, armed on every SW step, expecting hw_trig_n triggers per step.
+    * HW triggered expecting one trigger per SW step -> arm at the top
+    * HW triggered expecting hw_trig_n triggers per step -> arm on every sw step
     * Burst mode, burst_n > 1, uses a special EM command.
-    * Software triggered mode.
+    * Software triggered mode, armed at the top
 
     Note that the electrometer itself
     (as of SW version 2.0.04) does not allow for triggered burst
@@ -219,18 +218,18 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
             raise Exception('%s is busy!' % self.name)
         msg = "The Alba EM cannot handle hardware-triggered burst acquisitions!"
         assert not (self.hw_trig and (self.burst_n > 1)), msg
-        if self.do_rearm:
+        if self.global_arm:
             self.armed_so_far = 0
             self.rearm()
 
     @property
-    def do_rearm(self):
+    def global_arm(self):
         """
         This checks whether to arm the EM for several SW starts, which also
         implies continually rearming every self.em._max_data_points steps,
         to work around the tiny buffer of the thing.
         """
-        return (self.hw_trig and self.hw_arm_once) or (not self.hw_trig and self.burst_n==1)
+        return (self.hw_trig and self.hw_trig_n==1) or (not self.hw_trig and self.burst_n==1)
 
     def rearm(self):
         """
@@ -260,9 +259,9 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         """
         Run once per sw position
         """
-        if (self.hw_trig and not self.hw_arm_once):
+        if (self.hw_trig and self.hw_trig_n>1):
             self.em.arm(self.acqtime, self.hw_trig_n, True)
-        if self.do_rearm and (self.n_started == self.armed_so_far):
+        if self.global_arm and (self.n_started == self.armed_so_far):
             self.rearm()
 
     def start(self):
@@ -288,18 +287,18 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         st = self.em.state()
         if st in IDLE_STATES:
             return False
-        if (self.hw_trig and not self.hw_arm_once) or (self.burst_n > 1):
+        if (self.hw_trig and self.hw_trig_n>1) or (self.burst_n > 1):
             return st in BUSY_STATES
-        elif self.do_rearm:
+        elif self.global_arm:
             return (self.em.ndata < self.n_started_since_rearm)
         assert(False), "Should never get here!"
 
     def read(self):
-        if (self.hw_trig and not self.hw_arm_once) or (self.burst_n > 1):
+        if (self.hw_trig and self.hw_trig_n>1) or (self.burst_n > 1):
             dt, arr = self.em.read(timestamps=True)
             res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
             res['ts'] = dt
-        elif self.do_rearm:
+        elif self.global_arm:
             first = self.n_started_since_rearm - 1
             dt, arr = self.em.read(first=first, number=1, timestamps=True)
             res = {i+1: arr[0, i] for i in range(NUM_CHAN)}
