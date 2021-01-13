@@ -170,6 +170,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
         # get out of the fault caused by trigger timeout
         if (self._safe_read('acq_status') == 'Fault') and (self._safe_read('acq_status_fault_error') == 'No error'):
             self._safe_call_command('stopAcq')
@@ -210,8 +211,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self._safe_write('acq_trigger_mode', self.EXT_TRG_MODE)
             self._safe_write('acq_nb_frames', n_starts)
 
-        self.acqtime = acqtime
-        self._safe_write('acq_expo_time', acqtime)
+        self._safe_write('acq_expo_time', self.acqtime)
 
         if self.hybrid_mode:
             time.sleep(.1)
@@ -324,7 +324,7 @@ class LimaMerlin(LimaDetector):
             self.det.write_attribute('triggerStartType', "RISING_EDGE_TTL")
         else:
             self.det.write_attribute('triggerStartType', "INTERNAL")
-        super(LimaMerlin, self).prepare(*args, **kwargs)
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
 
 class LimaAndor(LimaDetector):
     """

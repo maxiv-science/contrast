@@ -182,6 +182,14 @@ class BurstDetector(object):
     Defines the API for detectors that optionally run in burst mode,
     so that an autonomous train of measurements is made for one
     arm/start command.
+
+    Defined three attributes:
+
+       burst_n: the number of autonomous measurements
+       burst_latency: the time between measurements
+       burst_acqtime: an optional parameter which (if not None)
+                      overrides the value received via the prepare()
+                      method.
     """
     def __init__(self):
         # let child classes set these if they want
@@ -189,6 +197,13 @@ class BurstDetector(object):
             self.burst_n = 1
         if not hasattr(self, 'burst_latency'):
             self.burst_latency = 0.0
+        if not hasattr(self, 'burst_acqtime'):
+            self.burst_acqtime = None
+
+    def prepare(self, acqtime, dataid, n_starts=None):
+        self.acqtime = acqtime
+        if self.burst_acqtime:
+            self.acqtime = self.burst_acqtime
 
 class DetectorGroup(object):
     """

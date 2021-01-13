@@ -35,7 +35,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
-
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.arm_number = -1
 
         if self.busy():
@@ -53,8 +53,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'%self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
-        self.exptime = acqtime
-        self.expperiod = self.burst_latency + acqtime
+        self.exptime = self.acqtime
+        self.expperiod = self.burst_latency + self.acqtime
 
     def arm(self):
         """

@@ -211,7 +211,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
-        self.acqtime = acqtime
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.n_started = 0
         self.n_starts = n_starts
         if self.busy():

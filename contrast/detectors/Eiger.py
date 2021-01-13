@@ -132,9 +132,10 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         Run before acquisition, once per scan. Set up triggering,
         number of images etc.
         """
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self._set('detector', 'config/nimages', self.burst_n)
-        self._set('detector', 'config/frame_time', acqtime + self.burst_latency)
-        self._set('detector', 'config/count_time', acqtime)
+        self._set('detector', 'config/frame_time', self.acqtime + self.burst_latency)
+        self._set('detector', 'config/count_time', self.acqtime)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
             self._set('detector', 'config/ntrigger', int(self.hw_trig_n * n_starts))
