@@ -31,6 +31,7 @@ class Electrometer(object):
         # require SW version 2.0.04, below that soft triggers are broken
         # and below 2.0.0 data indexing is wrong.
         assert self.version >= (2, 0, 4), "Requires on-board SW version 2.0.04 or higher."
+        self.hw_arm_once = False
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -229,7 +230,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         implies continually rearming every self.em._max_data_points steps,
         to work around the tiny buffer of the thing.
         """
-        return (self.hw_trig and self.arm_once) or (not self.hw_trig and self.burst_n==1)
+        return (self.hw_trig and self.hw_arm_once) or (not self.hw_trig and self.burst_n==1)
 
     def rearm(self):
         """
@@ -259,7 +260,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         """
         Run once per sw position
         """
-        if (self.hw_trig and not self.arm_once):
+        if (self.hw_trig and not self.hw_arm_once):
             self.em.arm(self.acqtime, self.hw_trig_n, True)
         if self.do_rearm and (self.n_started == self.armed_so_far):
             self.rearm()
@@ -287,14 +288,14 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         st = self.em.state()
         if st in IDLE_STATES:
             return False
-        if (self.hw_trig and not self.arm_once) or (self.burst_n > 1):
+        if (self.hw_trig and not self.hw_arm_once) or (self.burst_n > 1):
             return st in BUSY_STATES
         elif self.do_rearm:
             return (self.em.ndata < self.n_started_since_rearm)
         assert(False), "Should never get here!"
 
     def read(self):
-        if (self.hw_trig and not self.arm_once) or (self.burst_n > 1):
+        if (self.hw_trig and not self.hw_arm_once) or (self.burst_n > 1):
             dt, arr = self.em.read(timestamps=True)
             res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
             res['ts'] = dt

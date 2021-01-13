@@ -174,9 +174,8 @@ class TriggeredDetector(object):
     triggers.
     """
     def __init__(self):
-        self.hw_trig = False
-        self.hw_trig_n = 1
-        self.arm_once = False
+        self.hw_trig = False  # whether to arm for hw triggering
+        self.hw_trig_n = 1    # the number of triggers per sw step
 
 class BurstDetector(object):
     """
@@ -218,7 +217,7 @@ class DetectorGroup(object):
                 try:
                     d.prepare(acqtime, dataid, n_starts)
                     ok = True
-                except AssertionError:
+                except (AssertionError, NotImplementedError):
                     raise
                 except:
                     tried += 1

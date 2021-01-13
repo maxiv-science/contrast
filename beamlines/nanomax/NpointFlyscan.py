@@ -42,10 +42,12 @@ class NpointFlyscan(Mesh):
     def _set_det_trig(self, on):
         # set up all triggered detectors
         for d in Detector.get_active():
+
             if isinstance(d, TriggeredDetector) and not d.name=='panda0':
                 d.hw_trig = on
                 d.hw_trig_n = self.fastmotorintervals + 1
-                d.arm_once = False
+                if hasattr(d, 'hw_arm_once'):
+                    d.hw_arm_once = False
         # special treatment for the panda0 which rules all
         panda = self.panda
         if on:
