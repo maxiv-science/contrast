@@ -87,3 +87,18 @@ contrast.detectors.Xspress3 module
 .. automodule:: contrast.detectors.Xspress3
    :members:
    :show-inheritance:
+
+contrast.detectors.Eiger module
+-------------------------------
+
+.. automodule:: contrast.detectors.Eiger
+   :members:
+   :show-inheritance:
+
+contrast.detectors.Andor3 module
+--------------------------------
+
+.. automodule:: contrast.detectors.Andor3
+   :members:
+   :show-inheritance:
+
