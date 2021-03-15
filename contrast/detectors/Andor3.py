@@ -1,3 +1,9 @@
+"""
+Provides an interface to the Andor3 Zyla streaming manager,
+
+https://github.com/maxiv-science/andor-streamer
+"""
+
 if __name__ == '__main__':
     from contrast.detectors.Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
     from contrast.environment import env
@@ -10,11 +16,8 @@ import os
 import PyTango
 
 class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
+
     """
-    Detector class interfacing directly with the andor-streamer:
-
-    https://gitlab.maxiv.lu.se/nanomax-beamline/andor-streamer
-
     Note: hw trigger not yet implemented.
     """
 

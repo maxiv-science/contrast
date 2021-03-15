@@ -1,3 +1,9 @@
+"""
+Provides an interface to the Pilatus streaming manager,
+
+https://github.com/maxiv-science/pilatus-streamer
+"""
+
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
@@ -11,11 +17,6 @@ BUF_SIZE = 1024
 TIMEOUT = 20
 
 class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
-    """
-    Detector class interfacing directly with the pilatus-streamer:
-
-    https://gitlab.maxiv.lu.se/nanomax-beamline/pilatus-streamer
-    """
 
     def __init__(self, hostname, name=None):
         BurstDetector.__init__(self)

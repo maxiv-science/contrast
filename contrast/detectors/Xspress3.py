@@ -1,3 +1,9 @@
+"""
+Provides an interface to the Xspress3 streaming manager,
+
+https://github.com/maxiv-science/xspress3-streamer
+"""
+
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
@@ -9,11 +15,6 @@ except ModuleNotFoundError:
 import time
 
 class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
-    """
-    Detector class interfacing directly with the xspress3-streamer:
-
-    https://gitlab.maxiv.lu.se/nanomax-beamline/xspress3-streamer
-    """
 
     def __init__(self, device='staff/alebjo/xspress3', name=None):
         SoftwareLiveDetector.__init__(self)

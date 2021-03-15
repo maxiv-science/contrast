@@ -1,5 +1,7 @@
 """
-Merlin class which talks to an improvised REST API.
+Provides an interface to the Merlin detector streaming manager,
+
+https://github.com/maxiv-science/merlin-streamer
 """
 
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector

@@ -1,6 +1,5 @@
 """
-This currently arms the eiger on every software step, which is sub-optimal. To be fixed
-later, but the receiver has to be updated too.
+Provides a direct interface to the Dectris Eiger server.
 """
 
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
