@@ -131,6 +131,9 @@ mesh
     Software scan on a regular grid of N motors. ::
         
         mesh <motor1> <start> <stop> <intervals> ... <exp_time>
+
+    optional keyword arguments:
+        jitter: float ... Randomizes perfect grid positions.
     
 
 mv
