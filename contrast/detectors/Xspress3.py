@@ -2,7 +2,10 @@ from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDe
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
-import PyTango
+try:
+    import PyTango
+except ModuleNotFoundError:
+    pass
 import time
 
 class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
