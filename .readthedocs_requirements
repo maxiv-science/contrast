@@ -1,2 +1,6 @@
 ipython
 h5py
+zmq
+matplotlib
+requests
+
