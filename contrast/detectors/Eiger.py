@@ -16,6 +16,9 @@ from threading import Thread
 from base64 import b64encode, b64decode
 
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+    """
+    Does this docstring make a difference?
+    """
 
     def __init__(self, name=None, host='b-nanomax-eiger-dc-1.maxiv.lu.se',
                  api_version='1.8.0'):
