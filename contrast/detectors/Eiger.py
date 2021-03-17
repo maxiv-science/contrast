@@ -17,7 +17,7 @@ from base64 import b64encode, b64decode
 
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
-    Does this docstring make a difference?
+    Does this docstring make a difference? Yes it does. Add for the others.
     """
 
     def __init__(self, name=None, host='b-nanomax-eiger-dc-1.maxiv.lu.se',

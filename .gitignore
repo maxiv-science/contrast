@@ -4,5 +4,6 @@ build/*
 dist/*
 contrast.egg*
 docs/build
+macros.rst
 
 .vscode/*

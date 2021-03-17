@@ -11,6 +11,13 @@ Module contents
 Submodules
 ----------
 
+contrast.recorders.Recorder module
+----------------------------------
+
+.. automodule:: contrast.recorders.Recorder
+   :members:
+   :show-inheritance:
+
 contrast.recorders.Hdf5Recorder module
 --------------------------------------
 
@@ -22,13 +29,6 @@ contrast.recorders.PlotRecorder module
 --------------------------------------
 
 .. automodule:: contrast.recorders.PlotRecorder
-   :members:
-   :show-inheritance:
-
-contrast.recorders.Recorder module
-----------------------------------
-
-.. automodule:: contrast.recorders.Recorder
    :members:
    :show-inheritance:
 

@@ -25,6 +25,13 @@ contrast.environment.scheduling module
    :members:
    :show-inheritance:
 
+contrast.environment.shutters module
+------------------------------------
+
+.. automodule:: contrast.environment.shutters
+   :members:
+   :show-inheritance:
+
 contrast.environment.snapshots module
 -------------------------------------
 

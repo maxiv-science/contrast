@@ -11,6 +11,20 @@ Module contents
 Submodules
 ----------
 
+contrast.motors.Motor module
+----------------------------
+
+.. automodule:: contrast.motors.Motor
+   :members:
+   :show-inheritance:
+
+contrast.motors.PseudoMotor module
+----------------------------------
+
+.. automodule:: contrast.motors.PseudoMotor
+   :members:
+   :show-inheritance:
+
 contrast.motors.E727 module
 ---------------------------
 
@@ -29,20 +43,6 @@ contrast.motors.LC400 module
 ----------------------------
 
 .. automodule:: contrast.motors.LC400
-   :members:
-   :show-inheritance:
-
-contrast.motors.Motor module
-----------------------------
-
-.. automodule:: contrast.motors.Motor
-   :members:
-   :show-inheritance:
-
-contrast.motors.PseudoMotor module
-----------------------------------
-
-.. automodule:: contrast.motors.PseudoMotor
    :members:
    :show-inheritance:
 
