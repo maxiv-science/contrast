@@ -2,8 +2,9 @@
 Provides a Motor subclass for the Npoint LC400 piezo driver, and a
 helper class for generating waveforms. Relies on the Tango server
 developed at MAX IV (available on request!):
-  https://gitlab.maxiv.lu.se/kits-maxiv/lib-maxiv-npoint-lc400
-  https://gitlab.maxiv.lu.se/kits-maxiv/dev-maxiv-npoint-lc400
+
+* https://gitlab.maxiv.lu.se/kits-maxiv/lib-maxiv-npoint-lc400
+* https://gitlab.maxiv.lu.se/kits-maxiv/dev-maxiv-npoint-lc400
 """
 
 import PyTango

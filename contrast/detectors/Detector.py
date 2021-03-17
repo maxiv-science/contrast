@@ -183,13 +183,11 @@ class BurstDetector(object):
     so that an autonomous train of measurements is made for one
     arm/start command.
 
-    Defined three attributes:
+    Defines three attributes:
 
-       burst_n: the number of autonomous measurements
-       burst_latency: the time between measurements
-       burst_acqtime: an optional parameter which (if not None)
-                      overrides the value received via the prepare()
-                      method.
+    * `burst_n`: the number of autonomous measurements
+    * `burst_latency`: the time between measurements
+    * `burst_acqtime`: an optional parameter which (if not None) overrides the value received via the prepare() method.
     """
     def __init__(self):
         # let child classes set these if they want
