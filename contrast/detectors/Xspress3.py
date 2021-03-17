@@ -1,9 +1,3 @@
-"""
-Provides an interface to the Xspress3 streaming manager,
-
-https://github.com/maxiv-science/xspress3-streamer
-"""
-
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
@@ -15,6 +9,11 @@ except ModuleNotFoundError:
 import time
 
 class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+    """
+    Provides an interface to the Xspress3 streaming manager,
+
+    https://github.com/maxiv-science/xspress3-streamer
+    """
 
     def __init__(self, device='staff/alebjo/xspress3', name=None):
         SoftwareLiveDetector.__init__(self)
@@ -27,11 +26,6 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         self.burst_latency = 100e-9
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
-
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -78,9 +72,6 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         self.expected_total = 0
 
     def arm(self):
-        """
-        Called on every software step
-        """
         # in burst mode, we have to arm here, otherwise it's already done
         if self.burst_n > 1:
             self.proxy.Arm()
@@ -89,9 +80,6 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
             self.expected_total += self.expected_per_arm
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if self.hw_trig:
             return
         self.proxy.SoftwareTrigger()

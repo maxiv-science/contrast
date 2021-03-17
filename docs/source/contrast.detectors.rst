@@ -25,6 +25,13 @@ contrast.detectors.Dummies module
    :members:
    :show-inheritance:
 
+contrast.detectors.Pseudo module
+--------------------------------
+
+.. automodule:: contrast.detectors.Pseudo
+   :members:
+   :show-inheritance:
+
 contrast.detectors.Eiger module
 -------------------------------
 
@@ -60,6 +67,20 @@ contrast.detectors.Andor3 module
    :members:
    :show-inheritance:
 
+contrast.detectors.AlbaEM module
+--------------------------------
+
+.. automodule:: contrast.detectors.AlbaEM
+   :members:
+   :show-inheritance:
+
+contrast.detectors.PandaBox module
+----------------------------------
+
+.. automodule:: contrast.detectors.PandaBox
+   :members:
+   :show-inheritance:
+
 contrast.detectors.AdLink module
 --------------------------------
 
@@ -71,13 +92,6 @@ contrast.detectors.DG645 module
 -------------------------------
 
 .. automodule:: contrast.detectors.DG645
-   :members:
-   :show-inheritance:
-
-contrast.detectors.LC400Buffer module
--------------------------------------
-
-.. automodule:: contrast.detectors.LC400Buffer
    :members:
    :show-inheritance:
 

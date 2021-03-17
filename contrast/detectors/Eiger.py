@@ -1,7 +1,3 @@
-"""
-Provides a direct interface to the Dectris Eiger server.
-"""
-
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..recorders.Hdf5Recorder import Link
 from ..environment import env
@@ -17,7 +13,7 @@ from base64 import b64encode, b64decode
 
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
-    Does this docstring make a difference? Yes it does. Add for the others.
+    Provides a direct interface to the Dectris Eiger server.
     """
 
     def __init__(self, name=None, host='b-nanomax-eiger-dc-1.maxiv.lu.se',
@@ -78,11 +74,13 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def max_count_rate(self):
+        """ Maximum count rate according to the server """
         val = self._get('detector', 'config/countrate_correction_count_cutoff')['value']
         return int(val)
 
     @property
     def compression(self):
+        """ Whether bitshuffle compression is enabled """
         val = self._get('detector', 'config/compression')['value']
         return val == 'bslz4'
 
@@ -95,6 +93,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def energy(self):
+        """ Operating energy in keV """
         return self._get('detector', 'config/photon_energy')['value'] / 1000
 
     @energy.setter
@@ -107,6 +106,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def mask_applied(self):
+        """ Whether to apply the mask """
         return self._get('detector', 'config/pixel_mask_applied')['value']
 
     @mask_applied.setter
@@ -115,6 +115,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def pixel_splitting(self):
+        """ Whether to use virtual pixel splitting """
         return self._get('detector', 'config/virtual_pixel_correction_applied')['value']
 
     @pixel_splitting.setter
@@ -123,6 +124,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def threshold(self):
+        """ Energy threshold for the counters """
         return self._get('detector', 'config/threshold/1/energy')['value']
 
     @threshold.setter
@@ -130,10 +132,6 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('detector', 'config/threshold/1/energy', float(val))
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self._set('detector', 'config/nimages', self.burst_n)
         self._set('detector', 'config/frame_time', self.acqtime + self.burst_latency)
@@ -157,15 +155,10 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.n_started = 0
 
     def arm(self):
-        """
-        The Eiger is armed only once.
-        """
+        # The Eiger is armed only once.
         pass
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         self.n_started += 1
         if not self.hw_trig:
             self.acqthread = Thread(target=self._set, args=('detector', 'command/trigger'), kwargs={'timeout':None})

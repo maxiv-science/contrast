@@ -184,6 +184,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
 
     The specifics of the EM enables these four cases, each of which
     causes a different triggering and readout behaviour below:
+
     * HW triggered expecting one trigger per SW step -> arm at the top
     * HW triggered expecting hw_trig_n triggers per step -> arm on every sw step
     * Burst mode, burst_n > 1, uses a special EM command.
@@ -207,10 +208,6 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         self.n_started_since_rearm = 0
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.n_started = 0
         self.n_starts = n_starts
@@ -224,18 +221,13 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def global_arm(self):
-        """
-        This checks whether to arm the EM for several SW starts, which also
-        implies continually rearming every self.em._max_data_points steps,
-        to work around the tiny buffer of the thing.
-        """
+        # This checks whether to arm the EM for several SW starts, which also
+        # implies continually rearming every self.em._max_data_points steps,
+        # to work around the tiny buffer of the thing.
         return (self.hw_trig and self.hw_trig_n==1) or (not self.hw_trig and self.burst_n==1)
 
     def rearm(self):
-        """
-        Workaround allowing longer triggered scans than the tiny EM
-        buffer allows.
-        """
+        # Workaround allowing longer triggered scans than the tiny EM buffer allows.
         triggers_left = self.n_starts - self.n_started
         this_batch = min(triggers_left, self.em._max_data_points)
         self.em.arm(self.acqtime, this_batch, self.hw_trig)
@@ -243,31 +235,20 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         self.armed_so_far += this_batch
 
     def start_live(self, acqtime=1.0):
-        """
-        The Alba EM:s are always in live mode, exposing the
-        "instant current" values.
-        """
+        # The Alba EM:s are always in live mode, exposing the "instant current" values.
         pass
 
     def stop_live(self):
-        """
-        Nothing to do...
-        """
+        # Nothing to do...
         pass
 
     def arm(self):
-        """
-        Run once per sw position
-        """
         if (self.hw_trig and self.hw_trig_n>1):
             self.em.arm(self.acqtime, self.hw_trig_n, True)
         if self.global_arm and (self.n_started == self.armed_so_far):
             self.rearm()
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         self.n_started += 1
         self.n_started_since_rearm += 1
         if self.hw_trig:

@@ -12,6 +12,9 @@ import os
 from h5py import VirtualSource, VirtualLayout
 
 class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+    """
+    Lima base class.
+    """
     EXT_TRG_MODE = "EXTERNAL_TRIGGER_MULTI"
 
     def __init__(self, name=None, lima_device=None, det_device=None):
@@ -166,10 +169,6 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         return layout
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         # get out of the fault caused by trigger timeout
         if (self._safe_read('acq_status') == 'Fault') and (self._safe_read('acq_status_fault_error') == 'No error'):
@@ -228,9 +227,6 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self.layout = self.make_virtual_layout()
 
     def arm(self):
-        """
-        Start the detector if hardware triggered, just prepareAcq otherwise.
-        """
         self.arm_number += 1
         if self.hybrid_mode:
             return
@@ -243,9 +239,6 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self._safe_call_command('startAcq')
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if self.hw_trig or self.hybrid_mode:
             return
         if self.busy():

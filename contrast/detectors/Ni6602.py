@@ -51,10 +51,6 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
             self.dev.init()
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
 
         if self.busy():
             raise Exception('%s is busy!' % self.name)
@@ -70,33 +66,23 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
         self.dev.integrationTime = acqtime
 
     def start_live(self, acqtime=1.0):
-        """
-        The NI card can do on-board live mode.
-        """
+        # The NI card can do on-board live mode.
         self.dev.continuous = True
         self.dev.integrationTime = acqtime
         self.dev.Start()
 
     def stop_live(self):
-        """
-        The NI card can do on-board live mode.
-        """
+        # The NI card can do on-board live mode.
         self.stop()
         self.dev.continuous = False
 
     def arm(self):
-        """
-        Start the detector if hardware triggered
-        """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         if self.hw_trig:
             self.dev.Start()
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if self.hw_trig:
             return
         if self.busy():

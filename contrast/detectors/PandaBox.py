@@ -1,16 +1,3 @@
-"""
-Basic class for treating a PandaBox as a detector, capable
-of operating in burst mode (thereby acting as a time-based
-trigger source).
-
-The PandaBox is infinitely configurable, and this class assumes that:
-1) the PCAP block is used,
-2) the PULSE1 block is used to control the number of
-   acquired points and their timing, and
-3) flickering the "A" bit causes a trigger.
-
-"""
-
 from .Detector import Detector, TriggeredDetector, BurstDetector
 from ..environment import env
 
@@ -24,12 +11,21 @@ SOCK_RECV = 4096
 RECV_DELAY = 1e-4
 
 class PandaBox(Detector, TriggeredDetector, BurstDetector):
+    """
+    Basic class for treating a PandaBox as a detector, capable
+    of operating in burst mode (thereby acting as a time-based
+    trigger source).
+
+    The PandaBox is infinitely configurable, and this class assumes that:
+
+    #. the PCAP block is used,
+    #. the PULSE1 block is used to control the number of
+       acquired points and their timing, and
+    #. flickering the "A" bit causes a trigger.
+    """
 
     def __init__(self, name=None, host='172.16.126.88',
                  ctrl_port=8888, data_port=8889):
-        """
-        Class to interact directly with the PandABox.
-        """
         self.host = host
         self.ctrl_port = ctrl_port
         self.data_port = data_port
@@ -56,18 +52,12 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             return False
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan.
-        """
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.query('PULSE1.PULSES=%d' % self.burst_n)
         self.query('PULSE1.WIDTH=%f' % self.acqtime)
         self.query('PULSE1.STEP=%f' % (self.burst_latency+self.acqtime))
 
     def arm(self):
-        """
-        Gets called before every start command
-        """
         self.acqthread = Thread(target=self._acquire)
         self.acqthread.start()
         self.query('*PCAP.ARM=')
@@ -132,9 +122,6 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         self.query('*PCAP.DISARM=')
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if not self.hw_trig:
             self.query('BITS.A=1')
             time.sleep(.001)

@@ -1,9 +1,3 @@
-"""
-Provides an interface to the Andor3 Zyla streaming manager,
-
-https://github.com/maxiv-science/andor-streamer
-"""
-
 if __name__ == '__main__':
     from contrast.detectors.Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
     from contrast.environment import env
@@ -16,8 +10,11 @@ import os
 import PyTango
 
 class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
-
     """
+    Provides an interface to the Andor3 Zyla streaming manager,
+
+    https://github.com/maxiv-science/andor-streamer
+
     Note: hw trigger not yet implemented.
     """
 
@@ -31,11 +28,6 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         pass
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
-
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -66,15 +58,9 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         self.frames_expected = 0
 
     def arm(self):
-        """
-        Called on every software step - no action for sw timing
-        """
         pass
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if self.burst_n == 1:
             self.proxy.software_trigger()
             self.frames_expected += 1

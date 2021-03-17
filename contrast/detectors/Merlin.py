@@ -1,9 +1,3 @@
-"""
-Provides an interface to the Merlin detector streaming manager,
-
-https://github.com/maxiv-science/merlin-streamer
-"""
-
 from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
 from ..recorders.Hdf5Recorder import Link
 from ..environment import env
@@ -18,24 +12,31 @@ from threading import Thread
 
 TRIG_MODES = {'internal': 0, 'rising_ttl': 1, 'soft': 5}
 
-##################################################################
-### NOTE! A SEPARATE MODE MUST BE MADE FOR THE CONTINUOUS FEATURE, 
-### AS YOU CANNOT USE SOFT TRIGGERS FOR CONTINUOUS (NUMBER OF FRAMES
-### AND NUMBER OF FRAMES/TRIGGER HAVE TO BE THE SAME)
-########################################################################
-
 class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+    """
+    Provides an interface to the Merlin detector streaming manager,
 
+    https://github.com/maxiv-science/merlin-streamer
+    """
     def __init__(self, name=None, host='b-nanomax-controlroom-cc-2', port=8000):
         self.host = host
         self.port = port
         self._hdf_path = 'entry/measurement/Merlin/data'
         self.acqthread = None
-        self.gapless = False
+        self._gapless = False
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
+
+    @property
+    def gapless(self):
+        """ Whether to use the continuous alternating-counter mode """
+        return self._gapless
+
+    @gapless.setter
+    def gapless(self, val):
+        self._gapless = bool(val)
 
     def initialize(self):
         self.session = requests.Session()
@@ -73,6 +74,7 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def energy(self):
+        """ Operating photon energy """
         return self.get('energy')
 
     @energy.setter
@@ -84,10 +86,6 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.set('energy', val)
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         if n_starts is None:
             n_starts = 10000
@@ -123,9 +121,7 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             self.set('arm')
 
     def arm(self):
-        """
-        The Merlin is armed only once.
-        """
+        # The Merlin is armed only once.
         if not self.hw_trig:
             return
 
@@ -139,9 +135,6 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.acqthread.start()
 
     def start(self):
-        """
-        Start acquisition.
-        """
         if self.hw_trig:
             return
         # how many frames will this particular start() call cause?
