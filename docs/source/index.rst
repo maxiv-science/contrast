@@ -8,6 +8,8 @@ Welcome to the Contrast documentation!
 
 Contrast is a simple, lightweight python framework for instrument orchestration and data acquisition.
 
+This document was built automatically from Contrast version |version|.
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
