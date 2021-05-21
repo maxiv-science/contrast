@@ -83,12 +83,14 @@ class MaxivScheduler(DummyScheduler):
     NOTE: Using threaded status checkers here to avoid polling a large
     number of potentially slow shutter devices on a different control system.
     """
-    def __init__(self, shutter_list):
+    def __init__(self, shutter_list, avoid_injections=True, respect_countdown=True):
         self.shutter_checker = TangoShutterChecker(*shutter_list)
         self.shutter_checker.start()
         self.injection_device = tango.DeviceProxy('g-v-csproxy-0:10000/R3-319S2/DIA/DCCT-01')
         self.countdown_device = tango.DeviceProxy('g-v-csproxy-0:10000/g/ctl/machinestatus')
         self.disabled = False
+        self.avoid_injections = avoid_injections
+        self.respect_countdown = respect_countdown
 
     def _ready(self):
         if self.disabled:
@@ -96,14 +98,22 @@ class MaxivScheduler(DummyScheduler):
         else:
             shutters_ok = False not in self.shutter_checker.status_list
             try:
-                injection_ok = (self.injection_device.lifetime > 0) # negative when refilling
+                if self.avoid_injections:
+                    injection_ok = (self.injection_device.lifetime > 0) # negative when refilling
+                else:
+                    injection_ok = True
             except:
                 print("Couldn't reach the injection device %s, ignoring"%self.injection_device.name())
                 injection_ok = True
             return (shutters_ok and injection_ok)
 
     def _limit(self):
+        if not self.respect_countdown:
+            return None
         try:
-            return self.countdown_device.r3topup
+            dl = self.countdown_device.r3topup
+            dl = 1 if (dl < 0) else dl
+            return dl
         except:
+            print('MaxivScheduler: Problem getting the topup countdown value')
             return None

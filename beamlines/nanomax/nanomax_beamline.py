@@ -46,7 +46,9 @@ if __name__=='__main__':
                         shutter_list=['B303A-FE/VAC/HA-01',
                                       'B303A-FE/PSS/BS-01',
                                       'B303A-O/PSS/BS-01',
-                                      'B303A-E/PSS/BS-01',])
+                                      'B303A-E/PSS/BS-01',],
+                        avoid_injections=False,
+                        respect_countdown=False,)
     
     env.userLevel = 2
     # chosen these levels here:
