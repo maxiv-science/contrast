@@ -144,6 +144,11 @@ if __name__=='__main__':
     diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)
     diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)
 
+    # controller 4 in OH2 for fast shutter and first diamondBPM
+    fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)
+    
     # we use ch0 on that controller for the long range sample motor for now
     #samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1)
 
@@ -197,8 +202,15 @@ if __name__=='__main__':
     detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=1, dial_limits=(0, 295))
     dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=1, dial_limits=(0, 31))
 
+    # table motors
+    table_front_x = TangoMotor(device='b303a-e02/dia/tab-01-x1', name='table_front_x', userlevel=5, dial_limits=(-10,10))
+    table_back_x = TangoMotor(device='b303a-e02/dia/tab-01-x2', name='table_back_x', userlevel=5, dial_limits=(-10,10))
+    table_front_y = TangoMotor(device='b303a-e02/dia/tab-01-y1', name='table_front_y', userlevel=5, dial_limits=(-10,10))
+    table_back_y = TangoMotor(device='b303a-e02/dia/tab-01-y2', name='table_back_y', userlevel=5, dial_limits=(-10,10))
+
     # some sardana pseudo motors - these are reimplemented but just need to be configured
-    energy = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy')
+    energy_raw = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy_raw')
+    energy = TangoMotor(device='pseudomotor/nanomaxenergy_corr_ctrl/1', name='energy')
 
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=2)
@@ -210,6 +222,7 @@ if __name__=='__main__':
     # detectors
     pilatus = Pilatus(name='pilatus',
                      hostname='b-nanomax-mobile-ipc-01')
+    #merlin = Merlin(name='merlin', host='b-daq-node-2')
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     andor = Andor3(name='andor', device='staff/clewen/zyla')
@@ -271,13 +284,13 @@ if __name__=='__main__':
         #basey.proxy.PowerOn = True
         #basez.proxy.PowerOn = True
         runCommand('stoplive')
-        #runCommand('fsopen')
-        #time.sleep(1)
+        runCommand('fsopen')
+        time.sleep(0.2)
     def post_scan_stuff(slf):
         #basex.proxy.PowerOn = True
         #basey.proxy.PowerOn = True
         #basez.proxy.PowerOn = True
-        #runCommand('fsclose')
+        runCommand('fsclose')
         pass
 
 
