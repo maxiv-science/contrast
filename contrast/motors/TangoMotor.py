@@ -54,7 +54,12 @@ class TangoMotor(Motor):
 
     def busy(self):
         state = self.proxy.State()
-        if state == PyTango.DevState.ON:
+        if state == PyTango.DevState.MOVING:
+            return True
+        elif hasattr(self.proxy,"StatusReady") and hasattr(self.proxy,"StatusMoving"):
+            if self.proxy.StatusReady == False and self.proxy.StatusMoving == True:
+                return True
+        elif state == PyTango.DevState.ON:
             return False
         elif state == PyTango.DevState.ALARM:
             if hasattr(self.proxy, 'StatusLim-'):
