@@ -11,11 +11,12 @@ register_shortcut('diode1in', 'umv diode1_x 40000')
 register_shortcut('diode1out', 'umv diode1_x 0')
 register_shortcut('diode2in', 'umv diode2_y 30000')
 register_shortcut('diode2out', 'umv diode2_y 0')
-register_shortcut('fsin', 'umv fastshutter_x 25800')
-register_shortcut('fsout', 'umv fastshutter_x 0')
+register_shortcut('fsin', 'umv fastshutter_y -11600')
+register_shortcut('fsout', 'umv fastshutter_y 14000')
 register_shortcut('watten', 'wm attenuator*')
 register_shortcut('wsample', 'wm base* s?')
 register_shortcut('wbl', 'wm ivu_* energy mono_x2per ssa_gap*')
+register_shortcut('wtab', 'wm table*')
 
 @macro
 class FsOpen(object):
@@ -23,11 +24,9 @@ class FsOpen(object):
     Opens the fast shutter.
     """
     def run(self):
-        #fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
+        fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
         try:
-            #fastshutter.write_attribute("Shutter",False)
-            #decive is B303A-EH/CTL/PZCU-04B303A-EH/CTL/PZCU-04
-            runCommand('umv seh_left 1000')
+            fastshutter.write_attribute("Shutter",False)
             print("Fastshutter is now opened")
         except:
             print("Fastshutter could not be opened")
@@ -38,10 +37,9 @@ class FsClose(object):
     Closes the fast shutter.
     """
     def run(self):
-        #fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
+        fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
         try:
-            #fastshutter.write_attribute("Shutter",True)
-            runCommand('umv seh_left -4000')
+            fastshutter.write_attribute("Shutter",True)
             print("Fastshutter is now closed")
         except:
             print("Fastshutter could not be closed")
