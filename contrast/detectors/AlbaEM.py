@@ -261,8 +261,6 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
 
     def stop(self):
         self.em.stop()
-        while self.busy:
-            time.sleep(.01)
 
     def busy(self):
         st = self.em.state()
@@ -275,15 +273,20 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         assert(False), "Should never get here!"
 
     def read(self):
-        if (self.hw_trig and self.hw_trig_n>1) or (self.burst_n > 1):
-            dt, arr = self.em.read(timestamps=True)
-            res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
-            res['ts'] = dt
-        elif self.global_arm:
-            first = self.n_started_since_rearm - 1
-            dt, arr = self.em.read(first=first, number=1, timestamps=True)
-            res = {i+1: arr[0, i] for i in range(NUM_CHAN)}
-            res['ts'] = dt[0]
-        else:
-            assert(False), 'Should never get here!'
-        return res
+        try:
+            if (self.hw_trig and self.hw_trig_n>1) or (self.burst_n > 1):
+                dt, arr = self.em.read(timestamps=True)
+                res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
+                res['ts'] = dt
+            elif self.global_arm:
+                first = self.n_started_since_rearm - 1
+                dt, arr = self.em.read(first=first, number=1, timestamps=True)
+                res = {i+1: arr[0, i] for i in range(NUM_CHAN)}
+                res['ts'] = dt[0]
+            else:
+                assert(False), 'Should never get here!'
+            return res
+        except:
+            print('Problem reading out %s. Was it stopped?' % self.name)
+            return None
+
