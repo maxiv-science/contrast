@@ -5,6 +5,7 @@ a separate file so as not to clutter the main beamline file.
 
 import PyTango
 from contrast.environment import macro, register_shortcut, runCommand
+from contrast.motors import Motor
 
 # some handy shortcuts
 register_shortcut('diode1in', 'umv diode1_x 40000')
@@ -69,4 +70,19 @@ class M2shift(object):
         cmd = 'mvr m2fpitch %f' % (self.dist / -857.0)
         print("Moving the M2 fine pitch piezo like this:\n%s" % cmd)
         runCommand(cmd)
+
+@macro
+class Table(object):
+    """
+    Turn on or off the detector table motors.
+
+    table <on / off>
+    """
+    def __init__(self, arg):
+        self.arg = arg
+    def run(self):
+        for m in Motor.getinstances():
+            if 'table_' in m.name:
+                print('Turning %s %s' % (self.arg, m.name))
+                m.proxy.PowerOn = (self.arg.lower() == 'on')
 
