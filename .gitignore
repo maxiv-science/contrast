@@ -6,3 +6,7 @@ contrast.egg*
 docs/build
 
 .vscode/*
+/beamlines/softimax/.vscode/*
+beamlines/softimax/tests/*
+examples/.ipynb_checkpoints/
+examples/Untitled.ipynb

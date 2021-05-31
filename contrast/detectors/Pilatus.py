@@ -8,6 +8,7 @@ import socket
 import select
 
 BUF_SIZE = 1024
+TIMEOUT = 20
 
 class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
@@ -91,7 +92,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.sock.send(b'camcmd k\0')
         buf = ''
         while 'OK' not in buf:
-            ready = select.select([self.sock], [], [], 3.)
+            ready = select.select([self.sock], [], [], TIMEOUT)
             if ready[0]:
                 buf += self.sock.recv(BUF_SIZE).decode(encoding='ascii')
             else:
@@ -128,7 +129,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def _initialize_socket(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(3)
+            self.sock.settimeout(TIMEOUT)
             self.sock.connect((self.hostname, 8888))
             self._started = False
         except:
@@ -143,19 +144,19 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             raise Exception('Already running!')
         allowed = ('exposure', 'extmtrigger', 'extenable', 'exttrigger')
         assert command in allowed
-        res = self._query('%s %s' % (command, filename), timeout=10)
+        res = self._query('%s %s' % (command, filename), timeout=TIMEOUT)
         if res is None or (not res.startswith('15 OK')) or ('ERR' in res):
             raise Exception('Error starting exposure')
         else:
             self._started = True
 
-    def _query(self, command, timeout=1):
+    def _query(self, command, timeout=TIMEOUT):
         if self.busy():
             print('Detector measuring, better not...')
             return ''
         self._clear_buffer()
         self.sock.send(bytes(command + '\0', encoding='ascii'))
-        ready = select.select([self.sock], [], [], timeout)
+        ready = select.select([self.sock], [], [], TIMEOUT)
         if ready[0]:
             response = self.sock.recv(BUF_SIZE).decode(encoding='ascii')
         else:
@@ -188,14 +189,14 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def energy(self):
-        res = self._query('setenergy', timeout=20)
+        res = self._query('setenergy', timeout=TIMEOUT)
         res = self._parse_response(res, '15 OK Energy setting: (.*) eV')
         energy = float(res) if res else None
         return energy
 
     @energy.setter
-    def energy(self, val):
-        res = self._query('setenergy %f' % value, timeout=20)
+    def energy(self, value):
+        res = self._query('setenergy %f' % value, timeout=TIMEOUT)
         if res is None or not res.startswith('15 OK'):
             raise Exception('Error setting energy')
 

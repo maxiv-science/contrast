@@ -27,6 +27,7 @@ class KukaRobot(object):
         :type names: list, tuple
         """
         self.proxy = PyTango.DeviceProxy(tango_path)
+        self.proxy.set_source(PyTango.DevSource.DEV)
         self.polar_motors = [
             KukaMotor(manager=self, name=names[0]),
             KukaMotor(manager=self, name=names[1]),
@@ -114,9 +115,10 @@ class KukaMotor(Motor):
         :type pos: float
         """
         dial = (pos - self._offset) / self._scaling
+        _lowlim, _uplim = self.dial_limits
         try:
-            assert dial <= self._uplim
-            assert dial >= self._lowlim
+            assert dial <= _uplim
+            assert dial >= _lowlim
         except AssertionError:
             print('Trying to move %s outside its limits!' % self.name)
             return -1
