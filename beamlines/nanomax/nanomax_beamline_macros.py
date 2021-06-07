@@ -8,10 +8,10 @@ from contrast.environment import macro, register_shortcut, runCommand
 from contrast.motors import Motor
 
 # some handy shortcuts
-register_shortcut('diode1in', 'umv diode1_x 40000')
-register_shortcut('diode1out', 'umv diode1_x 0')
-register_shortcut('diode2in', 'umv diode2_y 30000')
-register_shortcut('diode2out', 'umv diode2_y 0')
+register_shortcut('diode1in', 'umv diode1_x 18000')
+register_shortcut('diode1out', 'umv diode1_x -18000')
+register_shortcut('diode2in', 'umv diode2_y 15000')
+register_shortcut('diode2out', 'umv diode2_y -15000')
 register_shortcut('fsin', 'umv fastshutter_y -11600')
 register_shortcut('fsout', 'umv fastshutter_y 14000')
 register_shortcut('watten', 'wm attenuator*')
