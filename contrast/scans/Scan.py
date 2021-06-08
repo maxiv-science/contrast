@@ -148,7 +148,10 @@ class SoftwareScan(object):
                                        status='started',
                                        path=env.paths.directory,
                                        snapshot=snap, 
-                                       description=self._command))
+                                       description=self._command,
+                                       limits=self.limits,
+                                       intervals=self.intervals,
+                                       n_positions=self.n_positions))
         try:
             for i, pos in enumerate(positions):
                 # move motors

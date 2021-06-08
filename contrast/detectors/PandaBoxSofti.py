@@ -222,7 +222,7 @@ class PandaBox0D(PandaBox):
             raise Exception('%s is busy!' % self.name)
 
     def stop(self):
-        pass
+        self.acq_run = False
 
     def read(self):
         return self.get_intensity()
