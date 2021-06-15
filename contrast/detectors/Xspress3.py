@@ -49,7 +49,7 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         self.proxy.nFramesPerTrigger = self.burst_n
         self.proxy.LatencyTime = self.burst_latency
         if self.hw_trig:
-            self.proxy.TriggerMode = 'EXTERNAL'
+            self.proxy.TriggerMode = 'EXTERNAL_MULTI'
         else:
             self.proxy.TriggerMode = 'SOFTWARE'
 
