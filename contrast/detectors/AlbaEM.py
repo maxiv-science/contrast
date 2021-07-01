@@ -22,12 +22,10 @@ class Electrometer(object):
     """
 
     def __init__(self, host='b-nanomax-em2-2', port=5025,
-                 max_data_points=100000, trig_source='DIO_1',
+                 trig_source='DIO_1',
                  target_host=None, target_port=50001):
         self.em = telnetlib.Telnet(host, port)
         self.query('ACQU:MODE CURRENT')
-        # the number of points that the tiny alba RAM can store:
-        self._max_data_points = max_data_points
         # the DIO channel used for triggering:
         self._trig_source = trig_source
         # require SW version 2.0.04, below that soft triggers are broken
@@ -102,7 +100,6 @@ class Electrometer(object):
         Take a series of measurements with internal timing. No
         triggering is possible, the series starts immediately.
         """
-        assert n <= self._max_data_points, ("Can't do more than %u points"%self._max_data_points)
         latency = max(latency, .320e-3)
         acqtime = period - latency
         self.query('ACQU:TIME %f'%(acqtime*1000))
@@ -116,7 +113,6 @@ class Electrometer(object):
         """
         Prepare for hw- or sw-triggered acquisition, n x acqtime.
         """
-        assert n <= self._max_data_points, ("Can't do more than %u points"%self._max_data_points)
         acqtime = acqtime * 1000 # ms
         acqtime = max(acqtime, 0.320)
         self.query('ACQU:TIME %f'%acqtime)
@@ -132,6 +128,10 @@ class Electrometer(object):
 
     @property
     def ndata(self):
+        """
+        NOTE this seems not to work in the latest firmware,
+        ACQU:NDAT? increments before the integration time is over.
+        """
         return int(self.query('ACQU:NDAT?'))
 
     @property
@@ -195,7 +195,6 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         self.em = Electrometer(**self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
-        self.n_started_since_rearm = 0
 
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
@@ -207,22 +206,12 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         assert not (self.hw_trig and (self.burst_n > 1)), msg
         if self.global_arm:
             self.armed_so_far = 0
-            self.rearm()
+            self.em.arm(self.acqtime, self.n_starts, self.hw_trig)
 
     @property
     def global_arm(self):
-        # This checks whether to arm the EM for several SW starts, which also
-        # implies continually rearming every self.em._max_data_points steps,
-        # to work around the tiny buffer of the thing.
+        # This checks whether to arm the EM for several SW starts.
         return (self.hw_trig and self.hw_trig_n==1) or (not self.hw_trig and self.burst_n==1)
-
-    def rearm(self):
-        # Workaround allowing longer triggered scans than the tiny EM buffer allows.
-        triggers_left = self.n_starts - self.n_started
-        this_batch = min(triggers_left, self.em._max_data_points)
-        self.em.arm(self.acqtime, this_batch, self.hw_trig)
-        self.n_started_since_rearm = 0
-        self.armed_so_far += this_batch
 
     def start_live(self, acqtime=1.0):
         # The Alba EM:s are always in live mode, exposing the "instant current" values.
@@ -235,12 +224,9 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     def arm(self):
         if (self.hw_trig and self.hw_trig_n>1):
             self.em.arm(self.acqtime, self.hw_trig_n, True)
-        if self.global_arm and (self.n_started == self.armed_so_far):
-            self.rearm()
 
     def start(self):
         self.n_started += 1
-        self.n_started_since_rearm += 1
         if self.hw_trig:
             return
         elif self.burst_n > 1:
@@ -261,7 +247,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if (self.hw_trig and self.hw_trig_n>1) or (self.burst_n > 1):
             return st in BUSY_STATES
         elif self.global_arm:
-            return (self.em.ndata < self.n_started_since_rearm)
+            return (self.em.ndata < self.n_started)
         assert(False), "Should never get here!"
 
     def read(self):
