@@ -7,6 +7,7 @@ from .Detector import Detector, LiveDetector, TriggeredDetector, BurstDetector
 import telnetlib
 import numpy as np
 import time
+import socket
 
 NUM_CHAN = 4
 TIMEOUT = None
@@ -21,7 +22,8 @@ class Electrometer(object):
     """
 
     def __init__(self, host='b-nanomax-em2-2', port=5025,
-                 max_data_points=1000, trig_source='DIO_1'):
+                 max_data_points=100000, trig_source='DIO_1',
+                 target_host=None, target_port=50001):
         self.em = telnetlib.Telnet(host, port)
         self.query('ACQU:MODE CURRENT')
         # the number of points that the tiny alba RAM can store:
@@ -31,6 +33,10 @@ class Electrometer(object):
         # require SW version 2.0.04, below that soft triggers are broken
         # and below 2.0.0 data indexing is wrong.
         assert self.version >= (2, 0, 4), "Requires on-board SW version 2.0.04 or higher."
+        if not target_host:
+            target_host = socket.gethostbyname(socket.gethostname())
+        self.target_host = target_host
+        self.target_port = target_port
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -103,7 +109,8 @@ class Electrometer(object):
         self.query('ACQU:LOWT %f'%(latency*1000))
         self.query('TRIG:MODE AUTOTRIGGER')
         self.query('ACQU:NTRI %u'%n)
-        self.query('ACQU:STAR True')
+        self.query('ACQU:MODE fast_buffer')
+        self.query('ACQU:STAR %s %u'%(self.target_host, self.target_port))
 
     def arm(self, acqtime=1., n=1, hw=False):
         """
@@ -117,7 +124,8 @@ class Electrometer(object):
         self.query('TRIG:INPU %s'%self._trig_source)
         self.query('TRIG:DELA 0.0') # no delay
         self.query('ACQU:NTRI %u'%n)
-        self.query('ACQU:STAR True')
+        self.query('ACQU:MODE fast_buffer')
+        self.query('ACQU:STAR %s %u'%(self.target_host, self.target_port))
 
     def soft_trigger(self):
         self.query('TRIG:SWSE True')
@@ -139,26 +147,8 @@ class Electrometer(object):
         Getting the timestamps is optional, because it means masses of
         extra ascii data transfer from the alba.
         """
-        self.query('TMST %d' % int(timestamps))
-        args = ''
-        # read everything or juts some values?
-        if first is not None:
-            args = ' %d' % first
-            if number is not None:
-                args += ',%d' % number
-        # go
-        res = eval(self.query('ACQU:MEAS?%s' % args))
-        N = len(res[0][1])
-        arr = np.empty(shape=(N, NUM_CHAN), dtype=np.float)
-        if timestamps:
-            dt = np.array(res[1][1])[:,0]
-            for ch in range(NUM_CHAN):
-                arr[:, ch] = np.array(res[ch][1])[:,1]
-            return dt, arr
-        else:
-            for ch in range(NUM_CHAN):
-                arr[:, ch] = np.array(res[ch][1])
-            return arr
+        pass
+        # We are going to implement stream receiving here.
 
     def test_soft_triggers(self):
         """
@@ -275,15 +265,5 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         assert(False), "Should never get here!"
 
     def read(self):
-        if (self.hw_trig and self.hw_trig_n>1) or (self.burst_n > 1):
-            dt, arr = self.em.read(timestamps=True)
-            res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
-            res['ts'] = dt
-        elif self.global_arm:
-            first = self.n_started_since_rearm - 1
-            dt, arr = self.em.read(first=first, number=1, timestamps=True)
-            res = {i+1: arr[0, i] for i in range(NUM_CHAN)}
-            res['ts'] = dt[0]
-        else:
-            assert(False), 'Should never get here!'
-        return res
+        pass
+        # will be handled with streaming
