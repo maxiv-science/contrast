@@ -7,8 +7,9 @@ from .Detector import Detector, LiveDetector, TriggeredDetector, BurstDetector
 import telnetlib
 import numpy as np
 import time
-import socket
+import socket, select
 
+BUF_SIZE = 1024
 NUM_CHAN = 4
 TIMEOUT = None
 VALID_RANGE_STRINGS = ['1mA', '100nA', '10nA', '1nA', '100uA', '10uA', '1uA', '100pA']
@@ -253,3 +254,23 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     def read(self):
         pass
         # will be handled with streaming
+
+
+class Stream(object):
+    def __init__(self, port):
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind((socket.gethostname(), port))
+        self.server.listen(1)
+
+    def _start(self):
+        while True:
+            client, address = self.server.accept()
+            print('client connected: ', address)
+            data = b''
+            while True:
+                new = client.recv(BUF_SIZE)
+                data += new
+                if new == b'':
+                    print('client disconnected')
+                    print(data)
+                    break
