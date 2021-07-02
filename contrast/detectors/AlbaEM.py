@@ -287,8 +287,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
 
 class Stream(Thread):
     """
-    Disposable helper which receives the electrometer's "fast
-    buffer" stream.
+    Server which receives the electrometer's "fast buffer" stream.
     """
     def __init__(self, port, debug=False):
         super().__init__()
