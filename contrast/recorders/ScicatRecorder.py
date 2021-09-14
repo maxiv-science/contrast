@@ -16,15 +16,15 @@ class ScicatRecorder(Recorder):
         self.entry = SciFish()
         self.entry.start_scan()
         self.entry.scicat_data.datasetName = dct['scannr']
-        self.entry.scicat_data.scanID = dct['scannr']
-        self.entry.scicat_data.title = dct['description']
         #self.entry.scicat_data.sampleId = ""
         #self.entry.scicat_data.dataFormat = ""
         #self.entry.scicat_data.files = []
         #self.entry.scicat_data.sourceFolder = "" # default from sdm
         #self.entry.scicat_data.description = ""
+        self.entry.environment_data.title = dct['description']
+        self.entry.environment_data.scanID = dct['scannr']
         det_group = Detector.get_active()
-        self.entry.scicat_data.detectors = sorted([d.name for d in det_group])
+        self.entry.environment_data.detectors = sorted([d.name for d in det_group])
 
     def act_on_data(self, dct):
         """
