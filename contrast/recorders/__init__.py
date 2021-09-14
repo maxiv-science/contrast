@@ -19,6 +19,11 @@ try:
 except ImportError:
     print("Note: StreamRecorder not available, probably because zmq is missing.")
 
+try:
+    from .ScicatRecorder import ScicatRecorder
+except ImportError:
+    print("Note: ScicatRecorder not available, probably because the MAX IV helper library scifish is missing.")
+
 import os, signal
 def kill_all_recorders():
     for r in Recorder.getinstances():
