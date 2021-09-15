@@ -1,6 +1,7 @@
 from . import Recorder
 from scifish import SciFish
 from ..detectors import Detector
+from ..utils import str_to_args
 
 class ScicatRecorder(Recorder):
     """
@@ -14,6 +15,7 @@ class ScicatRecorder(Recorder):
         """
         Give SciCat all the info for this scan. Enters the whole snapshot.
         """
+        # standard fields
         self.entry = SciFish()
         self.entry.start_scan()
         self.entry.scicat_data.datasetName = dct['scannr']
@@ -25,7 +27,13 @@ class ScicatRecorder(Recorder):
         self.entry.environment_data.title = dct['description']
         self.entry.environment_data.scanID = dct['scannr']
 
+        # the scientificMetadata field can be whatever, add the snapshot
         self.entry.scicat_data.scientificMetadata.update(dct['snapshot'])
+
+        # also parse the command and use any keywords, we can use those
+        # for general tagging (eg ptycho=True)
+        args, kwargs = str_to_args(dct['description'])
+        self.entry.scicat_data.scientificMetadata.update(kwargs)
 
         self.posted_detectors = False
 
