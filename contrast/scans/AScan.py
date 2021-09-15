@@ -12,7 +12,7 @@ class AScan(SoftwareScan):
         ascan <motor1> <start> <stop> ... <intervals> <exp_time>
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.motors = []
         self.limits = []
         try:
