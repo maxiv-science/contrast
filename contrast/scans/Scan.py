@@ -27,6 +27,7 @@ class SoftwareScan(object):
         :param exposuretime: Exposure time to pass on to detectors etc.
         :type exposuretime: float
         """
+        self._command = None # updated if run via macro
         self.motors = []   # list of motors, to be filled by subclass
         self.exposuretime = exposuretime
         self.scannr = env.nextScanID
