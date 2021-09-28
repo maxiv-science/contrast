@@ -35,6 +35,9 @@ class ScicatRecorder(Recorder):
         args, kwargs = str_to_args(dct['description'])
         self.entry.scicat_data.scientificMetadata.update(kwargs)
 
+        # send start, so the entry becomes visible in scanlog
+        self.entry.send_start()
+
         self.posted_detectors = False
 
     def act_on_data(self, dct):
