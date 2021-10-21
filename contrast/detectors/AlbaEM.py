@@ -2,10 +2,13 @@
 This module contains an interface to the Alba electrometer, as well as
 a contrast Detector class representing it.
 
-Works with the so-called fastbuffer mode of the electrometer, developed
-(and not yet formally delivered) by the MAX IV hardware group in 2021 as
-described here,
+Requires the so-called fastbuffer mode of the electrometer, with data
+streaming, developed (but not yet formally delivered) by the MAX IV
+hardware group in 2021 as described here,
+
 https://gitlab.maxiv.lu.se/kits-maxiv/lib-cells-albaem2/-/tree/streaming-no-zeromq/nuc_SW/alin/extra.
+
+For the old school data-polling version, see LegacyAlbaEM.py.
 """
 
 if __name__ == '__main__':
