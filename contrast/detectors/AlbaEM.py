@@ -21,7 +21,6 @@ import time
 import socket, select
 from threading import Thread
 
-SOFT_TRIG_HACK = 0.10
 BUF_SIZE = 1024
 NUM_CHAN = 4
 TIMEOUT = None
@@ -96,8 +95,6 @@ class Electrometer(object):
                 print('trying again with port %u' % stream_port)
         self.stream_host = stream_host
         self.stream_port = stream_port
-        # Handle an annoying bug in soft triggering:
-        self.last_soft_trig = time.time()
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -192,14 +189,15 @@ class Electrometer(object):
         self.query('ACQU:STAR %s %u'%(self.stream_host, self.stream_port))
 
     def soft_trigger(self):
-        # This limits soft triggers to 10 Hz, to work around a bug in
-        # the FAST_BUFFER mode, wherein the EM is blind to soft triggers
-        # for a while. Hopefully the bug will be removed.
-        time_passed = time.time() - self.last_soft_trig
-        if time_passed < SOFT_TRIG_HACK:
-            time.sleep(SOFT_TRIG_HACK - time_passed)
-        self.last_soft_trig = time.time()
+        old = int(self.query('ACQU:NDAT?'))
         ret = self.query('TRIG:SWSE True')
+        # there's a problem with missing soft triggers in fast buffer
+        # mode, but this seems to do it. NDAT cannot be used to check
+        # if an acquisition is ready, but waiting for the number to
+        # go up seems to ensure that the device will not miss any more
+        # commands.
+        while int(self.query('ACQU:NDAT?')) == old:
+            time.sleep(.001)
         assert ret == 'ACK'
 
     @property
@@ -227,11 +225,13 @@ class Electrometer(object):
             print('starting loop #%u'%(i+1))
             n = self.ndata
             while n < i:
-                print('   only have %u, trying again'%n)
+                print('   only have %u, trying again'%(n,))
                 time.sleep(.01)
                 n = self.ndata
             print('   have %u, issuing trigger #%u'%(n, i+1))
+            t0 = time.time()
             self.soft_trigger()
+            print('soft trigger took %.1f ms' % ((time.time()-t0)*1000))
 
 
 class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
