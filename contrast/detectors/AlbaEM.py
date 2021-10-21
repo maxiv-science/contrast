@@ -18,6 +18,7 @@ import time
 import socket, select
 from threading import Thread
 
+SOFT_TRIG_HACK = 0.050
 BUF_SIZE = 1024
 NUM_CHAN = 4
 TIMEOUT = None
@@ -191,8 +192,8 @@ class Electrometer(object):
         # this check handles a bug in the FAST_BUFFER mode, wherein
         # the EM is blind to soft triggers for a while. Hopefully
         # have it fixed and remove this.
-        if time.time() - self.last_soft_trig < 0.020:
-            time.sleep(0.020)
+        if time.time() - self.last_soft_trig < SOFT_TRIG_HACK:
+            time.sleep(SOFT_TRIG_HACK)
         self.last_soft_trig = time.time()
         ret = self.query('TRIG:SWSE True')
         assert ret == 'ACK'
@@ -211,14 +212,14 @@ class Electrometer(object):
         version = res.split(',')[-1].strip()
         return tuple(map(int, version.split('.')))
 
-    def test_soft_triggers(self):
+    def test_soft_triggers(self, N=1000):
         """
         The soft triggering wasn't reliable up until SW version 2.0.0,
         and seems to have started working from 2.0.04. This procedure
         typically halted after a few 100 points.
         """
-        self.arm(n=1000, acqtime=.001)
-        for i in range(1000):
+        self.arm(n=N, acqtime=.001)
+        for i in range(N):
             print('starting loop #%u'%(i+1))
             n = self.ndata
             while n < i:
