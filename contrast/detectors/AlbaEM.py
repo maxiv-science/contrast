@@ -313,7 +313,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if self.global_arm:
             # case 1 or 4, which means read a single point each time
             data = np.array(self.em.stream.data[-1])
-            data[1:] = data[1:] * 1e6 # Amps
+            data[1:] = data[1:] * 1e-6 # Amps
             return {k:v for k,v in zip(keys, data)}
         else:
             # case 2 or 3, return the last burst_n or hw_trig_n points
@@ -321,7 +321,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
             assert (len(self.em.stream.data) == chunk * self.n_started), 'wrong number of points received'
             ret = {}
             data = np.array(self.em.stream.data[-chunk:])
-            data[:, 1:] = data[:, 1:] * 1e6 # Amps
+            data[:, 1:] = data[:, 1:] * 1e-6 # Amps
             for i in range(len(keys)):
                 ret[keys[i]] = data[:, i].reshape((1,-1))
             return ret
