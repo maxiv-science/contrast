@@ -186,7 +186,8 @@ class Electrometer(object):
         self.query('ACQU:STAR %s %u'%(self.stream_host, self.stream_port))
 
     def soft_trigger(self):
-        self.query('TRIG:SWSE True')
+        ret = self.query('TRIG:SWSE True')
+        assert ret == 'ACK'
 
     @property
     def ndata(self):
