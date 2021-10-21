@@ -18,7 +18,7 @@ import time
 import socket, select
 from threading import Thread
 
-SOFT_TRIG_HACK = 0.050
+SOFT_TRIG_HACK = 0.10
 BUF_SIZE = 1024
 NUM_CHAN = 4
 TIMEOUT = None
@@ -189,11 +189,12 @@ class Electrometer(object):
         self.query('ACQU:STAR %s %u'%(self.stream_host, self.stream_port))
 
     def soft_trigger(self):
-        # this check handles a bug in the FAST_BUFFER mode, wherein
-        # the EM is blind to soft triggers for a while. Hopefully
-        # have it fixed and remove this.
-        if time.time() - self.last_soft_trig < SOFT_TRIG_HACK:
-            time.sleep(SOFT_TRIG_HACK)
+        # This limits soft triggers to 10 Hz, to work around a bug in
+        # the FAST_BUFFER mode, wherein the EM is blind to soft triggers
+        # for a while. Hopefully the bug will be removed.
+        time_passed = time.time() - self.last_soft_trig
+        if time_passed < SOFT_TRIG_HACK:
+            time.sleep(SOFT_TRIG_HACK - time_passed)
         self.last_soft_trig = time.time()
         ret = self.query('TRIG:SWSE True')
         assert ret == 'ACK'
