@@ -11,7 +11,7 @@ if __name__=='__main__':
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
     from contrast.environment.scheduling import MaxivScheduler
-    from contrast.recorders import Hdf5Recorder, StreamRecorder
+    from contrast.recorders import Hdf5Recorder, StreamRecorder, ScicatRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
     from contrast.detectors.LC400Buffer import LC400Buffer
@@ -268,7 +268,9 @@ if __name__=='__main__':
     zmqrec = StreamRecorder(name='zmqrec')
     zmqrec.start() # removed for now
 
-
+    # a scicat recorder
+    scicatrec = ScicatRecorder(name='scicatrec')
+    scicatrec.start()
 
     # default detector selection
     for d in Detector.getinstances():

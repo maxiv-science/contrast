@@ -14,7 +14,7 @@ class SpiralScan(DScan):
         spiralscan <motor1> <motor2> <stepsize> <positions> <exp_time>
     """
 
-    def __init__(self, m1, m2, stepsize, npos, exptime):
+    def __init__(self, m1, m2, stepsize, npos, exptime, **kwargs):
         # Parse arguments. We're inheriting DScan to get its nice run()
         # method, but we'll call the SoftwareScan constructor anyway bacause
         # we're not interested in DScan's way of parsing arguments.

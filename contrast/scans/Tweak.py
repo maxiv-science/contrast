@@ -36,7 +36,7 @@ class Tweak(Mesh):
         tweak <motor1> <stepsize1> [<motor2> <stepsize2>] <exp_time>
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)
