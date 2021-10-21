@@ -84,13 +84,17 @@ class MaxivScheduler(DummyScheduler):
     number of potentially slow shutter devices on a different control system.
     """
     def __init__(self, shutter_list, avoid_injections=True, respect_countdown=True):
-        self.shutter_checker = TangoShutterChecker(*shutter_list)
-        self.shutter_checker.start()
-        self.injection_device = tango.DeviceProxy('g-v-csproxy-0:10000/R3-319S2/DIA/DCCT-01')
-        self.countdown_device = tango.DeviceProxy('g-v-csproxy-0:10000/g/ctl/machinestatus')
-        self.disabled = False
-        self.avoid_injections = avoid_injections
-        self.respect_countdown = respect_countdown
+        try:
+            self.shutter_checker = TangoShutterChecker(*shutter_list)
+            self.shutter_checker.start()
+            self.injection_device = tango.DeviceProxy('g-v-csproxy-0:10000/R3-319S2/DIA/DCCT-01')
+            self.countdown_device = tango.DeviceProxy('g-v-csproxy-0:10000/g/ctl/machinestatus')
+            self.disabled = False
+            self.avoid_injections = avoid_injections
+            self.respect_countdown = respect_countdown
+        except Exception as e:
+            print('Failed to initialize scheduler:')
+            print(e)
 
     def _ready(self):
         if self.disabled:

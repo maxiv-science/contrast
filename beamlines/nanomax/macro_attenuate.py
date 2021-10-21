@@ -12,7 +12,7 @@ from contrast.environment import env, macro, register_shortcut, runCommand
 #       - way of printing the closest possible absorption values
 
 @macro
-class attenuate(object):
+class Attenuate(object):
     """
     Sets the attenuators to absorb X percent of the beam depending 
     on the current photon beam enegery.
