@@ -292,7 +292,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
 
     def stop(self):
         self.em.stop()
-        while self.busy:
+        while self.busy():
             time.sleep(.01)
 
     def busy(self):
