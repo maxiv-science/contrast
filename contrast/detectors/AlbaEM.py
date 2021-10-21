@@ -92,6 +92,8 @@ class Electrometer(object):
                 print('trying again with port %u' % stream_port)
         self.stream_host = stream_host
         self.stream_port = stream_port
+        # Handle an annoying bug in soft triggering:
+        self.last_soft_trig = time.time()
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -186,6 +188,12 @@ class Electrometer(object):
         self.query('ACQU:STAR %s %u'%(self.stream_host, self.stream_port))
 
     def soft_trigger(self):
+        # this check handles a bug in the FAST_BUFFER mode, wherein
+        # the EM is blind to soft triggers for a while. Hopefully
+        # have it fixed and remove this.
+        if time.time() - self.last_soft_trig < 0.020:
+            time.sleep(0.020)
+        self.last_soft_trig = time.time()
         ret = self.query('TRIG:SWSE True')
         assert ret == 'ACK'
 
