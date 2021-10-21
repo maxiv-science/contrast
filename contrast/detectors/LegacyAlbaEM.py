@@ -302,4 +302,4 @@ if __name__ == '__main__':
     while em.ndata < 1000:
         print('Now have %u points' % em.ndata)
         time.sleep(.1)
-    em.read(timestamps=True):
+    data = em.read(timestamps=True)
