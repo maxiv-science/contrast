@@ -228,7 +228,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     causes a different triggering and readout behaviour below:
 
     1) HW triggered expecting one trigger per SW step -> arm at the top
-    2) HW triggered expecting hw_trig_n triggers per step -> arm on every sw step
+    2) HW triggered expecting hw_trig_n triggers per SW step -> arm on every sw step
     3) Burst mode, burst_n > 1, uses a special EM command
     4) Software triggered mode, -> arm at the top
 
@@ -318,9 +318,9 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         else:
             # case 2 or 3, return the last burst_n or hw_trig_n points
             chunk = self.hw_trig_n if self.hw_trig else self.burst_n
-            assert (len(self.em.stream.data) == chunk * self.n_started), 'wrong number of points received'
+            assert (len(self.em.stream.data) == chunk), 'wrong number of points received'
             ret = {}
-            data = np.array(self.em.stream.data[-chunk:])
+            data = np.array(self.em.stream.data)
             data[:, 1:] = data[:, 1:] * 1e-6 # Amps
             for i in range(len(keys)):
                 ret[keys[i]] = data[:, i].reshape((1,-1))
