@@ -22,7 +22,7 @@ VALID_FILTER_STRINGS = ['3200Hz', '100Hz', '10Hz', '1Hz', '0.5Hz']
 BUSY_STATES = ('STATE_RUNNING', 'STATE_ACQUIRING')
 IDLE_STATES = ('STATE_ON', )
 
-class Electrometer(object):
+class LegacyElectrometer(object):
     """
     Interface to a 4-channel Alba electrometer.
     """
@@ -185,7 +185,7 @@ class Electrometer(object):
             self.soft_trigger()
 
 
-class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
+class LegacyAlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     """
     Contrast interface to the alba EM.
 
@@ -209,7 +209,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         BurstDetector.__init__(self)
 
     def initialize(self):
-        self.em = Electrometer(**self.kwargs)
+        self.em = LegacyElectrometer(**self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
         self.n_started_since_rearm = 0
@@ -296,8 +296,8 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         return res
 
 if __name__ == '__main__':
-    # Example usage of the bare Electrometer class.
-    em = Electrometer(host='b-nanomax-em2-0')
+    # Example usage of the bare LegacyElectrometer class.
+    em = LegacyElectrometer(host='b-nanomax-em2-0')
     em.burst(period=.001, n=1000) # 1 second, 1 kHz
     while em.ndata < 1000:
         print('Now have %u points' % em.ndata)
