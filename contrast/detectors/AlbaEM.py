@@ -1,9 +1,17 @@
 """
 This module contains an interface to the Alba electrometer, as well as
 a contrast Detector class representing it.
+
+Works with the so-called fastbuffer mode of the electrometer, developed
+(and not yet formally delivered) by the MAX IV hardware group in 2021 as
+described here,
+https://gitlab.maxiv.lu.se/kits-maxiv/lib-cells-albaem2/-/tree/streaming-no-zeromq/nuc_SW/alin/extra.
 """
 
-from .Detector import Detector, LiveDetector, TriggeredDetector, BurstDetector
+if __name__ == '__main__':
+    from contrast.detectors import Detector, LiveDetector, TriggeredDetector, BurstDetector
+else:
+    from .Detector import Detector, LiveDetector, TriggeredDetector, BurstDetector
 import telnetlib
 import numpy as np
 import time
@@ -19,6 +27,42 @@ BUSY_STATES = ('STATE_RUNNING', 'STATE_ACQUIRING')
 IDLE_STATES = ('STATE_ON', )
 
 
+class Stream(Thread):
+    """
+    Server which receives the electrometer's "fast buffer" stream.
+    """
+    def __init__(self, port, debug=False):
+        super().__init__()
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind((socket.gethostname(), port))
+        self.server.listen(1)
+        self.data = []
+        self.do_debug = debug
+
+    def debug(self, *args):
+        if self.do_debug:
+            print(*args)
+
+    def run(self):
+        while True:
+            client, address = self.server.accept()
+            self.debug('client connected')
+            data = b''
+            while True:
+                self.debug('server looping')
+                new = client.recv(BUF_SIZE)
+                if new == b'':
+                    self.debug('client disconnected')
+                    break
+                self.debug('received:', new)
+                data += new
+                parts = data.split(b'\n')
+                data = parts[-1] # empty if terminated with \n, otherwise dangling data
+                for part in parts[:-1]:
+                    self.data.append(list(map(float, part.split(b',')))[1:])
+                    self.debug('now have %u data points' % len(self.data))
+
+
 class Electrometer(object):
     """
     Interface to a 4-channel Alba electrometer.
@@ -26,7 +70,7 @@ class Electrometer(object):
 
     def __init__(self, host='b-nanomax-em2-2', port=5025,
                  trig_source='DIO_1',
-                 target_host=None, target_port=50001):
+                 stream_host=None, stream_port=50001):
         self.em = telnetlib.Telnet(host, port)
         self.query('ACQU:MODE CURRENT')
         # the DIO channel used for triggering:
@@ -34,10 +78,20 @@ class Electrometer(object):
         # require SW version 2.0.04, below that soft triggers are broken
         # and below 2.0.0 data indexing is wrong.
         assert self.version >= (2, 0, 4), "Requires on-board SW version 2.0.04 or higher."
-        if not target_host:
-            target_host = socket.gethostbyname(socket.gethostname())
-        self.target_host = target_host
-        self.target_port = target_port
+        # Figure out host and port for the stream receiving server:
+        if not stream_host:
+            stream_host = socket.gethostbyname(socket.gethostname())
+        ok = False
+        while not ok:
+            try:
+                self.stream = Stream(port=stream_port, debug=False)
+                self.stream.start()
+                ok = True
+            except OSError:
+                stream_port += 1
+                print('trying again with port %u' % stream_port)
+        self.stream_host = stream_host
+        self.stream_port = stream_port
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -83,13 +137,6 @@ class Electrometer(object):
             return
         self.query('CHAN%02u:CABO:FILT %s'%(ch, val))
 
-    def get_ti_gain(self, ch):
-        lookup = {'10K':10000, '1M':1000000, '100M':100000000, '1G':1000000000, '10G':10000000000}
-        return lookup[self.query('CHAN%02u:CABO:TIGA?'%ch).upper()]
-
-    def get_v_gain(self, ch):
-        return int(self.query('CHAN%02u:CABO:VGAI?'%ch))
-
     def state(self):
         st = self.query('ACQU:STAT?')
         return st
@@ -115,12 +162,13 @@ class Electrometer(object):
         """
         latency = max(latency, .320e-3)
         acqtime = period - latency
+        self.stream.data.clear()
         self.query('ACQU:TIME %f'%(acqtime*1000))
         self.query('ACQU:LOWT %f'%(latency*1000))
         self.query('TRIG:MODE AUTOTRIGGER')
         self.query('ACQU:NTRI %u'%n)
         self.query('ACQU:MODE fast_buffer')
-        self.query('ACQU:STAR %s %u'%(self.target_host, self.target_port))
+        self.query('ACQU:STAR %s %u'%(self.stream_host, self.stream_port))
 
     def arm(self, acqtime=1., n=1, hw=False):
         """
@@ -128,13 +176,14 @@ class Electrometer(object):
         """
         acqtime = acqtime * 1000 # ms
         acqtime = max(acqtime, 0.320)
+        self.stream.data.clear()
         self.query('ACQU:TIME %f'%acqtime)
         self.query('TRIG:MODE %s' % ('HARDWARE' if hw else 'SOFTWARE'))
         self.query('TRIG:INPU %s'%self._trig_source)
         self.query('TRIG:DELA 0.0') # no delay
         self.query('ACQU:NTRI %u'%n)
         self.query('ACQU:MODE fast_buffer')
-        self.query('ACQU:STAR %s %u'%(self.target_host, self.target_port))
+        self.query('ACQU:STAR %s %u'%(self.stream_host, self.stream_port))
 
     def soft_trigger(self):
         self.query('TRIG:SWSE True')
@@ -142,11 +191,10 @@ class Electrometer(object):
     @property
     def ndata(self):
         """
-        NOTE this seems not to work in the latest firmware,
-        ACQU:NDAT? increments before the integration time is over.
+        ACQU:NDAT? increments before the integration time is over, so
+        cannot be used. Look at the stream instead.
         """
-        #return int(self.query('ACQU:NDAT?'))
-        raise NotImplementedError
+        return len(self.stream.data)
 
     @property
     def version(self):
@@ -197,16 +245,13 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         BurstDetector.__init__(self)
 
     def initialize(self):
-        self.em = Electrometer(target_port=50013, **self.kwargs)
+        self.em = Electrometer(stream_port=50013, **self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
-        self.stream = Stream(50013, debug=self.do_debug)
-        self.stream.start()
         self.channels = [ch+1 for ch in range(NUM_CHAN)]
 
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
-        self.stream.data.clear()
         self.n_started = 0
         self.n_starts = n_starts
         if self.busy():
@@ -256,66 +301,36 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
             return False
         if self.global_arm:
             # case 1 or 4 (above): expect one point per start on the stream
-            return (len(self.stream.data) < self.n_started)
+            return (self.em.ndata < self.n_started)
         else:
             # case 2 or 3 (see above): require an idle status
             return st in BUSY_STATES
         assert(False), "Should never get here!"
 
     def read(self):
-        # NOTE: current conversion doesn't work properly yet, need
-        #       the correct equation from KITS HW.
         chs = self.channels
         keys = ['t',] + self.channels
-        ti_gains = np.array([self.em.get_ti_gain(ch) for ch in chs])
-        v_gains = np.array([self.em.get_v_gain(ch) for ch in chs])
         if self.global_arm:
             # case 1 or 4, which means read a single point each time
-            data = np.array(self.stream.data[-1])
-            data[1:] = data[1:] / ti_gains / v_gains / (self.acqtime / 40e-9) * 1e-3 # A
+            data = np.array(self.em.stream.data[-1])
+            data[1:] = data[1:] * 1e6 # Amps
             return {k:v for k,v in zip(keys, data)}
         else:
             # case 2 or 3, return the last burst_n or hw_trig_n points
             chunk = self.hw_trig_n if self.hw_trig else self.burst_n
-            assert (len(self.stream.data) == chunk * self.n_started), 'wrong number of points received'
+            assert (len(self.em.stream.data) == chunk * self.n_started), 'wrong number of points received'
             ret = {}
-            data = np.array(self.stream.data[-chunk:])
-            data[:, 1:] = data[:, 1:] / ti_gains / v_gains / (self.acqtime / 40e-9) * 1e-3 # A
+            data = np.array(self.em.stream.data[-chunk:])
+            data[:, 1:] = data[:, 1:] * 1e6 # Amps
             for i in range(len(keys)):
                 ret[keys[i]] = data[:, i].reshape((1,-1))
             return ret
 
-class Stream(Thread):
-    """
-    Server which receives the electrometer's "fast buffer" stream.
-    """
-    def __init__(self, port, debug=False):
-        super().__init__()
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind((socket.gethostname(), port))
-        self.server.listen(1)
-        self.data = []
-        self.do_debug = debug
 
-    def debug(self, *args):
-        if self.do_debug:
-            print(*args)
-
-    def run(self):
-        while True:
-            client, address = self.server.accept()
-            self.debug('client connected')
-            data = b''
-            while True:
-                self.debug('server looping')
-                new = client.recv(BUF_SIZE)
-                if new == b'':
-                    self.debug('client disconnected')
-                    break
-                self.debug('received:', new)
-                data += new
-                parts = data.split(b'\n')
-                data = parts[-1] # empty if terminated with \n, otherwise dangling data
-                for part in parts[:-1]:
-                    self.data.append(list(map(float, part.split(b',')))[1:])
-                    self.debug('now have %u data points' % len(self.data))
+if __name__ == '__main__':
+    # Example usage of the bare Electrometer class. Currents in uA.
+    em = Electrometer(host='b-nanomax-em2-0')
+    em.burst(period=.001, n=60000) # 1 minute, 1 kHz
+    while em.ndata < 60000:
+        print('Now have %u points' % len(em.stream.data))
+        time.sleep(.1)
