@@ -22,7 +22,7 @@ register_shortcut('wtab', 'wm table*')
 
 def fastshutter_action(state, name):
     """
-    Open (state=True) or close (state=False) the fast shutter,
+    Open (state=False) or close (state=True) the fast shutter,
     by setting BITS.outb high or low on the panda box with
     the give name.
     """
@@ -32,9 +32,10 @@ def fastshutter_action(state, name):
         raise Exception('No Gadget named %s'%name)
     response = panda.query('BITS.B=%u' % (int(state)))
     if 'OK' in response:
-        print('Fastshutter opened')
+        act = {False: 'opened', True: 'closed'}[state]
+        print('Fastshutter %s'%act)
     else:
-        print('Fastshutter closed')
+        print('Could not actuate the shutter')
 
 @macro
 class FsOpen(object):
@@ -42,7 +43,7 @@ class FsOpen(object):
     Opens the fast shutter.
     """
     def run(self):
-        fastshutter_action(True, 'panda0')
+        fastshutter_action(False, 'panda0')
 
 @macro
 class FsClose(object):
@@ -50,7 +51,7 @@ class FsClose(object):
     Closes the fast shutter.
     """
     def run(self):
-        fastshutter_action(False, 'panda0')
+        fastshutter_action(True, 'panda0')
 
 @macro
 class M1shift(object):
