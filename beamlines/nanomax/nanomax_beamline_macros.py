@@ -6,6 +6,7 @@ a separate file so as not to clutter the main beamline file.
 import PyTango
 from contrast.environment import macro, register_shortcut, runCommand
 from contrast.motors import Motor
+from contrast.detectors import Detector
 
 # some handy shortcuts
 register_shortcut('diode1in', 'umv diode1_x 18000')
@@ -19,18 +20,29 @@ register_shortcut('wsample', 'wm base* s?')
 register_shortcut('wbl', 'wm ivu_* energy mono_x2per ssa_gap*')
 register_shortcut('wtab', 'wm table*')
 
+def fastshutter_action(state, name):
+    """
+    Open (state=True) or close (state=False) the fast shutter,
+    by setting BITS.outb high or low on the panda box with
+    the give name.
+    """
+    try:
+        panda = [m for m in Detector.getinstances() if m.name == name][0]
+    except IndexError:
+        raise Exception('No Gadget named %s'%name)
+    response = panda.query('BITS.B=%u' % (int(state)))
+    if 'OK' in response:
+        print('Fastshutter opened')
+    else:
+        print('Fastshutter closed')
+
 @macro
 class FsOpen(object):
     """
     Opens the fast shutter.
     """
     def run(self):
-        fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
-        try:
-            fastshutter.write_attribute("Shutter",False)
-            print("Fastshutter is now opened")
-        except:
-            print("Fastshutter could not be opened")
+        fastshutter_action(True, 'panda0')
 
 @macro
 class FsClose(object):
@@ -38,12 +50,7 @@ class FsClose(object):
     Closes the fast shutter.
     """
     def run(self):
-        fastshutter = PyTango.DeviceProxy("B303A-A100380/CTL/ADLINKDIO-01")
-        try:
-            fastshutter.write_attribute("Shutter",True)
-            print("Fastshutter is now closed")
-        except:
-            print("Fastshutter could not be closed")
+        fastshutter_action(False, 'panda0')
 
 @macro
 class M1shift(object):

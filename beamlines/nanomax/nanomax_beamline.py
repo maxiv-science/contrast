@@ -25,11 +25,8 @@ if __name__=='__main__':
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Andor3 import Andor3
-#    from contrast.detectors.Lima import LimaAndor
     from contrast.detectors.Lima import LimaXspress3
     from contrast.detectors.Eiger import Eiger
-    from contrast.detectors.Ni6602 import Ni6602CounterCard
-    from contrast.detectors.AdLink import AdLinkAnalogInput
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector, PseudoDetector
@@ -69,7 +66,7 @@ if __name__=='__main__':
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sz', scaling=-1.0, dial_limits=(-100,100), user_format='%.3f')
 
     # Xerion rotation stage
-    #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
+    sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
 
     # base motors through sardana
     basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
@@ -126,7 +123,7 @@ if __name__=='__main__':
     skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2)#, scaling=1e-3)
     skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2)#, scaling=1e-3)
     kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)#, scaling=1e-3)
-    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
+    #sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
     pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3)#, scaling=1e-3)
     pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3)#, scaling=1e-3)
     pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3)#, scaling=1e-3)
@@ -250,10 +247,6 @@ if __name__=='__main__':
     #andor.lima.image_flip=[True, False]
 
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
-    #eiger_formax = Eiger(name='eiger_formax', host='172.16.126.92')
-
-    ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
-    adlink = AdLinkAnalogInput(name='adlink', device='B303A-A100380/CTL/ADLINKAI-01')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
 
