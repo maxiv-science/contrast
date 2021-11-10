@@ -1,34 +1,21 @@
 """
 Sets up a Soft beamline with real motors and detectors.
 """
-<<<<<<< HEAD
-
-=======
->>>>>>> 4f5e4d32f874fc037da817934cc03039c43f478d
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
 if __name__=='__main__':
 
-<<<<<<< HEAD
-=======
     import os
->>>>>>> 4f5e4d32f874fc037da817934cc03039c43f478d
     import contrast
     from contrast.environment import env
     from contrast.recorders import Hdf5Recorder
     from contrast.motors.TangoMotor import TangoMotor
-<<<<<<< HEAD
-    from contrast.detectors.Andor3 import Andor3
-
-    env.userLevel = 1 # we're not experts!
-=======
     from contrast.detectors.PandaBoxSofti import PandaBoxSofti, PandaBox0D
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.Andor3 import Andor3
 
     env.userLevel = 5 # we're not experts!
->>>>>>> 4f5e4d32f874fc037da817934cc03039c43f478d
     env.paths.directory = '/tmp'
 
     # the Hdf5Recorder later gets its path from the env object
@@ -41,10 +28,6 @@ if __name__=='__main__':
 
     # detectors
     andor = Andor3(device='b318a/andor3device/test', name='andor')
-<<<<<<< HEAD
-
-    contrast.wisdom()
-=======
     panda0 = PandaBoxSofti(name='panda0')
     pseudo = PseudoDetector(name='pseudo',
                             variables={'enc_x':'panda0/INENC1.VAL_Value',
@@ -71,4 +54,3 @@ if __name__=='__main__':
         print('\nNote: inferring that the next scan number should be %u' % (last+1))
     except Exception as e:
         print(e)
->>>>>>> 4f5e4d32f874fc037da817934cc03039c43f478d
