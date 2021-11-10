@@ -6,6 +6,9 @@ import h5py
 from ..recorders.Hdf5Recorder import Link
 
 class DummyDetector(Detector, SoftwareLiveDetector):
+    """
+    Dummy detector which returns a single number.
+    """
     def __init__(self, name=None):
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
@@ -40,6 +43,9 @@ class DummyDetector(Detector, SoftwareLiveDetector):
             raise Exception('Detector not started!')
 
 class Dummy1dDetector(DummyDetector):
+    """
+    Dummy detector which returns a 1d vector.
+    """
     def start(self):
         super(Dummy1dDetector, self).start()
         try:

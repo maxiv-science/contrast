@@ -93,3 +93,10 @@ with open('macros.rst', 'w') as fp:
         fp.write('-'*len(name) + '\n')
         fp.write(macro.__doc__)
         fp.write('\n\n')
+
+# -- Infer the version numbers from git tags ---------------------------------
+import re
+# The full version, including git commit etc.
+release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
+# The base version, corresponding to the latest release.
+version = release.split('-')[0]

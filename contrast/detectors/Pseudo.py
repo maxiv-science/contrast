@@ -4,7 +4,7 @@ import string
 
 def get_dict_recursive(dct, key):
     """
-    Recursively get the value corresponding to path/to/key from a nested
+    Helper function to get the value corresponding to path/to/key from a nested
     dict.
     """
     if '/' in key:
@@ -32,7 +32,8 @@ class PseudoDetector(Detector):
     if it's a dict, the detector will return a corresponding dict of
     results.
 
-    Example:
+    Example::
+
         r = PseudoDetector(variables={'x':'npointbuff/x', 'y':npointbuff/y'},
                            expressions={'r':np.sqrt(x**2+y**2)'},
                            name='r'')
@@ -43,7 +44,9 @@ class PseudoDetector(Detector):
         super().__init__(*args, **kwargs)
 
     def initialize(self):
-        # find our gadgets so we don't have to search every time
+        """
+        find our gadgets so we don't have to search every time
+        """
         labels = [s.split('/')[0] for s in self.variables.values()]
         self.gadgets = {}
         for g in Gadget.getinstances():

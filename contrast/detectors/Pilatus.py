@@ -12,9 +12,9 @@ TIMEOUT = 20
 
 class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
-    Detector class interfacing directly with the pilatus-streamer:
+    Provides an interface to the Pilatus streaming manager,
 
-    https://gitlab.maxiv.lu.se/nanomax-beamline/pilatus-streamer
+    https://github.com/maxiv-science/pilatus-streamer
     """
 
     def __init__(self, hostname, name=None):
@@ -31,11 +31,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.burst_latency = .003
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
-
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.arm_number = -1
 
         if self.busy():
@@ -53,15 +49,10 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'%self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
-        if self.burst_n > 1:
-            acqtime -= self.burst_latency
-        self.exptime = acqtime
-        self.expperiod = self.burst_latency + acqtime
+        self.exptime = self.acqtime
+        self.expperiod = self.burst_latency + self.acqtime
 
     def arm(self):
-        """
-        Start the detector if hardware triggered, just prepareAcq otherwise.
-        """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         self.arm_number += 1
@@ -76,9 +67,6 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             self._camserver_start(command='exttrigger', filename=self.saving_file)
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if self.hw_trig:
             return
         if self.busy():
@@ -189,6 +177,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     @property
     def energy(self):
+        """ Operating energy """
         res = self._query('setenergy', timeout=TIMEOUT)
         res = self._parse_response(res, '15 OK Energy setting: (.*) eV')
         energy = float(res) if res else None

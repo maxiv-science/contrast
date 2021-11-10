@@ -42,6 +42,7 @@ class NpointFlyscan(Mesh):
     def _set_det_trig(self, on):
         # set up all triggered detectors
         for d in Detector.get_active():
+
             if isinstance(d, TriggeredDetector) and not d.name=='panda0':
                 d.hw_trig = on
                 d.hw_trig_n = self.fastmotorintervals + 1
@@ -118,12 +119,6 @@ class NpointFlyscan(Mesh):
                 if n >= 10:
                     print('***** start_waveform() failed %u times, is the piexo having trouble settling? trying again...'%n)
                 time.sleep(.1)
-
-        # in burst mode, acquisition times are interpreted as acquisition
-        # periods. in this case, since the panda box is in burst mode bur
-        # the other detector probably aren't, we should add the latency
-        # to the pandabox.
-        self.panda.prepare(self.exptime+self.latency, self.scannr, self.n_positions)
 
     def _while_acquiring(self):
         s = ''

@@ -14,3 +14,5 @@ How to maintain and build this documentation:
     python3 setup.py install --user
 
 - If new modules (new source files) are added, they need to be added to the ``docs/source/contrast.*.rst`` hierarchy so that ``autodoc`` can include them.
+
+- macros.rst is a special case, it is assembled by ``make html`` per the code in ``conf.py``.

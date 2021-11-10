@@ -38,18 +38,12 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
             print('Warning: the AdLinkAnalogInput detector only works with hardware triggering.')
 
     def arm(self):
-        """
-        Start the detector if hardware triggered
-        """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
         if self.hw_trig:
             self.dev.Start()
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         pass
 
     def stop(self):

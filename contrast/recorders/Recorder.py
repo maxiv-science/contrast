@@ -64,7 +64,9 @@ class Recorder(Gadget, Process):
         self.quit = False
 
     def _process_queue(self):
-        dcts = [self.queue.get() for i in range(self.queue.qsize())] # ok since only we are reading from self.queue
+        dcts = []
+        while not self.queue.empty():
+            dcts.append(self.queue.get()) # ok since only we are reading from self.queue
         for dct in dcts:
             if dct is None:
                 self.quit = True

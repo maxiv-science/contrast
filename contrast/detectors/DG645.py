@@ -17,6 +17,8 @@ class StanfordTriggerSource(TriggerSource, BurstDetector):
         self.burst_latency = .001
 
     def prepare(self, acqtime, *args, **kwargs):
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
+        acqtime = self.acqtime
         self.proxy.TriggerSource = 5
         if self.burst_n > 1:
             self.proxy.BurstMode = True

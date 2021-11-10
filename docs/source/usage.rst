@@ -8,6 +8,11 @@ Launching a beamline
     ipython3
     %run /path/to/your/beamline/script.py
 
+or
+
+::
+
+    ipython3 -i /path/to/your/beamline/script.py
 
 Detector selection
 ------------------
@@ -17,10 +22,10 @@ Detectors have an ``active`` attribute which determines if they are included in 
     In [2]: lsdet
 
       name   class                                          
-    --------------------------------------------------------
-    * det2   <class 'lib.detectors.Dummies.DummyDetector'>  
-    * det3   <class 'lib.detectors.Dummies.Dummy1dDetector'>
-    * det1   <class 'lib.detectors.Dummies.DummyDetector'>  
+    -------------------------------------------------------------
+    * det2   <class 'contrast.detectors.Dummies.DummyDetector'>  
+    * det3   <class 'contrast.detectors.Dummies.Dummy1dDetector'>
+    * det1   <class 'contrast.detectors.Dummies.DummyDetector'>  
 
     In [3]: ct
     det2 : 0.5862324427414796
@@ -32,10 +37,10 @@ Detectors have an ``active`` attribute which determines if they are included in 
     In [5]: lsdet
 
       name   class                                          
-    --------------------------------------------------------
-    * det2   <class 'lib.detectors.Dummies.DummyDetector'>  
-      det3   <class 'lib.detectors.Dummies.Dummy1dDetector'>
-    * det1   <class 'lib.detectors.Dummies.DummyDetector'>  
+    -------------------------------------------------------------
+    * det2   <class 'contrast.detectors.Dummies.DummyDetector'>  
+      det3   <class 'contrast.detectors.Dummies.Dummy1dDetector'>
+    * det1   <class 'contrast.detectors.Dummies.DummyDetector'>  
 
     In [6]: ct
     det2 : 0.26999817158517125
@@ -44,7 +49,7 @@ Detectors have an ``active`` attribute which determines if they are included in 
 User levels
 -----------
 
-All ``Gadget`` instances have an associated user level. This means that certain motors can be hidden and protected while others are exposed through the macros. In this example, two sample motors are available to everyone while the undulator gap is higher level. This is not a security feature but meant to simplify the environment and reduce the risk of mistakes. ::
+All :py:class:`~contrast.Gadget.Gadget` instances have an associated user level. This means that certain motors can be hidden and protected while others are exposed through the macros. In this example, two sample motors are available to everyone while the undulator gap is higher level. This is not a security feature but meant to simplify the environment and reduce the risk of mistakes. ::
 
     In [4]: %userlevel
     Current userlevel: 1
@@ -131,7 +136,7 @@ If you're not on the ipython console but in a script, this still works. ::
 Direct access to python objects
 -------------------------------
 
-If ``Gadget`` objects operate on underlying Tango devices, then Tango attributes are directly accessible on the objects themselves. PyTango provides tab completion and so these can be easily checked or corrected. Of course ``Gadget`` subclasses can provide nice getter and setter methods, but fixes are easily done. ::
+If :py:class:`~contrast.Gadget.Gadget` objects operate on underlying Tango devices, then Tango attributes are directly accessible on the objects themselves. PyTango provides tab completion and so these can be easily checked or corrected. Of course :py:class:`~contrast.Gadget.Gadget` subclasses can provide nice getter and setter methods, but fixes are easily done. ::
 
     In [7]: pilatus.det.energy
     Out[7]: 10.0

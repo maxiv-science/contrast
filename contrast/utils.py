@@ -93,6 +93,8 @@ class SpecTable(object):
     A dyamic table, for use when the column titles and one data row are
     known.
     """
+    min_str_len = 12
+    max_str_len = 12
 
     def format_pair(self, k, v):
         """
@@ -138,8 +140,8 @@ class SpecTable(object):
             h = ('%%%us'%w)%k
             return ' '*len(h), h, '%%%us'%w
         else:
-            fmt = '%12.12s'
-            w = len(fmt%1)
+            fmt = '%%%u.%us' % (self.min_str_len, self.max_str_len)
+            w = len(fmt%v)
             h = ('%%%us'%w)%k
             return ' '*len(h), h, fmt
 
@@ -183,7 +185,9 @@ class SpecTable(object):
             elif isinstance(v, h5py.VirtualLayout):
                 vals += ['hdf5-vds']
             elif isinstance(v, np.ndarray):
-                vals += [str(v.shape)]
+                vals += [np.array2string(v, threshold=4, edgeitems=1,
+                            formatter={'float_kind':lambda x: "%.1e" % x},
+                            separator=',',)]
             else:
                 vals.append(v)
         return tuple(vals)

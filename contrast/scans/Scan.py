@@ -16,6 +16,9 @@ class SoftwareScan(object):
     sources, and recorders.
     """
 
+    dict_print_length = 5
+    str_print_length = 12
+
     def __init__(self, exposuretime):
         """
         The constructor should parse the parameters of the derived
@@ -24,6 +27,7 @@ class SoftwareScan(object):
         :param exposuretime: Exposure time to pass on to detectors etc.
         :type exposuretime: float
         """
+        self._command = None # updated if run via macro
         self.motors = []   # list of motors, to be filled by subclass
         self.exposuretime = exposuretime
         self.scannr = env.nextScanID
@@ -34,12 +38,13 @@ class SoftwareScan(object):
     def output(self, i, dct):
         # ignore dicts that are too long
         for k, v in dct.items():
-            if type(v) == dict and len(v) > 4:
+            if type(v) == dict and len(v) > self.dict_print_length:
                 dct[k] = {'...':'...'}
         dct['     #'] = i
         dct.move_to_end('     #', last=False)
         if i == 0:
             self.table = SpecTable()
+            self.table.max_str_len = self.str_print_length
             header = self.table.header_lines(dct)
             print('\n'+header)
             print('-'*len(header.split('\n')[-1]))
@@ -283,9 +288,5 @@ class Ct(object):
             dct[d.name] = d.read()
         # print results
         for key, val in dct.items():
-            try:
-                val_ = val.shape
-            except AttributeError:
-                val_ = val
-            print(key, ':', val_)
+            print(key, ':', val)
         self._after_ct()

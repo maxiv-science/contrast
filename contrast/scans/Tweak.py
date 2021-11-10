@@ -36,12 +36,13 @@ class Tweak(Mesh):
         tweak <motor1> <stepsize1> [<motor2> <stepsize2>] <exp_time>
     """
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         try:
             exposuretime = float(args[-1])
             super(Mesh, self).__init__(exposuretime)
             self.motors = args[:-1:2]
             self.steps = args[1::2]
+            self.n_positions = 1000
             assert len(args) in (3, 5)
             assert all_are_motors(self.motors)
         except:
@@ -52,12 +53,14 @@ class Tweak(Mesh):
     def _generate_positions(self):
         positions = {m.name:m.position() for m in self.motors}
         yield positions
-        while True:
+        n = 1
+        while n < self.n_positions:
             key = getarrowkey()
             imotor = 0 if key in (KEY_LEFT, KEY_RIGHT) else -1
             direction = -1 if key in (KEY_DOWN, KEY_LEFT) else 1
             positions[self.motors[imotor].name] += direction * self.steps[imotor]
             yield positions
+            n += 1
 
     def _before_move(self):
         # Override so as not to respect the scheduler.

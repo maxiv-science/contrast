@@ -174,14 +174,20 @@ class TriggeredDetector(object):
     triggers.
     """
     def __init__(self):
-        self.hw_trig = False
-        self.hw_trig_n = 1
+        self.hw_trig = False  # whether to arm for hw triggering
+        self.hw_trig_n = 1    # the number of triggers per sw step
 
 class BurstDetector(object):
     """
     Defines the API for detectors that optionally run in burst mode,
     so that an autonomous train of measurements is made for one
     arm/start command.
+
+    Defines three attributes:
+
+    * `burst_n`: the number of autonomous measurements
+    * `burst_latency`: the time between measurements
+    * `burst_acqtime`: an optional parameter which (if not None) overrides the value received via the prepare() method.
     """
     def __init__(self):
         # let child classes set these if they want
@@ -189,6 +195,13 @@ class BurstDetector(object):
             self.burst_n = 1
         if not hasattr(self, 'burst_latency'):
             self.burst_latency = 0.0
+        if not hasattr(self, 'burst_acqtime'):
+            self.burst_acqtime = None
+
+    def prepare(self, acqtime, dataid, n_starts=None):
+        self.acqtime = acqtime
+        if self.burst_acqtime:
+            self.acqtime = self.burst_acqtime
 
 class DetectorGroup(object):
     """
@@ -217,6 +230,8 @@ class DetectorGroup(object):
                 try:
                     d.prepare(acqtime, dataid, n_starts)
                     ok = True
+                except (AssertionError, NotImplementedError):
+                    raise
                 except:
                     tried += 1
                     print('*** problem calling prepare() on %s, trying again in %f s...' % (d.name, trial_delay))
@@ -242,6 +257,8 @@ class DetectorGroup(object):
                 try:
                     d.start()
                     ok = True
+                except AssertionError:
+                    raise
                 except:
                     tried += 1
                     print('*** problem calling start() on %s, trying again in %f s...' % (d.name, trial_delay))

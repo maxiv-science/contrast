@@ -11,9 +11,9 @@ import PyTango
 
 class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
     """
-    Detector class interfacing directly with the andor-streamer:
+    Provides an interface to the Andor3 Zyla streaming manager,
 
-    https://gitlab.maxiv.lu.se/nanomax-beamline/andor-streamer
+    https://github.com/maxiv-science/andor-streamer
 
     Note: hw trigger not yet implemented.
     """
@@ -28,11 +28,6 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         pass
 
     def prepare(self, acqtime, dataid, n_starts):
-        """
-        Run before acquisition, once per scan. Set up triggering,
-        number of images etc.
-        """
-
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -63,15 +58,9 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         self.frames_expected = 0
 
     def arm(self):
-        """
-        Called on every software step - no action for sw timing
-        """
         pass
 
     def start(self):
-        """
-        Start acquisition when software triggered.
-        """
         if self.burst_n == 1:
             self.proxy.software_trigger()
             self.frames_expected += 1

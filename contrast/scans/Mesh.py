@@ -11,7 +11,7 @@ class Mesh(SoftwareScan):
         
         mesh <motor1> <start> <stop> <intervals> ... <exp_time>
 
-    optional key word arguments:
+    optional keyword arguments:
         jitter: float ... Randomizes perfect grid positions.
     """
 

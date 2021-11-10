@@ -14,13 +14,14 @@ The framework runs locally in an IPython interpreter. This allows simple interac
 ``Gadget`` and its subclasses
 -----------------------------
 
-Contrast classes which represent specific beamline components (hardware or software) inherit from the common ``Gadget`` base class. Its most important subclasses are ``Motor`` (primarily for affecting some aspect of reality), ``Detector`` (for measuring some facet of the universe) and ``Recorder`` (for saving or passing on gathered data).
+Contrast classes which represent specific beamline components (hardware or software) inherit from the common :py:class:`~contrast.Gadget.Gadget` base class. Its most important subclasses are :py:class:`~contrast.motors.Motor.Motor` (primarily for affecting some aspect of reality), :py:class:`~contrast.detectors.Detector.Detector` (for measuring some facet of the universe) and :py:class:`~contrast.recorders.Recorder.Recorder` (for saving or passing on gathered data).
 
 .. inheritance-diagram:: contrast.motors.Motor.Motor contrast.detectors.Detector.TriggerSource contrast.recorders.Recorder.Recorder
-    :parts: 1
+    :parts: 2
     :top-classes: contrast.recorders.Recorder.Process
+    :caption: :py:class:`~contrast.Gadget.Gadget` and its subclasses.
 
-Instead of keeping central registries or databases, Contrast keeps track of ``Gadget`` objects through instance tracking and inheritance. The base class or any of its children can report what instances of it exist, and calling the ``getinstances()`` method of classes at different levels serves to filter out the objects of interest. An example follows. ::
+Instead of keeping central registries or databases, Contrast keeps track of :py:class:`~contrast.Gadget.Gadget` objects through instance tracking and inheritance. The base class or any of its children can report what instances of it exist, and calling the ``getinstances()`` method of classes at different levels serves to filter out the objects of interest. An example follows. ::
 
     In [1]: [m.name for m in Motor.getinstances()]
     Out[1]: ['gap', 'samy', 'samx']
@@ -34,27 +35,27 @@ Instead of keeping central registries or databases, Contrast keeps track of ``Ga
 Motors
 ~~~~~~
 
-Classes which inherit ``Motor`` represent physical motors or other devices which can be represented by numerical values (a bias voltage or beam energy, perhaps). The ``Motor`` class defines a simple API for moving the motor and reading its position. 
+Classes which inherit :py:class:`~contrast.motors.Motor.Motor` represent physical motors or other devices which can be represented by numerical values (a bias voltage or beam energy, perhaps). The :py:class:`~contrast.motors.Motor.Motor` class defines a simple API for moving the motor and reading its position. 
 
-Motors have dial and user positions, where the dial position should correspond closely to the physical position of the underlying hardware. The user position can be set at runtime to meaningful values. For example, a microscope translation stage might be set to zero when focusing on a sample plane. The dial and user positions are related by a scaling factor and an offset, handled by the ``Motor`` base class. Motor limits are stored internally in dial positions, so that they remain physically identical after changing the user position. The ``motors`` module defines convenience macros for moving, listing and reading motors, as well as defining user positions.
+Motors have dial and user positions, where the dial position should correspond closely to the physical position of the underlying hardware. The user position can be set at runtime to meaningful values. For example, a microscope translation stage might be set to zero when focusing on a sample plane. The dial and user positions are related by a scaling factor and an offset, handled by the :py:class:`~contrast.motors.Motor.Motor` base class. Motor limits are stored internally in dial positions, so that they remain physically identical after changing the user position. The :py:mod:`~contrast.motors` module defines convenience macros for moving, listing and reading motors, as well as defining user positions.
 
 Detectors
 ~~~~~~~~~
 
-The ``Detector`` base class defines the API for classes representing all detectors and data collecting devices. To operate a detector, the methods ``prepare()``, ``arm()``, ``start()`` are called, with ``read()`` called after the acquisition has finished.
+The :py:class:`~contrast.detectors.Detector.Detector` base class defines the API for classes representing all detectors and data collecting devices. To operate a detector, the methods ``prepare()``, ``arm()``, ``start()`` are called, with ``read()`` called after the acquisition has finished.
 
-Detectors come in many forms, and the ``Detector`` objects can return data of any type. Usually, numbers, small arrays, or Python ``dict`` objects are used, as these are easily written to hdf5 files in a hierarchical way. Detectors which produce large data rates write directly to disk or stream their data to a receiver, and therefore return hdf5 links instead of real data.
+Detectors come in many forms, and the :py:class:`~contrast.detectors.Detector.Detector` objects can return data of any type. Usually, numbers, small arrays, or Python ``dict`` objects are used, as these are easily written to hdf5 files in a hierarchical way. Detectors which produce large data rates write directly to disk or stream their data to a receiver, and therefore return hdf5 links instead of real data.
 
-Variants of ``Detector`` can be constructed by inheriting the base classes for hardware-triggered detectors, those that can run autonomously in live mode, and those that can take bursts of measurements with internal timing. The inheritance structure for a small set of ``Detector`` subclasses is shown below for illustration.
+Variants of :py:class:`~contrast.detectors.Detector.Detector` can be constructed by inheriting the base classes for hardware-triggered detectors, those that can run autonomously in live mode, and those that can take bursts of measurements with internal timing. The inheritance structure for the :py:class:`~contrast.detectors.Eiger.Eiger` subclass is shown below for illustration.
 
-.. inheritance-diagram:: contrast.detectors.Pilatus.Pilatus contrast.detectors.Merlin contrast.detectors.Xspress3 contrast.detectors.Ni6602 contrast.detectors.AdLink.AdLinkAnalogInput
+.. inheritance-diagram:: contrast.detectors.Eiger
     :parts: 1
-    :top-classes: contrast.recorders.Recorder.Process
+    :caption: Example of :py:class:`~contrast.detectors.Detector.Detector` inheritance.
 
 Recorders
 ~~~~~~~~~
 
-Data is captured by recorders. Recorders are run in separate processes and get data through queues to avoid holding up the main acquisition loop. They can do anything with the data, for example saving to ``hdf5`` files, live plotting, or streaming. See the ``Hdf5Recorder``, ``PlotRecorder``, and ``StreamRecorder`` classes for examples.
+Data is captured by recorders. Recorders are run in separate processes and get data through queues to avoid holding up the main acquisition loop. They can do anything with the data, for example saving to ``hdf5`` files, live plotting, or streaming. See the :py:class:`~contrast.recorders.Hdf5Recorder.Hdf5Recorder`, :py:class:`~contrast.recorders.PlotRecorder.PlotRecorder`, and :py:class:`~contrast.recorders.StreamRecorder.StreamRecorder` classes for examples.
 
 Note how easy it is to write these recorders, and how easy it would be to integrate online data analysis. The recorder simply grabs data from an incoming queue, while the data collection routine places collected data in the queues of all running recorders. As an example, here's how ``SoftwareScan`` and its derivatives gather and distribute data. ::
 
@@ -75,9 +76,9 @@ The ``lsrec`` macro lists currently running recorders. ::
     In [30]: lsrec
 
     name           class                                            
-    ----------------------------------------------------------------
-    hdf5recorder   <class 'lib.recorders.Hdf5Recorder.Hdf5Recorder'>
-    plot1          <class 'lib.recorders.PlotRecorder.PlotRecorder'>
+    ---------------------------------------------------------------------
+    hdf5recorder   <class 'contrast.recorders.Hdf5Recorder.Hdf5Recorder'>
+    plot1          <class 'contrast.recorders.PlotRecorder.PlotRecorder'>
 
 
 Macros
@@ -140,7 +141,7 @@ Macros aren't stored in a special library. They are written throughout the libra
 
 A macro is different from a script. Anyone can easily write a macro, but for composite operations where existing macros are just combined it is faster to write a script. The following is a script, not a macro, but uses a special ``runCommand`` function to interface with the command line syntax. ::
 
-    from lib.environment import runCommand
+    from contrast.environment import runCommand
 
     for i in range(5):
         runCommand('mv samy %d' % new_y_pos)
@@ -151,7 +152,7 @@ The environment object
 
 No global environment variables are used. Instead, a central object in the environment module is used to manage the overall logistics of the beamline. This includes things like paths and scan numbers::
 
-    In [24]: from lib.environment import env
+    In [24]: from contrast.environment import env
 
     In [25]: env.nextScanID
     Out[25]: 1
