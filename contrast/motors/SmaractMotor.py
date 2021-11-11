@@ -4,6 +4,7 @@ Provides a ``Motor`` subclass for Smaract positioners.
 
 import PyTango
 from . import Motor
+import time
 
 class SmaractLinearMotor(Motor):
     """
@@ -25,7 +26,11 @@ class SmaractLinearMotor(Motor):
         self.home_on_every_move = home_on_every_move
 
     def home(self):
+        print('\nhoming %s...' % self.name)
         self.proxy.arbitrary_command("FRM%u,2,60000,1" % self.axis)
+        while self.busy():
+            time.sleep(.1)
+        print('homing done')
 
     @property
     def dial_position(self):
