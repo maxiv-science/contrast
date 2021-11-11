@@ -61,6 +61,8 @@ class SmaractRotationMotor(SmaractLinearMotor):
 
     @dial_position.setter
     def dial_position(self, pos):
+        if self.home_on_every_move:
+            self.home()
         if pos < 0:
             rev = -1
             pos = (pos + 360) * 1e6
