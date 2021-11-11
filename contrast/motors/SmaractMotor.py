@@ -10,7 +10,7 @@ class SmaractLinearMotor(Motor):
     Single Smaract motor axis.
     """
 
-    def __init__(self, device, axis, **kwargs):
+    def __init__(self, device, axis, home_on_every_move=False, **kwargs):
         """
         :param device: Path to the MCS Tango device
         :type device: str
@@ -22,6 +22,10 @@ class SmaractLinearMotor(Motor):
         self.proxy = PyTango.DeviceProxy(device)
         self.proxy.set_source(PyTango.DevSource.DEV)
         self.axis = int(axis)
+        self.home_on_every_move = home_on_every_move
+
+    def home(self):
+        self.proxy.arbitrary_command("FRM%u,2,60000,1" % self.axis)
 
     @property
     def dial_position(self):
@@ -29,6 +33,8 @@ class SmaractLinearMotor(Motor):
 
     @dial_position.setter
     def dial_position(self, pos):
+        if self.home_on_every_move:
+            self.home()
         self.proxy.Write_position('%d, %f' % (self.axis, pos))
 
     def busy(self):
