@@ -8,8 +8,11 @@ This class assumes that:
 
 """
 from .PandaBox import PandaBox, SOCK_RECV
+from .Detector import Detector
 from typing import List
 import math, time
+import tango
+import numpy as np
 
 class PandaBoxSofti(PandaBox):
     
@@ -133,41 +136,35 @@ class PandaBoxSofti(PandaBox):
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
-class PandaBox0D(PandaBox):
-    
-    def __init__(self, name=None, type='diode', host='b-softimax-panda-0.maxiv.lu.se',
-                 ctrl_port=8888, data_port=8889):
+
+class PandaBox0D(Detector):
+    def __init__(self, name=None, device=None):
         """
         A PandaBox subclasses for 0D detectors, i.e. Photodiode and PMT
-        The type can be either 'diode' or 'PMT'
-        This class assumes that:
-            1) COUNTER5 is connected to TTLIN5 that is in turn connected to the Alba voltage output for the photodiode
-            2) COUNTER6 is connected to TTLIN6 that is in turn connected to the V2F on BlackFreq, which is connected to the PMT
-            3) Dwell time is set via PULSE2.WIDTH given in ms
-            4) The acquisition is software triggered by PULSE2.TRIG=ONE and should be set to PULSE2.TRIG=ZERO before the next acquisition cycle
         """
-        super().__init__(name=name, host=host, ctrl_port=ctrl_port, data_port=data_port)
-        if type == 'diode':
-            self.query_str = 'COUNTER5.OUT?'
-        elif type == 'PMT':
-            self.query_str = 'COUNTER6.OUT?'
-        else:
-            self.query_str = 'COUNTER5.OUT?'
-        
-        self._dwell = 0
-        self.acq_run = False
-    
-    def _reset(self):
-        """
-        Resets the detector before each new acquisiton.
-        """
-        return self.query('PULSE2.TRIG=ZERO')
-    
-    def _trig(self):
-        """
-        Resets the detector before each new acquisiton.
-        """
-        return self.query('PULSE2.TRIG=ONE')
+        super(PandaBox0D, self).__init__(name=name)
+        self.device_name = device
+        self._dwell = 10
+        self._trigger_state = False
+        self._trig_indx = 0
+        self._pd_diode_i = 0
+        self._pmt_i = 0
+        try:
+            self.dev = tango.DeviceProxy(self.device_name)
+        except Exception as err:
+            raise Exception('Faild to initialize withe the error: %s' % err)
+        self.dev.subscribe_event("DetOut", tango.EventType.CHANGE_EVENT, self._det_out_cb)
+        self.dev.DetTrigCntr = 0
+
+    def _det_out_cb(self, evnt):
+        if evnt.attr_value.value is None:
+            return
+        self._trig_indx, self._pd_diode_i, self._pmt_i = evnt.attr_value.value.tolist()
+        #print('DetOut Callback.', evnt.attr_value.value.tolist())
+        self._trigger_state = False
+
+    def initialize(self):
+        pass
 
     @property
     def dwell(self):
@@ -183,36 +180,23 @@ class PandaBox0D(PandaBox):
         Sets dwell time via PULSE2.WIDTH, dwell in ms.
 
         """
+        self.dev.DetDwell = dwell
         self._dwell = dwell
-        self.query(f'PULSE2.WIDTH={self._dwell}')
-    
-    def get_intensity(self):
-        """
-        Reads the intensity from COUNTER5 that is connected to the photodiode
-        """
-        self.acq_run = True
-        self._reset()
-        self._trig()
-        time.sleep(self._dwell/1000)
-        resp = self.query(self.query_str).split('=')
-        if resp[0] == 'OK ':
-            self.acq_run = False
-            return int(resp[1])
-        else:
-            self.acq_run = False
-            return None
-    
-    def arm(self):
-        pass
 
     def busy(self):
-        if self.acq_run:
+        if self._trigger_state:
             return True
         else:
             return False
 
-    def prepare(self, acqtime, dataid, n_starts):
-        self.dwell = int(acqtime*1000)
+    def prepare(self, acqtime, dataid, n_starts=1):
+        if self.busy():
+            raise Exception('%s is busy!' % self.name)
+        self.dev.DetDwell = acqtime
+        self._dwell = acqtime
+        self.acqtime = acqtime
+        self.n_starts = n_starts
+        self.dev.DetTrigCntr = 0
 
     def start(self):
         """
@@ -220,9 +204,12 @@ class PandaBox0D(PandaBox):
         """
         if self.busy():
             raise Exception('%s is busy!' % self.name)
+        self._trigger_state = True
+        self.dev.DetTrig = True
 
     def stop(self):
-        self.acq_run = False
+        pass
 
     def read(self):
-        return self.get_intensity()
+        #return np.array([int(self._trig_indx), int(self._pd_diode_i), int(self._pmt_i)])
+        return self._pmt_i
