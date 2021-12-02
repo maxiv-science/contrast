@@ -62,16 +62,6 @@ class TangoMotor(Motor):
         elif state == PyTango.DevState.ON:
             return False
         elif state == PyTango.DevState.ALARM:
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-            lim1 = self.proxy.read_attribute('StatusLim-').value
-            lim2 = self.proxy.read_attribute('StatusLim+').value
-            if lim1 or lim2:
-                # probably just a limit switch, then
-                return False
-=======
-=======
->>>>>>> 4f5e4d32f874fc037da817934cc03039c43f478d
             if hasattr(self.proxy, 'StatusLim-'):
                 lim1 = self.proxy.read_attribute('StatusLim-').value
                 lim2 = self.proxy.read_attribute('StatusLim+').value
@@ -80,10 +70,6 @@ class TangoMotor(Motor):
                     return False
             else:
                 return True
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> 4f5e4d32f874fc037da817934cc03039c43f478d
         else:
             return True
 
