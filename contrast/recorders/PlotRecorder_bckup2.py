@@ -128,33 +128,43 @@ class PlotRecorderMesh(Recorder):
         self.ydata = data2
         self.zdata = data_z
         self.nplots = 0
-        self._x, self._y, self._z = None, None, None
 
-    def init(self):
         # set up figure and axes
-        self.fig = plt.figure()
+        self.X, self.Y, self.Z = [],[],[]
+        self._x, self._y, self._z = None, None, None
+        self.new_point = False
+        
+        #self.fig = plt.figure()
+        self.fig, self.ax = plt.subplots()
         self.fig.canvas.set_window_title(self.name)
-        self.ax = self.fig.gca()
+        #self.ax = self.fig.gca()
         self.ax.set_xlabel(self.xdata)
         self.ax.set_ylabel(self.ydata)
-        self.ax.set_aspect(1)
+        #self.sc = self.ax.scatter(self.X, self.Y, self.Z, marker="o", s=100, cmap=cm.Greys_r)
 
-        # add a timer to trigger periodic checking of the queue
-        self.timer = self.fig.canvas.new_timer(interval=int(self.delay*1000))
-        self.timer.add_callback(self._timer_callback)
-        self.timer.start()
-
+    def init(self):
         # blocking show() manages when the application should close
+        self.sc = self.ax.scatter(self.X, self.Y, c='green', marker="o", sizes=(100,), edgecolor='black', linewidth=1, cmap='Greens')
+        self.anm = matplotlib.animation.FuncAnimation(self.fig, self._update_plot,
+                                                        frames=None, interval=100, repeat=False)
         plt.show()
-
-    def _timer_callback(self):
-        # this SIGINT handling has to be set up here, for some reason
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        
+    def _update_plot(self, arg):
+            # this SIGINT handling has to be set up here, for some reason
+        #signal.signal(signal.SIGINT, signal.SIG_IGN)
         self._process_queue()
         self.periodic_check()
+        #print(f'#### _update_plot call: self.new_point: {self.new_point}')
+        if self.new_point:
+            # self.X.append(np.random.rand(1)*10)
+            # self.Y.append(np.random.rand(1)*10)
+            # self.Z.append(np.random.rand(1)*10)
+            pass
+        self.new_point = False
+        
         if self.quit:
-            self._close()
-
+            self._close()        
+    
     def _get_new_point(self, dct, xname='finex', yname='finey', zname='roi'):
         self.entries = list(dct.items())
         x_val = dct[xname]
@@ -162,94 +172,42 @@ class PlotRecorderMesh(Recorder):
         z_val = dct[zname]
         #print(f'The input dct in _get_new_point is {dct}')
         return (x_val, y_val, z_val)
-    
+
     def run(self):
         self.init()
 
     def act_on_header(self, dct):
         # start a new scan
-        self.nplots += 1
-        self.x = []
-        self.new_scan = True
         self.scannr = dct['scannr']
-
-        # Extracting range/interval values from the mesh scan description
         self.desc = dct['description'].split()
         self.xdata_param, self.ydata_param = self.desc[2:5], self.desc[6:9]
+        self.ax.set_xlim(self.xdata_param[0], self.xdata_param[1])
+        self.ax.set_ylim(self.ydata_param[0], self.ydata_param[1])
 
-        # Some values for convenience
-        padding_k = 0.05 # Padding coefficient equals 5%
-        self.x_array_size = int(self.xdata_param[2])+1
-        self.y_array_size = int(self.ydata_param[2])+1
-        self.matrix_size = self.x_array_size * self.y_array_size
-
-        self.x_range = float(self.xdata_param[1]) - float(self.xdata_param[0])
-        self.y_range = float(self.ydata_param[1]) - float(self.ydata_param[0])
-        self.x_lim_pad = self.x_range * padding_k
-        self.y_lim_pad = self.y_range * padding_k
-        self.x_range_min =  float(self.xdata_param[0]) - self.x_lim_pad
-        self.x_range_max =  float(self.xdata_param[1]) + self.x_lim_pad
-        self.y_range_min =  float(self.ydata_param[0]) - self.y_lim_pad
-        self.y_range_max =  float(self.ydata_param[1]) + self.y_lim_pad
-
-        self.fig_dpi = self.fig.dpi
-        self.mrk_size = (self.ax.get_window_extent().width / self.x_array_size * 72. / self.fig_dpi) ** 2
-        print(f'self.mrk_size: {self.mrk_size}')
-        
-
-        # Allocating space for the data points
-        # self.X = np.zeros(shape=(self.matrix_size, ), dtype=np.float64)
-        # self.Y = np.zeros(shape=(self.matrix_size, ), dtype=np.float64)
-        # self.Z = np.zeros(shape=(self.matrix_size, ), dtype=np.float64)
-
-        self.X, self.Y, self.Z = [], [], []
-
-        self.sc = self.ax.scatter(self.X, self.Y, c=self.Z, marker="o", s=self.mrk_size, cmap='Greys_r')
-        
-        plt.xlim(self.x_range_min, self.x_range_max)
-        plt.ylim(self.y_range_min, self.y_range_max)
-
-        #self.ax.relim()
-        #self.ax.autoscale_view()
-
-        plt.colorbar(self.sc)
-        #self.sc.remove()
-        plt.draw()
-
-        self.point_N = 0
+        print(f'#### act_on_header call: self.xdata_param, self.ydata_param are {self.xdata_param}, {self.ydata_param}')
 
     def act_on_data(self, dct):
-        # if our data isn't in dct, just move on
-        try:
-            new_data = dict_lookup(dct, self.ydata)
-        except KeyError:
-            return
-
-        # print(f'#### act_on_data call: new_data is: {new_data}')
-
         # be ready to get data that are dicts instead of numbers,
         # so may as well just work with dicts.
-        if not isinstance(new_data, dict):
-            new_data = {'': new_data}
-
-        self._x, self._y, self._z = self._get_new_point(dct)
-
-        if self.point_N < self.matrix_size:
-            self.X.append(float(self._x))
-            self.Y.append(float(self._y))
-            self.Z.append(float(self._z))
-            self.point_N += 1
-        else:
-            pass
-
-        #self.sc = self.ax.scatter(self.X, self.Y, c=self.Z, marker="o", s=200, cmap='Greens')
-        self.sc.set_offsets(np.c_[np.array(self.X), np.array(self.Y)])
-        self.sc.set_array(np.array(self.Z))
-        self.sc.autoscale()
-        plt.draw()
-
+        # if not isinstance(new_data, dict):
+        #     return
+        self.new_point = True
+        x, y, z = self._get_new_point(dct)
+        self._x, self._y, self._z = x, y, z
+        print(f'#### act_on_data call: self._x, self._y, self._z are {self._x}, {self._y}, {self._z}')
+        #print(f'#### act_on_data call: dct is: {dct}')
+        self.X.append(self._x)
+        self.Y.append(self._y)
+        self.Z.append(self._z)
+        print(f'#### act_on_data call: self.X, self.Y, self.Z are: {self.X}, {self.Y}, {self.Z}')
+        self.sc.set_offsets(np.c_[self.X, self.Y])
+        # self.fig.canvas.flush_events()
+        # self.fig.canvas.draw_idle()
+        #plt.pause(0.1)
+        
     def _close(self):
         plt.close(self.fig)
+
 
 @macro
 class LivePlot(object):
@@ -282,11 +240,12 @@ class LivePlotMesh(object):
     """
     Start a live plot recorder which will plot coming scans. ::
 
-        liveplotmesh <x> <y> <int>
+        liveplot [<x>] <y>
 
     Examples::
 
-        liveplotmesh finex finey roi
+        liveplot xmotor diode1
+        liveplot diode1
     """
     def __init__(self, data1, data2, data_z):
         basename = 'plot'
@@ -299,7 +258,6 @@ class LivePlotMesh(object):
         self.data2 = data2.name if hasattr(data2, 'name') else data2
         self.data_z = data_z.name if hasattr(data_z, 'name') else data_z
         self.name = name
-    
     def run(self):
         rec = PlotRecorderMesh(data1=self.data1, data2=self.data2, data_z=self.data_z, name=self.name)
         rec.start()

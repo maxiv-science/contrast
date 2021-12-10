@@ -19,8 +19,11 @@ if __name__=='__main__':
     from contrast.detectors.Andor3 import Andor3, AndorSofti
     from contrast.scans import SoftwareScan, Ct
 
+    sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').SamplePath
+    
     env.userLevel = 5
-    env.paths.directory = '/data/staff/softimax/commissioning/Ptycho/01_12_2021'
+    env.paths.directory = '/data/staff/softimax/commissioning/andor_data/20211210'
+    #env.paths.directory = sample_path
 
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
@@ -33,17 +36,23 @@ if __name__=='__main__':
     # motors
     finex = TangoMotor(device='PiezoPiE712/CTL/X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
     finey = TangoMotor(device='PiezoPiE712/CTL/Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
+    #fine_dum = TangoMotor(device='B318A/CTL/DUMMY-01', name='fine_dum', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     osax = TangoMotor(device='motor/osa_ctrl/1', name='osax', user_format='%.3f', dial_format='%.3f', offset=0.83)
     osay = TangoMotor(device='motor/osa_ctrl/2', name='osay', user_format='%.3f', dial_format='%.3f', offset=0.32)
+    beamline_energy = TangoMotor(device='B318A/CTL/BEAMLINE-ENERGY', name='beamline_energy', user_format='%.3f', dial_format='%.3f', dial_limits=(275, 1600))
 
     shutter = tango.DeviceProxy('B318A-EA01/CTL/GalilShutter')
-
+    
     #finex = TangoMotor(device='B318A/CTL/DUMMY-01', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
 
     # detectors
-    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor')
-    panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')
+    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=200)
+    #andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor')
+    
+    #panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')
+    abs_x = TangoAttributeDetector('abs_x', 'B318A-EA01/CTL/PandaPosTrig', 'AbsX')
+    abs_y = TangoAttributeDetector('abs_y', 'B318A-EA01/CTL/PandaPosTrig', 'AbsY')
     roi = TangoAttributeDetector('roi', 'B318A-EA01/dia/andor-requests', 'data_mean')
     
     """ pseudo = PseudoDetector(name='pseudo',
@@ -59,7 +68,7 @@ if __name__=='__main__':
      # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [andor, roi, ]:
+    for d in [andor, roi, abs_x, abs_y]:
         d.active = True
 
     def pre_scan_stuff(slf):
