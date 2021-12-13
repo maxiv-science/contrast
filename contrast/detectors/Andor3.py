@@ -98,6 +98,7 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
         self.proxy = PyTango.DeviceProxy(device)
         self.frames_n = frames_n
+        self.file_path = env.paths.directory
 
     def initialize(self):
         pass
@@ -115,15 +116,14 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
         # saving and paths
         if dataid is None:
             # no saving
-            self.proxy.nTriggers = n_starts
+            self.burst_n = 1
+            self.proxy.nTriggers = 1
             self.saving_file = f'andor_ct_{time_stamp}.h5'
-            #dest = '/data/staff/softimax/andor/ct'
-            dest = env.paths.directory
-            andor_dest_name = os.path.join(dest, self.saving_file)
+            andor_dest_name = os.path.join(self.file_path, self.saving_file)
             try:
                 self.proxy.DestinationFilename = andor_dest_name
-            except Exception as err:
-                raise Exception('Faild to prepare Andor withe the error: %s' % err)
+            except BaseException as err:
+                raise Exception('Faild to set Andor DestinationFilename attr with the error: %s' % err)
         else:
             # saving
             self.dataid = dataid
@@ -138,25 +138,25 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
                 self.proxy.DestinationFilename = self.saving_file
             else:
                 try:
-                    self.cam_path = env.paths.directory + '/scan_%06d_%s' % (dataid, self.name)
-                    os.mkdir(self.cam_path, 0o777)
+                    self.cam_path = os.path.join(self.file_path, f'scan_{self.dataid:06d}_{self.name}')
+                    os.umask(0)
+                    os.makedirs(self.cam_path, mode=0o777)
                     print(f'Detector frames are written to: {self.cam_path}')
-                    fn = 'scan_%06d_%s.h5' % (dataid, self.name)
-                    self.saving_file = os.path.join(self.cam_path, fn)
                     if os.path.exists(self.saving_file):
                         print('%s: this h5 file exists, I am raising an error now'%self.name)
-                        raise Exception('%s h5 file already exists' % self.name)
-                    self.proxy.DestinationFilename = self.saving_file
+                        raise Exception('%s h5 file already exists' % self.saving_file)
                     self.file_apndx = 0
-                except Exception as e:
+                except BaseException as e:
                     print(e)
 
         # arming and numbers of frames
         self.proxy.ExposureTime = acqtime
+        #print(f'self.burst_n {self.burst_n}')
         if self.burst_n == 1:
             self.proxy.TriggerMode = 'SOFTWARE'
             self.proxy.nTriggers = n_starts
             self.proxy.Arm()
+            print('Armed in SOFTWARE for a single trigger.')
         else:
             print(f'In internal, burst_n : {self.burst_n}')
             self.proxy.TriggerMode = 'INTERNAL'
@@ -178,10 +178,9 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
         try:
             if self.burst_n == 1:
                 self.proxy.SoftwareTrigger()
-                self.frames_expected += 1
+                if self.dataid:
+                    self.frames_expected += 1
             else:
-                #path = env.paths.directory
-                self.cam_path = env.paths.directory + '/scan_%06d_%s' % (self.dataid, self.name)
                 fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
                 self.saving_file = os.path.join(self.cam_path, fn)
                 if os.path.exists(self.saving_file):
@@ -192,8 +191,8 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
                 self.frames_expected += self.burst_n
                 self.proxy.Arm()
                 self.proxy.start()
-        except Exception as e:
-            print('Detector is running!!')
+        except BaseException as e:
+            print(e)
 
     def stop(self):
         self.proxy.Stop()
@@ -215,5 +214,4 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
             return None
         else:
             path, f_name = os.path.split(self.proxy.DestinationFilename)
-            #print(f'Andor file path: {path}, filename: {f_name}')
             return Link(self.proxy.DestinationFilename, 'entry/data/data', universal=False)

@@ -22,8 +22,8 @@ if __name__=='__main__':
     sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').SamplePath
     
     env.userLevel = 5
-    env.paths.directory = '/data/staff/softimax/commissioning/andor_data/20211210'
-    #env.paths.directory = sample_path
+    #env.paths.directory = '/data/staff/softimax/commissioning/andor_data/20211210'
+    env.paths.directory = sample_path
 
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
@@ -47,7 +47,7 @@ if __name__=='__main__':
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
 
     # detectors
-    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=200)
+    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=100)
     #andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor')
     
     #panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')

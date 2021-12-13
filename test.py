@@ -2,8 +2,10 @@
 
 ##%run ./beamlines/softimax/softimax_beamline.py
 ##import numpy as np
-umv beamline_energy 1300
+
 print('ok')
+runCommand('umv beamline_energy 708')
+'''
 for i in arrange(10):
 	if i < 10:
 		try:
@@ -38,3 +40,15 @@ for i in arrange(10):
 
 print(' function is happy' )
 
+
+
+
+mesh finex -2.5 1.5 15 finey -0.5 3.5 15 beamline_energy 1301 1319 9 0.1 
+
+
+run test
+umv beamline_energy 1300 
+
+wa   
+%liveplotmesh finex finey roi
+'''
