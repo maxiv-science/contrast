@@ -1,3 +1,7 @@
+import os
+import PyTango
+import datetime
+import time
 if __name__ == '__main__':
     from contrast.detectors.Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
     from contrast.environment import env
@@ -6,9 +10,7 @@ else:
     from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
     from ..environment import env
     from ..recorders.Hdf5Recorder import Link
-import os
-import PyTango
-import datetime
+
 
 class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
     """
@@ -50,11 +52,11 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         # arming and numbers of frames
         self.proxy.exposure_time = acqtime
         if self.burst_n == 1:
-            self.proxy.trigger_mode = 'Software'
+            self.proxy.trigger_mode = 'SOFTWARE'
             self.proxy.frame_count = n_starts
             self.proxy.start()
         else:
-            self.proxy.trigger_mode = 'Internal'
+            self.proxy.trigger_mode = 'INTERNAL'
             self.proxy.frame_count = self.burst_n
         self.frames_expected = 0
 
@@ -87,6 +89,7 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         else:
             return Link(self.saving_file , 'entry/instrument/andor', universal=True)
 
+
 class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
     """
     Provides an interface to the Andor Zyla Tango DS at SoftiMAX
@@ -107,6 +110,7 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
+        self.saving_file = ''
         self.proxy.Stop()
         self.proxy.TriggerMode = 'SOFTWARE'
 
@@ -151,14 +155,13 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
 
         # arming and numbers of frames
         self.proxy.ExposureTime = acqtime
-        #print(f'self.burst_n {self.burst_n}')
         if self.burst_n == 1:
             self.proxy.TriggerMode = 'SOFTWARE'
             self.proxy.nTriggers = n_starts
             self.proxy.Arm()
-            print('Armed in SOFTWARE for a single trigger.')
+            print('Armed in SOFTWARE trigger mode for a single trigger.')
         else:
-            print(f'In internal, burst_n : {self.burst_n}')
+            print(f'Armed in INTERNAL trigger mode, burst_n : {self.burst_n}')
             self.proxy.TriggerMode = 'INTERNAL'
             self.point_n_apndx = 0 
             self.proxy.nTriggers = self.burst_n
@@ -170,7 +173,6 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
             continue
         if self.burst_n != 1:
             pass
-            
 
     def start(self):
         while self.busy():

@@ -48,7 +48,6 @@ if __name__=='__main__':
 
     # detectors
     andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=100)
-    #andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor')
     
     #panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')
     abs_x = TangoAttributeDetector('abs_x', 'B318A-EA01/CTL/PandaPosTrig', 'AbsX')
