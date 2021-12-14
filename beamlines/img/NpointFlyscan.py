@@ -34,7 +34,7 @@ class NpointFlyscan(Mesh):
             self.latency = float(args[-1])
             self.print_progress = False
             self.acctime = kwargs['acctime'] if 'acctime' in kwargs.keys() else 0.5
-            self.panda = [d for d in Detector.get_active() if d.name=='panda0'][0]
+            self.panda = [d for d in Detector.get_active() if d.name=='panda2'][0]
         except:
             #raise MacroSyntaxError
             raise
@@ -43,10 +43,10 @@ class NpointFlyscan(Mesh):
         # set up all triggered detectors
         for d in Detector.get_active():
 
-            if isinstance(d, TriggeredDetector) and not d.name=='panda0':
+            if isinstance(d, TriggeredDetector) and not d.name=='panda2':
                 d.hw_trig = on
                 d.hw_trig_n = self.fastmotorintervals + 1
-        # special treatment for the panda0 which rules all
+        # special treatment for the panda2 which rules all
         panda = self.panda
         if on:
             self.old_hw_trig = panda.hw_trig

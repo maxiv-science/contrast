@@ -9,7 +9,7 @@ if __name__=='__main__':
 
     import contrast
     from contrast.environment import env, runCommand
-    from contrast.environment.data import SdmPathFixer
+    from contrast.environment.data import PathFixer
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.TangoMotor import TangoMotor
