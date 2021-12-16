@@ -8,7 +8,7 @@ import numpy as np
 from contrast.environment import env, macro, register_shortcut, runCommand
 
 @macro
-class calc_ssa(object):
+class Calc_SSA(object):
     """
     Calculate the SSA settings needed for coherent / incohernet beam
     at either the diffraction (D) or the imaging (I) endstation.

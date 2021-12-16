@@ -35,13 +35,9 @@ if __name__=='__main__':
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
-    from img_beamline_macros import *
-    from NpointFlyscan import NpointFlyscan
-    from macro_calc_ssa import *
-    from macro_calc_osa import *
-    from macro_attenuate import *
-    from macro_set_beamline import *
     from contrast.scans import SoftwareScan, Ct
+    from macros_common import *
+    from macros_img import *
     import os
 
     # add a scheduler to pause scans when shutters close

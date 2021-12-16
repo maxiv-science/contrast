@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from contrast.environment import env, macro, register_shortcut, runCommand
 
 @macro
-class calc_osa(object):
+class Calc_OSA(object):
     """
     Calculate the maximum distance of the OSA from the sample and the corresponding size
     of the OSA. From there smaller and larger OSA diameters are possible if the OSA is 
