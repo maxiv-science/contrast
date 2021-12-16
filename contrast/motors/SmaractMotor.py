@@ -57,7 +57,6 @@ class SmaractRotationMotor(SmaractLinearMotor):
         result = eval(self.proxy.Arbitrary_command('GA%u'%self.axis))
         pos = int(result[2])
         rev = int(result[3])
-        sign = 1 if (rev == 0) else 1
         if rev == 0:
             pos = pos * 1e-6
         else:
@@ -75,4 +74,62 @@ class SmaractRotationMotor(SmaractLinearMotor):
             rev = 0
             pos = pos * 1e6
         self.proxy.Write_angle('%d, %u, %u' % (self.axis, int(pos), rev))
+
+class SmaractLinearMotor2(Motor):
+    """
+    Single Smaract motor axis. Connecting to new Smaract device using attributes 
+    """
+
+    def __init__(self, device, axis, velocity=0, **kwargs):
+        """
+        :param device: Path to the MCS Tango device
+        :type device: str
+        :param axis: Axis number on the controller
+        :type axis: int
+        :param ``**kwargs``: Passed on to the ``Motor`` base class
+        """
+        super(SmaractLinearMotor2, self).__init__(**kwargs)
+        self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
+        self._axis = int(axis)
+        attr = 'velocity_%d' % self._axis
+        self.proxy.write_attribute(attr, velocity)
+
+    @property
+    def dial_position(self):
+        attr = 'position_%d' % self._axis
+        return self.proxy.read_attribute(attr).value
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        attr = 'position_%d' % self._axis
+        self.proxy.write_attribute(attr, pos)
+
+    def busy(self):
+        attr = 'state_%d' % self._axis
+        # Smaracts return this:
+        # 0 (ON), 1 (MOVING), 2 (ALARM)
+        return not (self.proxy.read_attribute(attr).value == 0)
+
+    def stop(self):
+        self.proxy.stopAll() # safety first
+
+class SmaractRotationMotor2(SmaractLinearMotor2):
+    @property
+    def dial_position(self):
+        attr = 'angle_%d' % self._axis
+        result = self.proxy.read_attribute(attr).value
+        result = result.split(',')
+        pos = int(result[0])
+        rev = int(result[1])
+        pos = pos * 1e-6 + rev * 360
+        return pos
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        angle = int(1e6 * (pos % 360)) 
+        rev = int(pos // 360)
+        attr = 'angle_%d' % self._axis
+        val = '%d,%d' % (angle, rev)
+        self.proxy.write_attribute(attr, val)
 

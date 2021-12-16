@@ -24,7 +24,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
     #. flickering the "A" bit causes a trigger.
     """
 
-    def __init__(self, name=None, host='172.16.126.88',
+    def __init__(self, name=None, host='172.16.126.101',
                  ctrl_port=8888, data_port=8889, bitblock='BITS1'):
         self.host = host
         self.ctrl_port = ctrl_port
@@ -44,8 +44,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
     def query(self, cmd):
         self.ctrl_sock.sendall(bytes(cmd + '\n', 'ascii'))
-        ret = self.ctrl_sock.recv(SOCK_RECV).decode()
-        return ret
+        return self.ctrl_sock.recv(SOCK_RECV).decode()
 
     def busy(self):
         if self.acqthread and self.acqthread.is_alive():
@@ -83,7 +82,6 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         done = False
         buff = b''
         while not done:
-            ##print('%s trying to read a header...' % self.name)
             buff += s.recv(SOCK_RECV)
             if b'\n\n' in buff:
                 done = True
@@ -93,7 +91,6 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             ch = line.strip().split()[0].decode()
             op = line.strip().split()[2].decode()
             channels.append(ch + '_' + op)
-        ##print('%s read a header' % self.name)
 
         # Then put the rest of the data into the same buffer and continue
         n = 0
@@ -105,7 +102,6 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             # anything more to read?
             ready = select.select([s], [], [], RECV_DELAY)[0]
             if ready:
-                ##print('%s read some data' % self.name)
                 buff += s.recv(SOCK_RECV)
 
             #anything more to parse?
