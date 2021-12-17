@@ -238,6 +238,7 @@ if __name__ == '__main__':
 
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
+    NpointFlyscan.panda = panda0
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',
                                        'c2': 'panda0/INENC2.VAL_Mean',

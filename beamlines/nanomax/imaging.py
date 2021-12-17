@@ -156,6 +156,7 @@ if __name__ == '__main__':
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     # Pandabox reading the LC400 encoders, both digital (AquadB) and analog
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
+    NpointFlyscan.panda = panda2
     # Pandabox reading the Attocube (AquadB) encoders
     # panda3 = PandaBox(name='panda3', host='b-nanomax-pandabox-3')
 

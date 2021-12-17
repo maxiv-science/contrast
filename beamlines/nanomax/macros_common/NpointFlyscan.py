@@ -11,8 +11,10 @@ class NpointFlyscan(Mesh):
     """
     Flyscan macro for the Npoint LC400 setup.
 
-    npointflyscan <fly-motor> <start> <stop> <intervals> <step-motor1>
-                  <start1> <stop1> <intervals1> ... <exp time> <latency>
+    npointflyscan <fly-motor> <start> <stop> <intervals>
+                  <step-motor1> <start1> <stop1> <intervals1>
+                  ...
+                  <exp time> <latency>
 
     The argument fly-motor must be an instance of the LC400Motor class.
 
@@ -20,30 +22,29 @@ class NpointFlyscan(Mesh):
       acctime: set the acceleration time of the piezo (default acctime=0.5)
     """
 
+    panda = None
+
     def __init__(self, *args, **kwargs):
         """
         Parse arguments.
         """
-        try:
-            assert all_are_motors(args[:-2:4])
-            super(NpointFlyscan, self).__init__(*args[4:-1])
-            self.fastmotor = args[0]
-            # convert to dial coordinates, as the LC400 operates in dial units
-            self.fastmotorstart = ((float(args[1]) - self.fastmotor._offset)
-                                   / self.fastmotor._scaling)
-            self.fastmotorend = ((float(args[2]) - self.fastmotor._offset)
-                                 / self.fastmotor._scaling)
-            self.fastmotorintervals = int(args[3])
-            self.exptime = float(args[-2])
-            self.latency = float(args[-1])
-            self.print_progress = False
-            self.acctime = (kwargs['acctime'] if 'acctime' in kwargs.keys()
-                            else 0.5)
-            self.panda = [d for d in Detector.get_active()
-                          if d.name == 'panda2'][0]
-        except:
-            # raise MacroSyntaxError
-            raise
+        assert all_are_motors(args[:-2:4])
+        super(NpointFlyscan, self).__init__(*args[4:-1])
+        self.fastmotor = args[0]
+        # convert to dial coordinates, as the LC400 operates in dial units
+        self.fastmotorstart = ((float(args[1]) - self.fastmotor._offset)
+                               / self.fastmotor._scaling)
+        self.fastmotorend = ((float(args[2]) - self.fastmotor._offset)
+                             / self.fastmotor._scaling)
+        self.fastmotorintervals = int(args[3])
+        self.exptime = float(args[-2])
+        self.latency = float(args[-1])
+        self.print_progress = False
+        self.acctime = (kwargs['acctime'] if 'acctime' in kwargs.keys()
+                        else 0.5)
+        if self.panda is None:
+            raise Exception('Set NpointFlyscan.panda to your panda master')
+        print('Flyscan controlled by %s' % self.panda.name)
 
     def _set_det_trig(self, on):
         # set up all triggered detectors
