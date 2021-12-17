@@ -23,6 +23,7 @@ if __name__ == '__main__':
     from contrast.motors.Pmd401Motor import BaseYMotor
     from contrast.motors.Pmd401Motor import BaseZMotor
     from contrast.detectors.Eiger import Eiger
+    from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector, PseudoDetector
@@ -148,6 +149,7 @@ if __name__ == '__main__':
 
     # detectors
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
+    xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
 
     # The pandabox and some related pseudodetectors
