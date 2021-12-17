@@ -25,26 +25,26 @@ class SmaractLinearMotor(Motor):
         :type velocity: float
         :param ``**kwargs``: Passed on to the ``Motor`` base class
         """
-        super(SmaractLinearMotor2, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.proxy = tango.DeviceProxy(device)
         self.proxy.set_source(tango.DevSource.DEV)
-        self._axis = int(axis)
+        self.axis = int(axis)
         if velocity is not None:
-            attr = 'velocity_%d' % self._axis
+            attr = 'velocity_%d' % self.axis
             self.proxy.write_attribute(attr, velocity*1e-3)
 
     @property
     def dial_position(self):
-        attr = 'position_%d' % self._axis
+        attr = 'position_%d' % self.axis
         return self.proxy.read_attribute(attr).value * 1e-3
 
     @dial_position.setter
     def dial_position(self, pos):
-        attr = 'position_%d' % self._axis
+        attr = 'position_%d' % self.axis
         self.proxy.write_attribute(attr, pos * 1e3)
 
     def busy(self):
-        attr = 'state_%d' % self._axis
+        attr = 'state_%d' % self.axis
         return not (self.proxy.read_attribute(attr).value == tango.DevState.ON)
 
     def home(self):
@@ -61,7 +61,7 @@ class SmaractLinearMotor(Motor):
 class SmaractRotationMotor(SmaractLinearMotor):
     @property
     def dial_position(self):
-        attr = 'angle_%d' % self._axis
+        attr = 'angle_%d' % self.axis
         result = self.proxy.read_attribute(attr).value
         result = result.split(',')
         pos = int(result[0])
@@ -73,6 +73,6 @@ class SmaractRotationMotor(SmaractLinearMotor):
     def dial_position(self, pos):
         angle = int(1e6 * (pos % 360))
         rev = int(pos // 360)
-        attr = 'angle_%d' % self._axis
+        attr = 'angle_%d' % self.axis
         val = '%d,%d' % (angle, rev)
         self.proxy.write_attribute(attr, val)
