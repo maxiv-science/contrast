@@ -249,7 +249,7 @@ if __name__ == '__main__':
     # keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
 
     # the environment keeps track of where to write data
-    env.paths = SdmPathFixer('B303A/CTL/SDM-01')
+    env.paths = SdmPathFixer('B303A-E02/CTL/SDM-01')
 
     # an hdf5 recorder
     h5rec = Hdf5Recorder(name='h5rec')
