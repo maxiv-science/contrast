@@ -1,120 +1,64 @@
 """
-Provides a ``Motor`` subclass for Smaract positioners.
+Provides a ``Motor`` subclass for Smaract positioners. All numbers in
+micrometers.
+
+Controls these via a MAX IV Tango device,
+https://gitlab.maxiv.lu.se/kits-maxiv/dev-maxiv-mcs
 """
 
-import PyTango
+import tango
 from . import Motor
 import time
+
 
 class SmaractLinearMotor(Motor):
     """
     Single Smaract motor axis.
     """
-
-    def __init__(self, device, axis, home_on_every_move=False, **kwargs):
+    def __init__(self, device, axis, velocity=None, **kwargs):
         """
         :param device: Path to the MCS Tango device
         :type device: str
         :param axis: Axis number on the controller
         :type axis: int
+        :param velocity: Initialize velocity, defaults to None
+        :type velocity: float
         :param ``**kwargs``: Passed on to the ``Motor`` base class
         """
-        super(SmaractLinearMotor, self).__init__(**kwargs)
-        self.proxy = PyTango.DeviceProxy(device)
-        self.proxy.set_source(PyTango.DevSource.DEV)
-        self.axis = int(axis)
-        self.home_on_every_move = home_on_every_move
+        super(SmaractLinearMotor2, self).__init__(**kwargs)
+        self.proxy = tango.DeviceProxy(device)
+        self.proxy.set_source(tango.DevSource.DEV)
+        self._axis = int(axis)
+        if velocity is not None:
+            attr = 'velocity_%d' % self._axis
+            self.proxy.write_attribute(attr, velocity*1e-3)
+
+    @property
+    def dial_position(self):
+        attr = 'position_%d' % self._axis
+        return self.proxy.read_attribute(attr).value * 1e-3
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        attr = 'position_%d' % self._axis
+        self.proxy.write_attribute(attr, pos * 1e3)
+
+    def busy(self):
+        attr = 'state_%d' % self._axis
+        return not (self.proxy.read_attribute(attr).value == tango.DevState.ON)
 
     def home(self):
         print('\nhoming %s...' % self.name)
-        self.proxy.arbitrary_command("FRM%u,2,60000,1" % self.axis)
+        self.proxy.arbitraryCommand("FRM%u,2,60000,1" % self.axis)
         while self.busy():
             time.sleep(.1)
         print('homing done')
 
-    @property
-    def dial_position(self):
-        return self.proxy.Read_position(self.axis)
-
-    @dial_position.setter
-    def dial_position(self, pos):
-        if self.home_on_every_move:
-            self.home()
-        self.proxy.Write_position('%d, %f' % (self.axis, pos))
-
-    def busy(self):
-        state = self.proxy.channel_status(self.axis)
-        # Smaracts return this:
-        # 0 (ON), 1 (MOVING), 2 (ALARM)
-        return not (state == 0)
-
     def stop(self):
-        self.proxy.stop_all() # safety first
+        self.proxy.stopAll()  # safety first
+
 
 class SmaractRotationMotor(SmaractLinearMotor):
-    @property
-    def dial_position(self):
-        result = eval(self.proxy.Arbitrary_command('GA%u'%self.axis))
-        pos = int(result[2])
-        rev = int(result[3])
-        if rev == 0:
-            pos = pos * 1e-6
-        else:
-            pos = pos * 1e-6 - 360
-        return pos
-
-    @dial_position.setter
-    def dial_position(self, pos):
-        if self.home_on_every_move:
-            self.home()
-        if pos < 0:
-            rev = -1
-            pos = (pos + 360) * 1e6
-        else:
-            rev = 0
-            pos = pos * 1e6
-        self.proxy.Write_angle('%d, %u, %u' % (self.axis, int(pos), rev))
-
-class SmaractLinearMotor2(Motor):
-    """
-    Single Smaract motor axis. Connecting to new Smaract device using attributes 
-    """
-
-    def __init__(self, device, axis, velocity=0, **kwargs):
-        """
-        :param device: Path to the MCS Tango device
-        :type device: str
-        :param axis: Axis number on the controller
-        :type axis: int
-        :param ``**kwargs``: Passed on to the ``Motor`` base class
-        """
-        super(SmaractLinearMotor2, self).__init__(**kwargs)
-        self.proxy = PyTango.DeviceProxy(device)
-        self.proxy.set_source(PyTango.DevSource.DEV)
-        self._axis = int(axis)
-        attr = 'velocity_%d' % self._axis
-        self.proxy.write_attribute(attr, velocity)
-
-    @property
-    def dial_position(self):
-        attr = 'position_%d' % self._axis
-        return self.proxy.read_attribute(attr).value
-
-    @dial_position.setter
-    def dial_position(self, pos):
-        attr = 'position_%d' % self._axis
-        self.proxy.write_attribute(attr, pos)
-
-    def busy(self):
-        attr = 'state_%d' % self._axis
-        # Smaracts return this:
-        # 0 (ON), 1 (MOVING), 2 (ALARM)
-        return not (self.proxy.read_attribute(attr).value == 0)
-
-    def stop(self):
-        self.proxy.stopAll() # safety first
-
-class SmaractRotationMotor2(SmaractLinearMotor2):
     @property
     def dial_position(self):
         attr = 'angle_%d' % self._axis
@@ -127,9 +71,8 @@ class SmaractRotationMotor2(SmaractLinearMotor2):
 
     @dial_position.setter
     def dial_position(self, pos):
-        angle = int(1e6 * (pos % 360)) 
+        angle = int(1e6 * (pos % 360))
         rev = int(pos // 360)
         attr = 'angle_%d' % self._axis
         val = '%d,%d' % (angle, rev)
         self.proxy.write_attribute(attr, val)
-

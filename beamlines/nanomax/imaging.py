@@ -16,8 +16,7 @@ if __name__ == '__main__':
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
-    from contrast.motors.SmaractMotor import SmaractLinearMotor2
-    from contrast.motors.SmaractMotor import SmaractRotationMotor2
+    from contrast.motors.SmaractMotor import SmaractRotationMotor
     from contrast.motors.NanosMotor import NanosMotor
     from contrast.motors.Pmd401Motor import Pmd401Motor
     from contrast.motors.Pmd401Motor import BaseYMotor
@@ -68,9 +67,9 @@ if __name__ == '__main__':
     bz = BaseZMotor(motors=(b1, b2), name='bz', dry_run=False, userlevel=1, user_format='%.3f')   
 
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    pinhole_x = SmaractLinearMotor2(device='B303A-EH/CTL/PZCU-06', axis=0, name='pinhole_x', userlevel=1, user_format='%.3f', dial_format='%.3f', scaling=1e-3)
-    pinhole_y = SmaractLinearMotor2(device='B303A-EH/CTL/PZCU-06', axis=1, name='pinhole_y', userlevel=1, user_format='%.3f', dial_format='%.3f', scaling=1e-3)
-    sr = SmaractRotationMotor2(device='B303A-EH/CTL/PZCU-06', axis=2, name='sr', userlevel=1, user_format='%.4f', dial_format='%.4f', velocity=3000000)
+    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='pinhole_x', userlevel=1, user_format='%.3f', dial_format='%.3f')
+    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='pinhole_y', userlevel=1, user_format='%.3f', dial_format='%.3f')
+    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=2, name='sr', userlevel=1, user_format='%.4f', dial_format='%.4f', velocity=3000000)
 
     # sample piezos
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
@@ -111,27 +110,27 @@ if __name__ == '__main__':
 
     # smaracts
     # controller 2
-    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3, scaling=1e-3)
-    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3, scaling=1e-3)
-    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=1, scaling=1e-3)
-    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3, scaling=1e-3)
-    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3, scaling=1e-3)
-    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3, scaling=1e-3)
-    attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2, scaling=1e-3)
-    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2, scaling=1e-3)
-    attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2, scaling=1e-3)
-    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2, scaling=1e-3)
-    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3, scaling=1e-3)
+    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
+    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
+    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=1)
+    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3)
+    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3)
+    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3)
+    attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2)
+    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2)
+    attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
+    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
 
     # controller 3
-    # diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)#, scaling=1e-3)
-    # diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)#, scaling=1e-3)
-    # diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)#, scaling=1e-3)
+    # diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)#)
+    # diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)#)
+    # diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)#)
 
     # controller 4 in OH2 for fast shutter and first diamondBPM
-    # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#, scaling=1e-3)
-    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#, scaling=1e-3)
-    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)#, scaling=1e-3)
+    # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#)
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)#)
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
