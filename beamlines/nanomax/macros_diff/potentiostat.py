@@ -15,6 +15,7 @@ import tango
 import time
 import numpy as np
 
+
 class EC301Motor(TangoAttributeMotor):
     """
     Simple motor interface to the EC301 potentiostat, controlled via:
@@ -27,7 +28,7 @@ class EC301Motor(TangoAttributeMotor):
     @property
     def dial_position(self):
         return super().dial_position
-    
+
     @dial_position.setter
     def dial_position(self, pos):
         self.proxy.setPotential(pos)
@@ -49,9 +50,9 @@ class Cyclic_Voltammetry():
 
     def run(self):
         # Set up and tell the recorders what's about to happen
-        print('Running CV, scan #%u...'%self.scannr)
+        print('Running CV, scan #%u...' % self.scannr)
         for r in active_recorders():
-            r.queue.put(RecorderHeader(scannr=self.scannr, 
+            r.queue.put(RecorderHeader(scannr=self.scannr,
                                        status='started',
                                        path=env.paths.directory,
                                        description=self._command))
@@ -60,7 +61,7 @@ class Cyclic_Voltammetry():
         self.dev.potentialCycle(self.args)
         plt.ion()
         fig, ax = plt.subplots(nrows=2)
-        fig.suptitle('Scan #%d'%self.scannr)
+        fig.suptitle('Scan #%d' % self.scannr)
         plt.setp(ax[0], 'xlabel', 't', 'ylabel', 'E')
         plt.setp(ax[1], 'xlabel', 'E', 'ylabel', 'I')
         done = False
@@ -89,5 +90,6 @@ class Cyclic_Voltammetry():
                                        status='finished',
                                        path=env.paths.directory,
                                        description=self._command))
+
 
 pot = EC301Motor(name='pot')

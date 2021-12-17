@@ -1,12 +1,11 @@
 """
-Sets up a some actual nanomax hardware for the imaging station with beamline.
+The imaging endstation at NanoMAX.
 """
 
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
-if __name__=='__main__':
-
+if __name__ == '__main__':
     import contrast
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
@@ -14,7 +13,6 @@ if __name__=='__main__':
     from contrast.recorders import Hdf5Recorder, StreamRecorder, ScicatRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
-    from contrast.detectors.LC400Buffer import LC400Buffer
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
@@ -24,40 +22,32 @@ if __name__=='__main__':
     from contrast.motors.Pmd401Motor import Pmd401Motor
     from contrast.motors.Pmd401Motor import BaseYMotor
     from contrast.motors.Pmd401Motor import BaseZMotor
-    from contrast.motors.E727 import E727Motor
-    from contrast.detectors.Pilatus import Pilatus
-    from contrast.detectors.Xspress3 import Xspress3
-    from contrast.detectors.Andor3 import Andor3
-#    from contrast.detectors.Lima import LimaAndor
     from contrast.detectors.Eiger import Eiger
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector, PseudoDetector
-    from contrast.detectors.DG645 import StanfordTriggerSource
-    from contrast.detectors.Keysight import Keysight2985
     from contrast.scans import SoftwareScan, Ct
     from macros_common import *
     from macros_img import *
     import os
+    import time
 
     # add a scheduler to pause scans when shutters close
-    #env.scheduler = MaxivScheduler(
-    #                    shutter_list=['B303A-FE/VAC/HA-01',
-    #                                 'B303A-FE/PSS/BS-01',
-    #                                  'B303A-O/PSS/BS-01',
-    #                                  'B303A-E/PSS/BS-01',],
-    #                    avoid_injections=False,
-    #                    respect_countdown=False,)
-    
+    env.scheduler = MaxivScheduler(
+                        shutter_list=['B303A-FE/VAC/HA-01',
+                                      'B303A-FE/PSS/BS-01',
+                                      'B303A-O/PSS/BS-01'],
+                        avoid_injections=False,
+                        respect_countdown=False,)
+
     env.userLevel = 2
-    # chosen these levels here:
+    # arbitrarily chosen these levels:
     # 1 - simple user
     # 2 - power user
     # 3 - optics
     # 4 - potentially dangerous
 
     # Nanos motors for central stop, zone plate and order sorting aperture positioning
-
     zpx = NanosMotor(device='staff/ulfjoh/nanos-1', axis=4, name='zpx', userlevel=1, scaling=5e-4)
     zpy = NanosMotor(device='staff/ulfjoh/nanos-1', axis=5, name='zpy', userlevel=1, scaling=-5e-4)
     zpz = NanosMotor(device='staff/ulfjoh/nanos-1', axis=8, name='zpz', userlevel=1, scaling=-5e-4)
@@ -66,8 +56,8 @@ if __name__=='__main__':
     osax = NanosMotor(device='staff/ulfjoh/nanos-1', axis=13, name='osax', userlevel=1, scaling=-5e-4)
     osay = NanosMotor(device='staff/ulfjoh/nanos-1', axis=14, name='osay', userlevel=1, scaling=-5e-4)
     osaz = NanosMotor(device='staff/ulfjoh/nanos-1', axis=15, name='osaz', userlevel=1, scaling=-5e-4)
-    #m16 = NanosMotor(device='staff/ulfjoh/nanos-1', axis=16, name='m16', userlevel=1, scaling=-5e-4)
-    #m17 = NanosMotor(device='staff/ulfjoh/nanos-1', axis=17, name='m17', userlevel=1, scaling=-5e-4)
+    # m16 = NanosMotor(device='staff/ulfjoh/nanos-1', axis=16, name='m16', userlevel=1, scaling=-5e-4)
+    # m17 = NanosMotor(device='staff/ulfjoh/nanos-1', axis=17, name='m17', userlevel=1, scaling=-5e-4)
 
     # PiezoLEGS motors for coarse sample positioning
     bx = Pmd401Motor(device='test/ctl/pmd-01', axis=0, name='bx', userlevel=1, scaling=1e-3, user_format='%.3f')
@@ -80,11 +70,6 @@ if __name__=='__main__':
     pinhole_x = SmaractLinearMotor2(device='B303A-EH/CTL/PZCU-06', axis=0, name='pinhole_x', userlevel=1, user_format='%.3f', dial_format='%.3f', scaling=1e-3)
     pinhole_y = SmaractLinearMotor2(device='B303A-EH/CTL/PZCU-06', axis=1, name='pinhole_y', userlevel=1, user_format='%.3f', dial_format='%.3f', scaling=1e-3)
     sr = SmaractRotationMotor2(device='B303A-EH/CTL/PZCU-06', axis=2, name='sr', userlevel=1, user_format='%.4f', dial_format='%.4f', velocity=3000000)
-
-    # PI NanoCube 3-axis piezo. To be used in temporary setups
-    #sx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    #sy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='sy', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    #sz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='sz', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
 
     # sample piezos
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
@@ -123,11 +108,6 @@ if __name__=='__main__':
     # Nanobpm motor. Positions the bpm vertically in the beam. Almost never moved. Should be at 2.5 mm
     nanobpm_y = TangoMotor(device='b303a-o/dia/bpx-01', name='nanobpm_y', userlevel=6, dial_limits=(-0.1, 23.1))
 
-    # buffered position detector - internal position recording is
-    # not configured in the NpointFlyscan macro right now!
-    # npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
-    # npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
-
     # smaracts
     # controller 2
     dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3, scaling=1e-3)
@@ -141,20 +121,17 @@ if __name__=='__main__':
     attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2, scaling=1e-3)
     attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2, scaling=1e-3)
     diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3, scaling=1e-3)
-    #pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2)#, scaling=-1e-3)
-    #pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2)#, scaling=1e-3)
-    #pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
 
     # controller 3
-    #diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)#, scaling=1e-3)
-    #diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)#, scaling=1e-3)
-    #diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)#, scaling=1e-3)
+    # diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)#, scaling=1e-3)
+    # diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)#, scaling=1e-3)
+    # diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)#, scaling=1e-3)
 
     # controller 4 in OH2 for fast shutter and first diamondBPM
-    #fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#, scaling=1e-3)
+    # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#, scaling=1e-3)
     dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#, scaling=1e-3)
     dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)#, scaling=1e-3)
-    
+
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
     ssa_gapy = TangoMotor(device='B303A-O/opt/SLIT-01-GAPYPM', name='ssa_gapy', userlevel=2)
@@ -169,17 +146,8 @@ if __name__=='__main__':
     dummy1 = DummyMotor(name='dummy1', userlevel=2)
     dummy2 = DummyMotor(name='dummy2', userlevel=2)
 
-    # The delay generator as a software source for hardware triggers
-    #stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
-
     # detectors
-    #pilatus = Pilatus(name='pilatus', hostname='b-nanomax-mobile-ipc-01')
-    xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
-    #andor = Andor3(name='andor', device='staff/clewen/zyla')
-    #andor.proxy.rotation=1
-    #andor.proxy.flipud=True
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
-
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
 
     # The pandabox and some related pseudodetectors
@@ -191,21 +159,19 @@ if __name__=='__main__':
     # panda3 = PandaBox(name='panda3', host='b-nanomax-pandabox-3')
 
     pseudo = PseudoDetector(name='pseudo',
-                            variables={'c1':'panda2/INENC1.VAL_Mean',
-                                       'c2':'panda2/INENC2.VAL_Mean',
-                                       'c3':'panda2/INENC3.VAL_Mean',
-                                       'a1':'panda2/FMC_IN.VAL1_Mean',
-                                       'a2':'panda2/FMC_IN.VAL2_Mean',
-                                       'a3':'panda2/FMC_IN.VAL3_Mean'},
-                            expression={'x':'c1', 'y':'c3', 'z':'c2', 'x_analog':'a1', 'y_analog':'a3', 'z_analog':'a2'})
-
-    # The keysight as both a detector (ammeter) and motor (bias voltage)
-    #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
-    #keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
+                            variables={'c1': 'panda2/INENC1.VAL_Mean',
+                                       'c2': 'panda2/INENC2.VAL_Mean',
+                                       'c3': 'panda2/INENC3.VAL_Mean',
+                                       'a1': 'panda2/FMC_IN.VAL1_Mean',
+                                       'a2': 'panda2/FMC_IN.VAL2_Mean',
+                                       'a3': 'panda2/FMC_IN.VAL3_Mean'},
+                            expression={'x': 'c1', 'y': 'c3', 'z': 'c2',
+                                        'x_analog': 'a1',
+                                        'y_analog': 'a3',
+                                        'z_analog': 'a2'})
 
     # the environment keeps track of where to write data
-    env.paths = SdmPathFixer('B303A-E01/CTL/SDM-01')    
-    #env.paths.directory = '/mxn/groups/nanomax/ulfjoh/img_data'
+    env.paths = SdmPathFixer('B303A-E01/CTL/SDM-01')
 
     # an hdf5 recorder
     h5rec = Hdf5Recorder(name='h5rec')
@@ -213,9 +179,9 @@ if __name__=='__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start() # removed for now
+    zmqrec.start()  # removed for now
 
-    # a scicat recorder
+    # a scicat recorder - paused until further notice
     # scicatrec = ScicatRecorder(name='scicatrec')
     # scicatrec.start()
 
@@ -226,19 +192,15 @@ if __name__=='__main__':
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
-    import PyTango
-    import time
     def pre_scan_stuff(slf):
         runCommand('stoplive')
         runCommand('fsopen')
         b1.stop()   # making sure the base motors are not regulating
         time.sleep(0.2)
+
     def post_scan_stuff(slf):
         runCommand('fsclose')
         pass
-
-
-
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
@@ -256,6 +218,7 @@ if __name__=='__main__':
     except:
         pass
 
-    # add a memorizer so the motors keep their user positions and limits after a restart
-    # note that this will overwrite the dial positions set above! delete the file to generate it again.
+    # add a memorizer so the motors keep their user positions and limits
+    # after a restart note that this will overwrite the dial positions
+    # set above! delete the file to generate it again.
     memorizer = MotorMemorizer(name='memorizer', filepath='/mxn/groups/nanomax/nimis/sw/.memorizer')

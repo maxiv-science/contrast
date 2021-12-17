@@ -1,12 +1,11 @@
 """
-Sets up a some actual nanomax hardware.
+The diffraction endstation at NanoMAX.
 """
 
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
-if __name__=='__main__':
-
+if __name__ == '__main__':
     import contrast
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
@@ -25,7 +24,6 @@ if __name__=='__main__':
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Andor3 import Andor3
-    from contrast.detectors.Lima import LimaXspress3
     from contrast.detectors.Eiger import Eiger
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
@@ -36,27 +34,28 @@ if __name__=='__main__':
     from macros_common import *
     from macros_diff import *
     import os
+    import time
 
     # add a scheduler to pause scans when shutters close
     env.scheduler = MaxivScheduler(
                         shutter_list=['B303A-FE/VAC/HA-01',
                                       'B303A-FE/PSS/BS-01',
                                       'B303A-O/PSS/BS-01',
-                                      'B303A-E/PSS/BS-01',],
+                                      'B303A-E/PSS/BS-01'],
                         avoid_injections=False,
                         respect_countdown=False,)
     
     env.userLevel = 2
-    # chosen these levels here:
+    # arbitrarily chosen these levels:
     # 1 - simple user
     # 2 - power user
     # 3 - optics
     # 4 - potentially dangerous
 
     # PI NanoCube 3-axis piezo. To be used in temporary setups
-    #sx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    # sx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     sy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='sy', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    #sz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='sz', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    # sz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='sz', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
 
     # sample piezos
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sx', scaling=-1.0, dial_limits=(-100,100), user_format='%.3f')
@@ -111,8 +110,8 @@ if __name__=='__main__':
 
     # buffered position detector - internal position recording is
     # not configured in the NpointFlyscan macro right now!
-    #npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
-    #npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
+    # npoint_buff = LC400Buffer(device='B303A/CTL/FLYSCAN-02', name='npoint_buff', xaxis=2, yaxis=3, zaxis=1)
+    # npoint_buff.active = False # this can be switched on from flyscanning macros when needed, although it does no harm.
 
     # smaracts
     # controller 1
@@ -121,7 +120,7 @@ if __name__=='__main__':
     skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2)#, scaling=1e-3)
     skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2)#, scaling=1e-3)
     kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)#, scaling=1e-3)
-    #sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
+    # sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
     pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3)#, scaling=1e-3)
     pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3)#, scaling=1e-3)
     pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3)#, scaling=1e-3)
@@ -151,10 +150,9 @@ if __name__=='__main__':
     fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#, scaling=1e-3)
     dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#, scaling=1e-3)
     dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)#, scaling=1e-3)
-    
-    # we use ch0 on that controller for the long range sample motor for now
-    #samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1, scaling=1e-3)
 
+    # we use ch0 on that controller for the long range sample motor for now
+    # samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1, scaling=1e-3)
 
     # KB mirror pitch piezos
     m1froll = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=1, name='m1froll', userlevel=2, dial_limits=(0,30))
@@ -169,7 +167,7 @@ if __name__=='__main__':
     #kbh5 = TangoMotor(device='b303a-e02/opt/mir-01-h5ml', name='kbh5', userlevel=6, user_format='%.4f', dial_format='%.4f')
 
     # Robot
-    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
@@ -200,7 +198,7 @@ if __name__=='__main__':
     # beam stop motors
     beamstop_x = TangoMotor(device='B303A-E02/DIA/SAMS-01-X', name='beamstop_x', userlevel=2, scaling=1.0)
     beamstop_y = TangoMotor(device='B303A-E02/DIA/SAMS-01-Y', name='beamstop_y', userlevel=2, scaling=1.0)
-    #sams_z = TangoMotor(device='B303A-E02/DIA/SAMS-01-Z', name='sams_z', userlevel=4, scaling=-1.0)
+    # sams_z = TangoMotor(device='B303A-E02/DIA/SAMS-01-Z', name='sams_z', userlevel=4, scaling=-1.0)
 
     # xrf detector linear motion
     xrf_x = TangoMotor(device='B303A-E02/DIA/DMA-01-X', name='xrf_x', userlevel=4, scaling=1.25, dial_limits=(0, 75))
@@ -229,21 +227,11 @@ if __name__=='__main__':
     # detectors
     pilatus = Pilatus(name='pilatus',
                      hostname='b-nanomax-mobile-ipc-01')
-    #merlin = Merlin(name='merlin', host='b-daq-node-2')
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     andor = Andor3(name='andor', device='staff/clewen/zyla')
     andor.proxy.rotation=1
     andor.proxy.flipud=True
-#    xspress3 = LimaXspress3(name='xspress3',
-#                            lima_device='lima/limaccd/b303a-a100380-dia-detxfcu-01',
-#                            det_device='lima/xspress3/b303a-a100380-dia-detxfcu-01')
-#    andor = LimaAndor(name='andor',
-#                       lima_device='lima/limaccds/andortest',
-#                       det_device='lima/andor3/andortest')
-    #andor.lima.image_rotation='90'
-    #andor.lima.image_flip=[True, False]
-
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
@@ -251,14 +239,14 @@ if __name__=='__main__':
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     pseudo = PseudoDetector(name='pseudo',
-                            variables={'c1':'panda0/INENC1.VAL_Mean',
-                                       'c2':'panda0/INENC2.VAL_Mean',
-                                       'c3':'panda0/INENC3.VAL_Mean' },
-                            expression={'x':'c2', 'y':'c3', 'z':'c1'})
+                            variables={'c1': 'panda0/INENC1.VAL_Mean',
+                                       'c2': 'panda0/INENC2.VAL_Mean',
+                                       'c3': 'panda0/INENC3.VAL_Mean'},
+                            expression={'x': 'c2', 'y': 'c3', 'z': 'c1'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
-    #keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
-    #keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
+    # keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
+    # keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A/CTL/SDM-01')
@@ -269,37 +257,33 @@ if __name__=='__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start() # removed for now
+    zmqrec.start()  # removed for now
 
-    # a scicat recorder
-    scicatrec = ScicatRecorder(name='scicatrec')
-    scicatrec.start()
+    # a scicat recorder - paused until further notice
+    # scicatrec = ScicatRecorder(name='scicatrec')
+    # scicatrec.start()
 
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [alba2, panda0, pseudo]: #eiger,
+    for d in [alba2, panda0, pseudo]:  # eiger,
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
-    import PyTango
-    import time
     def pre_scan_stuff(slf):
-        #basex.proxy.PowerOn = True
-        #basey.proxy.PowerOn = True
-        #basez.proxy.PowerOn = True
+        # basex.proxy.PowerOn = False
+        # basey.proxy.PowerOn = False
+        # basez.proxy.PowerOn = False
         runCommand('stoplive')
         runCommand('fsopen')
         time.sleep(0.2)
+
     def post_scan_stuff(slf):
-        #basex.proxy.PowerOn = True
-        #basey.proxy.PowerOn = True
-        #basez.proxy.PowerOn = True
+        # basex.proxy.PowerOn = True
+        # basey.proxy.PowerOn = True
+        # basez.proxy.PowerOn = True
         runCommand('fsclose')
         pass
-
-
-
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
@@ -311,12 +295,13 @@ if __name__=='__main__':
     # find the latest scan number and initialize env.nextScanID
     try:
         l = os.listdir(env.paths.directory)
-        last = max([int(l_[:-3]) for l_ in l if (len(l_)==9 and l_.endswith('.h5'))])
+        last = max([int(l_[:-3]) for l_ in l if (len(l_) == 9 and l_.endswith('.h5'))])
         env.nextScanID = last + 1
         print('\nNote: inferring that the next scan number should be %u' % (last+1))
     except:
         pass
 
-    # add a memorizer so the motors keep their user positions and limits after a restart
-    # note that this will overwrite the dial positions set above! delete the file to generate it again.
+    # add a memorizer so the motors keep their user positions and limits
+    # after a restart note that this will overwrite the dial positions
+    # set above! delete the file to generate it again.
     memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
