@@ -22,14 +22,14 @@ register_shortcut('wtab', 'wm table*')
 def fastshutter_action(state, name):
     """
     Open (state=False) or close (state=True) the fast shutter,
-    by setting BITS.outb high or low on the panda box with
+    by setting BITS1.outb high or low on the panda box with
     the give name.
     """
     try:
         panda = [m for m in Detector.getinstances() if m.name == name][0]
     except IndexError:
         raise Exception('No Gadget named %s'%name)
-    response = panda.query('BITS.B=%u' % (int(state)))
+    response = panda.query('BITS1.B=%u' % (int(state)))
     if 'OK' in response:
         act = {False: 'opened', True: 'closed'}[state]
         print('Fastshutter %s'%act)
