@@ -8,6 +8,7 @@ from ..utils import SpecTable
 from collections import OrderedDict
 import sys
 
+
 class SoftwareScan(object):
     """
     Base class for the normal sardana-style software-controlled scan.
@@ -27,8 +28,8 @@ class SoftwareScan(object):
         :param exposuretime: Exposure time to pass on to detectors etc.
         :type exposuretime: float
         """
-        self._command = None # updated if run via macro
-        self.motors = []   # list of motors, to be filled by subclass
+        self._command = None  # updated if run via macro
+        self.motors = []  # list of motors, to be filled by subclass
         self.exposuretime = exposuretime
         self.scannr = env.nextScanID
         self.n_positions = None
@@ -39,7 +40,7 @@ class SoftwareScan(object):
         # ignore dicts that are too long
         for k, v in dct.items():
             if type(v) == dict and len(v) > self.dict_print_length:
-                dct[k] = {'...':'...'}
+                dct[k] = {'...': '...'}
         dct['     #'] = i
         dct.move_to_end('     #', last=False)
         if i == 0:
@@ -50,7 +51,8 @@ class SoftwareScan(object):
             print('-'*len(header.split('\n')[-1]))
         print(self.table.fill_line(dct))
         if self.n_positions and self.print_progress:
-            timeleft = str(datetime.timedelta(seconds=(self.n_positions-i)*dct['dt']/(i+1))).split('.')[0]
+            timeleft = str(datetime.timedelta(
+                seconds=(self.n_positions-i)*dct['dt']/(i+1))).split('.')[0]
             print('Time left: %s\r' % timeleft, end='')
 
     def _calc_time_needed(self):
@@ -95,10 +97,12 @@ class SoftwareScan(object):
         try:
             while not ready or not enough_time:
                 if not enough_time:
-                    print('not enough time to complete this measurement so waiting, press ctrl-c to ignore from now on...')
+                    print('not enough time to complete this measurement so'
+                          + ' waiting, press ctrl-c to ignore from now on...')
                 else:
                     if not found_not_ready:
-                        print('Waiting for beamline to become available, press ctrl-c to ignore from now on...')
+                        print('Waiting for beamline to become available,'
+                              + ' press ctrl-c to ignore from now on...')
                         found_not_ready = True
                     else:
                         print('.', end='')
@@ -142,17 +146,19 @@ class SoftwareScan(object):
         trg_group = TriggerSource.get_active()
         group = det_group + trg_group
         if group.busy():
-            print('These gadgets are busy: %s' % (', '.join([d.name for d in group if d.busy()])))
+            print('These gadgets are busy: %s'
+                  % (', '.join([d.name for d in group if d.busy()])))
             return
-        group.prepare(self.exposuretime, self.scannr, self.n_positions, trials=100)
+        group.prepare(self.exposuretime, self.scannr, self.n_positions,
+                      trials=100)
         t0 = time.time()
         # send a header to the recorders
         snap = env.snapshot.capture()
         for r in active_recorders():
-            r.queue.put(RecorderHeader(scannr=self.scannr, 
+            r.queue.put(RecorderHeader(scannr=self.scannr,
                                        status='started',
                                        path=env.paths.directory,
-                                       snapshot=snap, 
+                                       snapshot=snap,
                                        description=self._command))
         try:
             for i, pos in enumerate(positions):
@@ -191,7 +197,7 @@ class SoftwareScan(object):
                 r.queue.put(RecorderFooter(scannr=self.scannr,
                                            status='finished',
                                            path=env.paths.directory,
-                                           snapshot=snap, 
+                                           snapshot=snap,
                                            description=self._command))
 
         except KeyboardInterrupt:
@@ -203,7 +209,7 @@ class SoftwareScan(object):
                 r.queue.put(RecorderFooter(scannr=self.scannr,
                                            status='interrupted',
                                            path=env.paths.directory,
-                                           snapshot=snap, 
+                                           snapshot=snap,
                                            description=self._command))
         except:
             self._after_scan()
@@ -212,7 +218,6 @@ class SoftwareScan(object):
         # do any user-defined cleanup actions
         self._after_scan()
 
-        
     def _generate_positions(self):
         """
         *Override this method.* Function or generator which returns or
@@ -221,6 +226,7 @@ class SoftwareScan(object):
             {motorA.name: posA, motorB.name: posB, ...}
         """
         raise NotImplementedError
+
 
 @macro
 class LoopScan(SoftwareScan):
@@ -239,7 +245,8 @@ class LoopScan(SoftwareScan):
     def _generate_positions(self):
         # dummy positions with a non existent motor
         for i in range(self.intervals + 1):
-            yield {'fake':i}
+            yield {'fake': i}
+
 
 @macro
 class Ct(object):
@@ -255,13 +262,15 @@ class Ct(object):
 
     def _before_ct(self):
         """
-        Placeholder method for users to hook actions onto scan classes after import.
+        Placeholder method for users to hook actions onto scan classes
+        after import.
         """
         pass
 
     def _after_ct(self):
         """
-        Placeholder method for users to hook actions onto scan classes after import.
+        Placeholder method for users to hook actions onto scan classes
+        after import.
         """
         pass
 

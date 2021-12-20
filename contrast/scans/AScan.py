@@ -4,11 +4,12 @@ from ..motors import all_are_motors
 import numpy as np
 import time
 
+
 @macro
 class AScan(SoftwareScan):
     """
     Software scan one or more motors in parallel. ::
-        
+
         ascan <motor1> <start> <stop> ... <intervals> <exp_time>
     """
 
@@ -37,6 +38,7 @@ class AScan(SoftwareScan):
         for i in range(len(positions[0])):
             yield {m.name: pos[i] for (m, pos) in zip(self.motors, positions)}
 
+
 @macro
 class DScan(AScan):
     """
@@ -46,7 +48,7 @@ class DScan(AScan):
         dscan <motor1> <start> <stop> <intervals> ... <exp_time>
     """
     def _generate_positions(self):
-        current = {m.name:m.position() for m in self.motors}
+        current = {m.name: m.position() for m in self.motors}
         for pos in super(DScan, self)._generate_positions():
             for i, m in enumerate(self.motors):
                 pos[m.name] += current[m.name]

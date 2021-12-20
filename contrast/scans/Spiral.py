@@ -5,12 +5,13 @@ from ..motors import all_are_motors
 import numpy as np
 import time
 
+
 @macro
 class SpiralScan(DScan):
     """
-    Software scan across a 2D Archimedes spiral centered on the 
+    Software scan across a 2D Archimedes spiral centered on the
     current position. ::
-        
+
         spiralscan <motor1> <motor2> <stepsize> <positions> <exp_time>
     """
 

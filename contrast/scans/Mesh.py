@@ -4,11 +4,12 @@ from ..motors import all_are_motors
 import numpy as np
 import time
 
+
 @macro
 class Mesh(SoftwareScan):
     """
     Software scan on a regular grid of N motors. ::
-        
+
         mesh <motor1> <start> <stop> <intervals> ... <exp_time>
 
     optional keyword arguments:
@@ -41,11 +42,12 @@ class Mesh(SoftwareScan):
                                          self.limits[i][1],
                                          self.intervals[i]+1))
         grids = np.meshgrid(*reversed(positions))
-        grids = [l for l in reversed(grids)] # fastest last
+        grids = [l for l in reversed(grids)]  # fastest last
 
         if 'jitter' in self.kwargs.keys():
-            print('[!] jittered grid postions by factor:', self.kwargs['jitter'])
-            if self.kwargs['jitter']!=0:
+            print('[!] jittered grid postions by factor:',
+                  self.kwargs['jitter'])
+            if self.kwargs['jitter'] != 0:
 
                 step_sizes = []
                 for i, motor in enumerate(self.motors):
@@ -53,9 +55,9 @@ class Mesh(SoftwareScan):
                     n = self.intervals[i]
                     step_sizes.append(1.*d/n)
 
-                rel_jitter = np.random.uniform(low  = -.5*self.kwargs['jitter'],
-                                           high = .5*self.kwargs['jitter'],
-                                           size = np.shape(grids))
+                rel_jitter = np.random.uniform(low=-.5*self.kwargs['jitter'],
+                                               high=.5*self.kwargs['jitter'],
+                                               size=np.shape(grids))
                 for i, step_size in enumerate(step_sizes):
                     grids[i] += rel_jitter[i] * step_size
 
@@ -72,7 +74,7 @@ class DMesh(Mesh):
         dmesh <motor1> <start> <stop> <intervals> ... <exp_time>
     """
     def _generate_positions(self):
-        current = {m.name:m.position() for m in self.motors}
+        current = {m.name: m.position() for m in self.motors}
         for pos in super(DMesh, self)._generate_positions():
             for i, m in enumerate(self.motors):
                 pos[m.name] += current[m.name]
