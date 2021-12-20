@@ -247,6 +247,11 @@ class MotorMemorizer(Gadget):
         except (FileNotFoundError,):
             print("Cant write to %s, doesn't exist")
 
+def expect_motors(motors):
+    for m in motors:
+        if not isinstance(m, Motor):
+            raise Exception('%s is not a Motor object!' % m)
+
 @macro
 class Mv(object):
     """
@@ -258,6 +263,7 @@ class Mv(object):
     def __init__(self, *args):
         self.motors = args[::2]
         self.targets = np.array(args[1::2])
+        expect_motors(self.motors)
 
     def _run_while_waiting(self):
         pass
@@ -330,7 +336,9 @@ class Wm(object):
     """
     def __init__(self, *args):
         self.motors = args
-        self.out    = True
+        self.out = True
+        expect_motors(self.motors)
+
     def run(self, *args):
         ret = None
         titles = ['motor', 'user pos.', 'limits', 'dial pos.', 'limits']
@@ -398,6 +406,7 @@ class SetLim(object):
         self.motors = args[::3]
         self.lowers = args[1::3]
         self.uppers = args[2::3]
+        expect_motors(self.motors)
 
     def run(self):
         for m, l, u in zip(self.motors, self.lowers, self.uppers):
@@ -420,6 +429,7 @@ class SetPos(object):
     def __init__(self, *args):
         self.motors = args[::2]
         self.positions = args[1::2]
+        expect_motors(self.motors)
 
     def run(self):
         for m, p in zip(self.motors, self.positions):
@@ -477,6 +487,7 @@ class Bookmark(object):
     def __init__(self, name, *args):
         self.name = name
         self.motors = args
+        expect_motors(self.motors)
 
     def run(self):
         existing = [b for b in bookmark_refs if b.name==self.name]
