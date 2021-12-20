@@ -10,6 +10,7 @@ from . import Gadget
 from . import utils
 from . import environment
 
+
 def wisdom():
     """
     Prints the current meaning of the acronym Contrast.
@@ -18,5 +19,4 @@ def wisdom():
     from .abbreviations import abbrv
     ind = random.randint(0, len(abbrv)-1)
     print('\nWelcome to contrast,\n')
-    print('   "%s"'%abbrv[ind])
-
+    print('   "%s"' % abbrv[ind])
