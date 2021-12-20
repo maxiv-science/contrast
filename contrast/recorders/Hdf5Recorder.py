@@ -4,6 +4,8 @@ import time
 import numpy as np
 import os
 
+H5_NAME_FORMAT = '%06u.h5'
+
 class Link(h5py.ExternalLink):
     """
     Helper class which wraps a h5py.ExternalLink, but which also
@@ -26,7 +28,7 @@ class Hdf5Recorder(Recorder):
         """
         Opens a file when a new scan starts.
         """
-        filename = os.path.join(dct['path'], '%06u.h5'%dct['scannr'])
+        filename = os.path.join(dct['path'], H5_NAME_FORMAT % dct['scannr'])
         if os.path.isfile(filename):
             print('************ WARNING ************')
             print('Data already exists! Hdf5Recorder')

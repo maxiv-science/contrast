@@ -24,13 +24,14 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
     #. flickering the "A" bit causes a trigger.
     """
 
-    def __init__(self, name=None, host='172.16.126.88',
-                 ctrl_port=8888, data_port=8889):
+    def __init__(self, name=None, host='172.16.126.101',
+                 ctrl_port=8888, data_port=8889, bitblock='BITS1'):
         self.host = host
         self.ctrl_port = ctrl_port
         self.data_port = data_port
         self.acqthread = None
         self.burst_latency = .003
+        self.bitblock = bitblock
         Detector.__init__(self, name=name)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
@@ -123,9 +124,9 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
     def start(self):
         if not self.hw_trig:
-            self.query('BITS.A=1')
-            time.sleep(.001)
-            self.query('BITS.A=0')
+            self.query('%s.A=1' % self.bitblock)
+            time.sleep(0.001)
+            self.query('%s.A=0' % self.bitblock)
 
     def stop(self):
         self.query('*PCAP.DISARM=')

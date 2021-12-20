@@ -37,7 +37,7 @@ class PseudoMotor(Motor):
 
     @dial_position.setter
     def dial_position(self, pos):
-        physicals = self.calc_physicals(pos, self.physicals())
+        physicals = self.calc_physicals(pos)
         for m, pos in zip(self.motors, physicals):
             if self.dry_run:
                 print('Would move %s to %f' % (m.name, pos))
