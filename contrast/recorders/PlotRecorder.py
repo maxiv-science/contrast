@@ -17,6 +17,7 @@ def dict_lookup(dct, path):
     else:
         return dct[path]
 
+
 class PlotRecorder(Recorder):
     """
     Recorder which catches data and plots it with matplotlib.
@@ -86,8 +87,12 @@ class PlotRecorder(Recorder):
         if self.new_scan:
             self.new_scan = False
             col = 'bkmrcg'[(self.nplots-1) % 6]
-            styles = {k:['solid', 'dashed', 'dotted', 'dashdot'][i%4] for i, k in enumerate(new_data.keys())}
-            self.lines = {key: Line2D(xdata=[], ydata=[], color=col, linestyle=styles[key], label='%d: %s'%(self.scannr, key)) for key in new_data.keys()}
+            styles = {k: ['solid', 'dashed', 'dotted', 'dashdot'][i % 4]
+                      for i, k in enumerate(new_data.keys())}
+            self.lines = {key: Line2D(xdata=[], ydata=[], color=col,
+                                      linestyle=styles[key], label='%d: %s'
+                                      % (self.scannr, key))
+                          for key in new_data.keys()}
             self.y = {key: [] for key in new_data.keys()}
             for k, l in self.lines.items():
                 self.ax.add_line(l)
@@ -111,6 +116,7 @@ class PlotRecorder(Recorder):
     def _close(self):
         plt.close(self.fig)
 
+
 @macro
 class LivePlot(object):
     """
@@ -133,6 +139,7 @@ class LivePlot(object):
         self.data1 = data1.name if hasattr(data1, 'name') else data1
         self.data2 = data2.name if hasattr(data2, 'name') else data2
         self.name = name
+
     def run(self):
         rec = PlotRecorder(data1=self.data1, data2=self.data2, name=self.name)
         rec.start()

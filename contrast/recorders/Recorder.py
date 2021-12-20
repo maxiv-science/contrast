@@ -1,6 +1,8 @@
 from ..Gadget import Gadget
 from .. import utils
 from ..environment import macro
+import time
+import signal
 
 from multiprocessing import get_context
 # Fancy multiprocessing contexts needed or we will crash matplotlib
@@ -10,37 +12,39 @@ from multiprocessing import get_context
 ctx = get_context('spawn')
 Queue = ctx.Queue
 
+
 class Process(ctx.Process):
     """ Dummy for cleaning up the inheritance documentation. """
     pass
 
-import time
-import signal
 
 class RecorderHeader(dict):
     """
     Helper class to define a specific dict format to send recorders
     when a new scan starts.
     """
-    def __init__(self, scannr, path, snapshot=None, description=None, status=None):
+    def __init__(self, scannr, path, snapshot=None, description=None,
+                 status=None):
         super(RecorderHeader, self).__init__(scannr=scannr,
                                              status=status,
                                              path=path,
                                              snapshot=snapshot,
                                              description=description)
 
+
 class RecorderFooter(dict):
     """
     Helper class to define a specific dict format to send recorders
     when a new scan finishes.
     """
-    #pass
-    def __init__(self, scannr, path, snapshot=None, description=None, status=None):
+    def __init__(self, scannr, path, snapshot=None, description=None,
+                 status=None):
         super(RecorderFooter, self).__init__(scannr=scannr,
                                              status=status,
                                              path=path,
                                              snapshot=snapshot,
                                              description=description)
+
 
 class Recorder(Gadget, Process):
     """
@@ -63,7 +67,8 @@ class Recorder(Gadget, Process):
     def _process_queue(self):
         dcts = []
         while not self.queue.empty():
-            dcts.append(self.queue.get()) # ok since only we are reading from self.queue
+            # ok since only we are reading from self.queue:
+            dcts.append(self.queue.get())
         for dct in dcts:
             if dct is None:
                 self.quit = True
@@ -141,13 +146,18 @@ class DummyRecorder(Recorder):
     Dummy recorder for practise.
     """
     def act_on_header(self, dct):
-        print('got a header! am told to write scan %d to %s' % (dct['scannr'], dct['path']))
+        print('got a header! am told to write scan %d to %s'
+              % (dct['scannr'], dct['path']))
+
     def act_on_data(self, dct):
         print('found this!', dct)
+
     def act_on_footer(self, dct):
         print('scan %d at %s over, apparently' % (dct['scannr'], dct['path']))
+
     def init(self):
         print('opening')
+
     def _close(self):
         print('closing')
 
@@ -159,6 +169,7 @@ def active_recorders():
 
     """
     return [r for r in Recorder.getinstances() if r.is_alive()]
+
 
 @macro
 class LsRec(object):
