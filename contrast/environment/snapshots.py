@@ -3,6 +3,7 @@ Module which contains classes that gather information which
 needs to be dumped to every scan.
 """
 
+
 class EmptySnapshot(object):
     """
     Define the API.
@@ -12,6 +13,7 @@ class EmptySnapshot(object):
         Returns a dict of label-value pairs.
         """
         return {}
+
 
 class MotorSnapshot(EmptySnapshot):
     """

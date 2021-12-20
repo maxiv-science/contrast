@@ -3,12 +3,14 @@ try:
 except ModuleNotFoundError:
     pass
 
+
 class PathFixer(object):
     """
     Basic pathfixer which takes a path manually.
     """
     def __init__(self):
         self.directory = None
+
 
 class SdmPathFixer(object):
     """
@@ -28,6 +30,6 @@ class SdmPathFixer(object):
                 return val
             except DevError:
                 print('Failed in getting SDM path from Tango. Trying again...')
-        print('Failed %u times, using cached value: %s' % (self.TRIALS, self.cache))
+        print('Failed %u times, using cached value: %s'
+              % (self.TRIALS, self.cache))
         return self.cache
-
