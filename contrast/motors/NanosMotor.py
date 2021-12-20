@@ -6,6 +6,7 @@ import PyTango
 import time
 from . import Motor
 
+
 class NanosMotor(Motor):
     """
     Single Nanos motor axis.
@@ -39,29 +40,29 @@ class NanosMotor(Motor):
     def busy(self):
         attr = 'channel%02d_state' % self._axis
         return not (self.proxy.read_attribute(attr).value == 'STATIONARY')
-   
+
     def stop(self):
-        self.proxy.StopAll() # safety first
+        self.proxy.StopAll()  # safety first
 
     def reset_encoder(self):
         # Sets the encoder position to zero
         ax = '#%02d\r' % self._axis
         self.proxy.ArbitrarySend(ax)
-        time.sleep(0.1) 
-        self.proxy.ArbitrarySend('O0\r') 
+        time.sleep(0.1)
+        self.proxy.ArbitrarySend('O0\r')
 
     def home(self):
         print('Homeing is currently not safe to execute. No action right now.')
         """
         ax = '#%02d\r' % self._axis
         self.proxy.ArbitrarySend(ax)
-        time.sleep(0.1) 
-        self.proxy.ArbitrarySend('N9\r') 
+        time.sleep(0.1)
+        self.proxy.ArbitrarySend('N9\r')
         ret = ''
         while(ret != '0'):
             ret = self.proxy.ArbitraryAsk('n')
-            mess = 'Homing axis %d status=%s' % (self._axis, ret) 
+            mess = 'Homing axis %d status=%s' % (self._axis, ret)
             print(mess)
-            time.sleep(2)  
+            time.sleep(2)
         print('Homing finished')
         """

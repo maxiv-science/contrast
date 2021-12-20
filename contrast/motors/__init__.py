@@ -9,6 +9,7 @@ everywhere.
 from .Motor import Motor, DummyMotor, MotorMemorizer, MotorBookmark
 from .PseudoMotor import PseudoMotor, ExamplePseudoMotor
 
+
 def all_are_motors(seq):
     """
     Function which returns True if all objects in seq are instances

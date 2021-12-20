@@ -5,6 +5,7 @@ combinations of other motors.
 
 from . import Motor
 
+
 class PseudoMotor(Motor):
     """
     Pseudo motor base class.
@@ -70,6 +71,7 @@ class PseudoMotor(Motor):
         """
         raise NotImplementedError
 
+
 class ExamplePseudoMotor(PseudoMotor):
     """
     Example pseudo motor which implements the difference between two
@@ -82,5 +84,5 @@ class ExamplePseudoMotor(PseudoMotor):
         current_physicals = self.physicals
         current_diff = self.calc_pseudo(current_physicals)
         half_increase = (pseudo - current_diff) / 2.0
-        return [current_physicals[0] - half_increase, 
+        return [current_physicals[0] - half_increase,
                 current_physicals[1] + half_increase]

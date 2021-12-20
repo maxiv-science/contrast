@@ -5,6 +5,7 @@ Provides a Motor interface to standard Tango motors.
 import PyTango
 from . import Motor
 
+
 class TangoMotor(Motor):
     """
     Single Tango motor.
@@ -56,8 +57,9 @@ class TangoMotor(Motor):
         state = self.proxy.State()
         if state == PyTango.DevState.MOVING:
             return True
-        elif hasattr(self.proxy,"StatusReady") and hasattr(self.proxy,"StatusMoving"):
-            if self.proxy.StatusReady == False and self.proxy.StatusMoving == True:
+        elif (hasattr(self.proxy, "StatusReady")
+              and hasattr(self.proxy, "StatusMoving")):
+            if (not self.proxy.StatusReady) and self.proxy.StatusMoving:
                 return True
         elif state == PyTango.DevState.ON:
             return False
@@ -75,4 +77,3 @@ class TangoMotor(Motor):
 
     def stop(self):
         self.proxy.stop()
-

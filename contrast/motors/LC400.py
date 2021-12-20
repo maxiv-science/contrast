@@ -13,6 +13,7 @@ import math
 import json
 import numpy as np
 
+
 class LC400Motor(Motor):
     """
     Single axis on the LC400.
@@ -70,11 +71,13 @@ class LC400Waveform(object):
 
     # constants
     # 24 µs, internal clock cycle of LC.400
-    CLOCKCYCLE= 0.000024
+    CLOCKCYCLE = 0.000024
     # maximum number of points in a waveform
     MAXPOINTS = 83333
 
-    def __init__(self, axis, startpoint, endpoint, scanpoints, exposuretime, latencytime, accelerationtime, decelerationtime = None, startvelocity = None, endvelocity = None):
+    def __init__(self, axis, startpoint, endpoint, scanpoints, exposuretime,
+                 latencytime, accelerationtime, decelerationtime=None,
+                 startvelocity=None, endvelocity=None):
         # waveform parameters
         self.axis = axis
         self.axisname = "axis%i" % axis
@@ -82,7 +85,7 @@ class LC400Waveform(object):
         print("step size: ", stepsize)
         self.startpoint = startpoint
         self.endpoint = endpoint + stepsize
-        self.scanpoints = scanpoints # scanpoints is intervals+1
+        self.scanpoints = scanpoints  # scanpoints is intervals+1
         self.exposuretime = exposuretime
         self.latencytime = latencytime
         self.accelerationtime = accelerationtime
@@ -93,7 +96,8 @@ class LC400Waveform(object):
             self.decelerationtime = decelerationtime
 
         # calculate linear velocity
-        self.velocity = (self.endpoint - self.startpoint)/ ((self.scanpoints) * (exposuretime+latencytime))
+        self.velocity = ((self.endpoint - self.startpoint)
+                         / ((self.scanpoints) * (exposuretime+latencytime)))
         print(f"velocity: {self.velocity:0.3} microns/s")
 
         # set start velocity
@@ -110,21 +114,30 @@ class LC400Waveform(object):
         else:
             self.endvelocity = endvelocity
 
-        # TODO check for valid start and end velocities, e.g. startvelocity < velocity
+        # TODO check for valid start and end velocities, e.g.
+        # startvelocity < velocity
 
-        # calculate total time of line (acceleraton phase + linear regime + deceleration phase)
-        self.lineartime = self.scanpoints * (self.exposuretime + self.latencytime)
-        self.totaltime = self.accelerationtime + self.lineartime + self.decelerationtime
+        # calculate total time of line
+        # (acceleraton phase + linear regime + deceleration phase)
+        self.lineartime = (self.scanpoints
+                           * (self.exposuretime + self.latencytime))
+        self.totaltime = (self.accelerationtime + self.lineartime
+                          + self.decelerationtime)
 
         # deterimine clock cycle delay of LC.400, 0 means no delay
-        self.clockcycledelay = math.ceil(math.floor(self.totaltime/self.CLOCKCYCLE)/self.MAXPOINTS) - 1
+        self.clockcycledelay = math.ceil(
+            math.floor(self.totaltime/self.CLOCKCYCLE)/self.MAXPOINTS) - 1
         print("clock cycle delay: ", self.clockcycledelay)
         # determine optimal number of points in waveform
         self.effectiveclockcycle = self.CLOCKCYCLE * (self.clockcycledelay+1)
-        self.waveformpoints = math.floor(self.totaltime / self.effectiveclockcycle)
+        self.waveformpoints = math.floor(self.totaltime
+                                         / self.effectiveclockcycle)
         # define start cycle of linear phase.
-        # This is the time when the LC 400 creates the trigger to start the pandabox for position recording and triggering of other detectors
-        self.linearstartindex = math.ceil(self.accelerationtime/self.effectiveclockcycle)
+        # This is the time when the LC 400 creates the trigger to start
+        # the pandabox for position recording and triggering of other
+        # detectors
+        self.linearstartindex = math.ceil(self.accelerationtime
+                                          / self.effectiveclockcycle)
         print("triggger start index: ", self.linearstartindex)
         # start point of the waveform in absolute coordinates of the scanner
         self.absolutstartposition = self.accelerationphase(0)
@@ -134,10 +147,12 @@ class LC400Waveform(object):
     def accelerationphase(self, t):
         # calculate parameters for trajectory
         a = (self.velocity - self.startvelocity) / self.accelerationtime
-        b = 1/self.accelerationtime
+        b = 1 / self.accelerationtime
         c = (self.velocity - self.startvelocity) / self.accelerationtime
         d = self.startvelocity
-        e = self.startpoint - self.startvelocity*self.accelerationtime  - ( 0.5 + 1/(4*np.pi**2) ) * (self.velocity - self.startvelocity)*self.accelerationtime
+        e = (self.startpoint - self.startvelocity*self.accelerationtime
+             - (0.5 + 1/(4*np.pi**2)) * (self.velocity - self.startvelocity)
+             * self.accelerationtime)
         # calculate trajectory
         x = a/(4*np.pi**2 * b**2) * np.cos(2*np.pi*b*t) + c/2 * t**2 + d*t + e
         return x
@@ -156,13 +171,15 @@ class LC400Waveform(object):
         d1 = self.velocity + c * T_e
         d2 = self.endvelocity + c*(T_e+self.decelerationtime)
         d = d2
-        e = self.endpoint + a / (4 * np.pi**2 * b**2) + 1/2 * c * T_e**2 - d * T_e
+        e = (self.endpoint + a / (4 * np.pi**2 * b**2) + 1/2 * c * T_e**2
+             - d * T_e)
         # calculate trajectory
-        x = -a/(4*np.pi**2 * b**2) * np.cos(2*np.pi*b*(t-T_e)) - c/2 * t**2 + d*t + e
+        x = (-a / (4*np.pi**2 * b**2) * np.cos(2*np.pi*b*(t-T_e))
+             - c/2 * t**2 + d*t + e)
         return x
 
     def time(self):
-        t = np.arange(0,self.totaltime, step = self.effectiveclockcycle)
+        t = np.arange(0, self.totaltime, step=self.effectiveclockcycle)
         return t
 
     def waveform(self):
@@ -170,9 +187,10 @@ class LC400Waveform(object):
         for t in self.time():
             if t < self.accelerationtime:
                 x.append(self.accelerationphase(t))
-            elif t >= self.accelerationtime and t <= self.accelerationtime+self.lineartime:
+            elif (t >= self.accelerationtime
+                  and t <= self.accelerationtime + self.lineartime):
                 x.append(self.linearphase(t))
-            elif t > self.accelerationtime+self.lineartime:
+            elif t > self.accelerationtime + self.lineartime:
                 x.append(self.decelerationphase(t))
             else:
                 print("not used: ", t)
@@ -181,7 +199,8 @@ class LC400Waveform(object):
             raise Exception("waveform too long")
         print(f"points in wafeform : {len(x)}")
         # offset whole waveform so it starts at 0.
-        # Waveforms in the LC400 are relative motions with respect to the physical start position of the motor
+        # Waveforms in the LC400 are relative motions with respect to
+        # the physical start position of the motor
         offset = self.accelerationphase(0)
         res = [i - offset for i in x]
         return res
@@ -196,23 +215,24 @@ class LC400Waveform(object):
             data = {}
             data["generator"] = "pointlist2"
             data["version"] = "2.0"
-            data["ClockScaling"] = 1+1 # a bug in the LC400 Tango Server substracts 1, se we have to add 1
+            # a bug in the LC400 Tango Server substracts 1, se we have to add 1
+            data["ClockScaling"] = 1 + 1
             data["TotalPoints"] = 1
-            data["EndLinePoint"] = 1 # is this needed?
+            data["EndLinePoint"] = 1  # is this needed?
             data["FlyScanAxis"] = int(ax[-1])
             # Trigger on/off indeces
             triggers = {}
             triggers["count"] = 1
-            triggers["on"] = [0,]
-            triggers["off"] = [0,]
+            triggers["on"] = [0]
+            triggers["off"] = [0]
             # function definition of output pins
             # we use pin 9 (Out 4) to create the start trigger
             output_pins = {}
-            output_pins["9"] = {"polarity": 0, 
+            output_pins["9"] = {"polarity": 0,
                                 "function": 0}
             data[ax] = {"triggers": triggers,
-                                   "output_pins": output_pins,
-                                   "positions": [0.,]}
+                        "output_pins": output_pins,
+                        "positions": [0.]}
             js.append(json.dumps(data))
         return js
 
@@ -221,9 +241,10 @@ class LC400Waveform(object):
         data = {}
         data["generator"] = "pointlist2"
         data["version"] = "2.0"
-        data["ClockScaling"] = self.clockcycledelay+1 # a bug in the LC400 Tango Server substracts 1, se we have to add 1
+        # a bug in the LC400 Tango Server substracts 1, se we have to add 1
+        data["ClockScaling"] = self.clockcycledelay + 1
         data["TotalPoints"] = self.waveformpoints
-        data["EndLinePoint"] = self.waveformpoints # is this needed?
+        data["EndLinePoint"] = self.waveformpoints  # is this needed?
         data["FlyScanAxis"] = self.axis
         # Trigger on/off indeces
         triggers = {}
@@ -233,11 +254,11 @@ class LC400Waveform(object):
         # function definition of output pins
         # we use pin 9 (Out 4) to create teh start trigger
         output_pins = {}
-        output_pins["9"] = {"polarity": 0, 
+        output_pins["9"] = {"polarity": 0,
                             "function": 3}
 
         data[self.axisname] = {"triggers": triggers,
-                                "output_pins": output_pins,
-                                "positions": self.waveform()}
+                               "output_pins": output_pins,
+                               "positions": self.waveform()}
 
         return json.dumps(data)
