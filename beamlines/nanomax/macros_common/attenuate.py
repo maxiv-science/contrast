@@ -38,10 +38,10 @@ class Attenuate(object):
                  [250, 500, 1000, 1000],
                  [20, 40, 80, 160],
                  [0, 0, 0, 0],
-                 [50, , 200, 400],
+                 [50, 100, 200, 400],
                  [15, 30, 60, 120],
                  [20, 40, 80, 160],
-                 [25, 50, , 200]]
+                 [25, 50, 100, 200]]
     thickness = np.array(thickness)
 
     # loading offline data between 5 and 25 keV
