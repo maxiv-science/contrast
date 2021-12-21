@@ -10,6 +10,7 @@ import select
 SOCK_RECV = 4096
 RECV_DELAY = 1e-4
 
+
 class PandaBox(Detector, TriggeredDetector, BurstDetector):
     """
     Basic class for treating a PandaBox as a detector, capable
@@ -68,7 +69,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             if 'Busy' in ret:
                 done = True
             time.sleep(.005)
-        time.sleep(.05) # necessary hack
+        time.sleep(.05)  # necessary hack
 
     def _acquire(self):
         """
@@ -94,8 +95,8 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
         # Then put the rest of the data into the same buffer and continue
         n = 0
-        data = {ch:[] for ch in channels}
-        
+        data = {ch: [] for ch in channels}
+
         num_points = self.hw_trig_n * self.burst_n
 
         while n < num_points:
@@ -104,7 +105,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             if ready:
                 buff += s.recv(SOCK_RECV)
 
-            #anything more to parse?
+            # anything more to parse?
             if b'\n' in buff:
                 line, buff = buff.split(b'\n', 1)
                 vals = line.strip().split()

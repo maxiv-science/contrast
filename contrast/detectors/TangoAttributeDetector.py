@@ -6,6 +6,7 @@ can be monitored during scans.
 from .Detector import Detector
 import PyTango
 
+
 class TangoAttributeDetector(Detector):
     """
     Detector interface to Tango attributes, so that anything can be
@@ -35,4 +36,3 @@ class TangoAttributeDetector(Detector):
             return self.val
         except AttributeError:
             raise Exception('Detector not started!')
-

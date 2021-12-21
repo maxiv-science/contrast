@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..recorders.Hdf5Recorder import Link
 from ..environment import env
 
@@ -12,13 +13,15 @@ from threading import Thread
 
 TRIG_MODES = {'internal': 0, 'rising_ttl': 1, 'soft': 5}
 
+
 class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
     Provides an interface to the Merlin detector streaming manager,
 
     https://github.com/maxiv-science/merlin-streamer
     """
-    def __init__(self, name=None, host='b-nanomax-controlroom-cc-2', port=8000):
+    def __init__(self, name=None,
+                 host='b-nanomax-controlroom-cc-2', port=8000):
         self.host = host
         self.port = port
         self._hdf_path = 'entry/measurement/Merlin/data'
@@ -47,14 +50,15 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self.burst_latency = 1.64e-3
 
     def get(self, key):
-        response = self.session.get('http://%s:%d/%s' %(self.host, self.port, key))
+        response = self.session.get(
+            'http://%s:%d/%s' % (self.host, self.port, key))
         if response:
             return response.json()['value']
         else:
             print('error', response)
 
     def set(self, key, value=None):
-        url = 'http://%s:%d/%s' %(self.host, self.port, key)
+        url = 'http://%s:%d/%s' % (self.host, self.port, key)
         if value is None:
             payload = None
         else:
@@ -91,30 +95,35 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             n_starts = 10000
         self.set('num_frames_per_trigger', self.burst_n)
         self.set('acquisition_time', self.acqtime * 1000)
-        self.set('acquisition_period', (self.acqtime + self.burst_latency) * 1000)
+        self.set('acquisition_period',
+                 (self.acqtime + self.burst_latency) * 1000)
         self.set('counterdepth', 24)
         if self.gapless:
             if self.hw_trig:
-                assert (self.hw_trig_n == 1), 'Only hw_trig_n=1 is allowed for gapless operation'
+                assert (self.hw_trig_n == 1), \
+                       'Only hw_trig_n=1 is allowed for gapless operation'
                 self.set('trigger_start', TRIG_MODES['rising_ttl'])
             else:
                 self.set('trigger_start', TRIG_MODES['internal'])
             self.set('num_frames', int(self.burst_n))
             self.set('continuousrw', True)
-            
+
         elif self.hw_trig:
             self.set('trigger_start', TRIG_MODES['rising_ttl'])
-            self.set('num_frames', int(self.burst_n * self.hw_trig_n * n_starts))
+            self.set(
+                'num_frames', int(self.burst_n * self.hw_trig_n * n_starts))
         else:
             self.set('trigger_start', TRIG_MODES['soft'])
-            self.set('num_frames', int(n_starts * self.burst_n)) # np.int64 isn't json serializable
+            # np.int64 isn't json serializable:
+            self.set('num_frames', int(n_starts * self.burst_n))
         if dataid is None:
             self.dpath = ''
         else:
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.dpath = os.path.join(env.paths.directory, filename)
             if os.path.exists(self.dpath):
-                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
         self.set('filename', self.dpath)
         if not self.gapless:
@@ -127,7 +136,7 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
         if self.gapless:
             nframes = self.burst_n
-            self.set('arm') # this actually starts the detector
+            self.set('arm')  # this actually starts the detector
             time.sleep(.1)
         else:
             nframes = self.hw_trig_n * self.burst_n
@@ -140,7 +149,7 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         # how many frames will this particular start() call cause?
         if self.gapless:
             nframes = self.burst_n
-            self.set('arm') # this actually starts the detector
+            self.set('arm')  # this actually starts the detector
         else:
             nframes = self.burst_n
         # the following command will issue a soft trigger if applicable,
@@ -153,15 +162,16 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def read(self):
         if self.dpath:
-            ret = {'frames': Link(self.dpath , self._hdf_path, universal=True),
-                   'thumbs:': None,}
+            ret = {'frames': Link(self.dpath, self._hdf_path, universal=True),
+                   'thumbs:': None, }
         else:
             ret = None
         return ret
 
     def _start(self, acqtime):
         """
-        The Merlin also needs to override this method as it uses software triggers.
+        The Merlin also needs to override this method as it uses
+        software triggers.
         """
         self.stopped = False
         NN = 1000
@@ -175,4 +185,3 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 self.start()
                 while self.busy():
                     time.sleep(.05)
-

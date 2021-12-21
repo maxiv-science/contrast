@@ -5,6 +5,7 @@ except ModuleNotFoundError:
     pass
 import numpy as np
 
+
 class AdLinkAnalogInput(Detector, TriggeredDetector):
     """
     Interface to the AdLink Tango device exposing one analog input.
@@ -17,8 +18,8 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
     def initialize(self):
         self.dev = PyTango.DeviceProxy(self.dev_name)
         self.dev.init()
-        
-        self.stop() # needs to be in standby to change anything
+
+        self.stop()  # needs to be in standby to change anything
 
         self.dev.write_attribute("TriggerSources", "ExtD:+")
         self.dev.write_attribute("TriggerMode", 1)
@@ -35,7 +36,8 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
             self.dev.write_attribute('NumOfTriggers', self.hw_trig_n)
             self.dev.write_attribute('SampleRate', srate)
         else:
-            print('Warning: the AdLinkAnalogInput detector only works with hardware triggering.')
+            print('Warning: the AdLinkAnalogInput detector only works '
+                  + 'with hardware triggering.')
 
     def arm(self):
         if self.busy():
@@ -58,6 +60,5 @@ class AdLinkAnalogInput(Detector, TriggeredDetector):
         if not self.hw_trig:
             return -1
         vals = self.dev.read_attribute("C00_MeanValues").value
-        self.dev.Stop() # have to explicitly call stop after the read
+        self.dev.Stop()  # have to explicitly call stop after the read
         return np.array(vals)
-

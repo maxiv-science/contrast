@@ -1,13 +1,16 @@
 if __name__ == '__main__':
-    from contrast.detectors.Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+    from contrast.detectors.Detector import (
+        Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
     from contrast.environment import env
     from contrast.recorders.Hdf5Recorder import Link
 else:
-    from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+    from .Detector import (
+        Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
     from ..environment import env
     from ..recorders.Hdf5Recorder import Link
 import os
 import PyTango
+
 
 class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
     """
@@ -21,7 +24,8 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
     def __init__(self, device='zyla/test/1', name=None):
         SoftwareLiveDetector.__init__(self)
         BurstDetector.__init__(self)
-        Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
+        # last so that initialize() can overwrite parent defaults:
+        Detector.__init__(self, name=name)
         self.proxy = PyTango.DeviceProxy(device)
 
     def initialize(self):
@@ -42,7 +46,8 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
             fn = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.saving_file = os.path.join(path, fn)
             if os.path.exists(self.saving_file):
-                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
             self.proxy.filename = self.saving_file
 
@@ -84,5 +89,5 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         if self.saving_file == '':
             return None
         else:
-            return Link(self.saving_file , 'entry/instrument/andor', universal=True)
-
+            return Link(
+                self.saving_file, 'entry/instrument/andor', universal=True)

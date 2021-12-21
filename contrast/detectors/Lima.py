@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..environment import env
 from ..environment import macro
 
@@ -11,7 +12,9 @@ except ModuleNotFoundError:
 import os
 from h5py import VirtualSource, VirtualLayout
 
-class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+
+class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector,
+                   BurstDetector):
     """
     Lima base class.
     """
@@ -19,11 +22,12 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
     def __init__(self, name=None, lima_device=None, det_device=None):
         """
-        Lima is sometimes very slow to finish writing data, which is why this
-        gadget has a 'hybrid mode', where Lima is started only once, and sequential
-        arm/start calls to this gadget only increment counters. The busy state
-        is set based on Lima's last_image_acquired compared to these counters,
-        and does not reflect the state of the Lima device.
+        Lima is sometimes very slow to finish writing data, which is why
+        this gadget has a 'hybrid mode', where Lima is started only
+        once, and sequential arm/start calls to this gadget only
+        increment counters. The busy state is set based on Lima's
+        last_image_acquired compared to these counters, and does not
+        reflect the state of the Lima device.
         """
         self.lima_device_name = lima_device
         self.det_device_name = det_device
@@ -44,7 +48,9 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                 timeout = False
                 for e_ in e.args:
                     if 'timeout' in e_.desc.lower():
-                        print('*** Timeout when writing attribute %s on %s. Trying again...' % (attr, self.lima_device_name))
+                        print(('*** Timeout when writing attribute %s on %s.'
+                               + 'Trying again...')
+                              % (attr, self.lima_device_name))
                         timeout = True
                 if not timeout:
                     raise
@@ -59,7 +65,9 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                 timeout = False
                 for e_ in e.args:
                     if 'timeout' in e_.desc.lower():
-                        print('*** Timeout when reading attribute %s on %s. Trying again...' % (attr, self.lima_device_name))
+                        print(('*** Timeout when reading attribute %s on %s.'
+                               + 'Trying again...')
+                              % (attr, self.lima_device_name))
                         timeout = True
                 if not timeout:
                     raise
@@ -79,12 +87,15 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             except PyTango.DevFailed as e:
                 timeout = False
                 doublecall = False
-                for e_ in e.args: 
+                for e_ in e.args:
                     if 'timeout' in e_.desc.lower():
-                        print('*** Timeout during %s call to %s. Trying again...' % (cmd, self.lima_device_name))
+                        print(
+                            '*** Timeout during %s call to %s. Trying again...'
+                            % (cmd, self.lima_device_name))
                         timeout = True
                     if 'run prepareacq before starting' in e_.desc.lower():
-                        print('*** StartAcq called twice on %s. Moving on...'%self.name)
+                        print('*** StartAcq called twice on %s. Moving on...'
+                              % self.name)
                         doublecall = True
                         if not timeout:
                             ok = True
@@ -128,7 +139,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         # Make sure the devices are reachable, or this will throw an error
         self.lima.state()
         self.det.state()
-        
+
         self.lima.acq_trigger_mode = "INTERNAL_TRIGGER"
         self.lima.saving_mode = "AUTO_FRAME"
         self.lima.saving_frame_per_file = 1
@@ -146,7 +157,8 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
     def make_virtual_layout(self):
         _, bytes, n, m = self.lima.image_sizes
-        dtype = {1: np.uint8, 2: np.uint16, 4:np.uint32, 8:np.uint64}[int(bytes)]
+        dtype = {
+            1: np.uint8, 2: np.uint16, 4: np.uint32, 8: np.uint64}[int(bytes)]
         # we need to have relative paths in every virtual source object
         relfile = self.saving_filename
 
@@ -154,24 +166,31 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             N = self.n_starts * self.burst_n * self.hw_trig_n
             layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
             for i in range(self.n_starts):
-                vsource = VirtualSource(relfile, self._hdf_path_base % i, shape=(self.hw_trig_n,m,n))
+                vsource = VirtualSource(
+                    relfile,
+                    self._hdf_path_base % i, shape=(self.hw_trig_n, m, n))
                 layout[i*self.hw_trig_n:(i+1)*self.hw_trig_n] = vsource
         elif self.hybrid_mode:
             N = self.n_starts * self.burst_n
             layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
-            vsource = VirtualSource(relfile, self._hdf_path_base % 0, shape=(N, m, n))
+            vsource = VirtualSource(
+                relfile, self._hdf_path_base % 0, shape=(N, m, n))
             layout[:] = vsource
         else:
             N = self.n_starts * self.burst_n
             layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
             for i in range(self.n_starts):
-                layout[i*self.burst_n:(i+1)*self.burst_n] = VirtualSource(relfile, self._hdf_path_base % i, shape=(self.burst_n,m,n))
+                layout[i*self.burst_n:(i+1)*self.burst_n] = (
+                    VirtualSource(
+                        relfile, self._hdf_path_base % i,
+                        shape=(self.burst_n, m, n)))
         return layout
 
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         # get out of the fault caused by trigger timeout
-        if (self._safe_read('acq_status') == 'Fault') and (self._safe_read('acq_status_fault_error') == 'No error'):
+        if ((self._safe_read('acq_status') == 'Fault')
+                and (self._safe_read('acq_status_fault_error') == 'No error')):
             self._safe_call_command('stopAcq')
             self._safe_call_command('prepareAcq')
 
@@ -183,7 +202,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
 
         if dataid is None:
             # no saving
-            self._safe_write('saving_mode', "MANUAL") # no saving
+            self._safe_write('saving_mode', "MANUAL")  # no saving
             self.saving_filename = None
         else:
             # saving
@@ -192,7 +211,8 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             prefix = 'scan_%06d_%s' % (dataid, self.name)
             self._safe_write('saving_prefix', prefix)
             self.saving_filename = prefix + self._safe_read('saving_suffix')
-            if os.path.exists(os.path.join(env.paths.directory, self.saving_filename)):
+            if os.path.exists(
+                    os.path.join(env.paths.directory, self.saving_filename)):
                 print('%s hdf5 file already exists' % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
@@ -268,6 +288,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         else:
             return {'frames': self.layout}
 
+
 class LimaPilatus(LimaDetector):
     """
     Pilatus specific LimaDetector.
@@ -283,12 +304,14 @@ class LimaPilatus(LimaDetector):
     @property
     def energy(self):
         return self.det.energy_threshold
-        
+
     @energy.setter
     def energy(self, value):
         if value < 4.5 or value > 36:
-            raise ValueError('Requested value is outside the Pilatus range of 4.5-36 keV')
+            raise ValueError(
+                'Requested value is outside the Pilatus range of 4.5-36 keV')
         self.det.write_attribute('energy_threshold', value)
+
 
 class LimaMerlin(LimaDetector):
     """
@@ -307,7 +330,7 @@ class LimaMerlin(LimaDetector):
     @property
     def energy(self):
         return self.det.operatingEnergy
-        
+
     @energy.setter
     def energy(self, value):
         self.det.write_attribute('operatingEnergy', value)
@@ -318,6 +341,7 @@ class LimaMerlin(LimaDetector):
         else:
             self.det.write_attribute('triggerStartType', "INTERNAL")
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
+
 
 class LimaAndor(LimaDetector):
     """
@@ -330,6 +354,7 @@ class LimaAndor(LimaDetector):
     def _initialize_det(self):
         self.lima.user_detector_name = 'Andor'
 
+
 class LimaXspress3(LimaDetector):
     """
     Xspress3 specific LimaDetector.
@@ -340,6 +365,7 @@ class LimaXspress3(LimaDetector):
         super(LimaXspress3, self).__init__(*args, **kwargs)
         self._hdf_path_base = 'entry_%04d/measurement/xspress3/data'
 
+
 @macro
 class Lima_hybrid_on(object):
     """
@@ -347,6 +373,7 @@ class Lima_hybrid_on(object):
     or for all Lima devices if nothing is specified.
     """
     VAL = True
+
     def __init__(self, *args):
         if args:
             self.dets = args
@@ -357,6 +384,7 @@ class Lima_hybrid_on(object):
         for d in self.dets:
             d.hybrid_mode = self.VAL
 
+
 @macro
 class Lima_hybrid_off(Lima_hybrid_on):
     """
@@ -364,4 +392,3 @@ class Lima_hybrid_off(Lima_hybrid_on):
     or for all Lima devices if nothing is specified.
     """
     VAL = False
-

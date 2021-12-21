@@ -5,6 +5,7 @@ import numpy as np
 import h5py
 from ..recorders.Hdf5Recorder import Link
 
+
 class DummyDetector(Detector, SoftwareLiveDetector):
     """
     Dummy detector which returns a single number.
@@ -42,6 +43,7 @@ class DummyDetector(Detector, SoftwareLiveDetector):
         except AttributeError:
             raise Exception('Detector not started!')
 
+
 class Dummy1dDetector(DummyDetector):
     """
     Dummy detector which returns a 1d vector.
@@ -51,10 +53,11 @@ class Dummy1dDetector(DummyDetector):
         try:
             # reshape to (1, N) to protect the physical detector dimension
             # from being stacked in the hdf5 file later.
-            self.val = (np.random.rand(100) * self.acqtime).reshape((1,-1))
+            self.val = (np.random.rand(100) * self.acqtime).reshape((1, -1))
             self._started = time.time()
         except AttributeError:
             raise Exception('Detector not prepared!')
+
 
 class DummyWritingDetector(DummyDetector):
     """
@@ -66,7 +69,8 @@ class DummyWritingDetector(DummyDetector):
         if dataid is None:
             self.filename_base = None
         else:
-            self.filename_base = '/tmp/Dummy_scan_%03d_image_%%03d.hdf5' % dataid
+            self.filename_base = (
+                '/tmp/Dummy_scan_%03d_image_%%03d.hdf5' % dataid)
             self.next_image = -1
 
     def start(self):
@@ -83,6 +87,7 @@ class DummyWritingDetector(DummyDetector):
 
     def read(self):
         return self.latest_link
+
 
 class DummyWritingDetector2(DummyDetector):
     """
@@ -110,11 +115,16 @@ class DummyWritingDetector2(DummyDetector):
                     d = fp[self.datapath]
                     d.resize((d.shape[0] + 1, M, N))
                 else:
-                    d = fp.create_dataset(self.datapath, shape=(1,M,N), maxshape=(None,M,N), dtype=np.float)
-                d[-1] = np.arange(M*N).reshape((M, N)) + np.random.rand(M, N) * M * N / 10
+                    d = fp.create_dataset(self.datapath,
+                                          shape=(1, M, N),
+                                          maxshape=(None, M, N),
+                                          dtype=np.float)
+                d[-1] = (np.arange(M*N).reshape((M, N))
+                         + np.random.rand(M, N) * M * N / 10)
 
     def read(self):
         return self.link
+
 
 class DummyDictDetector(DummyDetector):
     """
@@ -125,10 +135,11 @@ class DummyDictDetector(DummyDetector):
         try:
             self.val = {'ch1': np.random.rand() * self.acqtime,
                         'ch2': np.random.rand() * self.acqtime * 2,
-                        'ch3': np.random.rand() * self.acqtime * 3,}
+                        'ch3': np.random.rand() * self.acqtime * 3, }
             self._started = time.time()
         except AttributeError:
             raise Exception('Detector not prepared!')
+
 
 class DummyTriggerSource(TriggerSource):
     def initialize(self):

@@ -1,6 +1,7 @@
 from .Detector import TriggerSource, BurstDetector
 import PyTango
 
+
 class StanfordTriggerSource(TriggerSource, BurstDetector):
     """
     Class representing the DG645 as a simple source for hardware
@@ -37,4 +38,3 @@ class StanfordTriggerSource(TriggerSource, BurstDetector):
 
     def start(self):
         self.proxy.TriggerSingle()
-
