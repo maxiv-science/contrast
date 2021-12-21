@@ -70,13 +70,13 @@ class Tomo(object):
 
     def set_fpath(self):
         # so far we take the same directory as this file is in
-        self.base = os.path.dirname(os.path.realpath(__file__))+'/'
+        self.base = os.path.dirname(os.path.realpath(__file__)) + '/'
         # ToDo: read the path value, so it saved where the raw data is
-        self.fpath = self.base+'tomo_center.config'
+        self.fpath = self.base + 'tomo_center.config'
 
     def print_fpath(self):
         print('# the current config file for the tomo macro is:')
-        print('#     '+self.fpath)
+        print('#     ' + self.fpath)
 
     def datetime_str(self):
         return datetime.datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
@@ -97,7 +97,7 @@ class Tomo(object):
                     self.positions.append([float(x) for x in split[1:]])
 
     def get_motor_position(self, motor):
-        runCommand('wms '+motor)
+        runCommand('wms ' + motor)
         return env.lastMacroResult
 
     def read_current_positions(self):
@@ -105,7 +105,7 @@ class Tomo(object):
         for motor in self.motors:
             result.append(self.get_motor_position(motor))
         with open(self.fpath, 'a+') as F:
-            F.write(self.line_to_str(result)+'\r\n')
+            F.write(self.line_to_str(result) + '\r\n')
         print(self.get_header())
         print(self.line_to_str(result))
 
@@ -115,11 +115,11 @@ class Tomo(object):
 
     def write_header(self):
         with open(self.fpath, 'a+') as F:
-            F.write(self.get_header()+'\r\n')
-            F.write('#'*86+'\r\n')
+            F.write(self.get_header() + '\r\n')
+            F.write('#' * 86 + '\r\n')
 
     def line_to_str(self, line):
-        return (line[0] +'    '
+        return (line[0] + '    '
                 + ' '.join([str(round(x, 3)).ljust(8) for x in line[1:]]))
 
     def my_sin(self, r_deg, rx, dtheta, cx):
@@ -149,9 +149,9 @@ class Tomo(object):
     def read_xyzr(self):
         x, y, z, r = [], [], [], []
         for line in self.positions:
-            x.append(line[0]+line[3])
-            y.append(line[1]+line[4])
-            z.append(line[2]+line[5])
+            x.append(line[0] + line[3])
+            y.append(line[1] + line[4])
+            z.append(line[2] + line[5])
             r.append(line[6])
         return np.array(x), np.array(y), np.array(z), np.array(r)
 
@@ -166,8 +166,8 @@ class Tomo(object):
             # different center, which we calcualte from the first saved
             # position.
             z_rx = self.fitx[0][0]
-            z_dtheta = self.fitx[0][1]-90
-            z_cz = z[0]-z_rx*np.sin((z_dtheta+r[0])*np.pi/180.)
+            z_dtheta = self.fitx[0][1] - 90
+            z_cz = z[0] - z_rx * np.sin((z_dtheta + r[0]) * np.pi / 180.)
             self.fitz = np.array([[z_rx, z_dtheta, z_cz]])
         else:
             # the z-movement is an independet sine
@@ -193,41 +193,41 @@ class Tomo(object):
         plt.scatter([cx], [cz], c='r')
         plt.plot([cx, x0], [cz, z0], c='r')
         plt.axis('equal')
-        plt.ylabel(self.motors[2]+' + '+self.motors[5])
-        plt.xlabel(self.motors[0]+' + '+self.motors[3])
+        plt.ylabel(self.motors[2] + ' + ' + self.motors[5])
+        plt.xlabel(self.motors[0] + ' + ' + self.motors[3])
 
         plt.subplot(2, 4, 2)
         plt.scatter(r, x)
         plt.plot(r_deg_plot, self.my_sin(r_deg_plot, *self.fitx[0]),
                  c='r', alpha=0.5)
-        plt.ylabel(self.motors[0]+' + '+self.motors[3])
+        plt.ylabel(self.motors[0] + ' + ' + self.motors[3])
         plt.xlabel(self.motors[6])
 
         plt.subplot(2, 4, 3)
         plt.scatter(r, y)
         plt.plot(r_deg_plot, self.my_sin(r_deg_plot, *self.fity[0]),
                  c='r', alpha=0.5)
-        plt.ylabel(self.motors[1]+' + '+self.motors[4])
+        plt.ylabel(self.motors[1] + ' + ' + self.motors[4])
         plt.xlabel(self.motors[6])
 
         plt.subplot(2, 4, 4)
         plt.scatter(r, z)
         plt.plot(r_deg_plot, self.my_sin(r_deg_plot, *self.fitz[0]),
                  c='r', alpha=0.5)
-        plt.ylabel(self.motors[2]+' + '+self.motors[5])
+        plt.ylabel(self.motors[2] + ' + ' + self.motors[5])
         plt.xlabel(self.motors[6])
 
         plt.subplot(2, 4, 6)
-        plt.scatter(r, x-self.my_sin(r, *self.fitx[0]), c='r')
-        plt.ylabel('residuum: '+self.motors[0]+' + '+self.motors[3])
+        plt.scatter(r, x - self.my_sin(r, *self.fitx[0]), c='r')
+        plt.ylabel('residuum: ' + self.motors[0] + ' + ' + self.motors[3])
         plt.xlabel(self.motors[6])
         plt.subplot(2, 4, 7)
-        plt.scatter(r, y-self.my_sin(r, *self.fity[0]), c='r')
-        plt.ylabel('residuum: '+self.motors[1]+' + '+self.motors[4])
+        plt.scatter(r, y - self.my_sin(r, *self.fity[0]), c='r')
+        plt.ylabel('residuum: ' + self.motors[1] + ' + ' + self.motors[4])
         plt.xlabel(self.motors[6])
         plt.subplot(2, 4, 8)
-        plt.scatter(r, z-self.my_sin(r, *self.fitz[0]), c='r')
-        plt.ylabel('residuum: '+self.motors[2]+' + '+self.motors[5])
+        plt.scatter(r, z - self.my_sin(r, *self.fitz[0]), c='r')
+        plt.ylabel('residuum: ' + self.motors[2] + ' + ' + self.motors[5])
         plt.xlabel(self.motors[6])
 
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
@@ -243,17 +243,17 @@ class Tomo(object):
         fit_basez = self.my_sin(sr, *self.fitz[0])
 
         if self.verbosity >= 2:
-            print('#'*80)
+            print('#' * 80)
             print('# tomo rotate to:')
-            print('# sr = '+str(sr))
-            print('#'*80)
+            print('# sr = ' + str(sr))
+            print('#' * 80)
             print('### base')
-            print('#     basex = '+str(fit_basex))
-            print('#     basey = '+str(fit_basey))
-            print('#     basez = '+str(fit_basez))
+            print('#     basex = ' + str(fit_basex))
+            print('#     basey = ' + str(fit_basey))
+            print('#     basez = ' + str(fit_basez))
             print('### scanner')
             print('#     sx = sy = sz = 0')
-            print('#'*80)
+            print('#' * 80)
 
         self.move_motor('sx', 0.0)
         self.move_motor('sy', 0.0)
@@ -261,7 +261,7 @@ class Tomo(object):
         if sr >= 0:
             self.move_motor('sr', str(sr))
         else:
-            self.move_motor('sr', str(sr+360))
+            self.move_motor('sr', str(sr + 360))
         self.move_motor('basex', fit_basex)
         self.move_motor('basey', fit_basey)
         self.move_motor('basez', fit_basez)

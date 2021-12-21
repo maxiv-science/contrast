@@ -5,12 +5,15 @@ from contrast.detectors import Detector, TriggeredDetector
 from contrast.motors.LC400 import LC400Waveform
 import time
 
+
 @macro
 class NpointFlyscan(Mesh):
     """
     Flyscan macro for the Npoint LC400 setup.
-        
-    npointflyscan <fly-motor> <start> <stop> <intervals> <step-motor1> <start1> <stop1> <intervals1> ... <exp time> <latency>
+
+    npointflyscan <fly-motor> <start> <stop> <intervals>
+                  <step-motor1> <start1> <stop1> <intervals1> ...
+                  <exp time> <latency>
 
     The argument fly-motor must be an instance of the LC400Motor class.
     """
@@ -25,14 +28,15 @@ class NpointFlyscan(Mesh):
             super(NpointFlyscan, self).__init__(*args[4:-1])
             self.fastmotor = args[0]
             # convert to dial coordinates, as the LC400 operates in dial units
-            self.fastmotorstart = ( float(args[1]) - self.fastmotor._offset ) / self.fastmotor._scaling
-            self.fastmotorend = ( float(args[2]) - self.fastmotor._offset ) / self.fastmotor._scaling
+            self.fastmotorstart = ((float(args[1]) - self.fastmotor._offset)
+                                   / self.fastmotor._scaling)
+            self.fastmotorend = ((float(args[2]) - self.fastmotor._offset)
+                                 / self.fastmotor._scaling)
             self.fastmotorintervals = int(args[3])
             self.exptime = float(args[-2])
             self.latency = float(args[-1])
             self.print_progress = False
         except:
-            #raise MacroSyntaxError
             raise
 
     def _set_det_trig(self, on):
@@ -48,18 +52,21 @@ class NpointFlyscan(Mesh):
             self._set_det_trig(True)
 
             # Activate the LC400 buffer
-            #runCommand('activate npoint_buff')
+            # runCommand('activate npoint_buff')
 
             # create waveform from scan parameters
-            self.wf = LC400Waveform(self.fastmotor.axis, 
-                               self.fastmotorstart,
-                               self.fastmotorend,
-                               self.fastmotorintervals+1,
-                               self.exptime,
-                               self.latency,
-                               0.5, # acceleration time TODO make this a configurable parameter, e.g via a keyword parameter
-                               )
-            # get JSON config string and send it to the LC400 via the motor.proxy 
+            self.wf = LC400Waveform(
+                self.fastmotor.axis,
+                self.fastmotorstart,
+                self.fastmotorend,
+                self.fastmotorintervals + 1,
+                self.exptime,
+                self.latency,
+                # acceleration time TODO make this a configurable parameter,
+                # e.g via a keyword parameter:
+                0.5,
+            )
+            # get JSON config string, send it to the LC400 via the motor.proxy
             json = self.wf.json()
             self.fastmotor.proxy.load_waveform(json)
 
@@ -93,7 +100,8 @@ class NpointFlyscan(Mesh):
                 self.fastmotor.proxy.start_waveform()
                 ok = True
             except:
-                print('***** start_waveform() failed, is the piexo having trouble settling? trying again...')
+                print('***** start_waveform() failed, is the piexo having '
+                      'trouble settling? trying again...')
                 import time
                 time.sleep(.1)
 
@@ -103,4 +111,3 @@ class NpointFlyscan(Mesh):
             if d.name in ('xspress3', 'merlin'):
                 s += ('%s: %u, ' % (d.name, d.lima.last_image_acquired))
         print(s + '\r', end='')
-

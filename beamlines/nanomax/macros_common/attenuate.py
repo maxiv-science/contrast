@@ -30,18 +30,18 @@ class Attenuate(object):
 
     # absorber settings at the NanoMAX beamline - status 2019-10-06
     elements = ['Al', 'Ti', 'Si', 'Cu', None, 'Fe', 'Mo', 'Ta', 'Ag']
-    position = [-40000, -29000, -18000, -9000, 0, 11000,  21000,  33000, 41000]
+    position = [-40000, -29000, -18000, -9000, 0, 11000, 21000, 33000, 41000]
     carriers = ['attenuator1_x', 'attenuator2_x',
                 'attenuator3_x', 'attenuator4_x']
-    thickness = [[25,   50,  100,  100],   # in um
-                 [20,   40,   80,  160],
+    thickness = [[25, 50, 100, 100],   # in um
+                 [20, 40, 80, 160],
                  [250, 500, 1000, 1000],
-                 [20,   40,   80,  160],
-                 [0,     0,    0,    0],
-                 [50,  100,  200,  400],
-                 [15,   30,   60,  120],
-                 [20,   40,   80,  160],
-                 [25,   50,  100,  200]]
+                 [20, 40, 80, 160],
+                 [0, 0, 0, 0],
+                 [50, , 200, 400],
+                 [15, 30, 60, 120],
+                 [20, 40, 80, 160],
+                 [25, 50, , 200]]
     thickness = np.array(thickness)
 
     # loading offline data between 5 and 25 keV
@@ -77,7 +77,7 @@ class Attenuate(object):
             self.transmission_1um[element] = np.exp(T_log)
 
     def calculate_transmission_of_actual_foils(self):
-        self.transmission = 1.*np.ones_like(self.thickness)
+        self.transmission = 1. * np.ones_like(self.thickness)
         for i, element in enumerate(self.elements):
             for j, carrier in enumerate(self.carriers):
                 if not (element is None):
@@ -86,7 +86,7 @@ class Attenuate(object):
                     self.transmission[i, j] = 1. * T
 
     def calcualte_possible_permutations(self):
-        self.T_tot = [[T1*T2*T3*T4, i1, i2, i3, i4,
+        self.T_tot = [[T1 * T2 * T3 * T4, i1, i2, i3, i4,
                        [self.elements[i1], self.elements[i2],
                         self.elements[i3], self.elements[i4]]]
                       for i1, T1 in enumerate(self.transmission[:, 0])
@@ -102,7 +102,7 @@ class Attenuate(object):
     def get_current_carrier_positions(self):
         carrier_positions = []
         for carrier in sorted(self.carriers):
-            runCommand('wms '+carrier)
+            runCommand('wms ' + carrier)
             carrier_positions.append(env.lastMacroResult)
         return np.array(carrier_positions)
 
@@ -124,7 +124,7 @@ class Attenuate(object):
 
         if printing:
             print('currently:')
-            print('    absorption  ', str(1-self.T_currently))
+            print('    absorption  ', str(1 - self.T_currently))
             print('    transmission', str(self.T_currently))
             print('with:')
             for i_carrier, i_pos in enumerate(carrier_indices):
@@ -165,34 +165,34 @@ class Attenuate(object):
             self.calcualte_possible_permutations()
             self.check_possible_permutations_for_elements()
 
-            self.T_min = 1.*self.T_allowed[0, 0]
+            self.T_min = 1. * self.T_allowed[0, 0]
 
             try:
                 if self.attenuate_to == 'max':
                     print('choosing maximal possible attenuation')
-                    self.T_choosen = 1.*self.T_allowed[0, :]
-                    self.attenuate_to = 1.-self.T_choosen[0]
+                    self.T_choosen = 1. * self.T_allowed[0, :]
+                    self.attenuate_to = 1. - self.T_choosen[0]
 
                 # is the choosen absorption value reachable?
                 elif ((self.attenuate_to > 1)
-                      or (round(1-self.T_min, 3) <= self.attenuate_to)):
-                    print('absorption of', self.attenuate_to, 
+                      or (round(1 - self.T_min, 3) <= self.attenuate_to)):
+                    print('absorption of', self.attenuate_to,
                           'cannot be reached')
                     print('instead choosing maximum possible attenuation')
-                    self.T_choosen = 1.*self.T_allowed[0, :]
+                    self.T_choosen = 1. * self.T_allowed[0, :]
 
                 # which combination gives the closest result?
                 else:
                     self.T_choosen = list(filter(
-                                        lambda i: i[0] <= 1-self.attenuate_to,
-                                        self.T_allowed))[-1]
+                        lambda i: i[0] <= 1 - self.attenuate_to,
+                        self.T_allowed))[-1]
             except ValueError:
                 print("Oops!  That was no valid input")
 
             # get needed mv motor commands
             commands = []
             for i_carrier, i_pos in enumerate(
-                        self.T_choosen[1:1+len(self.carriers)]):
+                    self.T_choosen[1:1 + len(self.carriers)]):
                 i_pos = int(i_pos)
                 command = 'mv ' + str(self.carriers[i_carrier])
                 command += ' ' + str(self.position[i_pos]).ljust(8)
@@ -202,18 +202,19 @@ class Attenuate(object):
             if self.verbosity >= 3 or self.how == 'safe':
                 print('aimed for:')
                 print('    absorption  ', self.attenuate_to)
-                print('    transmission', max(0, 1-self.attenuate_to))
+                print('    transmission', max(0, 1 - self.attenuate_to))
                 print('    at currently', self.photon_energy, 'eV')
                 print('can achieve:')
-                print('    absorption  ', str(1-self.T_choosen[0]))
+                print('    absorption  ', str(1 - self.T_choosen[0]))
                 print('    transmission', str(self.T_choosen[0]))
                 print('with motor setting:')
 
                 for i_carrier, i_pos in enumerate(
-                            self.T_choosen[1:1+len(self.carriers)]):
+                        self.T_choosen[1:1 + len(self.carriers)]):
                     i_pos = int(i_pos)
                     line = '    ' + commands[i_carrier]
-                    line += '#' + str(self.thickness[i_pos, i_carrier]).rjust(5)
+                    line += '#' + str(
+                        self.thickness[i_pos, i_carrier]).rjust(5)
                     line += ' um of ' + str(self.elements[i_pos])
                     print(line)
 

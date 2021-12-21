@@ -61,23 +61,23 @@ class Calc_SSA(object):
 
     def get_acceptance(self):
         if self.endstation in self.accepted_names_D:
-            self.accepteance_m = np.array([225.e-6, 379.e-6])
+            self.accepteance_m = np.array([225e-6, 379e-6])
         elif self.endstation in self.accepted_names_I:
             acc = [1e-6 * self.FZP_diameter_um, 1e-6 * self.FZP_diameter_um]
             self.accepteance_m = np.array(acc)
 
     def print_result(self):
-        print('    photon energy: '+str(self.photon_energy_eV)+' eV')
-        print('    distance from SSA: '+str(self.d_ssa_m)+' m')
-        print('    optics aperture: '+str(self.accepteance_m)+' m')
+        print('    photon energy: ' + str(self.photon_energy_eV) + ' eV')
+        print('    distance from SSA: ' + str(self.d_ssa_m) + ' m')
+        print('    optics aperture: ' + str(self.accepteance_m) + ' m')
         if self.coherent:
             print('    beam: coherence mode')
         else:
             print('    beam: high flux mode')
-        print('-'*20)
+        print('-' * 20)
         print('    required SSA opening:',
-              "ssa_gapx {0:.2f}".format(self.ssa_opening_m[0]*1.e6),
-              "ssa_gapy {0:.2f}".format(self.ssa_opening_m[1]*1.e6))
+              "ssa_gapx {0:.2f}".format(self.ssa_opening_m[0] * 1e6),
+              "ssa_gapy {0:.2f}".format(self.ssa_opening_m[1] * 1e6))
 
     def run(self):
         if self.input_validation():

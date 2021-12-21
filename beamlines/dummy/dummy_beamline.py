@@ -5,20 +5,22 @@ Sets up a mock beamline with dummy motors and detectors.
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
-if __name__=='__main__':
+if __name__ == '__main__':
 
     import contrast
     from contrast.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
     from contrast.scans import *
-    from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector, DummyWritingDetector2
+    from contrast.detectors import (DummyDetector, Dummy1dDetector,
+                                    DummyWritingDetector,
+                                    DummyWritingDetector2)
     from contrast.environment import env, register_shortcut
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     import os
 
     # if you have ptypy installed, you can generate mock ptycho data
-    #from sim_ptycho_scan import *
+    # from sim_ptycho_scan import *
 
-    env.userLevel = 1 # we're not experts!
+    env.userLevel = 1  # we're not experts!
 
     samx = DummyMotor(name='samx')
     samx.dial_limits = (0, 10)
@@ -32,13 +34,13 @@ if __name__=='__main__':
 
     basex = DummyMotor(name='basex')
     basex.dial_limits = (-8000, 8000)
-    basex.velocity      = 10000
+    basex.velocity = 10000
     basey = DummyMotor(name='basey')
     basey.dial_limits = (-8000, 8000)
-    basey.velocity      = 10000
+    basey.velocity = 10000
     basez = DummyMotor(name='basez')
     basez.dial_limits = (-8000, 8000)
-    basez.velocity      = 10000
+    basez.velocity = 10000
 
     sx = DummyMotor(name='sx')
     sx.dial_limits = (-50, 50)
@@ -51,8 +53,8 @@ if __name__=='__main__':
     sr.velocity = 30
 
     energy = DummyMotor(name='energy')
-    energy.dial_limits   = (5000, 35000)
-    energy.velocity      = 50000
+    energy.dial_limits = (5000, 35000)
+    energy.velocity = 50000
     energy.dial_position = 10000
 
     attenuator1_x = DummyMotor(name='attenuator1_x')
@@ -95,7 +97,8 @@ if __name__=='__main__':
 
     # this MotorMemorizer keeps track of motor user positions and
     # limits, and dumps this to file when they are changed.
-    memorizer = MotorMemorizer(name='memorizer', filepath='/tmp/.dummy_beamline_motors')
+    memorizer = MotorMemorizer(
+        name='memorizer', filepath='/tmp/.dummy_beamline_motors')
 
     # handy shortcuts
     register_shortcut('wsample', 'wm samx samy')
@@ -105,6 +108,7 @@ if __name__=='__main__':
     # define pre- and post-scan actions, per base class
     def pre_scan_stuff(slf):
         print("Maybe open a shutter here?")
+
     def post_scan_stuff(slf):
         print("Maybe close that shutter again?")
 
