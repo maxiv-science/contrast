@@ -38,12 +38,13 @@ if __name__ == '__main__':
 
     # add a scheduler to pause scans when shutters close
     env.scheduler = MaxivScheduler(
-                        shutter_list=['B303A-FE/VAC/HA-01',
-                                      'B303A-FE/PSS/BS-01',
-                                      'B303A-O/PSS/BS-01',
-                                      'B303A-E/PSS/BS-01'],
-                        avoid_injections=False,
-                        respect_countdown=False,)
+        shutter_list=['B303A-FE/VAC/HA-01',
+                      'B303A-FE/PSS/BS-01',
+                      'B303A-O/PSS/BS-01',
+                      'B303A-E/PSS/BS-01'],
+        avoid_injections=False,
+        respect_countdown=False
+    )
 
     env.userLevel = 2
     # arbitrarily chosen these levels:
@@ -296,13 +297,17 @@ if __name__ == '__main__':
     # find the latest scan number and initialize env.nextScanID
     try:
         l = os.listdir(env.paths.directory)
-        last = max([int(l_[:-3]) for l_ in l if (len(l_) == 9 and l_.endswith('.h5'))])
+        last = max(
+            [int(l_[:-3]) for l_ in l if (len(l_) == 9 and l_.endswith('.h5'))]
+        )
         env.nextScanID = last + 1
-        print('\nNote: inferring that the next scan number should be %u' % (last+1))
+        print('\nNote: inferring that the next scan number should be %u'
+              % (last + 1))
     except:
         pass
 
     # add a memorizer so the motors keep their user positions and limits
     # after a restart note that this will overwrite the dial positions
     # set above! delete the file to generate it again.
-    memorizer = MotorMemorizer(name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
+    memorizer = MotorMemorizer(
+        name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')

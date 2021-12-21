@@ -5,6 +5,7 @@ except ModuleNotFoundError:
     pass
 import numpy as np
 
+
 class Keysight2985(Detector):
     """
     Interface to the Keysight electrometer at
@@ -17,7 +18,7 @@ class Keysight2985(Detector):
     def initialize(self):
         self.dev = PyTango.DeviceProxy(self.dev_name)
         self.dev.init()
-        
+
     def prepare(self, acqtime, dataid, n_starts):
         self.dev.write_attribute('integration_time', acqtime)
         self.dev.InputOn()
@@ -42,4 +43,3 @@ class Keysight2985(Detector):
     @property
     def current_range(self):
         return self.dev.current_range
-

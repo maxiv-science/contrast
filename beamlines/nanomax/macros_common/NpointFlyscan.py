@@ -79,7 +79,7 @@ class NpointFlyscan(Mesh):
             wf = LC400Waveform(self.fastmotor.axis,
                                self.fastmotorstart,
                                self.fastmotorend,
-                               self.fastmotorintervals+1,
+                               self.fastmotorintervals + 1,
                                self.exptime,
                                self.latency,
                                self.acctime,

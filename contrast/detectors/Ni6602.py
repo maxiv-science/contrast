@@ -8,6 +8,7 @@ import time
 PROP_MAP = {1: 'counter01', 2: 'counter02', 3: 'counter03'}
 CHANNEL_MAP = {'counter1': 'CNT1', 'counter2': 'CNT2', 'counter3': 'CNT3'}
 
+
 class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
     """
     Interface to the Ni6602 Tango device exposing counters.
@@ -21,7 +22,7 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
     def initialize(self):
         self.dev = PyTango.DeviceProxy(self.dev_name)
         self.dev.init()
-        
+
         # handle some unwanted options that otherwise can cause errors
         self.dev.write_attribute("nexusFileGeneration", 0)
         self.dev.write_attribute("CNT1MinPulseWidthEnable", 0)
@@ -33,7 +34,7 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
         Switch between PW (pulse-width gated) and EVT (single count) mode.
         This is done through Tango properties so is a bit messy.
 
-        pw = True means go to gated mode, 
+        pw = True means go to gated mode,
         pw = False means go to single count.
         """
         if pw:
@@ -102,4 +103,3 @@ class Ni6602CounterCard(Detector, LiveDetector, TriggeredDetector):
         for name, channel in CHANNEL_MAP.items():
             res[name] = self.dev.read_attribute(channel).value
         return res
-

@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
@@ -8,7 +9,9 @@ except ModuleNotFoundError:
     pass
 import time
 
-class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+
+class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector,
+               BurstDetector):
     """
     Provides an interface to the Xspress3 streaming manager,
 
@@ -19,7 +22,8 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
-        Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
+        # do this last so that initialize() can overwrite parent defaults:
+        Detector.__init__(self, name=name)
         self.proxy = PyTango.DeviceProxy(device)
 
     def initialize(self):
@@ -40,7 +44,8 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
             fn = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.saving_file = os.path.join(path, fn)
             if os.path.exists(self.saving_file):
-                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
             self.proxy.DestinationFileName = self.saving_file
 
@@ -56,7 +61,7 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         # if not in burst mode, we can arm here and then just soft trigger
         ntrig = 1
         self.arm_calls = 0
-        if self.burst_n == 1:            
+        if self.burst_n == 1:
             ntrig *= n_starts
         if self.hw_trig:
             ntrig *= self.hw_trig_n
@@ -64,7 +69,8 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
         if self.burst_n == 1:
             self.proxy.Arm()
 
-        # so how many frames do we expect to see before the detector is done with a specific start()?
+        # so how many frames do we expect to see before the detector is
+        # done with a specific start()?
         exp = self.burst_n
         if self.hw_trig:
             exp *= self.hw_trig_n
@@ -98,12 +104,12 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
                         return False
                 return True
             except PyTango.DevFailed:
-                print('%s.busy(): failed to talk to my Tango device, trying again...'%self.name)
+                print('%s.busy(): failed to talk to my Tango device, '
+                      'trying again...' % self.name)
                 time.sleep(.5)
 
     def read(self):
         if self.saving_file == '':
             return None
         else:
-            return Link(self.saving_file , '/', universal=True)
-
+            return Link(self.saving_file, '/', universal=True)

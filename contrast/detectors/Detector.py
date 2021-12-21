@@ -5,6 +5,7 @@ import numpy as np
 import time
 import threading
 
+
 class Detector(Gadget):
     """
     Base class representing any device which can be read out to produce
@@ -18,7 +19,8 @@ class Detector(Gadget):
             self.initialize()
         except Exception as e:
             self.active = False
-            print('Failed to initialize %s. Run "%s.initialize()" to try again and perhaps learn more.' % (self.name, self.name))
+            print(('Failed to initialize %s. Run "%s.initialize()" to try '
+                   'again and perhaps learn more.') % (self.name, self.name))
 
     @classmethod
     def get_active(cls):
@@ -26,8 +28,10 @@ class Detector(Gadget):
         Returns a DetectorGroup instance containing the currently active
         ``Detector`` instances.
         """
-        return DetectorGroup(*[d for d in cls.getinstances() if (d.active and not isinstance(d, TriggerSource))])
-    
+        return DetectorGroup(*[d for d in cls.getinstances()
+                               if (d.active
+                                   and not isinstance(d, TriggerSource))])
+
     def prepare(self, acqtime, dataid, n_starts=None):
         """
         Run before acquisition, once per scan.
@@ -80,6 +84,7 @@ class Detector(Gadget):
         """
         raise NotImplementedError
 
+
 class TriggerSource(Detector):
     """
     A TriggerSource is a device which follows the ``Detector`` API,
@@ -102,6 +107,7 @@ class TriggerSource(Detector):
 
     def read(self):
         pass
+
 
 class LiveDetector(object):
     """
@@ -126,6 +132,7 @@ class LiveDetector(object):
         """
         raise NotImplementedError
 
+
 class SoftwareLiveDetector(LiveDetector):
     """
     Implements a software live mode, where detectors that do not provide
@@ -142,7 +149,8 @@ class SoftwareLiveDetector(LiveDetector):
         :param acqtime: Acquisition time.
         :type acqtime: float
         """
-        if self.thread is not None: self.stop_live()
+        if self.thread is not None:
+            self.stop_live()
         self.stopped = False
         self.thread = threading.Thread(target=self._start, args=(acqtime,))
         self.thread.start()
@@ -152,9 +160,11 @@ class SoftwareLiveDetector(LiveDetector):
         Stops background acquisition.
         """
         # if the thread has been stopped or never started
-        if self.thread is None: return
+        if self.thread is None:
+            return
         # if the thread has died by itself for some reason
-        if not self.thread.is_alive(): return
+        if not self.thread.is_alive():
+            return
         self.stopped = True
         self.stop()
         self.thread.join()
@@ -168,6 +178,7 @@ class SoftwareLiveDetector(LiveDetector):
             while self.busy():
                 time.sleep(.05)
 
+
 class TriggeredDetector(object):
     """
     Defines the API for detectors that optionally accept hardware
@@ -176,6 +187,7 @@ class TriggeredDetector(object):
     def __init__(self):
         self.hw_trig = False  # whether to arm for hw triggering
         self.hw_trig_n = 1    # the number of triggers per sw step
+
 
 class BurstDetector(object):
     """
@@ -187,7 +199,8 @@ class BurstDetector(object):
 
     * `burst_n`: the number of autonomous measurements
     * `burst_latency`: the time between measurements
-    * `burst_acqtime`: an optional parameter which (if not None) overrides the value received via the prepare() method.
+    * `burst_acqtime`: an optional parameter which (if not None)
+      overrides the value received via the prepare() method.
     """
     def __init__(self):
         # let child classes set these if they want
@@ -202,6 +215,7 @@ class BurstDetector(object):
         self.acqtime = acqtime
         if self.burst_acqtime:
             self.acqtime = self.burst_acqtime
+
 
 class DetectorGroup(object):
     """
@@ -234,7 +248,8 @@ class DetectorGroup(object):
                     raise
                 except:
                     tried += 1
-                    print('*** problem calling prepare() on %s, trying again in %f s...' % (d.name, trial_delay))
+                    print(('*** problem calling prepare() on %s, trying again '
+                           + 'in %f s...') % (d.name, trial_delay))
                     time.sleep(trial_delay)
                     if tried == trials:
                         raise
@@ -261,7 +276,8 @@ class DetectorGroup(object):
                     raise
                 except:
                     tried += 1
-                    print('*** problem calling start() on %s, trying again in %f s...' % (d.name, trial_delay))
+                    print(('*** problem calling start() on %s, trying again '
+                           + 'in %f s...') % (d.name, trial_delay))
                     time.sleep(trial_delay)
                     if tried == trials:
                         raise
@@ -278,7 +294,8 @@ class DetectorGroup(object):
         Checks if one or more of the  constituent devices is busy.
         """
         for d in self:
-            if d.busy(): return True
+            if d.busy():
+                return True
         return False
 
     def __iter__(self):
@@ -289,6 +306,7 @@ class DetectorGroup(object):
 
     def __add__(self, other):
         return DetectorGroup(*self.detectors, *other.detectors)
+
 
 @macro
 class LsDet(object):
@@ -302,7 +320,7 @@ class LsDet(object):
                 continue
             name = ('* ' + d.name) if d.active else ('  ' + d.name)
             try:
-            # rough sense of how each detector is doing
+                # rough sense of how each detector is doing
                 if d.busy():
                     name += ' (busy)'
             except:
@@ -310,6 +328,7 @@ class LsDet(object):
 
             dct[name] = d.__class__
         print(utils.dict_to_table(dct, titles=('  name', 'class')))
+
 
 @macro
 class LsTrig(object):
@@ -321,14 +340,15 @@ class LsTrig(object):
         for d in TriggerSource.getinstances():
             name = ('* ' + d.name) if d.active else ('  ' + d.name)
             try:
-            # rough sense of how each detector is doing
+                # rough sense of how each detector is doing
                 if d.busy():
                     name += ' (busy)'
             except:
                 name += '  (not responding)'
-            
+
             dct[name] = d.__class__
         print(utils.dict_to_table(dct, titles=('  name', 'class')))
+
 
 @macro
 class StartLive(object):
@@ -346,7 +366,8 @@ class StartLive(object):
             self.exptime = .1
             self.dets = args
         if not self.dets:
-            self.dets = [d for d in Detector.get_active() if isinstance(d, LiveDetector)]
+            self.dets = [d for d in Detector.get_active()
+                         if isinstance(d, LiveDetector)]
 
     def run(self):
         for d in self.dets:
@@ -354,6 +375,7 @@ class StartLive(object):
                 d.start_live(float(self.exptime))
             else:
                 print('%s is not a LiveDetector' % d.name)
+
 
 @macro
 class StopLive(object):
@@ -368,7 +390,8 @@ class StopLive(object):
         if args:
             self.dets = args
         else:
-            self.dets = [d for d in Detector.get_active() if isinstance(d, LiveDetector)]
+            self.dets = [d for d in Detector.get_active()
+                         if isinstance(d, LiveDetector)]
 
     def run(self):
         for d in self.dets:
@@ -376,6 +399,7 @@ class StopLive(object):
                 d.stop_live()
             else:
                 print('%s is not a LiveDetector' % d.name)
+
 
 @macro
 class Deactivate(object):
@@ -394,6 +418,7 @@ class Deactivate(object):
         for d in self.dets:
             d.active = False
 
+
 @macro
 class Activate(object):
     """
@@ -410,4 +435,3 @@ class Activate(object):
     def run(self):
         for d in self.dets:
             d.active = True
-

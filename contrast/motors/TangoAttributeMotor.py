@@ -5,6 +5,7 @@ Provides a general Motor interface to any Tango attribute.
 import PyTango
 from . import Motor
 
+
 class TangoAttributeMotor(Motor):
     """
     Motor interface to any Tango attribute, so that anything can be

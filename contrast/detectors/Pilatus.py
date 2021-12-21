@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
@@ -10,7 +11,9 @@ import select
 BUF_SIZE = 1024
 TIMEOUT = 20
 
-class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+
+class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
+              BurstDetector):
     """
     Provides an interface to the Pilatus streaming manager,
 
@@ -21,7 +24,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         BurstDetector.__init__(self)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
-        Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
+        # do this last so that initialize() can overwrite parent defaults:
+        Detector.__init__(self, name=name)
         self._hdf_path = 'entry/measurement/Pilatus/data'
         self.hostname = hostname
 
@@ -46,7 +50,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             fn = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.saving_file = os.path.join(path, fn)
             if os.path.exists(self.saving_file):
-                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
 
         self.exptime = self.acqtime
@@ -60,11 +65,13 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if self.hw_trig and (self.burst_n == 1):
             # each image triggered
             self.nimages = self.hw_trig_n
-            self._camserver_start(command='extmtrigger', filename=self.saving_file)
+            self._camserver_start(
+                command='extmtrigger', filename=self.saving_file)
         elif self.hw_trig and (self.burst_n > 1):
             # triggered burst mode
             self.nimages = self.burst_n
-            self._camserver_start(command='exttrigger', filename=self.saving_file)
+            self._camserver_start(
+                command='exttrigger', filename=self.saving_file)
 
     def start(self):
         if self.hw_trig:
@@ -84,7 +91,9 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             if ready[0]:
                 buf += self.sock.recv(BUF_SIZE).decode(encoding='ascii')
             else:
-                raise Exception('The camserver didnt accept the stop command. This happens when it is running above 10 Hz or so.')
+                raise Exception('The camserver didnt accept the stop command. '
+                                'This happens when it is running above 10 Hz '
+                                'or so.')
         self._started = False
 
     def busy(self):
@@ -97,10 +106,14 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if ready[0]:
             response = self.sock.recv(BUF_SIZE).decode(encoding='ascii')
             if len(response) == 0:
-                raise Exception('The socket connecting client to streamer is dead')
+                raise Exception(
+                    'The socket connecting client to streamer is dead')
             if 'ERR' in response:
-                print('Error! The %s acquisition didnt finish. Causing a ctrl-C...'%self.name)
-                print('This should be done better, we could actually move on to the next line. But for now lets focus on not halting forever.')
+                print('Error! The %s acquisition didnt finish. Causing a '
+                      'ctrl-C...' % self.name)
+                print('This should be done better, we could actually move '
+                      'on to the next line. But for now lets focus on not '
+                      'halting forever.')
                 raise KeyboardInterrupt
             if response.startswith('7 OK'):
                 self._started = False
@@ -111,8 +124,9 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if self.saving_file == '':
             return None
         else:
-            return {'frames': Link(self.saving_file , self._hdf_path, universal=True),
-                    'thumbs:': None,}
+            return {'frames': Link(self.saving_file, self._hdf_path,
+                                   universal=True),
+                    'thumbs:': None, }
 
     def _initialize_socket(self):
         try:
@@ -192,7 +206,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     @property
     def exptime(self):
         res = self._query('exptime')
-        res = self._parse_response(res, '15 OK Exposure time set to: (.*) sec.\x18')
+        res = self._parse_response(
+            res, '15 OK Exposure time set to: (.*) sec.\x18')
         return float(res)
 
     @exptime.setter
@@ -204,7 +219,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     @property
     def expperiod(self):
         res = self._query('expperiod')
-        res = self._parse_response(res, '15 OK Exposure period set to: (.*) sec\x18')
+        res = self._parse_response(
+            res, '15 OK Exposure period set to: (.*) sec\x18')
         return float(res)
 
     @expperiod.setter
@@ -216,7 +232,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     @property
     def nimages(self):
         res = self._query('nimages')
-        res = self._parse_response(res, '15 OK N images set to: (\d+)')
+        res = self._parse_response(res, '15 OK N images set to: ([0-9]+)')
         nimages = int(res) if res else None
         return nimages
 
@@ -237,4 +253,3 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         res = self._query('imgpath %s' % value)
         if res is None or not res.startswith('10 OK'):
             raise Exception('Error setting imgpath')
-

@@ -19,6 +19,7 @@ register_shortcut('wsample', 'wm base* s?')
 register_shortcut('wbl', 'wm ivu_* energy mono_x2per ssa_gap*')
 register_shortcut('wtab', 'wm table*')
 
+
 def fastshutter_action(state, name):
     """
     Open (state=False) or close (state=True) the fast shutter,
@@ -28,13 +29,14 @@ def fastshutter_action(state, name):
     try:
         panda = [m for m in Detector.getinstances() if m.name == name][0]
     except IndexError:
-        raise Exception('No Gadget named %s'%name)
+        raise Exception('No Gadget named %s' % name)
     response = panda.query('BITS1.B=%u' % (int(state)))
     if 'OK' in response:
         act = {False: 'opened', True: 'closed'}[state]
-        print('Fastshutter %s'%act)
+        print('Fastshutter %s' % act)
     else:
         print('Could not actuate the shutter')
+
 
 @macro
 class FsOpen(object):
@@ -43,6 +45,7 @@ class FsOpen(object):
     """
     def run(self):
         fastshutter_action(False, 'panda0')
+
 
 @macro
 class FsClose(object):

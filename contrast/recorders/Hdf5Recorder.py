@@ -6,6 +6,7 @@ import os
 
 H5_NAME_FORMAT = '%06u.h5'
 
+
 class Link(h5py.ExternalLink):
     """
     Helper class which wraps a h5py.ExternalLink, but which also
@@ -15,6 +16,7 @@ class Link(h5py.ExternalLink):
     def __init__(self, *args, universal=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.universal = universal
+
 
 class Hdf5Recorder(Recorder):
     """
@@ -37,8 +39,9 @@ class Hdf5Recorder(Recorder):
             self.fp = None
         else:
             self.fp = h5py.File(filename, 'w')
-            self.act_on_data({'snapshot':dct['snapshot']}, base='entry/')
-            self.act_on_data({'description':dct['description']}, base='entry/')
+            self.act_on_data({'snapshot': dct['snapshot']}, base='entry/')
+            self.act_on_data({'description': dct['description']},
+                             base='entry/')
 
     def act_on_data(self, dct, base='entry/measurement/'):
         """
@@ -65,12 +68,16 @@ class Hdf5Recorder(Recorder):
             if isinstance(val, np.ndarray):
                 # arrays are stacked along the first index
                 if create:
-                    d = self.fp.create_dataset(name, shape=val.shape, maxshape=(None,)+val.shape[1:], dtype=val.dtype)
+                    d = self.fp.create_dataset(name,
+                                               shape=val.shape,
+                                               maxshape=(
+                                                   (None,) + val.shape[1:]),
+                                               dtype=val.dtype)
                     old = 0
                 else:
                     d = self.fp[name]
                     old = d.shape[0]
-                    d.resize((old+val.shape[0],) + d.shape[1:])
+                    d.resize((old + val.shape[0],) + d.shape[1:])
                 d[old:] = val
 
             elif isinstance(val, h5py.ExternalLink):
@@ -81,7 +88,9 @@ class Hdf5Recorder(Recorder):
                     universal = False
                 # we need relative paths
                 val = h5py.ExternalLink(
-                    filename=os.path.relpath(val.filename, start=os.path.dirname(self.fp.filename)),
+                    filename=os.path.relpath(val.filename,
+                                             start=os.path.dirname(
+                                                 self.fp.filename)),
                     path=val.path)
                 if create:
                     if universal:
@@ -101,22 +110,25 @@ class Hdf5Recorder(Recorder):
             elif (type(val) == str):
                 # strings
                 if create:
-                    d = self.fp.create_dataset(name, shape=(0,), maxshape=(None,), dtype='S100')
+                    d = self.fp.create_dataset(name, shape=(0,),
+                                               maxshape=(None, ),
+                                               dtype='S100')
                 else:
                     d = self.fp[name]
                 val = val.encode(encoding='ascii', errors='ignore')
-                d.resize((d.shape[0]+1,) + d.shape[1:])
+                d.resize((d.shape[0] + 1,) + d.shape[1:])
                 d[-1] = val
 
             else:
                 # scalars of any type
                 if create:
-                    d = self.fp.create_dataset(name, shape=(0,), maxshape=(None,), dtype=type(val))
+                    d = self.fp.create_dataset(name, shape=(0,),
+                                               maxshape=(None, ),
+                                               dtype=type(val))
                 else:
                     d = self.fp[name]
-                d.resize((d.shape[0]+1,) + d.shape[1:])
-                d[-1] = val                
-
+                d.resize((d.shape[0] + 1,) + d.shape[1:])
+                d[-1] = val
 
     def act_on_footer(self, dct):
         """

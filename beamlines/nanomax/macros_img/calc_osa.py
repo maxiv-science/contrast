@@ -84,7 +84,7 @@ class Calc_OSA(object):
         elif not (isinstance(self.OSA_distance_mm, (int, float))
                   or self.OSA_distance_mm is None):
             print(err % "Give an OSA distance as a number, or NONE")
-            return False   
+            return False
         else:
             return True
 
@@ -100,22 +100,22 @@ class Calc_OSA(object):
             print('    OSA distance:          %.3f mm' % self.OSA_distance_mm)
 
     def print_result_max_distance(self):
-        print('    '+'-'*20)
+        print('    ' + '-' * 20)
         print('    focal length:          %.3f mm' % self.f1_mm)
-        print('    '+'-'*20)
+        print('    ' + '-' * 20)
         print('    maximal OSA distance:  %.3f mm' % self.f_OSA_max_mm)
         print('    osa diameter for that: %.3f um' % self.d_OSA_max_um)
         if self.d_OSA_max_um > self.CS_diamter_um:
-            print('WARNING: CS too small')   
-        print('    '+'-'*20)
+            print('WARNING: CS too small')
+        print('    ' + '-' * 20)
 
     def plot_result(self):
         self.fig = plt.figure(figsize=(12, 8), facecolor='white')
         plt.subplot(1, 1, 1)
 
         # plot CS
-        plt.plot([-1.5*self.f1_mm, -1.5*self.f1_mm],
-                 [-0.5*self.CS_diamter_um, 0.5*self.CS_diamter_um],
+        plt.plot([-1.5 * self.f1_mm, -1.5 * self.f1_mm],
+                 [-0.5 * self.CS_diamter_um, 0.5 * self.CS_diamter_um],
                  c='k', lw=5)
 
         # plot FZP
@@ -126,13 +126,15 @@ class Calc_OSA(object):
         d_det = 33
 
         # plot incoming beam and 1st order focus
-        for y in (list(np.linspace(0.5*self.FZP_diameter_um,
-                                   -0.5*self.FZP_diameter_um,
+        for y in (list(np.linspace(0.5 * self.FZP_diameter_um,
+                                   -0.5 * self.FZP_diameter_um,
                                    self.N_rays, endpoint=True))
                   + [-0.5 * self.CS_diamter_um, 0.5 * self.CS_diamter_um]):
-            if np.abs(y) >= 0.5*self.CS_diamter_um:
-                ys = [y, y, 0, -y, -y*d_det/self.f1_mm]
-                xs = [-2.*self.f1_mm, -1.*self.f1_mm, 0, 1*self.f1_mm, d_det]
+            if np.abs(y) >= 0.5 * self.CS_diamter_um:
+                ys = [y, y, 0, -y, -y * d_det / self.f1_mm]
+                xs = [-2. * self.f1_mm, -1. * self.f1_mm,
+                      0,
+                      1 * self.f1_mm, d_det]
             else:
                 ys = [y, y]
                 xs = [-2. * self.f1_mm, -1.5 * self.f1_mm]
@@ -140,13 +142,15 @@ class Calc_OSA(object):
 
         # plot 2nd order focus
         # Todo... have rays blocked by the OSA (or not)
-        for y in (list(np.linspace(0.5*self.FZP_diameter_um,
-                       -0.5*self.FZP_diameter_um,
+        for y in (list(np.linspace(0.5 * self.FZP_diameter_um,
+                       -0.5 * self.FZP_diameter_um,
                        self.N_rays, endpoint=True))
                   + [-0.5 * self.CS_diamter_um, 0.5 * self.CS_diamter_um]):
-            if np.abs(y) >= 0.5*self.CS_diamter_um:
-                # ys = [y, 0, -y, -y-y*d_det/self.f2_mm]
-                # xs = [-1.*self.f1_mm, -1.*self.f1_mm+self.f2_mm, -1.*self.f1_mm+2.*self.f2_mm, d_det]
+            if np.abs(y) >= 0.5 * self.CS_diamter_um:
+                # ys = [y, 0, -y, -y - y * d_det / self.f2_mm]
+                # xs = [-1. * self.f1_mm, -1. * self.f1_mm + self.f2_mm,
+                #       -1. * self.f1_mm + 2. * self.f2_mm,
+                #       d_det]
                 ys = [y, 0, -y]
                 xs = [-1. * self.f1_mm, -1. * self.f1_mm + self.f2_mm,
                       -1. * self.f1_mm + 2. * self.f2_mm]
@@ -154,10 +158,10 @@ class Calc_OSA(object):
 
         # plot OSA
         plt.plot([-self.OSA_distance_mm, -self.OSA_distance_mm],
-                 [0.5 * self.FZP_diameter_um,  0.5 * self.OSA_diameter_um],
+                 [0.5 * self.FZP_diameter_um, 0.5 * self.OSA_diameter_um],
                  c='r', lw=5)
         plt.plot([-self.OSA_distance_mm, -self.OSA_distance_mm],
-                 [-0.5*self.FZP_diameter_um, -0.5*self.OSA_diameter_um],
+                 [-0.5 * self.FZP_diameter_um, -0.5 * self.OSA_diameter_um],
                  c='r', lw=5)
 
         # axes
@@ -234,7 +238,7 @@ class Calc_OSA(object):
                           / self.photon_wavelength_m)
             # ToDo ... maybe a more acurate calcualtion that does not require
             # "many" zones
-            self.f2_mm = 0.5*self.f1_mm
+            self.f2_mm = 0.5 * self.f1_mm
 
             # calculate the maximal OSA distance and corresponding size
             self.calc_max_distance()
@@ -254,7 +258,7 @@ class Calc_OSA(object):
                 # the user only has given a size, ... so wants to know a good
                 # distance
                 self.print_suggested_distance()
-                self.OSA_distance_mm = 1.*self.suggested_distance_mm
+                self.OSA_distance_mm = 1. * self.suggested_distance_mm
                 self.plot_result()
 
             elif (self.OSA_diameter_um is None
@@ -268,7 +272,7 @@ class Calc_OSA(object):
                           % self.f_OSA_max_mm)
                 else:
                     self.print_suggested_diameters()
-                    self.OSA_diameter_um = 1.*self.suggested_diameters_um[0]
+                    self.OSA_diameter_um = 1. * self.suggested_diameters_um[0]
                     self.plot_result()
 
             elif (self.OSA_diameter_um is not None

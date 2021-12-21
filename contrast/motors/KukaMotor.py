@@ -8,6 +8,7 @@ import PyTango
 import time
 from . import Motor
 
+
 class KukaRobot(object):
     """
     Managing class which coordinates movements of the robot in polar
@@ -17,7 +18,8 @@ class KukaRobot(object):
     This class owns three ``KukaMotor`` instances, which are returned on
     iteration::
 
-        gamma, delta, radius = KukaRobot('path/to/device', names=['gamma, 'delta', 'radius'])
+        gamma, delta, radius = KukaRobot('path/to/device',
+                                         names=['gamma, 'delta', 'radius'])
     """
     def __init__(self, tango_path, names=['gamma', 'delta', 'radius']):
         """
@@ -31,7 +33,7 @@ class KukaRobot(object):
         self.polar_motors = [
             KukaMotor(manager=self, name=names[0]),
             KukaMotor(manager=self, name=names[1]),
-            KukaMotor(manager=self, name=names[2]),]
+            KukaMotor(manager=self, name=names[2])]
 
     def __iter__(self):
         return self.polar_motors.__iter__()
@@ -43,7 +45,8 @@ class KukaRobot(object):
         try:
             return self.proxy.position
         except PyTango.DevFailed:
-            raise Exception('The robot device position is not available. State: %s' % self.proxy.State())
+            msg = 'The robot device position is not available. State: %s'
+            raise Exception(msg % self.proxy.State())
 
     def move_me(self, motor, pos):
         """
@@ -78,6 +81,7 @@ class KukaRobot(object):
 
     def busy(self):
         return not (self.proxy.State() == PyTango.DevState.ON)
+
 
 class KukaMotor(Motor):
     """
@@ -125,4 +129,3 @@ class KukaMotor(Motor):
         except TypeError:
             pass
         self.dial_position = dial
-

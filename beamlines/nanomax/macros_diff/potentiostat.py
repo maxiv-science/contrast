@@ -65,27 +65,27 @@ class Cyclic_Voltammetry():
         plt.setp(ax[0], 'xlabel', 't', 'ylabel', 'E')
         plt.setp(ax[1], 'xlabel', 'E', 'ylabel', 'I')
         done = False
-        t, E, I = [], [], []
+        t, E, J = [], [], []
         try:
             while not done:
                 done = not self.dev.running
                 nE = len(E)
-                nI = len(I)
+                nJ = len(J)
                 nt = len(t)
-                n = max(0, min(nE, nI, nt)-1)
+                n = max(0, min(nE, nJ, nt) - 1)
                 E += list(self.dev.readout_E(nE))
-                I += list(self.dev.readout_I(nI))
+                J += list(self.dev.readout_I(nJ))
                 t += list(self.dev.readout_t(nt))
-                m = min(len(E), len(I), len(t))
+                m = min(len(E), len(J), len(t))
                 ax[0].plot(t[n:m], E[n:m], 'k')
-                ax[1].plot(E[n:m], I[n:m], 'r')
+                ax[1].plot(E[n:m], J[n:m], 'r')
                 plt.pause(.5)
         except KeyboardInterrupt:
             self.dev.stop()
         print('...done')
 
         for r in active_recorders():
-            r.queue.put({'I': np.array(I), 't': np.array(t), 'E': np.array(E)})
+            r.queue.put({'I': np.array(J), 't': np.array(t), 'E': np.array(E)})
             r.queue.put(RecorderFooter(scannr=self.scannr,
                                        status='finished',
                                        path=env.paths.directory,

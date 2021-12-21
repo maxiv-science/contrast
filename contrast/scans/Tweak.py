@@ -1,6 +1,8 @@
 from ..environment import macro, MacroSyntaxError
 from .Mesh import Mesh
-import tty, sys, termios
+import tty
+import sys
+import termios
 from ..motors import all_are_motors
 
 # constants to keep track of key buttons
@@ -9,9 +11,11 @@ KEY_DOWN = '\x1b[B'
 KEY_RIGHT = '\x1b[C'
 KEY_LEFT = '\x1b[D'
 
+
 def getarrowkey():
     """
-    A function which waits for a keypress and returns one of the above constants.
+    A function which waits for a keypress and returns one of the above
+    constants.
     """
     ch = None
     fd = sys.stdin.fileno()
@@ -25,6 +29,7 @@ def getarrowkey():
         return ch
     else:
         return None
+
 
 @macro
 class Tweak(Mesh):
@@ -51,14 +56,15 @@ class Tweak(Mesh):
         print('\nUse the arrow keys to tweak motors and ctrl-C to stop.')
 
     def _generate_positions(self):
-        positions = {m.name:m.position() for m in self.motors}
+        positions = {m.name: m.position() for m in self.motors}
         yield positions
         n = 1
         while n < self.n_positions:
             key = getarrowkey()
             imotor = 0 if key in (KEY_LEFT, KEY_RIGHT) else -1
             direction = -1 if key in (KEY_DOWN, KEY_LEFT) else 1
-            positions[self.motors[imotor].name] += direction * self.steps[imotor]
+            positions[self.motors[imotor].name] \
+                += direction * self.steps[imotor]
             yield positions
             n += 1
 
