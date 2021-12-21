@@ -45,7 +45,7 @@ class PlotRecorder(Recorder):
         self.ax.set_ylabel(self.ydata)
 
         # add a timer to trigger periodic checking of the queue
-        self.timer = self.fig.canvas.new_timer(interval=int(self.delay*1000))
+        self.timer = self.fig.canvas.new_timer(interval=int(self.delay * 1000))
         self.timer.add_callback(self._timer_callback)
         self.timer.start()
 
@@ -86,7 +86,7 @@ class PlotRecorder(Recorder):
         # in the data.
         if self.new_scan:
             self.new_scan = False
-            col = 'bkmrcg'[(self.nplots-1) % 6]
+            col = 'bkmrcg'[(self.nplots - 1) % 6]
             styles = {k: ['solid', 'dashed', 'dotted', 'dashdot'][i % 4]
                       for i, k in enumerate(new_data.keys())}
             self.lines = {key: Line2D(xdata=[], ydata=[], color=col,

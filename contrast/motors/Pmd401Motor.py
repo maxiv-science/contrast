@@ -60,8 +60,8 @@ class BaseYMotor(PseudoMotor):
     Pseudo motor which implements the y motion, combined by the
     longitudinal and wedge motion motors at the imaging.
     """
-    z_part = math.cos(15/180*math.pi)
-    y_part = -math.sin(15/180*math.pi)
+    z_part = math.cos(15 / 180 * math.pi)
+    y_part = -math.sin(15 / 180 * math.pi)
 
     def calc_pseudo(self, physicals):
         pseudo = self.y_part * physicals[1]
@@ -70,8 +70,8 @@ class BaseYMotor(PseudoMotor):
     def calc_physicals(self, pseudo):
         current_physicals = self.physicals()
         current_z = self.z_part * current_physicals[1] + current_physicals[0]
-        physicals = [current_z - self.z_part * pseudo/self.y_part,
-                     pseudo/self.y_part]
+        physicals = [current_z - self.z_part * pseudo / self.y_part,
+                     pseudo / self.y_part]
         return physicals
 
 
@@ -80,8 +80,8 @@ class BaseZMotor(PseudoMotor):
     Pseudo motor which implements the z motion, combined by the
     longitudinal and wedge motion motors at the imaging.
     """
-    z_part = math.cos(15/180*math.pi)
-    y_part = -math.sin(15/180*math.pi)
+    z_part = math.cos(15 / 180 * math.pi)
+    y_part = -math.sin(15 / 180 * math.pi)
 
     def calc_pseudo(self, physicals):
         pseudo = self.z_part * physicals[1] + physicals[0]

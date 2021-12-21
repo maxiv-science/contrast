@@ -31,7 +31,7 @@ class SmaractLinearMotor(Motor):
         self.axis = int(axis)
         if velocity is not None:
             attr = 'velocity_%d' % self.axis
-            self.proxy.write_attribute(attr, velocity*1e-3)
+            self.proxy.write_attribute(attr, velocity * 1e-3)
 
     @property
     def dial_position(self):

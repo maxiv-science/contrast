@@ -113,8 +113,8 @@ class LegacyElectrometer(object):
                ("Can't do more than %u points" % self._max_data_points)
         latency = max(latency, .320e-3)
         acqtime = period - latency
-        self.query('ACQU:TIME %f' % (acqtime*1000))
-        self.query('ACQU:LOWT %f' % (latency*1000))
+        self.query('ACQU:TIME %f' % (acqtime * 1000))
+        self.query('ACQU:LOWT %f' % (latency * 1000))
         self.query('TRIG:MODE AUTOTRIGGER')
         self.query('ACQU:NTRI %u' % n)
         self.query('ACQU:STAR True')
@@ -189,7 +189,7 @@ class LegacyElectrometer(object):
                 print('   only have %u, trying again' % n)
                 time.sleep(.01)
                 n = self.ndata
-            print('   have %u, issuing trigger #%u' % (n, i+1))
+            print('   have %u, issuing trigger #%u' % (n, i + 1))
             self.soft_trigger()
 
 
@@ -297,12 +297,12 @@ class LegacyAlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     def read(self):
         if (self.hw_trig and self.hw_trig_n > 1) or (self.burst_n > 1):
             dt, arr = self.em.read(timestamps=True)
-            res = {i+1: arr[:, i] for i in range(NUM_CHAN)}
+            res = {i + 1: arr[:, i] for i in range(NUM_CHAN)}
             res['ts'] = dt
         elif self.global_arm:
             first = self.n_started_since_rearm - 1
             dt, arr = self.em.read(first=first, number=1, timestamps=True)
-            res = {i+1: arr[0, i] for i in range(NUM_CHAN)}
+            res = {i + 1: arr[0, i] for i in range(NUM_CHAN)}
             res['ts'] = dt[0]
         else:
             assert(False), 'Should never get here!'

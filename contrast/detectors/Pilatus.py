@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
@@ -218,8 +219,8 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
     @property
     def expperiod(self):
         res = self._query('expperiod')
-        res = self._parse_response(res,
-            '15 OK Exposure period set to: (.*) sec\x18')
+        res = self._parse_response(
+            res, '15 OK Exposure period set to: (.*) sec\x18')
         return float(res)
 
     @expperiod.setter
@@ -231,7 +232,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
     @property
     def nimages(self):
         res = self._query('nimages')
-        res = self._parse_response(res, '15 OK N images set to: (\d+)')
+        res = self._parse_response(res, '15 OK N images set to: ([0-9]+)')
         nimages = int(res) if res else None
         return nimages
 

@@ -21,8 +21,9 @@ class AScan(SoftwareScan):
             self.intervals = int(args[-2])
             super(AScan, self).__init__(exposuretime)
             for i in range(int((len(args) - 2) / 3)):
-                self.motors.append(args[3*i])
-                self.limits.append([float(m) for m in args[3*i+1:3*i+3]])
+                self.motors.append(args[3 * i])
+                self.limits.append(
+                    [float(m) for m in args[3 * i + 1:3 * i + 3]])
             self.n_positions = self.intervals + 1
             assert all_are_motors(self.motors)
             assert (len(args) - 2) % 3 == 0
@@ -34,7 +35,7 @@ class AScan(SoftwareScan):
         for i in range(len(self.motors)):
             positions.append(np.linspace(self.limits[i][0],
                                          self.limits[i][1],
-                                         self.intervals+1))
+                                         self.intervals + 1))
         for i in range(len(positions[0])):
             yield {m.name: pos[i] for (m, pos) in zip(self.motors, positions)}
 

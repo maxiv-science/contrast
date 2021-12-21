@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
@@ -9,7 +10,8 @@ except ModuleNotFoundError:
 import time
 
 
-class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
+class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector,
+               BurstDetector):
     """
     Provides an interface to the Xspress3 streaming manager,
 

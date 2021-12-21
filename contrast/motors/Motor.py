@@ -210,7 +210,8 @@ class MotorMemorizer(Gadget):
                         # this is an existing motor!
                         motors[dct['name']]._offset = dct['_offset']
                         if dct['dial_limits']:
-                            motors[dct['name']].dial_limits = dct['dial_limits']
+                            motors[dct['name']].dial_limits = (
+                                dct['dial_limits'])
                     elif '_offset' not in dct.keys():
                         # this is a bookmark!
                         motor_names = list(dct.keys())
@@ -221,16 +222,19 @@ class MotorMemorizer(Gadget):
                         for m in motor_names:
                             match = [m_ for m_ in avail_motors if m_.name == m]
                             if not len(match):
-                                msg = 'Could not find motor %s, ignoring bookmark %s'
-                                print(msg % (m, dct['name']))
+                                print('Could not find motor %s, '
+                                      'ignoring bookmark %s'
+                                      % (m, dct['name']))
                                 bail = True
                                 break
                             motor_objs.append(match[0])
                         if bail:
                             break
-                        bookmark_refs.append(MotorBookmark(name=dct['name'],
-                                             motors=motor_objs,
-                                             positions=[dct[n] for n in motor_names]))
+                        bookmark_refs.append(
+                            MotorBookmark(name=dct['name'],
+                                          motors=motor_objs,
+                                          positions=[
+                                              dct[n] for n in motor_names]))
             print('Loaded motor states and bookmarks from %s' % self.filepath)
         except (FileNotFoundError,):
             print("Memorizer file %s doesn't exist" % self.filepath)
@@ -368,8 +372,8 @@ class Wm(object):
                     ulims = '(None, None)'
                     dlims = '(None, None)'
                 else:
-                    ulims = ('(%s, %s)' % (2*(m._uformat,))) % m.user_limits
-                    dlims = ('(%s, %s)' % (2*(m._dformat,))) % m.dial_limits
+                    ulims = ('(%s, %s)' % (2 * (m._uformat,))) % m.user_limits
+                    dlims = ('(%s, %s)' % (2 * (m._dformat,))) % m.dial_limits
                 table.append([m.name, upos, ulims, dpos, dlims])
             except:
                 print('Could not get position of %s' % m.name)
@@ -524,7 +528,8 @@ class Bookmark(object):
     def run(self):
         existing = [b for b in bookmark_refs if b.name == self.name]
         [bookmark_refs.remove(b) for b in existing]
-        bookmark_refs.append(MotorBookmark(name=self.name, motors=self.motors,
+        bookmark_refs.append(MotorBookmark(
+            name=self.name, motors=self.motors,
             positions=[m.dial_position for m in self.motors]))
 
         # memorize the new state
@@ -540,7 +545,7 @@ class Restore(BookmarkMacroBase):
     def run(self):
         if not self.specific:
             return
-        dct = {m: (p*m._scaling+m._offset)
+        dct = {m: (p * m._scaling + m._offset)
                for m, p in self.bookmarks[0].dct.items()}
         args = [val for pair in dct.items() for val in pair]
         umv = Umv(*args)

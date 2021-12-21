@@ -19,6 +19,6 @@ def wisdom():
     """
     import random
     from .abbreviations import abbrv
-    ind = random.randint(0, len(abbrv)-1)
+    ind = random.randint(0, len(abbrv) - 1)
     print('\nWelcome to contrast,\n')
     print('   "%s"' % abbrv[ind])

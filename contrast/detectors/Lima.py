@@ -169,7 +169,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector,
                 vsource = VirtualSource(
                     relfile,
                     self._hdf_path_base % i, shape=(self.hw_trig_n, m, n))
-                layout[i*self.hw_trig_n:(i+1)*self.hw_trig_n] = vsource
+                layout[i * self.hw_trig_n:(i + 1) * self.hw_trig_n] = vsource
         elif self.hybrid_mode:
             N = self.n_starts * self.burst_n
             layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
@@ -180,7 +180,7 @@ class LimaDetector(Detector, SoftwareLiveDetector, TriggeredDetector,
             N = self.n_starts * self.burst_n
             layout = VirtualLayout(shape=(N, m, n), dtype=dtype)
             for i in range(self.n_starts):
-                layout[i*self.burst_n:(i+1)*self.burst_n] = (
+                layout[i * self.burst_n:(i + 1) * self.burst_n] = (
                     VirtualSource(
                         relfile, self._hdf_path_base % i,
                         shape=(self.burst_n, m, n)))

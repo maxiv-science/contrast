@@ -116,7 +116,7 @@ class SpecTable(object):
             header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%% %us' % w) % k
-            return ' ' * len(h),  h, '%%%ud' % w
+            return ' ' * len(h), h, '%%%ud' % w
         elif k == 'dt':
             fmt = '%6.3f'
             return 6 * ' ', '%6s' % k, fmt
@@ -125,16 +125,16 @@ class SpecTable(object):
             data_width = len(fmt % 1)
             header_width = len(str(k))
             w = max(data_width, header_width)
-            spaces = ' '*(w-data_width)
+            spaces = ' ' * (w - data_width)
             h = ('%%%us' % w) % k
-            return ' '*len(h),  h, spaces+fmt
+            return ' ' * len(h), h, spaces + fmt
         elif isinstance(v, dict):
             results = [self.format_pair(k_, v_) for k_, v_ in v.items()]
             keys = '  '.join([str(r[-2]) for r in results])
             fmts = '  '.join([str(r[-1]) for r in results])
             h1 = ('%%.%us' % (len(keys))) % k
-            pl = (len(keys)-len(h1)) // 2
-            pr = (len(keys)-len(h1)) - pl
+            pl = (len(keys) - len(h1)) // 2
+            pr = (len(keys) - len(h1)) - pl
             h1 = '.' * pl + h1 + '.' * pr
             return h1, keys, fmts
         elif isinstance(v, h5py.ExternalLink):
@@ -142,7 +142,7 @@ class SpecTable(object):
             header_width = len(str(k))
             w = max(data_width, header_width)
             h = ('%%%us' % w) % k
-            return ' '*len(h), h, '%%%us' % w
+            return ' ' * len(h), h, '%%%us' % w
         elif isinstance(v, h5py.VirtualLayout):
             data_width = len('hdf5-vds')
             header_width = len(str(k))
@@ -153,7 +153,7 @@ class SpecTable(object):
             fmt = '%%%u.%us' % (self.min_str_len, self.max_str_len)
             w = len(fmt % v)
             h = ('%%%us' % w) % k
-            return ' '*len(h), h, fmt
+            return ' ' * len(h), h, fmt
 
     def header_lines(self, dct):
         """

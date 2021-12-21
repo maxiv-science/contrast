@@ -81,7 +81,7 @@ class LC400Waveform(object):
         # waveform parameters
         self.axis = axis
         self.axisname = "axis%i" % axis
-        stepsize = (endpoint-startpoint)/(scanpoints-1)
+        stepsize = (endpoint - startpoint) / (scanpoints - 1)
         print("step size: ", stepsize)
         self.startpoint = startpoint
         self.endpoint = endpoint + stepsize
@@ -97,7 +97,7 @@ class LC400Waveform(object):
 
         # calculate linear velocity
         self.velocity = ((self.endpoint - self.startpoint)
-                         / ((self.scanpoints) * (exposuretime+latencytime)))
+                         / ((self.scanpoints) * (exposuretime + latencytime)))
         print(f"velocity: {self.velocity:0.3} microns/s")
 
         # set start velocity
@@ -126,10 +126,10 @@ class LC400Waveform(object):
 
         # deterimine clock cycle delay of LC.400, 0 means no delay
         self.clockcycledelay = math.ceil(
-            math.floor(self.totaltime/self.CLOCKCYCLE)/self.MAXPOINTS) - 1
+            math.floor(self.totaltime / self.CLOCKCYCLE) / self.MAXPOINTS) - 1
         print("clock cycle delay: ", self.clockcycledelay)
         # determine optimal number of points in waveform
-        self.effectiveclockcycle = self.CLOCKCYCLE * (self.clockcycledelay+1)
+        self.effectiveclockcycle = self.CLOCKCYCLE * (self.clockcycledelay + 1)
         self.waveformpoints = math.floor(self.totaltime
                                          / self.effectiveclockcycle)
         # define start cycle of linear phase.
@@ -150,32 +150,34 @@ class LC400Waveform(object):
         b = 1 / self.accelerationtime
         c = (self.velocity - self.startvelocity) / self.accelerationtime
         d = self.startvelocity
-        e = (self.startpoint - self.startvelocity*self.accelerationtime
-             - (0.5 + 1/(4*np.pi**2)) * (self.velocity - self.startvelocity)
+        e = (self.startpoint - self.startvelocity * self.accelerationtime
+             - (0.5 + 1 / (4 * np.pi**2))
+             * (self.velocity - self.startvelocity)
              * self.accelerationtime)
         # calculate trajectory
-        x = a/(4*np.pi**2 * b**2) * np.cos(2*np.pi*b*t) + c/2 * t**2 + d*t + e
+        x = (a / (4 * np.pi**2 * b**2) * np.cos(2 * np.pi * b * t)
+             + c / 2 * t**2 + d * t + e)
         return x
 
     def linearphase(self, t):
-        x = self.startpoint + self.velocity*(t-self.accelerationtime)
+        x = self.startpoint + self.velocity * (t - self.accelerationtime)
         return x
 
     def decelerationphase(self, t):
         # calculate parameters for trajectory
-        T_e = self.accelerationtime+self.lineartime
+        T_e = self.accelerationtime + self.lineartime
         a = (self.velocity - self.endvelocity) / self.decelerationtime
-        b = 1/self.decelerationtime
+        b = 1 / self.decelerationtime
         c = (self.velocity - self.endvelocity) / self.decelerationtime
         # d1 and d2 should be equivalent
         d1 = self.velocity + c * T_e
-        d2 = self.endvelocity + c*(T_e+self.decelerationtime)
+        d2 = self.endvelocity + c * (T_e + self.decelerationtime)
         d = d2
-        e = (self.endpoint + a / (4 * np.pi**2 * b**2) + 1/2 * c * T_e**2
+        e = (self.endpoint + a / (4 * np.pi**2 * b**2) + 1 / 2 * c * T_e**2
              - d * T_e)
         # calculate trajectory
-        x = (-a / (4*np.pi**2 * b**2) * np.cos(2*np.pi*b*(t-T_e))
-             - c/2 * t**2 + d*t + e)
+        x = (-a / (4 * np.pi**2 * b**2) * np.cos(2 * np.pi * b * (t - T_e))
+             - c / 2 * t**2 + d * t + e)
         return x
 
     def time(self):
@@ -250,7 +252,7 @@ class LC400Waveform(object):
         triggers = {}
         triggers["count"] = 1
         triggers["on"] = [self.linearstartindex]
-        triggers["off"] = [self.linearstartindex+1]
+        triggers["off"] = [self.linearstartindex + 1]
         # function definition of output pins
         # we use pin 9 (Out 4) to create teh start trigger
         output_pins = {}

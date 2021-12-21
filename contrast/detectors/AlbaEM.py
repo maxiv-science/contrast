@@ -173,8 +173,8 @@ class Electrometer(object):
         latency = max(latency, .320e-3)
         acqtime = period - latency
         self.stream.data.clear()
-        self.query('ACQU:TIME %f' % (acqtime*1000))
-        self.query('ACQU:LOWT %f' % (latency*1000))
+        self.query('ACQU:TIME %f' % (acqtime * 1000))
+        self.query('ACQU:LOWT %f' % (latency * 1000))
         self.query('TRIG:MODE AUTOTRIGGER')
         self.query('ACQU:NTRI %u' % n)
         self.query('ACQU:MODE fast_buffer')
@@ -229,16 +229,16 @@ class Electrometer(object):
         """
         self.arm(n=N, acqtime=.001)
         for i in range(N):
-            print('starting loop #%u' % (i+1))
+            print('starting loop #%u' % (i + 1))
             n = self.ndata
             while n < i:
                 print('   only have %u, trying again' % (n,))
                 time.sleep(.01)
                 n = self.ndata
-            print('   have %u, issuing trigger #%u' % (n, i+1))
+            print('   have %u, issuing trigger #%u' % (n, i + 1))
             t0 = time.time()
             self.soft_trigger()
-            print('soft trigger took %.1f ms' % ((time.time()-t0)*1000))
+            print('soft trigger took %.1f ms' % ((time.time() - t0) * 1000))
 
 
 class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
@@ -270,7 +270,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         self.em = Electrometer(stream_port=50013, **self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
-        self.channels = [ch+1 for ch in range(NUM_CHAN)]
+        self.channels = [ch + 1 for ch in range(NUM_CHAN)]
 
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)

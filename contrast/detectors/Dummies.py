@@ -82,7 +82,7 @@ class DummyWritingDetector(DummyDetector):
             filename = self.filename_base % self.next_image
             datapath = 'entry/measurement/data'
             with h5py.File(filename, 'w') as fp:
-                fp[datapath] = np.arange(195*487).reshape((195, 487))
+                fp[datapath] = np.arange(195 * 487).reshape((195, 487))
             self.latest_link = h5py.ExternalLink(filename, datapath)
 
     def read(self):
@@ -119,7 +119,7 @@ class DummyWritingDetector2(DummyDetector):
                                           shape=(1, M, N),
                                           maxshape=(None, M, N),
                                           dtype=np.float)
-                d[-1] = (np.arange(M*N).reshape((M, N))
+                d[-1] = (np.arange(M * N).reshape((M, N))
                          + np.random.rand(M, N) * M * N / 10)
 
     def read(self):

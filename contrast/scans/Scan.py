@@ -47,12 +47,13 @@ class SoftwareScan(object):
             self.table = SpecTable()
             self.table.max_str_len = self.str_print_length
             header = self.table.header_lines(dct)
-            print('\n'+header)
-            print('-'*len(header.split('\n')[-1]))
+            print('\n' + header)
+            print('-' * len(header.split('\n')[-1]))
         print(self.table.fill_line(dct))
         if self.n_positions and self.print_progress:
             timeleft = str(datetime.timedelta(
-                seconds=(self.n_positions-i)*dct['dt']/(i+1))).split('.')[0]
+                seconds=(
+                    self.n_positions - i) * dct['dt'] / (i + 1))).split('.')[0]
             print('Time left: %s\r' % timeleft, end='')
 
     def _calc_time_needed(self):

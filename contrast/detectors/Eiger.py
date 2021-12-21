@@ -109,7 +109,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if (val < 4) or (val > 30):
             print('Bad energy value, should be in keV and between 4-30')
             return
-        val = float(val)*1000
+        val = float(val) * 1000
         self._set('detector', 'config/photon_energy', val)
 
     @property

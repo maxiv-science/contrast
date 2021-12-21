@@ -12,6 +12,10 @@
 #
 import os
 import sys
+import re
+from contrast.environment import env
+from collections import OrderedDict
+
 sys.path.insert(0, os.path.abspath('../..'))
 
 
@@ -27,14 +31,14 @@ author = 'Alexander Björling'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-        'sphinx.ext.autodoc',
-        'sphinx.ext.viewcode',
-        'sphinx.ext.inheritance_diagram',
-#        'sphinx_automodapi.automodapi',
-#        'sphinx.ext.autosectionlabel',
-        'IPython.sphinxext.ipython_console_highlighting',
-        'IPython.sphinxext.ipython_directive',
-        ]
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.inheritance_diagram',
+    # 'sphinx_automodapi.automodapi',
+    # 'sphinx.ext.autosectionlabel',
+    'IPython.sphinxext.ipython_console_highlighting',
+    'IPython.sphinxext.ipython_directive',
+]
 
 master_doc = 'index'
 
@@ -46,26 +50,27 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-autoclass_content = 'both' # docstring from both class and constructor
+autoclass_content = 'both'  # docstring from both class and constructor
 autodoc_mock_imports = ['PyTango']
-autodoc_member_order = 'bysource' # in the source code order, not alphabetically
+autodoc_member_order = 'bysource'  # in the source code order, not A-Z
 autodoc_inherit_docstrings = False
 
 latex_elements = {
     'papersize': 'a4paper',
-    }
+}
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'classic' #'alabaster'
+html_theme = 'classic'  # 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
 
 # -- Special handling of macro classes ---------------------------------------
 def label_macros(app, what, name, obj, options, lines):
@@ -77,25 +82,24 @@ def label_macros(app, what, name, obj, options, lines):
             lines.insert(0, '')
             lines.insert(0, '**This class generates the macro `%s`**' % name)
 
+
 def setup(app):
     app.connect('autodoc-process-docstring', label_macros)
 
+
 # -- Build a document listing the built-in macros ----------------------------
-from contrast.environment import env
-from collections import OrderedDict
 dct = env.registeredMacros
-dct = OrderedDict({key:dct[key] for key in sorted(dct.keys())})
+dct = OrderedDict({key: dct[key] for key in sorted(dct.keys())})
 with open('macros.rst', 'w') as fp:
     fp.write('Built-in macros\n')
     fp.write('===============\n\n')
     for name, macro in dct.items():
         fp.write('%s\n' % name)
-        fp.write('-'*len(name) + '\n')
+        fp.write('-' * len(name) + '\n')
         fp.write(macro.__doc__)
         fp.write('\n\n')
 
 # -- Infer the version numbers from git tags ---------------------------------
-import re
 # The full version, including git commit etc.
 release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
 # The base version, corresponding to the latest release.

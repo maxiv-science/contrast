@@ -87,6 +87,6 @@ class ScicatRecorder(Recorder):
                 {'path': fn,
                  'time': tm,
                  'size': sz}
-                )
+            )
 
         self.entry.end_scan()

@@ -57,7 +57,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.query('PULSE1.PULSES=%d' % self.burst_n)
         self.query('PULSE1.WIDTH=%f' % self.acqtime)
-        self.query('PULSE1.STEP=%f' % (self.burst_latency+self.acqtime))
+        self.query('PULSE1.STEP=%f' % (self.burst_latency + self.acqtime))
 
     def arm(self):
         self.acqthread = Thread(target=self._acquire)

@@ -68,14 +68,16 @@ class Hdf5Recorder(Recorder):
             if isinstance(val, np.ndarray):
                 # arrays are stacked along the first index
                 if create:
-                    d = self.fp.create_dataset(name, shape=val.shape,
-                                               maxshape=(None,)+val.shape[1:],
+                    d = self.fp.create_dataset(name,
+                                               shape=val.shape,
+                                               maxshape=(
+                                                   (None,) + val.shape[1:]),
                                                dtype=val.dtype)
                     old = 0
                 else:
                     d = self.fp[name]
                     old = d.shape[0]
-                    d.resize((old+val.shape[0],) + d.shape[1:])
+                    d.resize((old + val.shape[0],) + d.shape[1:])
                 d[old:] = val
 
             elif isinstance(val, h5py.ExternalLink):
@@ -88,7 +90,7 @@ class Hdf5Recorder(Recorder):
                 val = h5py.ExternalLink(
                     filename=os.path.relpath(val.filename,
                                              start=os.path.dirname(
-                                                self.fp.filename)),
+                                                 self.fp.filename)),
                     path=val.path)
                 if create:
                     if universal:
@@ -114,7 +116,7 @@ class Hdf5Recorder(Recorder):
                 else:
                     d = self.fp[name]
                 val = val.encode(encoding='ascii', errors='ignore')
-                d.resize((d.shape[0]+1,) + d.shape[1:])
+                d.resize((d.shape[0] + 1,) + d.shape[1:])
                 d[-1] = val
 
             else:
@@ -125,7 +127,7 @@ class Hdf5Recorder(Recorder):
                                                dtype=type(val))
                 else:
                     d = self.fp[name]
-                d.resize((d.shape[0]+1,) + d.shape[1:])
+                d.resize((d.shape[0] + 1,) + d.shape[1:])
                 d[-1] = val
 
     def act_on_footer(self, dct):
