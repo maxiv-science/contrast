@@ -79,7 +79,10 @@ class Electrometer(object):
     def __init__(self, host='b-nanomax-em2-2', port=5025,
                  trig_source='DIO_1',
                  stream_host=None, stream_port=50001):
-        self.em = telnetlib.Telnet(host, port)
+        try:
+            self.em = telnetlib.Telnet(host, port, timeout=5)
+        except telnetlib.socket.timeout:
+            raise Exception('Could not connect to %s:%d' % (host, port))
         self.query('ACQU:MODE CURRENT')
         # the DIO channel used for triggering:
         self._trig_source = trig_source
