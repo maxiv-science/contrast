@@ -17,31 +17,28 @@ class ImgSampleStage(object):
     The manager's role is to always move the motors away from the sample and then approach 
     to the final position, to avoid collitions with the OSA. It also Y or Z motions one at a time. 
 
-    This class owns three ``Pmd401Motor`` instances, which are returned on
+    This class owns three ``PiezoLegsMotor`` instances, which are returned on
     iteration::
 
         bx, by, bz = ImgSampleStage('path/to/device',
                                          names=['bx', 'by', 'bz'])
     """
 
-    def __init__(self, tango_path, velocity=100, names=['bx', 'by', 'bz']):
+    def __init__(self, device, velocity=100, names=['bx', 'by', 'bz'], **kwargs):
         """
-        :param tango_path: Path to the underlying Tango device
-        :type tango_path: str
-        :param names: Names to assign to the three polar motors
+        :param device: Path to the underlying Tango device
+        :type device: str
+        :param velocity: Motion velocity in full step units/sec
+        :type device: int
+        :param names: Names to assign to the three virtual motors x, y, z
         :type names: list, tuple
         """
-        self.proxy = PyTango.DeviceProxy(tango_path)
+        self.proxy = PyTango.DeviceProxy(device)
         self.proxy.set_source(PyTango.DevSource.DEV)
-        self.phys_motors = [
-            PiezoLegsMotor(tango_path, 0, velocity, name='motor_0'),
-            PiezoLegsMotor(tango_path, 1, velocity, name='motor_1'),
-            PiezoLegsMotor(tango_path, 2, velocity, name='motor_2')
-        ]
         self.axis_motors = [
-            AxisMotor(manager=self, name=names[0]),
-            AxisMotor(manager=self, name=names[1]),
-            AxisMotor(manager=self, name=names[2])
+            AxisMotor(manager=self, name=names[0], **kwargs),
+            AxisMotor(manager=self, name=names[1], **kwargs),
+            AxisMotor(manager=self, name=names[2], **kwargs)
         ]
         self.y_part = math.sin(-15/180 * math.pi)
         self.z_part = math.cos(-15/180 * math.pi)
@@ -56,10 +53,9 @@ class ImgSampleStage(object):
         """
         Method which makes sure that only one of the vertical (Y) or longitudinal (Z) axis are 
         moved at a time. This is required because both these axis are realized by a combination 
-        of the longitudinal motor (number 1 in phys_motors) and the wedge motor (number 2). 
+        of the longitudinal motor (motor 1) and the wedge motor (number 2). 
         Motor 0 is equal to the X-axis. Since the X-motion is independet of all other motors,
         this can be operated independent.  
-
 
         :param motor: Motor instance to move, typically ``self`` for the calling ``AxisMotor``.
         :param pos: Target position
@@ -70,31 +66,38 @@ class ImgSampleStage(object):
 
         if self.motor2index(motor) == 0:
             # Sets the x-position. Moves the horizontal x-direction motor. Simple, this is only one physical motor
-            self.phys_motors[0].dial_position = pos
+            self.unpark()
+            self.proxy.write_attribute('channel00_position', pos)
         elif self.motor2index(motor) == 1:
             # Sets the y-position. This is achieved by a combination of the height wedge motor and the z-motor.
             # When the height is changed, the wedge AND the z-direction motor needs to be moved to result in
             # new height and maintained z-position.
-            current_wedge = self.phys_motors[2].dial_position()
-            current_long = self.phys_motors[1].dial_position()
+            current_wedge = self.proxy.read_attribute('channel02_encoder').value
+            current_long = self.proxy.read_attribute('channel01_encoder').value
             new_wedge = pos / self.y_part
             new_long = current_long - self.z_part * (new_wedge - current_wedge)
             # Ensures that the sample is moving away from the OSA and then approached with the other motor
             if new_long > current_long:
-                self.phys_motors[1].dial_position = new_long
+                self.proxy.write_attribute('channel01_position', new_long)
                 while self.busy(motor):
                     time.sleep(.1)
-                self.phys_motors[2].dial_position = new_wedge
+                self.proxy.write_attribute('channel01_position', new_wedge)
+                while self.busy(motor):
+                    time.sleep(.1)
             else:
-                self.phys_motors[2].dial_position = new_wedge
+                self.proxy.write_attribute('channel01_position', new_wedge)
                 while self.busy(motor):
                     time.sleep(.1)
-                self.phys_motors[1].dial_position = new_long
+                self.proxy.write_attribute('channel01_position', new_long)
+                while self.busy(motor):
+                    time.sleep(.1)
         elif self.motor2index(motor) == 2:
             # Sets the z-position. THis is achieved by the combined motion of the longitudinal motor
             # and the horizontal part of th wedge motor.
-            new_long = pos - self.z_part * self.phys_motors[2].dial_position()
-            self.phys_motors[1].dial_position = new_long
+            new_long = pos - self.z_part * self.proxy.read_attribute('channel02_encoder').value
+            self.proxy.write_attribute('channel01_position', new_long)
+            while self.busy(motor):
+                time.sleep(.1)
 
     def where_am_i(self, motor):
         """
@@ -106,26 +109,23 @@ class ImgSampleStage(object):
         :param motor: Motor instance to move, typically ``self`` for the calling ``AxisMotor``.
         """
         if self.motor2index(motor) == 0:
-            position = self.phys_motors[0].dial_position()
+            position = self.proxy.read_attribute('channel00_encoder').value
         elif self.motor2index(motor) == 1:
-            position = self.y_part * self.phys_motors[2].dial_position()
+            position = self.y_part * self.proxy.read_attribute('channel02_encoder').value
         elif self.motor2index(motor) == 2:
             position = self.z_part * \
-                self.phys_motors[2].dial_position(
-                ) + self.phys_motors[1].dial_position()
+                self.proxy.read_attribute('channel02_encoder').value + self.proxy.read_attribute('channel01_encoder').value
         return position
 
     def busy(self, motor):
         if self.motor2index(motor) == 0:
-            busy = self.phys_motors[0].busy()
+            busy = self.proxy.read_attribute('channel00_state').value == 'running'
         elif self.motor2index(motor) > 0:
-            busy = self.phys_motors[1].busy() or self.phys_motors[2].busy()
+            busy = self.proxy.read_attribute('channel01_state').value == 'running' or self.proxy.read_attribute('channel02_state').value == 'running'
         return busy
 
     def stop(self, motor):
-        self.phys_motors[0].stop()
-        self.phys_motors[1].stop()
-        self.phys_motors[2].stop()
+        self.proxy.StopAll()
 
 
 class AxisMotor(Motor):
