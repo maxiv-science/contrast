@@ -7,7 +7,55 @@ import PyTango
 import time
 import math
 from . import Motor
-from . import PseudoMotor
+
+
+class PiezoLegsMotor(Motor):
+    """
+    Single Pmd401 PiezoLEGS motor axis.
+    """
+
+    def __init__(self, device, axis, velocity=100, **kwargs):
+        """
+        :param device: Path to the Pmd401 Tango device
+        :type device: str
+        :param axis: Axis number on the controller
+        :type axis: int
+        :param velocity: Velocity for the motor. Unit is waveform-steps per second
+        :type velocity: int
+        :param ``**kwargs``: Passed on to the ``Motor`` base class
+        """
+        super(PiezoLegsMotor, self).__init__(**kwargs)
+        self.proxy = PyTango.DeviceProxy(device)
+        self.proxy.set_source(PyTango.DevSource.DEV)
+        self._axis = int(axis)
+        command = 'X%dY8,%d;' % (self._axis, velocity)
+        self.proxy.arbitrarySend(command)
+
+    @property
+    def dial_position(self):
+        attr = 'channel%02d_encoder' % self._axis
+        return self.proxy.read_attribute(attr).value
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        self.unpark()
+        attr = 'channel%02d_position' % self._axis
+        self.proxy.write_attribute(attr, pos)
+
+    def busy(self):
+        attr = 'channel%02d_state' % self._axis
+        return (self.proxy.read_attribute(attr).value == 'running')
+
+    def stop(self):
+        self.proxy.StopAll()  # safety first
+
+    def park(self):
+        command = 'X%dM6' % self._axis
+        reply = self.proxy.arbitrarySend(command)
+
+    def unpark(self):
+        command = 'X%dM2' % self._axis
+        reply = self.proxy.arbitrarySend(command)
 
 
 class ImgSampleStage(object):
@@ -28,13 +76,24 @@ class ImgSampleStage(object):
         """
         :param device: Path to the underlying Tango device
         :type device: str
-        :param velocity: Motion velocity in full step units/sec
-        :type device: int
+        :param velocity: Velocity for the motor. Unit is waveform-steps per second
+        :type velocity: int
         :param names: Names to assign to the three virtual motors x, y, z
         :type names: list, tuple
+        :param ``**kwargs``: Passed on to the ``Motor`` base class
         """
         self.proxy = PyTango.DeviceProxy(device)
         self.proxy.set_source(PyTango.DevSource.DEV)
+
+        # Set the velocities of the motors
+        command = 'X0Y8,%d;X1Y8,%d;X2Y8,%d' % (velocity, velocity, velocity)
+        self.proxy.arbitrarySend(command)
+
+        # Set motor motion limits in the controller
+        self._lims = {'m0min': 11000000, 'm0max': 35000000, 'm1min': 23500000, 'm1max': 88500000, 'm2min': 13000000, 'm2max': 80000000}
+        command = 'X0Y3,%d;X0Y4,%d;X1Y3,%d;X1Y4,%d;X2Y3,%d;X2Y4,%d;' % (self._lims['m0min'], self._lims['m0max'], self._lims['m1min'], self._lims['m1max'], self._lims['m2min'], self._lims['m2max'])   
+        self.proxy.arbitrarySend(command)
+
         self.axis_motors = [
             AxisMotor(manager=self, name=names[0], **kwargs),
             AxisMotor(manager=self, name=names[1], **kwargs),
@@ -54,50 +113,58 @@ class ImgSampleStage(object):
         Method which makes sure that only one of the vertical (Y) or longitudinal (Z) axis are 
         moved at a time. This is required because both these axis are realized by a combination 
         of the longitudinal motor (motor 1) and the wedge motor (number 2). 
-        Motor 0 is equal to the X-axis. Since the X-motion is independet of all other motors,
-        this can be operated independent.  
+        Motor 0 is equal to the X-axis. Since the X-motion is independent of all other motors,
+        this can be operated freely.  
 
         :param motor: Motor instance to move, typically ``self`` for the calling ``AxisMotor``.
         :param pos: Target position
         :type pos: float
         """
+
+        margin = 300000 
+
         while self.busy(motor):
             time.sleep(.5)
 
+        self.unpark(motor)
         if self.motor2index(motor) == 0:
-            # Sets the x-position. Moves the horizontal x-direction motor. Simple, this is only one physical motor
-            self.unpark()
-            self.proxy.write_attribute('channel00_position', pos)
+            # Sets the x-position. Moves the horizontal x-direction motor.
+            try:
+                assert pos > (self._lims['m0min'] + margin)
+                assert pos < (self._lims['m0max'] - margin)
+                self.proxy.write_attribute('channel00_position', pos)
+            except AssertionError:
+                print('The combination of longitudinal and height postions is not allowed. The longitudina motor cannot reach the requested position')
+                self.info()
         elif self.motor2index(motor) == 1:
             # Sets the y-position. This is achieved by a combination of the height wedge motor and the z-motor.
-            # When the height is changed, the wedge AND the z-direction motor needs to be moved to result in
+            # When the height is changed, the wedge AND the z-direction motor need to be moved to result in
             # new height and maintained z-position.
             current_wedge = self.proxy.read_attribute('channel02_encoder').value
             current_long = self.proxy.read_attribute('channel01_encoder').value
             new_wedge = pos / self.y_part
             new_long = current_long - self.z_part * (new_wedge - current_wedge)
-            # Ensures that the sample is moving away from the OSA and then approached with the other motor
-            if new_long > current_long:
+            try:
+                assert new_long > (self._lims['m1min'] + margin)
+                assert new_long < (self._lims['m1max'] - margin)
+                assert new_wedge > (self._lims['m2min'] + margin)
+                assert new_wedge < (self._lims['m2max'] - margin)
                 self.proxy.write_attribute('channel01_position', new_long)
-                while self.busy(motor):
-                    time.sleep(.1)
-                self.proxy.write_attribute('channel01_position', new_wedge)
-                while self.busy(motor):
-                    time.sleep(.1)
-            else:
-                self.proxy.write_attribute('channel01_position', new_wedge)
-                while self.busy(motor):
-                    time.sleep(.1)
-                self.proxy.write_attribute('channel01_position', new_long)
-                while self.busy(motor):
-                    time.sleep(.1)
+                self.proxy.write_attribute('channel02_position', new_wedge)
+            except AssertionError:
+                print('The combination of longitudinal and height postions is not allowed. One or both motors cannot reach the requested positions')
+                self.info()
         elif self.motor2index(motor) == 2:
-            # Sets the z-position. THis is achieved by the combined motion of the longitudinal motor
-            # and the horizontal part of th wedge motor.
+            # Sets the z-position. This is achieved by the combined motion of the longitudinal motor
+            # and the horizontal part of the wedge motor.
             new_long = pos - self.z_part * self.proxy.read_attribute('channel02_encoder').value
-            self.proxy.write_attribute('channel01_position', new_long)
-            while self.busy(motor):
-                time.sleep(.1)
+            try:
+                assert new_long > (self._lims['m1min'] + margin)
+                assert new_long < (self._lims['m1max'] - margin)
+                self.proxy.write_attribute('channel01_position', new_long)
+            except AssertionError:
+                print('The combination of longitudinal and height postions is not allowed. The longitudina motor cannot reach the requested position')
+                self.info()
 
     def where_am_i(self, motor):
         """
@@ -125,7 +192,28 @@ class ImgSampleStage(object):
         return busy
 
     def stop(self, motor):
+        print('Stopping all sample stage motors')
         self.proxy.StopAll()
+
+    def park(self, motor):
+        if self.motor2index(motor) == 0:
+            self.proxy.arbitrarySend('X0M6')
+        elif self.motor2index(motor) > 0:
+            self.proxy.arbitrarySend('X1M6')
+            self.proxy.arbitrarySend('X2M6')
+
+    def unpark(self, motor):
+        if self.motor2index(motor) == 0:
+            self.proxy.arbitrarySend('X0M2')
+        elif self.motor2index(motor) > 0:
+            self.proxy.arbitrarySend('X1M2')
+            self.proxy.arbitrarySend('X2M2')
+
+    def info(self):
+        print('Encoder positions and limits for sample stage physical motors:')
+        print('X-motor\t\t\t', self.proxy.read_attribute('channel00_encoder').value, '(%d, %d)' % (self._lims['m0min'], self._lims['m0max']))
+        print('Longitudinal motor\t', self.proxy.read_attribute('channel01_encoder').value, '(%d, %d)' % (self._lims['m1min'], self._lims['m1max']))
+        print('Wedge motor\t\t', self.proxy.read_attribute('channel02_encoder').value, '(%d, %d)' % (self._lims['m2min'], self._lims['m2max']))
 
 
 class AxisMotor(Motor):
@@ -155,7 +243,7 @@ class AxisMotor(Motor):
         return self.manager.busy(motor=self)
 
     def stop(self):
-        self.manager.Stop(motor=self)
+        self.manager.stop(motor=self)
 
     def move(self, pos):
         """
@@ -177,89 +265,13 @@ class AxisMotor(Motor):
             pass
         self.dial_position = dial
 
-
-class PiezoLegsMotor(Motor):
-    """
-    Single Pmd401 PiezoLEGS motor axis.
-    """
-
-    def __init__(self, device, axis, velocity=100, **kwargs):
-        """
-        :param device: Path to the Pmd401 Tango device
-        :type device: str
-        :param axis: Axis number on the controller
-        :type axis: int
-        :param velocity: Velocity for the motor. Arbitrary value
-        :type velocity: int
-        :param ``**kwargs``: Passed on to the ``Motor`` base class
-        """
-        super(PiezoLegsMotor, self).__init__(**kwargs)
-        self.proxy = PyTango.DeviceProxy(device)
-        self.proxy.set_source(PyTango.DevSource.DEV)
-        self._axis = int(axis)
-        self._velocity = velocity
-
-    @property
-    def dial_position(self):
-        attr = 'channel%02d_encoder' % self._axis
-        return self.proxy.read_attribute(attr).value
-
-    @dial_position.setter
-    def dial_position(self, pos):
-        self.unpark()
-        attr = 'channel%02d_position' % self._axis
-        self.proxy.write_attribute(attr, pos)
-
-    def busy(self):
-        attr = 'channel%02d_state' % self._axis
-        return (self.proxy.read_attribute(attr).value == 'running')
-
-    def stop(self):
-        self.proxy.StopAll()  # safety first
+    def info(self):
+        self.manager.info()
 
     def park(self):
-        command = 'X%dM6' % self._axis
-        reply = self.proxy.arbitrarySend(command)
+        self.manager.park(motor=self)
 
     def unpark(self):
-        command = 'X%dM2' % self._axis
-        reply = self.proxy.arbitrarySend(command)
+        self.manager.unpark(motor=self)
 
 
-class BaseYMotor(Motor):
-    """
-    Pseudo motor which implements the y motion, combined by the
-    longitudinal and wedge motion motors at the imaging.
-    """
-    z_part = math.cos(15 / 180 * math.pi)
-    y_part = -math.sin(15 / 180 * math.pi)
-
-    def calc_pseudo(self, physicals):
-        pseudo = self.y_part * physicals[1]
-        return pseudo
-
-    def calc_physicals(self, pseudo):
-        current_physicals = self.physicals()
-        current_z = self.z_part * current_physicals[1] + current_physicals[0]
-        physicals = [current_z - self.z_part * pseudo / self.y_part,
-                     pseudo / self.y_part]
-        return physicals
-
-
-class BaseZMotor(Motor):
-    """
-    Pseudo motor which implements the z motion, combined by the
-    longitudinal and wedge motion motors at the imaging.
-    """
-    z_part = math.cos(15 / 180 * math.pi)
-    y_part = -math.sin(15 / 180 * math.pi)
-
-    def calc_pseudo(self, physicals):
-        pseudo = self.z_part * physicals[1] + physicals[0]
-        return pseudo
-
-    def calc_physicals(self, pseudo):
-        current_physicals = self.physicals()
-        physicals = [pseudo - self.z_part * current_physicals[1],
-                     current_physicals[1]]
-        return physicals
