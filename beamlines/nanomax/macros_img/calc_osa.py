@@ -60,51 +60,51 @@ class Calc_OSA(object):
         self.N_rays = 100
 
     def input_validation(self):
+        err = "    [ERROR]"
         if not(isinstance(self.FZP_diameter_um, (int, float))):
-            err = "    [ERROR] %s"
-            print(err % "The FZP diameter was not given as a number.")
+            print(err, "The FZP diameter was not given as a number.")
             return False
         elif not(isinstance(self.FZP_drn_nm, (int, float))):
-            print(err % "The outer most zone width was not given as a number.")
+            print(err, "The outer most zone width was not given as a number.")
             return False
         elif not(isinstance(self.CS_diamter_um, (int, float))):
-            print(err % "The central stop diameter was not given as a number.")
+            print(err, "The central stop diameter was not given as a number.")
             return False
         elif not(isinstance(self.photon_energy_keV, (int, float))):
-            print(err % "The photon energy not given as a number.")
+            print(err, "The photon energy not given as a number.")
             return False
         elif not (isinstance(self.OSA_diameter_um, (int, float))
                   or self.OSA_diameter_um is None):
-            print(err % "Give an OSA diameter as a number, or NONE")
+            print(err, "Give an OSA diameter as a number, or NONE")
             return False
         elif (isinstance(self.OSA_diameter_um, (int, float))
               and self.OSA_diameter_um >= self.CS_diamter_um):
-            print(err % "the given OSA is larger than the given central stop")
+            print(err, "the given OSA is larger than the given central stop")
             return False
         elif not (isinstance(self.OSA_distance_mm, (int, float))
                   or self.OSA_distance_mm is None):
-            print(err % "Give an OSA distance as a number, or NONE")
+            print(err, "Give an OSA distance as a number, or None")
             return False
         else:
             return True
 
     def print_input(self):
         print('calculating for:')
-        print('    photon energy:         %.3f keV' % self.photon_energy_keV)
-        print('    central stop diameter: %.3f um' % self.CS_diamter_um)
-        print('    FZP diameter:          %.3f um' % self.FZP_diameter_um)
-        print('    outer most zone width: %.3f nm' % self.FZP_drn_nm)
+        print(f'    photon energy:         {self.photon_energy_keV:.3f} keV')
+        print(f'    central stop diameter: {self.CS_diamter_um:.3f} um')
+        print(f'    FZP diameter:          {self.FZP_diameter_um:.3f} um')
+        print(f'    outer most zone width: {self.FZP_drn_nm:.3f} nm')
         if self.OSA_diameter_um is not None:
-            print('    OSA diameter:          %.3f um' % self.OSA_diameter_um)
+            print(f'    OSA diameter:          {self.OSA_diameter_um:.3f} um')
         if self.OSA_distance_mm is not None:
-            print('    OSA distance:          %.3f mm' % self.OSA_distance_mm)
+            print(f'    OSA distance:          {self.OSA_distance_mm:.3f} mm')
 
     def print_result_max_distance(self):
         print('    ' + '-' * 20)
-        print('    focal length:          %.3f mm' % self.f1_mm)
+        print(f'    focal length:          {self.f1_mm:.3f} mm')
         print('    ' + '-' * 20)
-        print('    maximal OSA distance:  %.3f mm' % self.f_OSA_max_mm)
-        print('    osa diameter for that: %.3f um' % self.d_OSA_max_um)
+        print(f'    maximal OSA distance:  {self.f_OSA_max_mm:.3f} mm')
+        print(f'    OSA diameter for that: {self.d_OSA_max_um:.3f} um')
         if self.d_OSA_max_um > self.CS_diamter_um:
             print('WARNING: CS too small')
         print('    ' + '-' * 20)
@@ -216,15 +216,15 @@ class Calc_OSA(object):
                 / self.f_OSA_max_mm * self.OSA_distance_mm)
 
     def print_suggested_distance(self):
-        print('you can put your OSA maximally %.3f mm from the focus'
-              % self.suggested_distance_mm)
+        print('you can put your OSA maximally ' \
+              f'{self.suggested_distance_mm:.3f} mm from the focus')
 
     def print_suggested_diameters(self):
         print('at this distance your OSA should be')
-        print('    at least %.3f um in diameter and '
-              % self.suggested_diameters_um[0])
-        print('    maximally %.3f um in diameter'
-              % self.suggested_diameters_um[1])
+        print(f'    at least {self.suggested_diameters_um[0]:.3f} um'\
+              ' in diameter and ')
+        print(f'    maximally {self.suggested_diameters_um[1]:.3f} um'\
+              'in diameter')
 
     def run(self):
         if self.input_validation():
@@ -268,8 +268,8 @@ class Calc_OSA(object):
                 if self.OSA_distance_mm > self.f_OSA_max_mm:
                     print('[WARNING] with these settings, no OSA can be that '
                           'far away from the focus!')
-                    print('          choose a distance smaller than %.3f mm'
-                          % self.f_OSA_max_mm)
+                    print('          choose a distance smaller than'\
+                          f' {self.f_OSA_max_mm:.3f} mm')
                 else:
                     self.print_suggested_diameters()
                     self.OSA_diameter_um = 1. * self.suggested_diameters_um[0]
