@@ -11,7 +11,7 @@ from . import Motor
 
 class PiezoLegsMotor(Motor):
     """
-    Single Pmd401 PiezoLEGS motor axis.
+    Single Pmd301 or Pmd401 PiezoLEGS motor axis.
     """
 
     def __init__(self, device, axis, velocity=100, **kwargs):
