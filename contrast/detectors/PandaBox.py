@@ -97,7 +97,10 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         n = 0
         data = {ch: [] for ch in channels}
 
-        num_points = self.hw_trig_n * self.burst_n
+        if self.hw_trig:
+            num_points = self.hw_trig_n * self.burst_n
+        else:
+            num_points = self.burst_n
 
         while n < num_points:
             # anything more to read?
