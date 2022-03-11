@@ -1,5 +1,5 @@
 try:
-    from tango import DeviceProxy, DevError
+    from tango import DeviceProxy, DevFailed, CommunicationFailed
 except ModuleNotFoundError:
     pass
 
@@ -28,7 +28,7 @@ class SdmPathFixer(object):
                 val = self.device.SamplePath
                 self.cache = val
                 return val
-            except DevError:
+            except (DevFailed, CommunicationFailed):
                 print('Failed in getting SDM path from Tango. Trying again...')
         print('Failed %u times, using cached value: %s'
               % (self.TRIALS, self.cache))
