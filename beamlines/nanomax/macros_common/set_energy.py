@@ -19,17 +19,17 @@ class SetEnergy(object):
     setenergy <energy> <ssa>
 
     usage / examples:
-        %set_energy 12300
+        %setenergy 12300
            - sets the monochromator energy and undulator gap
 
-        %set_energy 10000 ssa='coh'
+        %setenergy 10000 ssa='coh'
             - sets the monochromator energy, undulator gap and ssa size
 
-        %set_energy 7000 ssa='flux' set_coating=True
+        %setenergy 7000 ssa='flux' set_coating=True
             - sets the monochromator energy, undulator gap, ssa size and
               hfm mirror coating
 
-        %set_energy 7000 set_gap=False
+        %setenergy 7000 set_gap=False
             - sets the monochromator energy
     """
 
