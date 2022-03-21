@@ -273,17 +273,12 @@ if __name__ == '__main__':
 
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
-        # basex.proxy.PowerOn = False
-        # basey.proxy.PowerOn = False
-        # basez.proxy.PowerOn = False
+        assert h5rec.is_alive(), 'hdf5 recorder is dead! this can''t be good. maybe restart contrast.'
         runCommand('stoplive')
         runCommand('fsopen')
         time.sleep(0.2)
 
     def post_scan_stuff(slf):
-        # basex.proxy.PowerOn = True
-        # basey.proxy.PowerOn = True
-        # basez.proxy.PowerOn = True
         runCommand('fsclose')
         pass
 
