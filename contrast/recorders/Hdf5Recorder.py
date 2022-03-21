@@ -38,7 +38,15 @@ class Hdf5Recorder(Recorder):
             print('*********************************')
             self.fp = None
         else:
-            self.fp = h5py.File(filename, 'w')
+            try:
+                self.fp = h5py.File(filename, 'w')
+            except OSError as e:
+                print('*********** WARNING ***********')
+                print('Could not open hdf5 file. Error')
+                print('as follows.')
+                print('*******************************')
+                print(e)
+                self.fp = None
             self.act_on_data({'snapshot': dct['snapshot']}, base='entry/')
             self.act_on_data({'description': dct['description']},
                              base='entry/')
