@@ -233,7 +233,8 @@ if __name__ == '__main__':
     andor = Andor3(name='andor', device='staff/clewen/zyla')
     andor.proxy.rotation=1
     andor.proxy.flipud=True
-    eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
+    eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
+    eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
 
