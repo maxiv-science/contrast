@@ -13,13 +13,16 @@ if __name__=='__main__':
     from contrast.environment import env
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors.TangoMotor import TangoMotor
-    from contrast.detectors.PandaBoxSofti import PandaBoxSofti, PandaBox0D
+    from contrast.detectors.PandaBoxSofti import PandaBoxSoftiPtycho, PandaBox0D
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.TangoAttributeDetector import TangoAttributeDetector
     from contrast.detectors.Andor3 import Andor3, AndorSofti
     from contrast.scans import SoftwareScan, Ct
 
-    sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').SamplePath
+    from contrast.motors import DummyMotor
+    from contrast.detectors import DummyDetector
+
+    sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').Path
     
     env.userLevel = 5
     #env.paths.directory = '/data/staff/softimax/commissioning/andor_data/20211210'
@@ -30,24 +33,27 @@ if __name__=='__main__':
     h5rec.start()
 
     # a zmq recorder
-    zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start() # removed for now
+    #zmqrec = StreamRecorder(name='zmqrec')
+    #zmqrec.start() # removed for now
 
     # motors
     finex = TangoMotor(device='PiezoPiE712/CTL/X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
     finey = TangoMotor(device='PiezoPiE712/CTL/Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
-    #fine_dum = TangoMotor(device='B318A/CTL/DUMMY-01', name='fine_dum', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
+    basex = DummyMotor(name='basex')
+    # fine_dum = TangoMotor(device='B318A/CTL/DUMMY-01', name='fine_dum', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     osax = TangoMotor(device='motor/osa_ctrl/1', name='osax', user_format='%.3f', dial_format='%.3f', offset=0.83)
     osay = TangoMotor(device='motor/osa_ctrl/2', name='osay', user_format='%.3f', dial_format='%.3f', offset=0.32)
     beamline_energy = TangoMotor(device='B318A/CTL/BEAMLINE-ENERGY', name='beamline_energy', user_format='%.3f', dial_format='%.3f', dial_limits=(275, 1600))
 
-    shutter = tango.DeviceProxy('B318A-EA01/CTL/GalilShutter')
+    # shutter = tango.DeviceProxy('B318A-EA01/CTL/GalilShutter')
     
     #finex = TangoMotor(device='B318A/CTL/DUMMY-01', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
 
     # detectors
     andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=100)
+    panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0', frames_n=200)
+    det1 = DummyDetector(name='det1')
     
     #panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')
     abs_x = TangoAttributeDetector('abs_x', 'B318A-EA01/CTL/PandaPosTrig', 'AbsX')
@@ -67,16 +73,17 @@ if __name__=='__main__':
      # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [andor, roi, abs_x, abs_y]:
+    for d in [andor, panda0, roi, abs_x, abs_y]:
         d.active = True
 
     def pre_scan_stuff(slf):
             andor.stop()
-            shutter.Open()
+            # shutter.Open()
             time.sleep(0.2)
 
     def post_scan_stuff(slf):
-            shutter.Close()
+            pass
+            # shutter.Close()
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff

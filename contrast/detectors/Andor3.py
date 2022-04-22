@@ -216,4 +216,4 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
             return None
         else:
             path, f_name = os.path.split(self.proxy.DestinationFilename)
-            return Link(self.proxy.DestinationFilename, 'entry/data/data', universal=False)
+            return Link(self.proxy.DestinationFilename, 'entry/instrument/zyla/data', universal=False)

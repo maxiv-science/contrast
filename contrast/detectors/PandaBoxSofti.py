@@ -8,11 +8,17 @@ This class assumes that:
 
 """
 from .PandaBox import PandaBox, SOCK_RECV
-from .Detector import Detector
+from .Detector import Detector, TriggeredDetector, BurstDetector
+import socket
+from threading import Thread
+import select
 from typing import List
 import math, time
 import tango
 import numpy as np
+
+SOCK_RECV = 4096
+RECV_DELAY = 1e-4
 
 class PandaBoxSofti(PandaBox):
     
@@ -213,3 +219,91 @@ class PandaBox0D(Detector):
     def read(self):
         #return np.array([int(self._trig_indx), int(self._pd_diode_i), int(self._pmt_i)])
         return self._pmt_i
+
+
+class PandaBoxSoftiPtycho(PandaBox):
+
+    def __init__(self, name=None, host='b-softimax-panda-0',
+                 ctrl_port=8888, data_port=8889, frames_n = None):
+        self.host = host
+        self.ctrl_port = ctrl_port
+        self.data_port = data_port
+        self.acqthread = None
+        self.burst_latency = .003
+        self.frames_n = frames_n
+        Detector.__init__(self, name=name)
+        TriggeredDetector.__init__(self)
+        BurstDetector.__init__(self)
+
+    def prepare(self, acqtime, dataid, n_starts):
+        print('PandaBoxSoftiPtycho prepare() call..')
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
+        if self.frames_n:
+            self.burst_n = self.frames_n
+
+        self.query('COUNTER3.ENABLE=ZERO')
+        time.sleep(.001)
+        self.query('COUNTER3.ENABLE=ONE')
+        # self.query('PULSE3.PULSES=%d' % self.burst_n)
+        # self.query('PULSE3.WIDTH=%f' % self.acqtime)
+        # self.query('PULSE3.STEP=%f' % (self.burst_latency+self.acqtime))
+
+    def _acquire(self):
+        """
+        Receive and parse one set of measurements.
+        """
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((self.host, self.data_port))
+        s.send(b'\n\n')
+
+        # First wait for the header to be complete, and parse it.
+        done = False
+        buff = b''
+        while not done:
+            buff += s.recv(SOCK_RECV)
+            if b'\n\n' in buff:
+                done = True
+        header, buff = buff.split(b'\n\n')
+        channels = []
+        for line in header.split(b'fields:\n')[-1].split(b'\n'):
+            ch = line.strip().split()[0].decode()
+            op = line.strip().split()[2].decode()
+            channels.append(ch + '_' + op)
+
+        # Then put the rest of the data into the same buffer and continue
+        n = 0
+        data = {ch:[] for ch in channels}
+        
+        num_points = self.hw_trig_n * self.burst_n
+        print('The number of hw triggers in the panda detector: ', self.hw_trig_n)
+        print('The number of burst number in the panda detector: ', self.burst_n)
+
+        while n < num_points:
+            # anything more to read?
+            ready = select.select([s], [], [], RECV_DELAY)[0]
+            if ready:
+                buff += s.recv(SOCK_RECV)
+
+            #anything more to parse?
+            if b'\n' in buff:
+                line, buff = buff.split(b'\n', 1)
+                vals = line.strip().split()
+                for k, v in zip(channels, vals):
+                    if b'END' in v:
+                        data[k].append(None)
+                        n = num_points
+                        break
+                    data[k].append(float(v))
+                n += 1
+
+        for k, v in data.items():
+            data[k] = np.array(v)
+
+        self.data = data
+        self.query('*PCAP.DISARM=')
+
+    def start(self):
+        if not self.hw_trig:
+            self.query('BITS.D=0')
+            time.sleep(.001)
+            self.query('BITS.D=1')
