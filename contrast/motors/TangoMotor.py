@@ -4,6 +4,7 @@ Provides a Motor interface to standard Tango motors.
 
 import PyTango
 from . import Motor
+import time
 
 class TangoMotor(Motor):
     """
@@ -52,6 +53,23 @@ class TangoMotor(Motor):
         config.max_value = str(lims[1])
         self.proxy.set_attribute_config(config)
 
+    def move(self, pos):
+        while self.busy():
+            print(f'Motor {self.name} is busy, trying again in 10 ms.')
+            time.sleep(0.01)
+        # print(f'Motor {self.name} moved to:', pos)
+        dial = (pos - self._offset) / self._scaling
+        try:
+            _lowlim, _uplim = self.dial_position
+            assert dial <= _uplim
+            assert dial >= _lowlim
+        except AssertionError:
+            print('Trying to move %s outside its limits!' % self.name)
+            return -1
+        except TypeError:
+            pass
+        self.dial_position = dial
+
     def busy(self):
         state = self.proxy.State()
         if state == PyTango.DevState.MOVING:
@@ -75,4 +93,3 @@ class TangoMotor(Motor):
 
     def stop(self):
         self.proxy.stop()
-

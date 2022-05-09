@@ -1,0 +1,432 @@
+16:19:18,77 root DEBUG AndorSofti __init__() call.
+16:19:20,780 root DEBUG Andor3 detector stop() call.
+16:19:20,988 root DEBUG Andor3 detector prepare() call with n_starts: 1.
+16:19:21,763 root DEBUG Andor3 detector arm() call.
+16:19:22,106 root DEBUG Armed in SOFTWARE trigger mode for a single trigger.
+16:19:23,118 root DEBUG Andor3 detector start() call.
+16:19:23,210 root DEBUG Andor3 detector read() call.
+16:19:33,905 root DEBUG Andor3 detector stop() call.
+16:19:34,110 root DEBUG Andor3 detector prepare() call with n_starts: 1.
+16:19:34,953 root DEBUG Andor3 detector arm() call.
+16:19:35,237 root DEBUG Armed in SOFTWARE trigger mode for a single trigger.
+16:19:36,290 root DEBUG Andor3 detector start() call.
+16:19:36,353 root DEBUG Andor3 detector read() call.
+16:19:49,738 root DEBUG Andor3 detector stop() call.
+16:19:49,959 root DEBUG Andor3 detector prepare() call with n_starts: 1435.
+16:19:50,488 root DEBUG Andor3 detector arm() call.
+16:19:50,506 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:19:50,723 root DEBUG Andor3 detector start() call.
+16:19:52,682 root DEBUG Andor3 detector read() call.
+16:19:52,771 root DEBUG Andor3 detector arm() call.
+16:19:52,786 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:19:52,987 root DEBUG Andor3 detector start() call.
+16:19:54,955 root DEBUG Andor3 detector read() call.
+16:19:55,42 root DEBUG Andor3 detector arm() call.
+16:19:55,57 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:19:55,256 root DEBUG Andor3 detector start() call.
+16:19:57,196 root DEBUG Andor3 detector read() call.
+16:19:57,290 root DEBUG Andor3 detector arm() call.
+16:19:57,322 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:19:57,527 root DEBUG Andor3 detector start() call.
+16:19:59,471 root DEBUG Andor3 detector read() call.
+16:19:59,561 root DEBUG Andor3 detector arm() call.
+16:19:59,578 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:19:59,777 root DEBUG Andor3 detector start() call.
+16:20:01,763 root DEBUG Andor3 detector read() call.
+16:20:01,849 root DEBUG Andor3 detector arm() call.
+16:20:01,864 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:02,75 root DEBUG Andor3 detector start() call.
+16:20:04,27 root DEBUG Andor3 detector read() call.
+16:20:04,158 root DEBUG Andor3 detector arm() call.
+16:20:04,174 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:04,392 root DEBUG Andor3 detector start() call.
+16:20:06,369 root DEBUG Andor3 detector read() call.
+16:20:06,457 root DEBUG Andor3 detector arm() call.
+16:20:06,474 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:06,679 root DEBUG Andor3 detector start() call.
+16:20:08,695 root DEBUG Andor3 detector read() call.
+16:20:08,783 root DEBUG Andor3 detector arm() call.
+16:20:08,803 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:08,994 root DEBUG Andor3 detector start() call.
+16:20:10,937 root DEBUG Andor3 detector read() call.
+16:20:11,25 root DEBUG Andor3 detector arm() call.
+16:20:11,40 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:11,237 root DEBUG Andor3 detector start() call.
+16:20:13,188 root DEBUG Andor3 detector read() call.
+16:20:13,280 root DEBUG Andor3 detector arm() call.
+16:20:13,328 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:13,535 root DEBUG Andor3 detector start() call.
+16:20:15,487 root DEBUG Andor3 detector read() call.
+16:20:15,570 root DEBUG Andor3 detector arm() call.
+16:20:15,584 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:15,785 root DEBUG Andor3 detector start() call.
+16:20:17,923 root DEBUG Andor3 detector read() call.
+16:20:18,11 root DEBUG Andor3 detector arm() call.
+16:20:18,26 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:18,231 root DEBUG Andor3 detector start() call.
+16:20:20,165 root DEBUG Andor3 detector read() call.
+16:20:20,269 root DEBUG Andor3 detector arm() call.
+16:20:20,346 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:20,556 root DEBUG Andor3 detector start() call.
+16:20:22,541 root DEBUG Andor3 detector read() call.
+16:20:22,635 root DEBUG Andor3 detector arm() call.
+16:20:22,654 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:22,854 root DEBUG Andor3 detector start() call.
+16:20:24,802 root DEBUG Andor3 detector read() call.
+16:20:24,923 root DEBUG Andor3 detector arm() call.
+16:20:24,954 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:25,154 root DEBUG Andor3 detector start() call.
+16:20:27,100 root DEBUG Andor3 detector read() call.
+16:20:27,190 root DEBUG Andor3 detector arm() call.
+16:20:27,208 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:27,409 root DEBUG Andor3 detector start() call.
+16:20:29,364 root DEBUG Andor3 detector read() call.
+16:20:29,453 root DEBUG Andor3 detector arm() call.
+16:20:29,499 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:29,704 root DEBUG Andor3 detector start() call.
+16:20:31,654 root DEBUG Andor3 detector read() call.
+16:20:31,742 root DEBUG Andor3 detector arm() call.
+16:20:31,755 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:31,951 root DEBUG Andor3 detector start() call.
+16:20:34,9 root DEBUG Andor3 detector read() call.
+16:20:34,100 root DEBUG Andor3 detector arm() call.
+16:20:34,114 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:34,312 root DEBUG Andor3 detector start() call.
+16:20:36,282 root DEBUG Andor3 detector read() call.
+16:20:36,370 root DEBUG Andor3 detector arm() call.
+16:20:36,445 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:36,650 root DEBUG Andor3 detector start() call.
+16:20:38,619 root DEBUG Andor3 detector read() call.
+16:20:38,707 root DEBUG Andor3 detector arm() call.
+16:20:38,740 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:38,944 root DEBUG Andor3 detector start() call.
+16:20:40,903 root DEBUG Andor3 detector read() call.
+16:20:40,987 root DEBUG Andor3 detector arm() call.
+16:20:41,4 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:41,202 root DEBUG Andor3 detector start() call.
+16:20:43,181 root DEBUG Andor3 detector read() call.
+16:20:43,272 root DEBUG Andor3 detector arm() call.
+16:20:43,292 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:43,487 root DEBUG Andor3 detector start() call.
+16:20:45,448 root DEBUG Andor3 detector read() call.
+16:20:45,534 root DEBUG Andor3 detector arm() call.
+16:20:45,548 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:45,812 root DEBUG Andor3 detector start() call.
+16:20:47,874 root DEBUG Andor3 detector read() call.
+16:20:47,960 root DEBUG Andor3 detector arm() call.
+16:20:47,974 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:48,172 root DEBUG Andor3 detector start() call.
+16:20:50,161 root DEBUG Andor3 detector read() call.
+16:20:50,261 root DEBUG Andor3 detector arm() call.
+16:20:50,278 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:50,475 root DEBUG Andor3 detector start() call.
+16:20:52,457 root DEBUG Andor3 detector read() call.
+16:20:52,547 root DEBUG Andor3 detector arm() call.
+16:20:52,588 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:52,794 root DEBUG Andor3 detector start() call.
+16:20:54,761 root DEBUG Andor3 detector read() call.
+16:20:54,882 root DEBUG Andor3 detector arm() call.
+16:20:54,915 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:55,115 root DEBUG Andor3 detector start() call.
+16:20:57,69 root DEBUG Andor3 detector read() call.
+16:20:57,155 root DEBUG Andor3 detector arm() call.
+16:20:57,169 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:57,367 root DEBUG Andor3 detector start() call.
+16:20:59,370 root DEBUG Andor3 detector read() call.
+16:20:59,472 root DEBUG Andor3 detector arm() call.
+16:20:59,486 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:20:59,683 root DEBUG Andor3 detector start() call.
+16:21:01,653 root DEBUG Andor3 detector read() call.
+16:21:01,752 root DEBUG Andor3 detector arm() call.
+16:21:01,782 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:01,987 root DEBUG Andor3 detector start() call.
+16:21:03,986 root DEBUG Andor3 detector read() call.
+16:21:04,75 root DEBUG Andor3 detector arm() call.
+16:21:04,107 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:04,304 root DEBUG Andor3 detector start() call.
+16:21:06,273 root DEBUG Andor3 detector read() call.
+16:21:06,358 root DEBUG Andor3 detector arm() call.
+16:21:06,376 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:06,579 root DEBUG Andor3 detector start() call.
+16:21:08,554 root DEBUG Andor3 detector read() call.
+16:21:08,645 root DEBUG Andor3 detector arm() call.
+16:21:08,659 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:08,859 root DEBUG Andor3 detector start() call.
+16:21:10,806 root DEBUG Andor3 detector read() call.
+16:21:10,895 root DEBUG Andor3 detector arm() call.
+16:21:10,929 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:11,130 root DEBUG Andor3 detector start() call.
+16:21:13,120 root DEBUG Andor3 detector read() call.
+16:21:13,207 root DEBUG Andor3 detector arm() call.
+16:21:13,224 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:13,423 root DEBUG Andor3 detector start() call.
+16:21:15,370 root DEBUG Andor3 detector read() call.
+16:21:15,458 root DEBUG Andor3 detector arm() call.
+16:21:15,472 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:15,670 root DEBUG Andor3 detector start() call.
+16:21:17,726 root DEBUG Andor3 detector read() call.
+16:21:17,879 root DEBUG Andor3 detector arm() call.
+16:21:17,896 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:18,94 root DEBUG Andor3 detector start() call.
+16:21:20,68 root DEBUG Andor3 detector read() call.
+16:21:20,158 root DEBUG Andor3 detector arm() call.
+16:21:20,180 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:20,381 root DEBUG Andor3 detector start() call.
+16:21:22,361 root DEBUG Andor3 detector read() call.
+16:21:22,452 root DEBUG Andor3 detector arm() call.
+16:21:22,481 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:22,682 root DEBUG Andor3 detector start() call.
+16:21:24,649 root DEBUG Andor3 detector read() call.
+16:21:24,738 root DEBUG Andor3 detector arm() call.
+16:21:24,767 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:24,966 root DEBUG Andor3 detector start() call.
+16:21:26,917 root DEBUG Andor3 detector read() call.
+16:21:27,10 root DEBUG Andor3 detector arm() call.
+16:21:27,39 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:27,242 root DEBUG Andor3 detector start() call.
+16:21:29,209 root DEBUG Andor3 detector read() call.
+16:21:29,301 root DEBUG Andor3 detector arm() call.
+16:21:29,316 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:29,520 root DEBUG Andor3 detector start() call.
+16:21:31,479 root DEBUG Andor3 detector read() call.
+16:21:31,573 root DEBUG Andor3 detector arm() call.
+16:21:31,590 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:31,788 root DEBUG Andor3 detector start() call.
+16:21:33,759 root DEBUG Andor3 detector read() call.
+16:21:33,846 root DEBUG Andor3 detector arm() call.
+16:21:33,891 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:34,115 root DEBUG Andor3 detector start() call.
+16:21:36,104 root DEBUG Andor3 detector read() call.
+16:21:36,187 root DEBUG Andor3 detector arm() call.
+16:21:36,203 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:36,401 root DEBUG Andor3 detector start() call.
+16:21:38,340 root DEBUG Andor3 detector read() call.
+16:21:38,486 root DEBUG Andor3 detector arm() call.
+16:21:38,504 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:38,702 root DEBUG Andor3 detector start() call.
+16:21:40,670 root DEBUG Andor3 detector read() call.
+16:21:40,760 root DEBUG Andor3 detector arm() call.
+16:21:40,820 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:41,20 root DEBUG Andor3 detector start() call.
+16:21:43,50 root DEBUG Andor3 detector read() call.
+16:21:43,143 root DEBUG Andor3 detector arm() call.
+16:21:43,158 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:43,357 root DEBUG Andor3 detector start() call.
+16:21:45,323 root DEBUG Andor3 detector read() call.
+16:21:45,406 root DEBUG Andor3 detector arm() call.
+16:21:45,420 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:45,618 root DEBUG Andor3 detector start() call.
+16:21:47,564 root DEBUG Andor3 detector read() call.
+16:21:47,654 root DEBUG Andor3 detector arm() call.
+16:21:47,671 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:47,872 root DEBUG Andor3 detector start() call.
+16:21:49,821 root DEBUG Andor3 detector read() call.
+16:21:49,910 root DEBUG Andor3 detector arm() call.
+16:21:49,953 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:50,165 root DEBUG Andor3 detector start() call.
+16:21:52,176 root DEBUG Andor3 detector read() call.
+16:21:52,261 root DEBUG Andor3 detector arm() call.
+16:21:52,277 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:52,478 root DEBUG Andor3 detector start() call.
+16:21:54,447 root DEBUG Andor3 detector read() call.
+16:21:54,536 root DEBUG Andor3 detector arm() call.
+16:21:54,551 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:54,754 root DEBUG Andor3 detector start() call.
+16:21:56,765 root DEBUG Andor3 detector read() call.
+16:21:56,861 root DEBUG Andor3 detector arm() call.
+16:21:56,876 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:57,74 root DEBUG Andor3 detector start() call.
+16:21:59,28 root DEBUG Andor3 detector read() call.
+16:21:59,115 root DEBUG Andor3 detector arm() call.
+16:21:59,139 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:21:59,354 root DEBUG Andor3 detector start() call.
+16:22:01,340 root DEBUG Andor3 detector read() call.
+16:22:01,436 root DEBUG Andor3 detector arm() call.
+16:22:01,474 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:01,675 root DEBUG Andor3 detector start() call.
+16:22:03,635 root DEBUG Andor3 detector read() call.
+16:22:03,728 root DEBUG Andor3 detector arm() call.
+16:22:03,788 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:04,7 root DEBUG Andor3 detector start() call.
+16:22:06,33 root DEBUG Andor3 detector read() call.
+16:22:06,119 root DEBUG Andor3 detector arm() call.
+16:22:06,135 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:06,333 root DEBUG Andor3 detector start() call.
+16:22:08,313 root DEBUG Andor3 detector read() call.
+16:22:08,412 root DEBUG Andor3 detector arm() call.
+16:22:08,436 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:08,637 root DEBUG Andor3 detector start() call.
+16:22:10,608 root DEBUG Andor3 detector read() call.
+16:22:10,703 root DEBUG Andor3 detector arm() call.
+16:22:10,727 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:10,930 root DEBUG Andor3 detector start() call.
+16:22:12,988 root DEBUG Andor3 detector read() call.
+16:22:13,80 root DEBUG Andor3 detector arm() call.
+16:22:13,93 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:13,292 root DEBUG Andor3 detector start() call.
+16:22:15,240 root DEBUG Andor3 detector read() call.
+16:22:15,329 root DEBUG Andor3 detector arm() call.
+16:22:15,348 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:15,547 root DEBUG Andor3 detector start() call.
+16:22:17,507 root DEBUG Andor3 detector read() call.
+16:22:17,594 root DEBUG Andor3 detector arm() call.
+16:22:17,612 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:17,820 root DEBUG Andor3 detector start() call.
+16:22:19,779 root DEBUG Andor3 detector read() call.
+16:22:19,875 root DEBUG Andor3 detector arm() call.
+16:22:19,908 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:20,114 root DEBUG Andor3 detector start() call.
+16:22:22,80 root DEBUG Andor3 detector read() call.
+16:22:22,170 root DEBUG Andor3 detector arm() call.
+16:22:22,194 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:22,394 root DEBUG Andor3 detector start() call.
+16:22:24,346 root DEBUG Andor3 detector read() call.
+16:22:24,430 root DEBUG Andor3 detector arm() call.
+16:22:24,444 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:24,641 root DEBUG Andor3 detector start() call.
+16:22:26,657 root DEBUG Andor3 detector read() call.
+16:22:26,746 root DEBUG Andor3 detector arm() call.
+16:22:26,763 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:26,966 root DEBUG Andor3 detector start() call.
+16:22:28,920 root DEBUG Andor3 detector read() call.
+16:22:29,5 root DEBUG Andor3 detector arm() call.
+16:22:29,21 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:29,223 root DEBUG Andor3 detector start() call.
+16:22:31,228 root DEBUG Andor3 detector read() call.
+16:22:31,338 root DEBUG Andor3 detector arm() call.
+16:22:31,352 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:31,551 root DEBUG Andor3 detector start() call.
+16:22:33,506 root DEBUG Andor3 detector read() call.
+16:22:33,599 root DEBUG Andor3 detector arm() call.
+16:22:33,653 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:33,856 root DEBUG Andor3 detector start() call.
+16:22:35,974 root DEBUG Andor3 detector read() call.
+16:22:36,66 root DEBUG Andor3 detector arm() call.
+16:22:36,79 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:36,287 root DEBUG Andor3 detector start() call.
+16:22:38,257 root DEBUG Andor3 detector read() call.
+16:22:38,343 root DEBUG Andor3 detector arm() call.
+16:22:38,359 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:38,559 root DEBUG Andor3 detector start() call.
+16:22:40,561 root DEBUG Andor3 detector read() call.
+16:22:40,654 root DEBUG Andor3 detector arm() call.
+16:22:40,672 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:40,870 root DEBUG Andor3 detector start() call.
+16:22:42,822 root DEBUG Andor3 detector read() call.
+16:22:43,18 root DEBUG Andor3 detector arm() call.
+16:22:43,35 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:43,237 root DEBUG Andor3 detector start() call.
+16:22:45,195 root DEBUG Andor3 detector read() call.
+16:22:45,281 root DEBUG Andor3 detector arm() call.
+16:22:45,297 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:45,499 root DEBUG Andor3 detector start() call.
+16:22:47,571 root DEBUG Andor3 detector read() call.
+16:22:47,663 root DEBUG Andor3 detector arm() call.
+16:22:47,678 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:47,883 root DEBUG Andor3 detector start() call.
+16:22:50,1 root DEBUG Andor3 detector read() call.
+16:22:50,86 root DEBUG Andor3 detector arm() call.
+16:22:50,100 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:50,298 root DEBUG Andor3 detector start() call.
+16:22:52,281 root DEBUG Andor3 detector read() call.
+16:22:52,373 root DEBUG Andor3 detector arm() call.
+16:22:52,409 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:52,612 root DEBUG Andor3 detector start() call.
+16:22:54,566 root DEBUG Andor3 detector read() call.
+16:22:54,652 root DEBUG Andor3 detector arm() call.
+16:22:54,665 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:54,869 root DEBUG Andor3 detector start() call.
+16:22:56,867 root DEBUG Andor3 detector read() call.
+16:22:56,956 root DEBUG Andor3 detector arm() call.
+16:22:56,970 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:57,174 root DEBUG Andor3 detector start() call.
+16:22:59,130 root DEBUG Andor3 detector read() call.
+16:22:59,224 root DEBUG Andor3 detector arm() call.
+16:22:59,276 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:22:59,497 root DEBUG Andor3 detector start() call.
+16:23:01,489 root DEBUG Andor3 detector read() call.
+16:23:01,583 root DEBUG Andor3 detector arm() call.
+16:23:01,617 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:01,821 root DEBUG Andor3 detector start() call.
+16:23:03,823 root DEBUG Andor3 detector read() call.
+16:23:03,908 root DEBUG Andor3 detector arm() call.
+16:23:03,922 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:04,144 root DEBUG Andor3 detector start() call.
+16:23:06,131 root DEBUG Andor3 detector read() call.
+16:23:06,224 root DEBUG Andor3 detector arm() call.
+16:23:06,243 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:06,444 root DEBUG Andor3 detector start() call.
+16:23:08,412 root DEBUG Andor3 detector read() call.
+16:23:08,503 root DEBUG Andor3 detector arm() call.
+16:23:08,586 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:08,791 root DEBUG Andor3 detector start() call.
+16:23:10,744 root DEBUG Andor3 detector read() call.
+16:23:10,831 root DEBUG Andor3 detector arm() call.
+16:23:10,844 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:11,46 root DEBUG Andor3 detector start() call.
+16:23:13,53 root DEBUG Andor3 detector read() call.
+16:23:13,152 root DEBUG Andor3 detector arm() call.
+16:23:13,171 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:13,368 root DEBUG Andor3 detector start() call.
+16:23:15,333 root DEBUG Andor3 detector read() call.
+16:23:15,429 root DEBUG Andor3 detector arm() call.
+16:23:15,479 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:15,696 root DEBUG Andor3 detector start() call.
+16:23:17,831 root DEBUG Andor3 detector read() call.
+16:23:17,930 root DEBUG Andor3 detector arm() call.
+16:23:17,952 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:18,154 root DEBUG Andor3 detector start() call.
+16:23:20,115 root DEBUG Andor3 detector read() call.
+16:23:20,202 root DEBUG Andor3 detector arm() call.
+16:23:20,218 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:20,418 root DEBUG Andor3 detector start() call.
+16:23:22,390 root DEBUG Andor3 detector read() call.
+16:23:22,474 root DEBUG Andor3 detector arm() call.
+16:23:22,503 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:22,705 root DEBUG Andor3 detector start() call.
+16:23:24,665 root DEBUG Andor3 detector read() call.
+16:23:24,755 root DEBUG Andor3 detector arm() call.
+16:23:24,768 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:25,13 root DEBUG Andor3 detector start() call.
+16:23:26,972 root DEBUG Andor3 detector read() call.
+16:23:27,59 root DEBUG Andor3 detector arm() call.
+16:23:27,72 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:27,275 root DEBUG Andor3 detector start() call.
+16:23:29,268 root DEBUG Andor3 detector read() call.
+16:23:29,356 root DEBUG Andor3 detector arm() call.
+16:23:29,372 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:29,577 root DEBUG Andor3 detector start() call.
+16:23:31,525 root DEBUG Andor3 detector read() call.
+16:23:31,623 root DEBUG Andor3 detector arm() call.
+16:23:31,667 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:31,874 root DEBUG Andor3 detector start() call.
+16:23:33,950 root DEBUG Andor3 detector read() call.
+16:23:34,47 root DEBUG Andor3 detector arm() call.
+16:23:34,75 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:34,305 root DEBUG Andor3 detector start() call.
+16:23:36,323 root DEBUG Andor3 detector read() call.
+16:23:36,414 root DEBUG Andor3 detector arm() call.
+16:23:36,434 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:36,648 root DEBUG Andor3 detector start() call.
+16:23:38,615 root DEBUG Andor3 detector read() call.
+16:23:38,709 root DEBUG Andor3 detector arm() call.
+16:23:38,736 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:38,953 root DEBUG Andor3 detector start() call.
+16:23:40,902 root DEBUG Andor3 detector read() call.
+16:23:40,990 root DEBUG Andor3 detector arm() call.
+16:23:41,8 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:41,220 root DEBUG Andor3 detector start() call.
+16:23:43,203 root DEBUG Andor3 detector read() call.
+16:23:43,290 root DEBUG Andor3 detector arm() call.
+16:23:43,306 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:43,503 root DEBUG Andor3 detector start() call.
+16:23:45,484 root DEBUG Andor3 detector read() call.
+16:23:45,579 root DEBUG Andor3 detector arm() call.
+16:23:45,603 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:45,802 root DEBUG Andor3 detector start() call.
+16:23:47,829 root DEBUG Andor3 detector read() call.
+16:23:47,929 root DEBUG Andor3 detector arm() call.
+16:23:47,949 root DEBUG Armed in INTERNAL trigger mode, burst_n : 50
+16:23:48,158 root DEBUG Andor3 detector start() call.
+16:23:49,366 root DEBUG Andor3 detector stop() call.
+16:30:53,296 root ERROR Invalid alias: The name mv can't be aliased because it is another magic command.

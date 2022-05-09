@@ -235,8 +235,17 @@ class PandaBoxSoftiPtycho(PandaBox):
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
 
+    def _toggle_pcap(self):
+        self.query('PCAP.GATE=ONE')
+        self.query('PCAP.TRIG=ONE')
+        time.sleep(1)
+        self.query('PCAP.GATE=ZERO')
+        self.query('PCAP.TRIG=ZERO')
+        self.query('PCAP.GATE=TTLIN3.VAL')
+        self.query('PCAP.TRIG=TTLIN3.VAL')
+
     def prepare(self, acqtime, dataid, n_starts):
-        print('PandaBoxSoftiPtycho prepare() call..')
+        # print('PandaBoxSoftiPtycho prepare() call..')
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         if self.frames_n:
             self.burst_n = self.frames_n
@@ -247,6 +256,11 @@ class PandaBoxSoftiPtycho(PandaBox):
         # self.query('PULSE3.PULSES=%d' % self.burst_n)
         # self.query('PULSE3.WIDTH=%f' % self.acqtime)
         # self.query('PULSE3.STEP=%f' % (self.burst_latency+self.acqtime))
+
+        if dataid:
+            self.dataid = dataid
+        else:
+            self.dataid = None
 
     def _acquire(self):
         """
@@ -273,10 +287,10 @@ class PandaBoxSoftiPtycho(PandaBox):
         # Then put the rest of the data into the same buffer and continue
         n = 0
         data = {ch:[] for ch in channels}
-        
+
         num_points = self.hw_trig_n * self.burst_n
-        print('The number of hw triggers in the panda detector: ', self.hw_trig_n)
-        print('The number of burst number in the panda detector: ', self.burst_n)
+        # print('The number of hw triggers in the panda detector: ', self.hw_trig_n)
+        # print('The number of burst number in the panda detector: ', self.burst_n)
 
         while n < num_points:
             # anything more to read?
@@ -307,3 +321,6 @@ class PandaBoxSoftiPtycho(PandaBox):
             self.query('BITS.D=0')
             time.sleep(.001)
             self.query('BITS.D=1')
+        if not self.dataid:
+            self._toggle_pcap()
+            self.stop()

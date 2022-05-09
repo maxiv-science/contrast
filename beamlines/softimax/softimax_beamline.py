@@ -19,10 +19,12 @@ if __name__=='__main__':
     from contrast.detectors.Andor3 import Andor3, AndorSofti
     from contrast.scans import SoftwareScan, Ct
 
-    from contrast.motors import DummyMotor
+    from contrast.motors import DummyMotor, SoftiPiezoShutter, SoftiPolarizationCtrl
     from contrast.detectors import DummyDetector
 
-    sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').Path
+    from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
+
+    sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').SamplePath
     
     env.userLevel = 5
     #env.paths.directory = '/data/staff/softimax/commissioning/andor_data/20211210'
@@ -36,23 +38,35 @@ if __name__=='__main__':
     #zmqrec = StreamRecorder(name='zmqrec')
     #zmqrec.start() # removed for now
 
+    # polarization control
+    # the available values are : horizontal, circularpositive, circularnegative
+    # pol_ctrl = tango.DeviceProxy('B318A/CTL/ID-ENERGY-CTRL')
+    # pol_ctrl = TangoAttributeMotor(name='pol_ctrl', device='B318A/CTL/ID-ENERGY-CTRL', attribute='polarizationmode')
+    pol_ctrl = SoftiPolarizationCtrl(name='pol_ctrl', device='B318A/CTL/ID-ENERGY-CTRL')
+
     # motors
     finex = TangoMotor(device='PiezoPiE712/CTL/X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
     finey = TangoMotor(device='PiezoPiE712/CTL/Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
-    basex = DummyMotor(name='basex')
+
     # fine_dum = TangoMotor(device='B318A/CTL/DUMMY-01', name='fine_dum', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     osax = TangoMotor(device='motor/osa_ctrl/1', name='osax', user_format='%.3f', dial_format='%.3f', offset=0.83)
     osay = TangoMotor(device='motor/osa_ctrl/2', name='osay', user_format='%.3f', dial_format='%.3f', offset=0.32)
     beamline_energy = TangoMotor(device='B318A/CTL/BEAMLINE-ENERGY', name='beamline_energy', user_format='%.3f', dial_format='%.3f', dial_limits=(275, 1600))
 
-    # shutter = tango.DeviceProxy('B318A-EA01/CTL/GalilShutter')
+    shutter0 = SoftiPiezoShutter(device='B318A-EA01/CTL/PiezoShutter', name='shutter0')
+
+    #shutter = tango.DeviceProxy('B318A-EA01/CTL/PiezoShutter')
+    zp = tango.DeviceProxy('B318A-EA01/CTL/ZPEnergy')
+    zp_mot = TangoMotor(device='B318A-EA01/CTL/ZPEnergy', name='zp', user_format='%.3f', dial_format='%.3f', dial_limits=(-1300, -15000))
+    zp_E_mot = TangoAttributeMotor(name='zp_E_mot', device='B318A-EA01/CTL/ZPEnergy', attribute='Energy')
     
     #finex = TangoMotor(device='B318A/CTL/DUMMY-01', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
-
+ 
     # detectors
-    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=100)
-    panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0', frames_n=200)
+    n_frames = 50
+    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=n_frames)
+    panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0', frames_n=2*n_frames)
     det1 = DummyDetector(name='det1')
     
     #panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')
@@ -73,17 +87,16 @@ if __name__=='__main__':
      # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [andor, panda0, roi, abs_x, abs_y]:
+    for d in [andor, roi, abs_x, abs_y, panda0]:
         d.active = True
 
     def pre_scan_stuff(slf):
             andor.stop()
-            # shutter.Open()
+            shutter0.Open()
             time.sleep(0.2)
 
     def post_scan_stuff(slf):
-            pass
-            # shutter.Close()
+            shutter0.Close()
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
@@ -99,3 +112,6 @@ if __name__=='__main__':
         print('\nNote: inferring that the next scan number should be %u' % (last+1))
     except Exception as e:
         print(e)
+
+    print('\n\nThe current polarization mode is: ', pol_ctrl.get_polarization())
+    print('The beamline energy is: ', tango.DeviceProxy('B318A/CTL/BEAMLINE-ENERGY').Position)

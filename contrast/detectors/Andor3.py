@@ -2,6 +2,13 @@ import os
 import PyTango
 import datetime
 import time
+import logging as log
+log.basicConfig(filename='andor_log.txt',
+                filemode='w+',
+                format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                datefmt='%H:%M:%S',
+                level=log.DEBUG)
+
 if __name__ == '__main__':
     from contrast.detectors.Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
     from contrast.environment import env
@@ -90,23 +97,25 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
             return Link(self.saving_file , 'entry/instrument/andor', universal=True)
 
 
-class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
+class AndorSofti(Detector, BurstDetector):
     """
     Provides an interface to the Andor Zyla Tango DS at SoftiMAX
     """
 
-    def __init__(self, device='B318A-EA01/dia/andor-zyla-01', name=None, frames_n = None):
+    def __init__(self, device='B318A-EA01/dia/andor-zyla-01', name=None, frames_n=None):
         SoftwareLiveDetector.__init__(self)
         BurstDetector.__init__(self)
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
         self.proxy = PyTango.DeviceProxy(device)
         self.frames_n = frames_n
         self.file_path = env.paths.directory
+        log.debug(f'AndorSofti __init__() call.')
 
     def initialize(self):
         pass
 
     def prepare(self, acqtime, dataid, n_starts):
+        log.debug(f'Andor3 detector prepare() call with n_starts: {n_starts}.')
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -119,7 +128,7 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
         time_stamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
         # saving and paths
         if dataid is None:
-            # no saving
+            self.dataid = None
             self.burst_n = 1
             self.proxy.nTriggers = 1
             self.saving_file = f'andor_ct_{time_stamp}.h5'
@@ -144,6 +153,7 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
                 try:
                     self.cam_path = os.path.join(self.file_path, f'scan_{self.dataid:06d}_{self.name}')
                     os.umask(0)
+                    print(f'Attempting to create a new folder for the camera frames: {self.cam_path}')
                     os.makedirs(self.cam_path, mode=0o777)
                     print(f'Detector frames are written to: {self.cam_path}')
                     if os.path.exists(self.saving_file):
@@ -151,52 +161,61 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
                         raise Exception('%s h5 file already exists' % self.saving_file)
                     self.file_apndx = 0
                 except BaseException as e:
-                    print(e)
+                    print('prepare() exception: ', e)
 
         # arming and numbers of frames
         self.proxy.ExposureTime = acqtime
         if self.burst_n == 1:
             self.proxy.TriggerMode = 'SOFTWARE'
             self.proxy.nTriggers = n_starts
+
+        self.frames_expected = 0
+
+    def arm(self):
+        log.debug(f'Andor3 detector arm() call.')
+        while self.busy():
+            time.sleep(0.01)
+        if self.burst_n == 1:
             self.proxy.Arm()
             print('Armed in SOFTWARE trigger mode for a single trigger.')
-        else:
-            print(f'Armed in INTERNAL trigger mode, burst_n : {self.burst_n}')
+            log.debug(f'Armed in SOFTWARE trigger mode for a single trigger.')
+        elif self.burst_n > 1:
+            log.debug(f'Armed in INTERNAL trigger mode, burst_n : {self.burst_n}')
             self.proxy.TriggerMode = 'INTERNAL'
             self.point_n_apndx = 0 
             self.proxy.nTriggers = self.burst_n
-        self.frames_expected = 0
-        #
-
-    def arm(self):
-        while self.busy():
-            continue
-        if self.burst_n != 1:
-            pass
 
     def start(self):
+        log.debug(f'Andor3 detector start() call.')
         while self.busy():
-            continue
+            print('Detector is busy at start().')
+            log.debug(f'Andor3 detector start() call, but detector is busy. Andor3 detector state is {self.proxy.State()}')
         try:
             if self.burst_n == 1:
-                self.proxy.SoftwareTrigger()
                 if self.dataid:
                     self.frames_expected += 1
+                else:
+                    self.frames_expected += 1
+                self.proxy.SoftwareTrigger()
             else:
-                fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
-                self.saving_file = os.path.join(self.cam_path, fn)
-                if os.path.exists(self.saving_file):
-                    print('%s: this h5 file exists, I am raising an error now'%self.name)
-                    raise Exception('%s h5 file already exists' % self.name)
-                self.proxy.DestinationFilename = self.saving_file
-                self.file_apndx += 1
-                self.frames_expected += self.burst_n
-                self.proxy.Arm()
-                self.proxy.start()
-        except BaseException as e:
-            print(e)
+                if self.dataid:
+                    fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
+                    self.saving_file = os.path.join(self.cam_path, fn)
+                    if os.path.exists(self.saving_file):
+                        print('%s: this h5 file exists, I am raising an exception now..' % self.name)
+                        log.debug(f'{self.name}: this h5 file exists, I am raising an exception now.')
+                        raise Exception('%s h5 file already exists' % self.name)
+                    self.proxy.DestinationFilename = self.saving_file
+                    self.file_apndx += 1
+                    self.frames_expected += self.burst_n
+                    self.proxy.Arm()
+                else:
+                    print('No dataid')
+        except AttributeError as e:
+            print('start() exception: ', e)
 
     def stop(self):
+        log.debug('Andor3 detector stop() call.')
         self.proxy.Stop()
 
     def busy(self):
@@ -212,6 +231,7 @@ class AndorSofti(Detector, SoftwareLiveDetector, BurstDetector):
             return True
 
     def read(self):
+        log.debug('Andor3 detector read() call.')
         if self.saving_file == '':
             return None
         else:

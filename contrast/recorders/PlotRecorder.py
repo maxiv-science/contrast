@@ -193,7 +193,7 @@ class PlotRecorderMesh(Recorder):
         self.y_range_max =  float(self.ydata_param[1]) + self.y_lim_pad
 
         self.fig_dpi = self.fig.dpi
-        self.mrk_size = (self.ax.get_window_extent().width / self.x_array_size * 72. / self.fig_dpi) ** 2
+        self.mrk_size = 1.3*(self.ax.get_window_extent().width / self.x_array_size * 72. / self.fig_dpi) ** 2
         print(f'self.mrk_size: {self.mrk_size}')
         
 

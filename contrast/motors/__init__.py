@@ -8,6 +8,7 @@ everywhere.
 
 from .Motor import Motor, DummyMotor, MotorMemorizer, MotorBookmark
 from .PseudoMotor import PseudoMotor, ExamplePseudoMotor
+from .SoftiPiezoShutter import SoftiPiezoShutter, SoftiPolarizationCtrl, night_scan
 
 def all_are_motors(seq):
     """
