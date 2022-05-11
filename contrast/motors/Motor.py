@@ -61,9 +61,9 @@ class Motor(Gadget):
         if None not in (_uplim, _lowlim):
             l1 = _lowlim * self._scaling + self._offset
             l2 = _uplim * self._scaling + self._offset
+            return tuple(sorted([l1, l2]))
         else:
-            l1, l2 = None, None
-        return tuple(sorted([l1, l2]))
+            return (None, None)
 
     @user_limits.setter
     def user_limits(self, lims):
@@ -87,7 +87,7 @@ class Motor(Gadget):
             raise Exception('Motor is busy')
         dial = (pos - self._offset) / self._scaling
         try:
-            _lowlim, _uplim = self.dial_position
+            _lowlim, _uplim = self.dial_limits
             assert dial <= _uplim
             assert dial >= _lowlim
         except AssertionError:
