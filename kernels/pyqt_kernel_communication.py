@@ -21,7 +21,11 @@ class Client(QThread):
         cf = find_connection_file()
         client = BlockingKernelClient(connection_file=cf)
         client.load_connection_file()
-        client.start_channels()
+        client.start_channels(shell=False,
+                              iopub=True,
+                              stdin=False,
+                              control=False,
+                              hb=False)
         while True:
             msg = client.get_iopub_msg()
             self.received.emit(msg)

@@ -33,7 +33,11 @@ class Client(Thread):
         cf = find_connection_file()
         client = BlockingKernelClient(connection_file=cf)
         client.load_connection_file()
-        client.start_channels()
+        client.start_channels(shell=False,
+                              iopub=True,
+                              stdin=False,
+                              control=True,
+                              hb=False)
         while True:
             try:
                 msg = client.get_iopub_msg(TIMEOUT)
