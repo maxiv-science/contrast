@@ -198,19 +198,16 @@ class AndorSofti(Detector, BurstDetector):
                     self.frames_expected += 1
                 self.proxy.SoftwareTrigger()
             else:
-                if self.dataid:
-                    fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
-                    self.saving_file = os.path.join(self.cam_path, fn)
-                    if os.path.exists(self.saving_file):
-                        print('%s: this h5 file exists, I am raising an exception now..' % self.name)
-                        log.debug(f'{self.name}: this h5 file exists, I am raising an exception now.')
-                        raise Exception('%s h5 file already exists' % self.name)
-                    self.proxy.DestinationFilename = self.saving_file
-                    self.file_apndx += 1
-                    self.frames_expected += self.burst_n
-                    self.proxy.Arm()
-                else:
-                    print('No dataid')
+                fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
+                self.saving_file = os.path.join(self.cam_path, fn)
+                if os.path.exists(self.saving_file):
+                    print('%s: this h5 file exists, I am raising an exception now..' % self.name)
+                    log.debug(f'{self.name}: this h5 file exists, I am raising an exception now.')
+                    raise Exception('%s h5 file already exists' % self.name)
+                self.proxy.DestinationFilename = self.saving_file
+                self.file_apndx += 1
+                self.frames_expected += self.burst_n
+                self.proxy.Arm()
         except AttributeError as e:
             print('start() exception: ', e)
 
