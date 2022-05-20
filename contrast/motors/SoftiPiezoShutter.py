@@ -77,17 +77,32 @@ class night_scan(object):
             # print('mv beamline_energy 776.0')
             # self.shutter.Close()
 
-            runCommand('mesh finex 8.5 10 100 finey -0.8 -0.2 40 0.02')
-            runCommand('mesh finex 8.5 10 100 finey -1.4 -0.8 40 0.02')
+            #================define energies====================
+            energies = [926.0, 928.0, 932.0, 933.3, 937.1, 940.8]
 
-            self.pol_ctrl.set_polarization('circularpositive')
-            print('self.pol_ctrl.polarizationmode', self.pol_ctrl.get_polarization())
-            runCommand('mv beamline_energy 776.2')
+            # ===================== scan ==================
+            #runCommand('mesh finex -5 5 12 finey -10 0 12 0.1')
+            for val in energies:
+                # ===================== beamline energy ==================
+                print('mv beamline_energy', val)
+                runCommand('mv beamline_energy '+str(val))
+                print("mv zp_E too...")
+                runCommand('mv zp_E_mot '+str(val))
+
+                # ===================== scan ==================
+                runCommand('mesh finex -5 5 12 finey -10 0 12 0.1')
+            
+            
+            
+            #elf.pol_ctrl.set_polarization('circularpositive')
+            
+            #print('self.pol_ctrl.polarizationmode', self.pol_ctrl.get_polarization())
+            #runCommand('mv beamline_energy 776.2')
             # print('mv zp_E_mot 776.0')
             # self.shutter.Close()
 
-            runCommand('mesh finex 8.5 10 100 finey -0.8 -0.2 40 0.02')
-            runCommand('mesh finex 8.5 10 100 finey -1.4 -0.8 40 0.02')
+            #runCommand('mesh finex 8.5 10 100 finey -0.8 -0.2 40 0.02')
+            #runCommand('mesh finex 8.5 10 100 finey -1.4 -0.8 40 0.02')
 
             
 

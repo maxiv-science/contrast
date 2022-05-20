@@ -10,7 +10,8 @@ if __name__=='__main__':
     import time
     import contrast
     import tango
-    from contrast.environment import env
+    import signal
+    from contrast.environment import env, runCommand
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.detectors.PandaBoxSofti import PandaBoxSoftiPtycho, PandaBox0D
@@ -64,8 +65,8 @@ if __name__=='__main__':
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
  
     # detectors
-    n_frames = 20
-    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', frames_n=n_frames)
+    n_frames = 2
+    andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', shutter=shutter0, frames_n=n_frames)
     panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0', frames_n=2*n_frames)
     det1 = DummyDetector(name='det1')
     
@@ -97,6 +98,7 @@ if __name__=='__main__':
 
     def post_scan_stuff(slf):
             shutter0.Close()
+            signal.alarm(0)
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
