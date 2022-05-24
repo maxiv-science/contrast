@@ -112,6 +112,7 @@ class AndorSofti(Detector, BurstDetector):
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
         self.proxy = PyTango.DeviceProxy(device)
         self.frames_n = frames_n
+        self.frames_expected = 0
         self.file_path = env.paths.directory
         self.shutter = shutter
         log.debug(f'AndorSofti __init__() call.')
@@ -252,20 +253,13 @@ class AndorSofti(Detector, BurstDetector):
             print('Problem closing the shutter')
         signal.alarm(0)
 
-    # def _check_running(self):
-    #     st = self.proxy.State()
-    #     if st == PyTango.DevState.RUNNING and (self.proxy.nFramesAcquired == self.frames_expected):
-    #         return False
-    #     else:
-    #         return True
-
     def _busy_handler(self, signum, frame):
         print('The camera is busy for too long, raising an exception!')
         raise CameraBusyException('Camera is busy for too long, possibly missed frame!')
 
     def busy(self):
         st = self.proxy.State()
-        if self.proxy.nFramesAcquired != self.frames_expected:
+        if self.frames_expected > 0 and self.proxy.nFramesAcquired != self.frames_expected:
             return True
         elif st in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
             return False
