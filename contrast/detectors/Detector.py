@@ -246,7 +246,7 @@ class DetectorGroup(object):
         for d in self:
             d.arm()
 
-    def start(self, trials=1, trial_delay=1.):
+    def start(self, trials=1, trial_delay=65.):
         """
         Starts all constituent devices.
         """

@@ -11,20 +11,21 @@ import numpy as np
 
 # energy interval with start, stop and step
 
-# energies = np.arange(920, 930.5, 0.5)
+energies = np.arange(935.6, 945.8, 0.8)
 # here, if you want the stop to be 930, make sure to add
 # another step (i.e. 930.5)
 
 # =========================================================================
-
+'''
 # energy list with an offset
-energies = [926.0, 928.0, 932.0, 933.3, 937.1, 940.8]
 
-offset = 0.4 # uncomment this if you want an offset
+energies = [926.0, 928.0, 930.7, 932.0, 933.3, 937.1, 940.8]
+
+offset = -0.65 # uncomment this if you want an offset
 
 for i in range(len(energies)):
     energies[i] += offset
-
+'''
 # ==========energy stack===================================================
 '''
 energy_1 = np.arange(925, 929.8, 0.8)  # add an extra step at the stop point
@@ -32,9 +33,8 @@ energy_2 = np.arange(929.4, 935.3, 0.3)  # to make the list 'inclusive'
 energy_3 = np.arange(935.4, 945.8, 0.8)
 
 energies = [*energy_1, *energy_2, *energy_3]
-'''
-'''
-offset = 0.4  # uncomment this if you want an offset
+
+offset = -0.65  # uncomment this if you want an offset
 
 for i in range(len(energies)):
     energies[i] += offset
@@ -45,7 +45,6 @@ for i in range(len(energies)):
 scan = 'mesh finex -1 1 20 finey -1 1 20 0.02 jitter=0.01 ptycho=True'
 
 # =======================================
-
 
 for val in energies:
     try:
@@ -61,8 +60,8 @@ for val in energies:
 
         print(f"runCommand({scan})")
         time.sleep(3)       
-    
-    except:
-        print("Some error... Closing the shutter.")
-        shutter0.Close()
 
+    except BaseException as e:
+        print("Some error...", e)
+        print('Closing the shutter.')
+        shutter0.Close()

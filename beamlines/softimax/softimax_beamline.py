@@ -65,7 +65,7 @@ if __name__=='__main__':
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
  
     # detectors
-    n_frames = 2
+    n_frames = 20
     andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', shutter=shutter0, frames_n=n_frames)
     panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0', frames_n=2*n_frames)
     det1 = DummyDetector(name='det1')

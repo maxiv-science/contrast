@@ -108,7 +108,6 @@ class AndorSofti(Detector, BurstDetector):
     """
 
     def __init__(self, device='B318A-EA01/dia/andor-zyla-01', name=None, shutter=None, frames_n=None):
-        SoftwareLiveDetector.__init__(self)
         BurstDetector.__init__(self)
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
         self.proxy = PyTango.DeviceProxy(device)
@@ -119,10 +118,12 @@ class AndorSofti(Detector, BurstDetector):
         signal.signal(signal.SIGALRM, self._busy_handler)
 
     def initialize(self):
-        pass
+        log.debug(f'Andor3 detector initialize() call.')
 
     def prepare(self, acqtime, dataid, n_starts):
-        log.debug(f'Andor3 detector prepare() call with n_starts: {n_starts}.')
+        if n_starts:
+            self.n_starts = n_starts
+            log.debug(f'Andor3 detector prepare() call with n_starts: {n_starts}.')
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -132,7 +133,6 @@ class AndorSofti(Detector, BurstDetector):
         if self.frames_n:
             self.burst_n = self.frames_n
 
-        print('Set number of frames: ', self.burst_n)
         time_stamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
         # saving and paths
         if dataid is None:
@@ -158,7 +158,7 @@ class AndorSofti(Detector, BurstDetector):
                     print('%s: this h5 file exists, I am raising an error now'%self.name)
                     raise Exception('%s h5 file already exists' % self.name)
                 self.proxy.DestinationFilename = self.saving_file
-            else:
+            elif self.burst_n > 1:
                 try:
                     self.cam_path = os.path.join(self.file_path, f'scan_{self.dataid:06d}_{self.name}')
                     os.umask(0)
@@ -177,10 +177,10 @@ class AndorSofti(Detector, BurstDetector):
         if self.burst_n == 1:
             self.proxy.TriggerMode = 'SOFTWARE'
             self.proxy.nTriggers = 1
-            self.frames_expected = 1
             print('Preparation is done for a single software trigger, self.proxy.nTriggers: ', self.proxy.nTriggers)
-        else:
-            self.frames_expected = 0
+        elif self.burst_n > 1:
+            self.proxy.TriggerMode = 'INTERNAL'
+            self.proxy.nTriggers = self.burst_n
             print('Detector preaparation done.')
 
     def arm(self):
@@ -193,33 +193,30 @@ class AndorSofti(Detector, BurstDetector):
             self.frames_expected += 1
 
         if self.burst_n == 1:
-            self.proxy.TriggerMode = 'SOFTWARE'
+            self.frames_expected = 1
             self.proxy.Arm()
             print('Armed in SOFTWARE trigger mode for a single trigger.')
             log.debug(f'Armed in SOFTWARE trigger mode for a single trigger.')
         elif self.burst_n > 1:
-            log.debug(f'Armed in INTERNAL trigger mode, burst_n : {self.burst_n}')
-            self.proxy.TriggerMode = 'INTERNAL'
+            log.debug(f'Prepearing to measure in INTERNAL trigger mode, burst_n: {self.burst_n}')
             self.point_n_apndx = 0 
-            self.proxy.nTriggers = self.burst_n
+            self.frames_expected = self.burst_n
 
     def start(self):
         log.debug(f'Andor3 detector start() call.')
         signal.alarm(60)
-        # while self.busy():
-        #     print('Detector is busy at start().')
-        #     log.debug(f'Andor3 detector start() call, but detector is busy. Andor3 detector state is {self.proxy.State()}')
-        if self.shutter:
-            self.shutter.Open()
+
+        try:
+            if self.shutter:
+                self.shutter.Open()
+        except BaseException as e:
+            print('Problem openning the shutter')
+
         try:
             if self.burst_n == 1:
-                if self.dataid:
-                    self.frames_expected += 1
-                else:
-                    self.frames_expected += 1
                 print('Before the software trig.')
                 self.proxy.SoftwareTrigger()
-            else:
+            elif self.burst_n > 1:
                 fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
                 self.saving_file = os.path.join(self.cam_path, fn)
                 if os.path.exists(self.saving_file):
@@ -228,23 +225,39 @@ class AndorSofti(Detector, BurstDetector):
                     raise Exception('%s h5 file already exists' % self.name)
                 self.proxy.DestinationFilename = self.saving_file
                 self.file_apndx += 1
-                self.frames_expected += self.burst_n
+                log.debug(f'Andor3 detector arming from start() call.')
                 self.proxy.Arm()
         except AttributeError as e:
-            print('start() exception: ', e)
+            print('start() AttributeError exception: ', e)
+        except CameraBusyException as e:
+            print('Incrementing the self.frames_expected.')
+            self.frames_expected += 1
+        except BaseException as e:
+            print('BaseException in detector start()', e)
+            print('self.frames_expected: ', self.frames_expected)
+            print('self.burst_n: ', self.burst_n)
+            log.debug(f'BaseException in detector start(): {e}')
+            log.debug(f'self.frames_expected: {self.frames_expected}')
+            log.debug(f'self.burst_n: {self.burst_n}')
+            log.debug(f'self.proxy.nFramesAcquired: {self.proxy.nFramesAcquired}')
+            log.debug(f'self.proxy.State(): {self.proxy.State()}')
 
     def stop(self):
         log.debug('Andor3 detector stop() call.')
         self.proxy.Stop()
-        if self.shutter:
-            self.shutter.Close()
+        try:
+            if self.shutter:
+                self.shutter.Close()
+        except BaseException as e:
+            print('Problem closing the shutter')
         signal.alarm(0)
 
-    def _check_running(self):
-        if PyTango.DevState.RUNNING and (self.proxy.nFramesAcquired == self.frames_expected):
-            return False
-        else:
-            return True
+    # def _check_running(self):
+    #     st = self.proxy.State()
+    #     if st == PyTango.DevState.RUNNING and (self.proxy.nFramesAcquired == self.frames_expected):
+    #         return False
+    #     else:
+    #         return True
 
     def _busy_handler(self, signum, frame):
         print('The camera is busy for too long, raising an exception!')
@@ -252,21 +265,25 @@ class AndorSofti(Detector, BurstDetector):
 
     def busy(self):
         st = self.proxy.State()
-        if st == PyTango.DevState.RUNNING and self.burst_n != 1:
+        if self.proxy.nFramesAcquired != self.frames_expected:
             return True
-        if st in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
+        elif st in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
             return False
-        elif not self._check_running():
-            return False
-        # elif st == PyTango.DevState.RUNNING:
-        #     if self.proxy.nFramesAcquired == self.frames_expected:
-        #         return False
+        elif self.burst_n != 1 and st == PyTango.DevState.RUNNING:
+            return True
+        elif st == PyTango.DevState.RUNNING:
+            if self.proxy.nFramesAcquired == self.frames_expected:
+                return False
         else:
             return True
 
     def read(self):
-        if self.shutter:
-            self.shutter.Close()
+        try:
+            if self.shutter:
+                self.shutter.Close()
+        except BaseException as e:
+            print('Problem closing the shutter')
+
         log.debug('Andor3 detector read() call.')
         if self.saving_file == '':
             return None

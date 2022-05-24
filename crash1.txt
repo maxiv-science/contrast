@@ -1,0 +1,173 @@
+10:44:15,378 root DEBUG BaseException in detector start(): DevFailed[
+DevError[
+    desc = Exception: Could not check validity of give path...
+           HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+           
+  origin = Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 421, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 416, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib64/python3.6/http/client.py", line 1346, in getresponse
+    response.begin()
+  File "/usr/lib64/python3.6/http/client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib64/python3.6/http/client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib64/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+socket.timeout: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 438, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/util/retry.py", line 400, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/six.py", line 703, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 423, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 331, in _raise_timeout
+    self, url, "Read timed out. (read timeout=%s)" % timeout_value
+requests.packages.urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/lib_maxiv_station_client/station_client.py", line 48, in is_path_valid
+    path_response = self._get("/check-path?path=%s" %path)
+  File "/usr/lib/python3.6/site-packages/lib_maxiv_station_client/station_client.py", line 78, in _get
+    response = requests.get(url, timeout=2.5)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 530, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 651, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 514, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib64/python3.6/site-packages/tango/server.py", line 191, in write_attr
+    return get_worker().execute(write_method, self, value)
+  File "/usr/lib64/python3.6/site-packages/tango/green.py", line 98, in execute
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3.6/site-packages/dev_maxiv_andor3/Andor3.py", line 687, in set_DestinationFilename
+    response = self._daq_client.is_path_valid(value)
+  File "/usr/lib/python3.6/site-packages/lib_maxiv_station_client/station_client.py", line 59, in is_path_valid
+    raise Exception(message)
+Exception: Could not check validity of give path...
+HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+
+  reason = PyDs_PythonError
+severity = ERR]
+
+DevError[
+    desc = Failed to write_attribute on device b318a-ea01/dia/andor-zyla-01, attribute DestinationFilename
+  origin = DeviceProxy::write_attribute()
+  reason = API_AttributeFailed
+severity = ERR]
+]
+10:44:15,379 root DEBUG self.frames_expected: 22220
+10:44:15,379 root DEBUG self.burst_n: 20
+10:44:15,483 root DEBUG self.proxy.nFramesAcquired: 20
+10:44:15,523 root DEBUG self.proxy.State(): STANDBY
+
+10:44:15,378 root DEBUG BaseException in detector start(): DevFailed[
+DevError[
+    desc = Exception: Could not check validity of give path...
+           HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+           
+  origin = Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 421, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 416, in _make_request
+    httplib_response = conn.getresponse()
+  File "/usr/lib64/python3.6/http/client.py", line 1346, in getresponse
+    response.begin()
+  File "/usr/lib64/python3.6/http/client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "/usr/lib64/python3.6/http/client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "/usr/lib64/python3.6/socket.py", line 586, in readinto
+    return self._sock.recv_into(b)
+socket.timeout: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 438, in send
+    timeout=timeout
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/util/retry.py", line 400, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "/usr/lib/python3.6/site-packages/six.py", line 703, in reraise
+    raise value
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 423, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/usr/lib/python3.6/site-packages/requests/packages/urllib3/connectionpool.py", line 331, in _raise_timeout
+    self, url, "Read timed out. (read timeout=%s)" % timeout_value
+requests.packages.urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.6/site-packages/lib_maxiv_station_client/station_client.py", line 48, in is_path_valid
+    path_response = self._get("/check-path?path=%s" %path)
+  File "/usr/lib/python3.6/site-packages/lib_maxiv_station_client/station_client.py", line 78, in _get
+    response = requests.get(url, timeout=2.5)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 530, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/sessions.py", line 651, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3.6/site-packages/requests/adapters.py", line 514, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib64/python3.6/site-packages/tango/server.py", line 191, in write_attr
+    return get_worker().execute(write_method, self, value)
+  File "/usr/lib64/python3.6/site-packages/tango/green.py", line 98, in execute
+    return fn(*args, **kwargs)
+  File "/usr/lib/python3.6/site-packages/dev_maxiv_andor3/Andor3.py", line 687, in set_DestinationFilename
+    response = self._daq_client.is_path_valid(value)
+  File "/usr/lib/python3.6/site-packages/lib_maxiv_station_client/station_client.py", line 59, in is_path_valid
+    raise Exception(message)
+Exception: Could not check validity of give path...
+HTTPConnectionPool(host='softimax-xzyla-andor3-daq.daq.maxiv.lu.se', port=80): Read timed out. (read timeout=2.5)
+
+  reason = PyDs_PythonError
+severity = ERR]
+
+DevError[
+    desc = Failed to write_attribute on device b318a-ea01/dia/andor-zyla-01, attribute DestinationFilename
+  origin = DeviceProxy::write_attribute()
+  reason = API_AttributeFailed
+severity = ERR]
+]
+10:44:15,379 root DEBUG self.frames_expected: 22220
+10:44:15,379 root DEBUG self.burst_n: 20
+10:44:15,483 root DEBUG self.proxy.nFramesAcquired: 20
+10:44:15,523 root DEBUG self.proxy.State(): STANDBY
