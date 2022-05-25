@@ -112,4 +112,4 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector,
         if self.saving_file == '':
             return None
         else:
-            return Link(self.saving_file, '/', universal=True)
+            return Link(self.saving_file, '/entry/instrument/xspress3/', universal=True)
