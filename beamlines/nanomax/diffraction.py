@@ -126,27 +126,28 @@ if __name__ == '__main__':
     pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3)
     pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3)
     # controller 2
-    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
-    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
-    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=1)
-    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3)
-    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=1)
-    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3)
+    # DBPM motors disabled for now due to faulty module
+    # dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
+    # dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
+    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='seh_top', userlevel=3)
+    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='seh_bottom', userlevel=3)
+    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='seh_left', userlevel=3)
+    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='seh_right', userlevel=3)
     attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2)
-    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2)
+    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='attenuator2_x', userlevel=2)
     attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
-    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
+    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='attenuator4_x', userlevel=2)
     # fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
-    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
-    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2)
-    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2)
-    pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='diode1_x', userlevel=3)
+    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='pol_x', userlevel=2)
+    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='pol_y', userlevel=2)
+    pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
     
     ## controller 3
     # stages removed from DM4
-    #diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)
-    #diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)
-    #diode2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='diode2_x', userlevel=3)
+    xeol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='xeol_x', userlevel=1, velocity=1000)
+    xeol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='xeol_y', userlevel=1, scaling=-1, velocity=1000)
+    xeol_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='xeol_z', userlevel=1, scaling=-1, velocity=1000)
 
     # controller 4 in OH2 for fast shutter and first diamondBPM
     fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)
