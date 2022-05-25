@@ -147,7 +147,8 @@ if __name__ == '__main__':
     #dummy2 = DummyMotor(name='dummy2', userlevel=2)
     
     # detectors
-    eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
+    eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
+    eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
 
