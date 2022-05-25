@@ -130,6 +130,6 @@ class NpointFlyscan(Mesh):
                 time.sleep(.1)
 
     def _while_acquiring(self):
-        s = '%.2f um' % self.fastmotor.user_position
+        s = '%.3f um' % self.fastmotor.user_position
         print(s + '\r', end='')
-        time.sleep(.05)
+        time.sleep(.1)
