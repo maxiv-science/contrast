@@ -148,7 +148,7 @@ if __name__ == '__main__':
     
     # detectors
     eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
-    x3m = Xspress3(name='x3m', device='staff/alebjo/xspress3mini')
+    x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
 
     # The pandabox and some related pseudodetectors
