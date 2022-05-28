@@ -25,6 +25,7 @@ if __name__ == '__main__':
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector, PseudoDetector
+    from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
     from macros_common import *
     from macros_img import *
@@ -151,6 +152,12 @@ if __name__ == '__main__':
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    #oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
+    #topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
+    #E01cam01 = BaslerCamera(name='E01cam01', device='basler/e01-cam-01/main')
+    #E01cam02 = BaslerCamera(name='E01cam02', device='basler/e01-cam-02/main')
+    #E01cam03 = BaslerCamera(name='E01cam03', device='basler/e01-cam-03/main')
+    #E01cam04 = BaslerCamera(name='E01cam04', device='basler/e01-cam-04/main')
 
     # The pandabox and some related pseudodetectors
     # Pandabox at the diffraction station, which is needed for controlling the fast shutter

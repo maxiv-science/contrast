@@ -30,6 +30,7 @@ if __name__ == '__main__':
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
+    from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
     from macros_common import *
     from macros_diff import *
@@ -145,9 +146,9 @@ if __name__ == '__main__':
     
     ## controller 3
     # stages removed from DM4
-    xeol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='xeol_x', userlevel=1, velocity=1000)
-    xeol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='xeol_y', userlevel=1, scaling=-1, velocity=1000)
-    xeol_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='xeol_z', userlevel=1, scaling=-1, velocity=1000)
+    #xeol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='xeol_x', userlevel=1, velocity=1000)
+    #xeol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='xeol_y', userlevel=1, scaling=-1, velocity=1000)
+    #xeol_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='xeol_z', userlevel=1, scaling=-1, velocity=1000)
 
     # controller 4 in OH2 for fast shutter and first diamondBPM
     fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)
@@ -239,6 +240,12 @@ if __name__ == '__main__':
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
+    oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
+    topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
+    #E01cam01 = BaslerCamera(name='E01cam01', device='basler/e01-cam-01/main')
+    #E01cam02 = BaslerCamera(name='E01cam02', device='basler/e01-cam-02/main')
+    #E01cam03 = BaslerCamera(name='E01cam03', device='basler/e01-cam-03/main')
+    #E01cam04 = BaslerCamera(name='E01cam04', device='basler/e01-cam-04/main')
 
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')

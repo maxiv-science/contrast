@@ -23,7 +23,7 @@ class BaslerCamera(Detector):
         try:
             self.dev.Arm() # this will fail if the camera is running already
         except:
-            print("[!] camera is already running")
+            print(f"[!] camera {self.name} is already running")
         self.cf = CodecFactory()
 
     def prepare(self, acqtime, dataid, n_starts):
@@ -46,6 +46,7 @@ class BaslerCamera(Detector):
         pass
 
     def read(self):
+        ret = {}
         for i in range(3):
             # fet the last image acquired by the microscope
             try:
@@ -66,6 +67,7 @@ class BaslerCamera(Detector):
                 break
             else:
                 print("[!] failed frame, taking another one")
-        return image 
+        ret['frames'] = np.array([image]) 
+        return ret
 
 
