@@ -112,6 +112,7 @@ class AndorSofti(Detector, BurstDetector):
         Detector.__init__(self, name=name) # last so that initialize() can overwrite parent defaults
         self.proxy = PyTango.DeviceProxy(device)
         self.frames_n = frames_n
+        self._frames_acquired = 0
         self.frames_expected = 0
         self.file_path = env.paths.directory
         self.shutter = shutter
@@ -125,11 +126,12 @@ class AndorSofti(Detector, BurstDetector):
         if n_starts:
             self.n_starts = n_starts
             log.debug(f'Andor3 detector prepare() call with n_starts: {n_starts}.')
+            print(f'Andor3 detector prepare() call with n_starts: {n_starts}.')
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
         self.saving_file = ''
-        self.proxy.Stop()
+        self.stop()
 
         if self.frames_n:
             self.burst_n = self.frames_n
@@ -150,7 +152,6 @@ class AndorSofti(Detector, BurstDetector):
             # saving
             self.dataid = dataid
             if self.burst_n == 1:
-                self.proxy.nTriggers = 1
                 # saving
                 path = env.paths.directory
                 fn = 'scan_%06d_%s.h5' % (dataid, self.name)
@@ -177,26 +178,28 @@ class AndorSofti(Detector, BurstDetector):
         self.proxy.ExposureTime = acqtime
         if self.burst_n == 1:
             self.proxy.TriggerMode = 'SOFTWARE'
-            self.proxy.nTriggers = 1
-            print('Preparation is done for a single software trigger, self.proxy.nTriggers: ', self.proxy.nTriggers)
+            self.proxy.nTriggers = n_starts
+            self.frames_expected = 1
+            self._frames_acquired = 0
+            print(f'Preparation is done for a single SOFTWARE trigger, {self.proxy.nTriggers=}')
         elif self.burst_n > 1:
             self.proxy.TriggerMode = 'INTERNAL'
             self.proxy.nTriggers = self.burst_n
-            print('Detector preaparation done.')
+            print('Detector preaparation done for INTERNAL mode.')
 
     def arm(self):
         log.debug(f'Andor3 detector arm() call.')
+        # print(f'Just before arming: {self._frames_acquired=}, {self.frames_expected=}')
         try:
             while self.busy():
                 time.sleep(0.01)
         except CameraBusyException as e:
-            print('Incrementing the self.frames_expected.')
-            self.frames_expected += 1
+            print('Incrementing the self._frames_acquired.')
+            self._frames_acquired += 1
 
-        if self.burst_n == 1:
-            self.frames_expected = 1
+        if self.burst_n == 1 and self._frames_acquired < 1:
             self.proxy.Arm()
-            print('Armed in SOFTWARE trigger mode for a single trigger.')
+            print(f'Armed in SOFTWARE trigger mode for a single trigger, {self.proxy.State()=}')
             log.debug(f'Armed in SOFTWARE trigger mode for a single trigger.')
         elif self.burst_n > 1:
             log.debug(f'Prepearing to measure in INTERNAL trigger mode, burst_n: {self.burst_n}')
@@ -214,8 +217,15 @@ class AndorSofti(Detector, BurstDetector):
             print('Problem openning the shutter')
 
         try:
+            while self.busy():
+                time.sleep(0.01)
+        except CameraBusyException as e:
+            print('Incrementing the self._frames_acquired.')
+            self._frames_acquired += 1
+
+        try:
             if self.burst_n == 1:
-                print('Before the software trig.')
+                #print('Before the software trig.')
                 self.proxy.SoftwareTrigger()
             elif self.burst_n > 1:
                 fn = 'scan_%06d_%s_%s.h5' % (self.dataid, self.name, self.file_apndx)
@@ -231,8 +241,8 @@ class AndorSofti(Detector, BurstDetector):
         except AttributeError as e:
             print('start() AttributeError exception: ', e)
         except CameraBusyException as e:
-            print('Incrementing the self.frames_expected.')
-            self.frames_expected += 1
+            print('Incrementing the self._frames_acquired.')
+            self._frames_acquired += 1
         except BaseException as e:
             print('BaseException in detector start()', e)
             print('self.frames_expected: ', self.frames_expected)
@@ -246,6 +256,8 @@ class AndorSofti(Detector, BurstDetector):
     def stop(self):
         log.debug('Andor3 detector stop() call.')
         self.proxy.Stop()
+        self.frames_expected = 0
+        self._frames_acquired = 0
         try:
             if self.shutter:
                 self.shutter.Close()
@@ -259,19 +271,23 @@ class AndorSofti(Detector, BurstDetector):
 
     def busy(self):
         st = self.proxy.State()
-        if self.frames_expected > 0 and self.proxy.nFramesAcquired != self.frames_expected:
+        #print(f'Checking the state in busy(), {st=}')
+        if st == PyTango.DevState.MOVING:
             return True
-        elif st in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
-            return False
         elif self.burst_n != 1 and st == PyTango.DevState.RUNNING:
             return True
         elif st == PyTango.DevState.RUNNING:
+            #print(f'In busy() while RUNNING, {self.proxy.nFramesAcquired=}, {self.frames_expected=}')
             if self.proxy.nFramesAcquired == self.frames_expected:
                 return False
+        elif st in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
+            return False
         else:
             return True
 
     def read(self):
+        self._frames_acquired += 1
+        self.frames_expected += 1
         try:
             if self.shutter:
                 self.shutter.Close()
@@ -279,6 +295,7 @@ class AndorSofti(Detector, BurstDetector):
             print('Problem closing the shutter')
 
         log.debug('Andor3 detector read() call.')
+        #print('Andor3 detector read() call.')
         if self.saving_file == '':
             return None
         else:

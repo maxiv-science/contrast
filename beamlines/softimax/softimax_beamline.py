@@ -46,8 +46,11 @@ if __name__=='__main__':
     pol_ctrl = SoftiPolarizationCtrl(name='pol_ctrl', device='B318A/CTL/ID-ENERGY-CTRL')
 
     # motors
-    finex = TangoMotor(device='PiezoPiE712/CTL/X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
-    finey = TangoMotor(device='PiezoPiE712/CTL/Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
+    # finex = TangoMotor(device='PiezoPiE712/CTL/X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
+    # finey = TangoMotor(device='PiezoPiE712/CTL/Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
+
+    finex = TangoMotor(device='B318A-EA01/CTL/PI_X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(-50, 50), offset=0, scaling=1)
+    finey = TangoMotor(device='B318A-EA01/CTL/PI_Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(-50, 50), offset=0, scaling=1)
 
     # fine_dum = TangoMotor(device='B318A/CTL/DUMMY-01', name='fine_dum', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     osax = TangoMotor(device='motor/osa_ctrl/1', name='osax', user_format='%.3f', dial_format='%.3f', offset=0.83)
@@ -65,7 +68,7 @@ if __name__=='__main__':
     #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
  
     # detectors
-    n_frames = 20
+    n_frames = 1
     andor = AndorSofti(device='B318A-EA01/dia/andor-zyla-01', name='andor', shutter=shutter0, frames_n=n_frames)
     panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0', frames_n=2*n_frames)
     det1 = DummyDetector(name='det1')

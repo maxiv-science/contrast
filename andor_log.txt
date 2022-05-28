@@ -1,11 +1,428 @@
-14:35:01,961 root DEBUG Andor3 detector initialize() call.
-14:35:01,965 root DEBUG AndorSofti __init__() call.
-14:35:39,988 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/environment/__init__.py
-14:35:40,116 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/.conda/envs/contrast-dev/lib/python3.8/site-packages/jedi/third_party/typeshed/stdlib/3/builtins.pyi
-14:35:41,689 parso.python.diff DEBUG diff parser start
-14:35:41,690 parso.python.diff DEBUG line_lengths old: 1; new: 1
-14:35:41,690 parso.python.diff DEBUG -> code[replace] old[1:1] new[1:1]
-14:35:41,694 parso.python.diff DEBUG parse_part from 1 to 1 (to 0 in part parser)
-14:35:41,694 parso.python.diff DEBUG diff parser end
-14:35:41,709 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/__init__.py
-14:35:41,715 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/environment/data.py
+20:18:42,182 root DEBUG Andor3 detector initialize() call.
+20:18:42,186 root DEBUG AndorSofti __init__() call.
+20:18:45,810 root DEBUG Andor3 detector stop() call.
+20:18:46,44 root DEBUG Andor3 detector prepare() call with n_starts: 1.
+20:18:46,64 root DEBUG Andor3 detector stop() call.
+20:18:46,758 root DEBUG Andor3 detector arm() call.
+20:18:46,804 root DEBUG Armed in SOFTWARE trigger mode for a single trigger.
+20:18:46,860 root DEBUG Andor3 detector start() call.
+20:18:48,227 root DEBUG Andor3 detector read() call.
+20:19:27,809 root DEBUG Andor3 detector stop() call.
+20:19:28,48 root DEBUG Andor3 detector prepare() call with n_starts: 9.
+20:19:28,76 root DEBUG Andor3 detector stop() call.
+20:19:29,287 root DEBUG Andor3 detector arm() call.
+20:19:29,326 root DEBUG Armed in SOFTWARE trigger mode for a single trigger.
+20:19:29,383 root DEBUG Andor3 detector start() call.
+20:19:29,714 root DEBUG Andor3 detector read() call.
+20:19:30,690 root DEBUG Andor3 detector arm() call.
+20:19:30,862 root DEBUG Andor3 detector start() call.
+20:19:31,25 root DEBUG Andor3 detector read() call.
+20:19:31,718 root DEBUG Andor3 detector arm() call.
+20:19:31,789 root DEBUG Andor3 detector start() call.
+20:19:31,940 root DEBUG Andor3 detector read() call.
+20:19:32,746 root DEBUG Andor3 detector arm() call.
+20:19:32,829 root DEBUG Andor3 detector start() call.
+20:19:33,18 root DEBUG Andor3 detector read() call.
+20:19:33,781 root DEBUG Andor3 detector arm() call.
+20:19:33,874 root DEBUG Andor3 detector start() call.
+20:19:34,60 root DEBUG Andor3 detector read() call.
+20:19:34,819 root DEBUG Andor3 detector arm() call.
+20:19:34,891 root DEBUG Andor3 detector start() call.
+20:19:35,48 root DEBUG Andor3 detector read() call.
+20:19:35,846 root DEBUG Andor3 detector arm() call.
+20:19:35,927 root DEBUG Andor3 detector start() call.
+20:19:36,123 root DEBUG Andor3 detector read() call.
+20:19:36,880 root DEBUG Andor3 detector arm() call.
+20:19:36,953 root DEBUG Andor3 detector start() call.
+20:19:37,97 root DEBUG Andor3 detector read() call.
+20:19:37,911 root DEBUG Andor3 detector arm() call.
+20:19:37,996 root DEBUG Andor3 detector start() call.
+20:19:38,163 root DEBUG Andor3 detector read() call.
+20:19:51,597 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/.conda/envs/contrast-dev/lib/python3.8/site-packages/jedi/third_party/typeshed/stdlib/3/builtins.pyi
+20:19:51,613 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/__init__.py
+20:19:51,617 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/detectors/__init__.py
+20:19:51,628 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/detectors/Detector.py
+20:19:51,636 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/Gadget.py
+20:20:33,441 root DEBUG Andor3 detector stop() call.
+20:20:33,660 root DEBUG Andor3 detector prepare() call with n_starts: 9.
+20:20:33,676 root DEBUG Andor3 detector stop() call.
+20:20:34,634 root DEBUG Andor3 detector arm() call.
+20:20:34,648 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:34,705 root DEBUG Andor3 detector start() call.
+20:20:34,836 root DEBUG Andor3 detector arming from start() call.
+20:20:36,232 root DEBUG Andor3 detector read() call.
+20:20:36,698 root DEBUG Andor3 detector arm() call.
+20:20:36,736 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:36,793 root DEBUG Andor3 detector start() call.
+20:20:37,18 root DEBUG Andor3 detector arming from start() call.
+20:20:38,442 root DEBUG Andor3 detector read() call.
+20:20:38,757 root DEBUG Andor3 detector arm() call.
+20:20:38,772 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:38,833 root DEBUG Andor3 detector start() call.
+20:20:38,974 root DEBUG Andor3 detector arming from start() call.
+20:20:40,610 root DEBUG Andor3 detector read() call.
+20:20:41,619 root DEBUG Andor3 detector arm() call.
+20:20:41,644 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:41,705 root DEBUG Andor3 detector start() call.
+20:20:41,832 root DEBUG Andor3 detector arming from start() call.
+20:20:43,203 root DEBUG Andor3 detector read() call.
+20:20:43,942 root DEBUG Andor3 detector arm() call.
+20:20:43,956 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:44,12 root DEBUG Andor3 detector start() call.
+20:20:44,150 root DEBUG Andor3 detector arming from start() call.
+20:20:45,502 root DEBUG Andor3 detector read() call.
+20:20:45,996 root DEBUG Andor3 detector arm() call.
+20:20:46,10 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:46,67 root DEBUG Andor3 detector start() call.
+20:20:46,205 root DEBUG Andor3 detector arming from start() call.
+20:20:47,592 root DEBUG Andor3 detector read() call.
+20:20:48,77 root DEBUG Andor3 detector arm() call.
+20:20:48,97 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:48,153 root DEBUG Andor3 detector start() call.
+20:20:48,282 root DEBUG Andor3 detector arming from start() call.
+20:20:49,663 root DEBUG Andor3 detector read() call.
+20:20:50,145 root DEBUG Andor3 detector arm() call.
+20:20:50,158 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:50,215 root DEBUG Andor3 detector start() call.
+20:20:50,347 root DEBUG Andor3 detector arming from start() call.
+20:20:51,807 root DEBUG Andor3 detector read() call.
+20:20:52,212 root DEBUG Andor3 detector arm() call.
+20:20:52,259 root DEBUG Prepearing to measure in INTERNAL trigger mode, burst_n: 2
+20:20:52,315 root DEBUG Andor3 detector start() call.
+20:20:52,435 root DEBUG Andor3 detector arming from start() call.
+20:20:53,839 root DEBUG Andor3 detector read() call.
+20:21:38,900 root DEBUG Andor3 detector stop() call.
+20:21:39,124 root DEBUG Andor3 detector prepare() call with n_starts: 9.
+20:21:39,138 root DEBUG Andor3 detector stop() call.
+20:21:40,703 root DEBUG Andor3 detector arm() call.
+20:21:40,791 root DEBUG Armed in SOFTWARE trigger mode for a single trigger.
+20:21:40,848 root DEBUG Andor3 detector start() call.
+20:21:41,226 root DEBUG Andor3 detector read() call.
+20:21:41,738 root DEBUG Andor3 detector arm() call.
+20:21:41,816 root DEBUG Andor3 detector start() call.
+20:21:41,994 root DEBUG Andor3 detector read() call.
+20:21:42,775 root DEBUG Andor3 detector arm() call.
+20:21:42,911 root DEBUG Andor3 detector start() call.
+20:21:43,77 root DEBUG Andor3 detector read() call.
+20:21:43,811 root DEBUG Andor3 detector arm() call.
+20:21:43,890 root DEBUG Andor3 detector start() call.
+20:21:44,51 root DEBUG Andor3 detector read() call.
+20:21:44,836 root DEBUG Andor3 detector arm() call.
+20:21:44,946 root DEBUG Andor3 detector start() call.
+20:21:45,103 root DEBUG Andor3 detector read() call.
+20:21:45,865 root DEBUG Andor3 detector arm() call.
+20:21:45,989 root DEBUG Andor3 detector start() call.
+20:21:46,153 root DEBUG Andor3 detector read() call.
+20:21:46,895 root DEBUG Andor3 detector arm() call.
+20:21:46,982 root DEBUG Andor3 detector start() call.
+20:21:47,127 root DEBUG Andor3 detector read() call.
+20:21:47,918 root DEBUG Andor3 detector arm() call.
+20:21:47,993 root DEBUG Andor3 detector start() call.
+20:21:48,171 root DEBUG Andor3 detector read() call.
+20:21:48,962 root DEBUG Andor3 detector arm() call.
+20:21:49,86 root DEBUG Andor3 detector start() call.
+20:21:49,261 root DEBUG Andor3 detector read() call.
+20:22:13,593 parso.python.diff DEBUG diff parser start
+20:22:13,593 parso.python.diff DEBUG line_lengths old: 1; new: 1
+20:22:13,593 parso.python.diff DEBUG -> code[replace] old[1:1] new[1:1]
+20:22:13,593 parso.python.diff DEBUG parse_part from 1 to 1 (to 0 in part parser)
+20:22:13,594 parso.python.diff DEBUG diff parser end
+20:22:13,600 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/environment/__init__.py
+20:22:15,354 parso.python.diff DEBUG diff parser start
+20:22:15,354 parso.python.diff DEBUG line_lengths old: 1; new: 1
+20:22:15,354 parso.python.diff DEBUG -> code[replace] old[1:1] new[1:1]
+20:22:15,354 parso.python.diff DEBUG parse_part from 1 to 1 (to 0 in part parser)
+20:22:15,355 parso.python.diff DEBUG diff parser end
+20:22:15,369 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/contrast/contrast/environment/data.py
+20:33:48,767 parso.python.diff DEBUG diff parser start
+20:33:48,767 parso.python.diff DEBUG line_lengths old: 1; new: 1
+20:33:48,767 parso.python.diff DEBUG -> code[replace] old[1:1] new[1:1]
+20:33:48,769 parso.python.diff DEBUG parse_part from 1 to 1 (to 0 in part parser)
+20:33:48,771 parso.python.diff DEBUG diff parser end
+20:33:48,813 parso.cache DEBUG pickle loaded: /mxn/home/softimax-user/.conda/envs/contrast-dev/lib/python3.8/site-packages/jedi/third_party/typeshed/stdlib/3/sys.pyi
+20:34:21,105 root DEBUG Andor3 detector stop() call.
+20:34:21,337 root DEBUG Andor3 detector prepare() call with n_starts: 10201.
+20:34:21,383 root DEBUG Andor3 detector stop() call.
+20:34:22,980 root DEBUG Andor3 detector arm() call.
+20:34:23,20 root DEBUG Armed in SOFTWARE trigger mode for a single trigger.
+20:34:23,76 root DEBUG Andor3 detector start() call.
+20:34:23,453 root DEBUG Andor3 detector read() call.
+20:34:24,239 root DEBUG Andor3 detector arm() call.
+20:34:24,319 root DEBUG Andor3 detector start() call.
+20:34:24,500 root DEBUG Andor3 detector read() call.
+20:34:25,288 root DEBUG Andor3 detector arm() call.
+20:34:25,372 root DEBUG Andor3 detector start() call.
+20:34:25,564 root DEBUG Andor3 detector read() call.
+20:34:26,314 root DEBUG Andor3 detector arm() call.
+20:34:26,391 root DEBUG Andor3 detector start() call.
+20:34:26,557 root DEBUG Andor3 detector read() call.
+20:34:27,357 root DEBUG Andor3 detector arm() call.
+20:34:27,431 root DEBUG Andor3 detector start() call.
+20:34:27,631 root DEBUG Andor3 detector read() call.
+20:34:28,395 root DEBUG Andor3 detector arm() call.
+20:34:28,482 root DEBUG Andor3 detector start() call.
+20:34:28,644 root DEBUG Andor3 detector read() call.
+20:34:29,424 root DEBUG Andor3 detector arm() call.
+20:34:29,498 root DEBUG Andor3 detector start() call.
+20:34:29,731 root DEBUG Andor3 detector read() call.
+20:34:30,447 root DEBUG Andor3 detector arm() call.
+20:34:30,532 root DEBUG Andor3 detector start() call.
+20:34:30,701 root DEBUG Andor3 detector read() call.
+20:34:31,492 root DEBUG Andor3 detector arm() call.
+20:34:31,570 root DEBUG Andor3 detector start() call.
+20:34:31,765 root DEBUG Andor3 detector read() call.
+20:34:32,514 root DEBUG Andor3 detector arm() call.
+20:34:32,589 root DEBUG Andor3 detector start() call.
+20:34:32,762 root DEBUG Andor3 detector read() call.
+20:34:33,551 root DEBUG Andor3 detector arm() call.
+20:34:33,633 root DEBUG Andor3 detector start() call.
+20:34:33,800 root DEBUG Andor3 detector read() call.
+20:34:34,584 root DEBUG Andor3 detector arm() call.
+20:34:34,667 root DEBUG Andor3 detector start() call.
+20:34:34,874 root DEBUG Andor3 detector read() call.
+20:34:35,618 root DEBUG Andor3 detector arm() call.
+20:34:35,690 root DEBUG Andor3 detector start() call.
+20:34:35,838 root DEBUG Andor3 detector read() call.
+20:34:36,642 root DEBUG Andor3 detector arm() call.
+20:34:36,719 root DEBUG Andor3 detector start() call.
+20:34:37,16 root DEBUG Andor3 detector read() call.
+20:34:37,682 root DEBUG Andor3 detector arm() call.
+20:34:37,759 root DEBUG Andor3 detector start() call.
+20:34:37,916 root DEBUG Andor3 detector read() call.
+20:34:38,712 root DEBUG Andor3 detector arm() call.
+20:34:38,783 root DEBUG Andor3 detector start() call.
+20:34:38,955 root DEBUG Andor3 detector read() call.
+20:34:39,734 root DEBUG Andor3 detector arm() call.
+20:34:39,817 root DEBUG Andor3 detector start() call.
+20:34:39,980 root DEBUG Andor3 detector read() call.
+20:34:40,767 root DEBUG Andor3 detector arm() call.
+20:34:40,843 root DEBUG Andor3 detector start() call.
+20:34:41,50 root DEBUG Andor3 detector read() call.
+20:34:41,799 root DEBUG Andor3 detector arm() call.
+20:34:41,875 root DEBUG Andor3 detector start() call.
+20:34:42,93 root DEBUG Andor3 detector read() call.
+20:34:42,821 root DEBUG Andor3 detector arm() call.
+20:34:43,29 root DEBUG Andor3 detector start() call.
+20:34:43,180 root DEBUG Andor3 detector read() call.
+20:34:43,848 root DEBUG Andor3 detector arm() call.
+20:34:43,919 root DEBUG Andor3 detector start() call.
+20:34:44,66 root DEBUG Andor3 detector read() call.
+20:34:44,891 root DEBUG Andor3 detector arm() call.
+20:34:44,960 root DEBUG Andor3 detector start() call.
+20:34:45,134 root DEBUG Andor3 detector read() call.
+20:34:45,912 root DEBUG Andor3 detector arm() call.
+20:34:46,60 root DEBUG Andor3 detector start() call.
+20:34:46,223 root DEBUG Andor3 detector read() call.
+20:34:46,941 root DEBUG Andor3 detector arm() call.
+20:34:47,11 root DEBUG Andor3 detector start() call.
+20:34:47,166 root DEBUG Andor3 detector read() call.
+20:34:47,974 root DEBUG Andor3 detector arm() call.
+20:34:48,48 root DEBUG Andor3 detector start() call.
+20:34:48,218 root DEBUG Andor3 detector read() call.
+20:34:49,1 root DEBUG Andor3 detector arm() call.
+20:34:49,71 root DEBUG Andor3 detector start() call.
+20:34:49,239 root DEBUG Andor3 detector read() call.
+20:34:50,34 root DEBUG Andor3 detector arm() call.
+20:34:50,117 root DEBUG Andor3 detector start() call.
+20:34:50,275 root DEBUG Andor3 detector read() call.
+20:34:51,74 root DEBUG Andor3 detector arm() call.
+20:34:51,146 root DEBUG Andor3 detector start() call.
+20:34:51,302 root DEBUG Andor3 detector read() call.
+20:34:52,114 root DEBUG Andor3 detector arm() call.
+20:34:52,190 root DEBUG Andor3 detector start() call.
+20:34:52,334 root DEBUG Andor3 detector read() call.
+20:34:53,148 root DEBUG Andor3 detector arm() call.
+20:34:53,220 root DEBUG Andor3 detector start() call.
+20:34:53,389 root DEBUG Andor3 detector read() call.
+20:34:54,198 root DEBUG Andor3 detector arm() call.
+20:34:54,273 root DEBUG Andor3 detector start() call.
+20:34:54,436 root DEBUG Andor3 detector read() call.
+20:34:55,227 root DEBUG Andor3 detector arm() call.
+20:34:55,306 root DEBUG Andor3 detector start() call.
+20:34:55,463 root DEBUG Andor3 detector read() call.
+20:34:56,243 root DEBUG Andor3 detector arm() call.
+20:34:56,315 root DEBUG Andor3 detector start() call.
+20:34:56,475 root DEBUG Andor3 detector read() call.
+20:34:57,277 root DEBUG Andor3 detector arm() call.
+20:34:57,348 root DEBUG Andor3 detector start() call.
+20:34:57,515 root DEBUG Andor3 detector read() call.
+20:34:58,324 root DEBUG Andor3 detector arm() call.
+20:34:58,402 root DEBUG Andor3 detector start() call.
+20:34:58,566 root DEBUG Andor3 detector read() call.
+20:34:59,346 root DEBUG Andor3 detector arm() call.
+20:34:59,420 root DEBUG Andor3 detector start() call.
+20:34:59,609 root DEBUG Andor3 detector read() call.
+20:35:00,376 root DEBUG Andor3 detector arm() call.
+20:35:00,447 root DEBUG Andor3 detector start() call.
+20:35:00,624 root DEBUG Andor3 detector read() call.
+20:35:01,414 root DEBUG Andor3 detector arm() call.
+20:35:01,489 root DEBUG Andor3 detector start() call.
+20:35:01,670 root DEBUG Andor3 detector read() call.
+20:35:02,449 root DEBUG Andor3 detector arm() call.
+20:35:02,527 root DEBUG Andor3 detector start() call.
+20:35:02,691 root DEBUG Andor3 detector read() call.
+20:35:03,495 root DEBUG Andor3 detector arm() call.
+20:35:03,568 root DEBUG Andor3 detector start() call.
+20:35:03,733 root DEBUG Andor3 detector read() call.
+20:35:04,531 root DEBUG Andor3 detector arm() call.
+20:35:04,606 root DEBUG Andor3 detector start() call.
+20:35:04,775 root DEBUG Andor3 detector read() call.
+20:35:05,559 root DEBUG Andor3 detector arm() call.
+20:35:05,638 root DEBUG Andor3 detector start() call.
+20:35:05,859 root DEBUG Andor3 detector read() call.
+20:35:06,588 root DEBUG Andor3 detector arm() call.
+20:35:06,666 root DEBUG Andor3 detector start() call.
+20:35:06,828 root DEBUG Andor3 detector read() call.
+20:35:07,618 root DEBUG Andor3 detector arm() call.
+20:35:07,691 root DEBUG Andor3 detector start() call.
+20:35:07,869 root DEBUG Andor3 detector read() call.
+20:35:08,653 root DEBUG Andor3 detector arm() call.
+20:35:08,728 root DEBUG Andor3 detector start() call.
+20:35:08,877 root DEBUG Andor3 detector read() call.
+20:35:09,674 root DEBUG Andor3 detector arm() call.
+20:35:09,755 root DEBUG Andor3 detector start() call.
+20:35:09,999 root DEBUG Andor3 detector read() call.
+20:35:10,714 root DEBUG Andor3 detector arm() call.
+20:35:10,789 root DEBUG Andor3 detector start() call.
+20:35:10,993 root DEBUG Andor3 detector read() call.
+20:35:11,745 root DEBUG Andor3 detector arm() call.
+20:35:11,821 root DEBUG Andor3 detector start() call.
+20:35:11,993 root DEBUG Andor3 detector read() call.
+20:35:12,773 root DEBUG Andor3 detector arm() call.
+20:35:12,854 root DEBUG Andor3 detector start() call.
+20:35:13,136 root DEBUG Andor3 detector read() call.
+20:35:13,811 root DEBUG Andor3 detector arm() call.
+20:35:13,883 root DEBUG Andor3 detector start() call.
+20:35:14,33 root DEBUG Andor3 detector read() call.
+20:35:14,840 root DEBUG Andor3 detector arm() call.
+20:35:14,911 root DEBUG Andor3 detector start() call.
+20:35:15,54 root DEBUG Andor3 detector read() call.
+20:35:15,886 root DEBUG Andor3 detector arm() call.
+20:35:16,94 root DEBUG Andor3 detector start() call.
+20:35:16,254 root DEBUG Andor3 detector read() call.
+20:35:16,922 root DEBUG Andor3 detector arm() call.
+20:35:16,996 root DEBUG Andor3 detector start() call.
+20:35:17,166 root DEBUG Andor3 detector read() call.
+20:35:17,944 root DEBUG Andor3 detector arm() call.
+20:35:18,16 root DEBUG Andor3 detector start() call.
+20:35:18,180 root DEBUG Andor3 detector read() call.
+20:35:18,978 root DEBUG Andor3 detector arm() call.
+20:35:19,84 root DEBUG Andor3 detector start() call.
+20:35:19,251 root DEBUG Andor3 detector read() call.
+20:35:20,10 root DEBUG Andor3 detector arm() call.
+20:35:20,87 root DEBUG Andor3 detector start() call.
+20:35:20,251 root DEBUG Andor3 detector read() call.
+20:35:21,48 root DEBUG Andor3 detector arm() call.
+20:35:21,129 root DEBUG Andor3 detector start() call.
+20:35:21,285 root DEBUG Andor3 detector read() call.
+20:35:22,65 root DEBUG Andor3 detector arm() call.
+20:35:22,149 root DEBUG Andor3 detector start() call.
+20:35:22,315 root DEBUG Andor3 detector read() call.
+20:35:23,96 root DEBUG Andor3 detector arm() call.
+20:35:23,173 root DEBUG Andor3 detector start() call.
+20:35:23,335 root DEBUG Andor3 detector read() call.
+20:35:24,126 root DEBUG Andor3 detector arm() call.
+20:35:24,198 root DEBUG Andor3 detector start() call.
+20:35:24,352 root DEBUG Andor3 detector read() call.
+20:35:25,155 root DEBUG Andor3 detector arm() call.
+20:35:25,230 root DEBUG Andor3 detector start() call.
+20:35:25,381 root DEBUG Andor3 detector read() call.
+20:35:26,191 root DEBUG Andor3 detector arm() call.
+20:35:26,263 root DEBUG Andor3 detector start() call.
+20:35:26,433 root DEBUG Andor3 detector read() call.
+20:35:27,224 root DEBUG Andor3 detector arm() call.
+20:35:27,302 root DEBUG Andor3 detector start() call.
+20:35:27,525 root DEBUG Andor3 detector read() call.
+20:35:28,246 root DEBUG Andor3 detector arm() call.
+20:35:28,335 root DEBUG Andor3 detector start() call.
+20:35:28,509 root DEBUG Andor3 detector read() call.
+20:35:29,288 root DEBUG Andor3 detector arm() call.
+20:35:29,365 root DEBUG Andor3 detector start() call.
+20:35:29,537 root DEBUG Andor3 detector read() call.
+20:35:30,316 root DEBUG Andor3 detector arm() call.
+20:35:30,388 root DEBUG Andor3 detector start() call.
+20:35:30,539 root DEBUG Andor3 detector read() call.
+20:35:31,349 root DEBUG Andor3 detector arm() call.
+20:35:31,422 root DEBUG Andor3 detector start() call.
+20:35:31,587 root DEBUG Andor3 detector read() call.
+20:35:32,373 root DEBUG Andor3 detector arm() call.
+20:35:32,449 root DEBUG Andor3 detector start() call.
+20:35:32,601 root DEBUG Andor3 detector read() call.
+20:35:33,410 root DEBUG Andor3 detector arm() call.
+20:35:33,483 root DEBUG Andor3 detector start() call.
+20:35:33,665 root DEBUG Andor3 detector read() call.
+20:35:34,446 root DEBUG Andor3 detector arm() call.
+20:35:34,518 root DEBUG Andor3 detector start() call.
+20:35:34,688 root DEBUG Andor3 detector read() call.
+20:35:35,474 root DEBUG Andor3 detector arm() call.
+20:35:35,547 root DEBUG Andor3 detector start() call.
+20:35:35,693 root DEBUG Andor3 detector read() call.
+20:35:36,505 root DEBUG Andor3 detector arm() call.
+20:35:36,578 root DEBUG Andor3 detector start() call.
+20:35:36,718 root DEBUG Andor3 detector read() call.
+20:35:37,534 root DEBUG Andor3 detector arm() call.
+20:35:37,606 root DEBUG Andor3 detector start() call.
+20:35:37,778 root DEBUG Andor3 detector read() call.
+20:35:38,563 root DEBUG Andor3 detector arm() call.
+20:35:38,639 root DEBUG Andor3 detector start() call.
+20:35:38,811 root DEBUG Andor3 detector read() call.
+20:35:39,595 root DEBUG Andor3 detector arm() call.
+20:35:39,674 root DEBUG Andor3 detector start() call.
+20:35:39,843 root DEBUG Andor3 detector read() call.
+20:35:40,628 root DEBUG Andor3 detector arm() call.
+20:35:40,703 root DEBUG Andor3 detector start() call.
+20:35:40,868 root DEBUG Andor3 detector read() call.
+20:35:41,655 root DEBUG Andor3 detector arm() call.
+20:35:41,727 root DEBUG Andor3 detector start() call.
+20:35:41,895 root DEBUG Andor3 detector read() call.
+20:35:42,682 root DEBUG Andor3 detector arm() call.
+20:35:42,766 root DEBUG Andor3 detector start() call.
+20:35:43,11 root DEBUG Andor3 detector read() call.
+20:35:43,705 root DEBUG Andor3 detector arm() call.
+20:35:43,785 root DEBUG Andor3 detector start() call.
+20:35:43,948 root DEBUG Andor3 detector read() call.
+20:35:44,740 root DEBUG Andor3 detector arm() call.
+20:35:44,816 root DEBUG Andor3 detector start() call.
+20:35:44,975 root DEBUG Andor3 detector read() call.
+20:35:45,770 root DEBUG Andor3 detector arm() call.
+20:35:45,846 root DEBUG Andor3 detector start() call.
+20:35:46,125 root DEBUG Andor3 detector read() call.
+20:35:46,793 root DEBUG Andor3 detector arm() call.
+20:35:46,875 root DEBUG Andor3 detector start() call.
+20:35:47,43 root DEBUG Andor3 detector read() call.
+20:35:47,829 root DEBUG Andor3 detector arm() call.
+20:35:47,903 root DEBUG Andor3 detector start() call.
+20:35:48,59 root DEBUG Andor3 detector read() call.
+20:35:48,853 root DEBUG Andor3 detector arm() call.
+20:35:49,44 root DEBUG Andor3 detector start() call.
+20:35:49,198 root DEBUG Andor3 detector read() call.
+20:35:49,895 root DEBUG Andor3 detector arm() call.
+20:35:49,967 root DEBUG Andor3 detector start() call.
+20:35:50,138 root DEBUG Andor3 detector read() call.
+20:35:50,916 root DEBUG Andor3 detector arm() call.
+20:35:50,986 root DEBUG Andor3 detector start() call.
+20:35:51,156 root DEBUG Andor3 detector read() call.
+20:35:51,953 root DEBUG Andor3 detector arm() call.
+20:35:52,179 root DEBUG Andor3 detector start() call.
+20:35:52,327 root DEBUG Andor3 detector read() call.
+20:35:52,984 root DEBUG Andor3 detector arm() call.
+20:35:53,56 root DEBUG Andor3 detector start() call.
+20:35:53,233 root DEBUG Andor3 detector read() call.
+20:35:54,16 root DEBUG Andor3 detector arm() call.
+20:35:54,109 root DEBUG Andor3 detector start() call.
+20:35:54,287 root DEBUG Andor3 detector read() call.
+20:35:55,44 root DEBUG Andor3 detector arm() call.
+20:35:55,125 root DEBUG Andor3 detector start() call.
+20:35:55,320 root DEBUG Andor3 detector read() call.
+20:35:56,80 root DEBUG Andor3 detector arm() call.
+20:35:56,153 root DEBUG Andor3 detector start() call.
+20:35:56,355 root DEBUG Andor3 detector read() call.
+20:35:57,96 root DEBUG Andor3 detector arm() call.
+20:35:57,170 root DEBUG Andor3 detector start() call.
+20:35:57,337 root DEBUG Andor3 detector read() call.
+20:35:58,131 root DEBUG Andor3 detector arm() call.
+20:35:58,208 root DEBUG Andor3 detector start() call.
+20:35:58,359 root DEBUG Andor3 detector read() call.
+20:35:59,171 root DEBUG Andor3 detector arm() call.
+20:35:59,244 root DEBUG Andor3 detector start() call.
+20:35:59,389 root DEBUG Andor3 detector read() call.
