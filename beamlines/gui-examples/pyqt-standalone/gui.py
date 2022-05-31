@@ -1,11 +1,32 @@
 """
-A minimal contrast GUI which directly runs a beamline and does work
+An example contrast GUI which directly runs a beamline and does work
 in separate threads. The beamline is defined in bl.py, in the same way
-as usual. Recorders aren't in place yet, not sure how to do that.
+as usual.
+
+Useful concepts:
+
+* Scans are run in a thread (class ScanRunner) so that they don't block
+  the GUI.
+
+* Stdout is redirected to the pyqt signals/slots system, first by
+  replacing sys.stdout (class StreamWriter) and then by a threaded
+  helper (class StreamReader) which emits signals when something is
+  printed.
+
+* A Gadget tree is built as a pyqt model (class GadgetModel), with a
+  corresponding QTreeView to show everything. The model should update
+  on events, for example emitted by a thread (class GadgetMonitor)
+  which polls motor positions etc now and then.
+
+* Data are converted to pyqt signals by adding a custom Recorder
+  (class PyQtRecorder), which puts new data in a queue monitored by a
+  threaded emitter (class RecorderEmitter). The GUI can then act on any
+  data acquisition progress.
 """
 
 import sys
 import datetime
+import time
 import numpy as np
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QTextEdit, QVBoxLayout,
@@ -21,6 +42,7 @@ from contrast.scans import AScan
 from contrast.environment import env
 from contrast.recorders import Recorder
 from contrast.recorders.Recorder import Queue as MP_Queue
+import contrast
 
 if __name__ == '__main__':
     # recorder suprocesses require this main guard
@@ -48,6 +70,9 @@ class Example(QWidget):
         self.tree = QTreeView()
         self.tree.setModel(self.model)
         self.tree.expandAll()
+        self.monitor = GadgetMonitor()
+        self.monitor.update.connect(self.model.motor_update)
+        self.monitor.start()
 
         # A progress bar for scans
         self.progress = QProgressBar()
@@ -74,7 +99,7 @@ class Example(QWidget):
         queue = Queue()
         sys.stdout = StreamWriter(queue)
         self.reader = StreamReader(queue)
-        self.reader.signal.connect(self.print)
+        self.reader.signal.connect(self.new_stdout)
         self.reader.start()
 
         # a special recorder which generates qt signals
@@ -87,6 +112,9 @@ class Example(QWidget):
 
         # a scan runner object we can refer to,
         self.runner = None
+
+        # quote
+        contrast.wisdom()
 
     @pyqtSlot(dict)
     def new_data(self, dct):
@@ -109,17 +137,20 @@ class Example(QWidget):
             self.plot.plot([dct['sx']], [dct['det1']], symbol='o', color='k')
 
     @pyqtSlot(str)
-    def print(self, msg):
+    def new_stdout(self, msg):
         """
         Intercepts the stdout signal and adds it to a text box or so.
         """
-        self.txt.setTextColor(QColor('gray'))  # for example
         if len(msg) < 2:
             # exclude empty strings
             return
         if '\r' in msg:
             # exclude overwritten text
             return
+        self.print(msg, 'gray')
+
+    def print(self, msg, color='black'):
+        self.txt.setTextColor(QColor(color))
         self.txt.append(str(msg))
 
     def run_scan(self):
@@ -191,6 +222,11 @@ class GadgetModel(QStandardItemModel):
             for g in sub.getinstances():
                 row.appendRow(QStandardItem(g.name))
             top.appendRow(row)
+        self.top = top
+
+    @pyqtSlot(dict)
+    def motor_update(self, pos):
+        pass  # update model here
 
 
 class PyQtRecorder(Recorder):
@@ -228,6 +264,27 @@ class RecorderEmitter(QThread):
             if item is None:
                 return
             self.new.emit(item)
+
+
+class GadgetMonitor(QThread):
+    """
+    Helper thread which goes around checking states and positions of
+    Gadget objects at regular intervals, and issues signals with the
+    results.
+    """
+    update = pyqtSignal(dict)
+
+    def __init__(self):
+        super().__init__()
+        self.motors = list(Motor.getinstances())
+
+    def run(self):
+        while True:
+            dct = {}
+            for m in self.motors:
+                dct[m.name] = (m.user_position, m.busy())
+            self.update.emit(dct)
+            time.sleep(2)
 
 
 if __name__ == '__main__':
