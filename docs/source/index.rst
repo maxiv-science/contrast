@@ -16,6 +16,7 @@ This document was built automatically from Contrast version |release|.
    
    concepts
    usage
+   guis
    macros
    contrast
    docs
