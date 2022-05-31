@@ -5,10 +5,14 @@ as usual. Recorders aren't in place yet, not sure how to do that.
 """
 
 import sys
+import datetime
+import numpy as np
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QTextEdit, QVBoxLayout,
-                             QApplication, QPushButton, QTreeView)
+                             QHBoxLayout, QApplication, QPushButton,
+                             QTreeView, QProgressBar)
 from PyQt5.QtGui import QColor, QStandardItemModel, QStandardItem
+import pyqtgraph as pg
 from queue import Queue
 from io import StringIO
 from contrast.Gadget import Gadget
@@ -45,12 +49,26 @@ class Example(QWidget):
         self.tree.setModel(self.model)
         self.tree.expandAll()
 
-        # layout
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.tree)
-        vbox.addWidget(self.txt)
-        vbox.addWidget(self.btn)
-        self.setLayout(vbox)
+        # A progress bar for scans
+        self.progress = QProgressBar()
+        self.progress.setMinimum(0)
+        self._last_dt = 0
+
+        self.plot = pg.PlotWidget(parent=self, background='white')
+
+        # layout containing these things
+        hbox = QHBoxLayout()
+        col1 = QVBoxLayout()
+        col2 = QVBoxLayout()
+        col1.addWidget(self.tree)
+        col1.addWidget(self.txt)
+        col1.addWidget(self.btn)
+        col1.addWidget(self.progress)
+        col2.addWidget(self.plot)
+        hbox.addLayout(col1)
+        hbox.addLayout(col2)
+        self.setLayout(hbox)
+        self.resize(1200, 700)
 
         # redirect stdout
         queue = Queue()
@@ -59,28 +77,43 @@ class Example(QWidget):
         self.reader.signal.connect(self.print)
         self.reader.start()
 
-        # a special recorder gives qt signals
+        # a special recorder which generates qt signals
         queue = MP_Queue()
         self.qtrec = PyQtRecorder(queue, name='qtrec')
         self.qtrec.start()
         self.emitter = RecorderEmitter(queue)
-        self.emitter.new.connect(self.testslot)
+        self.emitter.new.connect(self.new_data)
         self.emitter.start()
 
         # a scan runner object we can refer to,
         self.runner = None
 
     @pyqtSlot(dict)
-    def testslot(self, dct):
+    def new_data(self, dct):
         self.txt.setTextColor(QColor('black'))  # for example
-        self.txt.append('got data/header/footer')
+        if 'status' in dct.keys():
+            # header/footer
+            if dct['status'] == 'started':
+                self.progress.setValue(0)
+        else:
+            # update progress bar
+            m = self.progress.maximum()
+            n = self.progress.value() + 1
+            eta = str(datetime.timedelta(
+                seconds=(
+                    (m - n) * (dct['dt'] - self._last_dt)))).split('.')[0]
+            self.progress.setValue(n)
+            self.progress.setFormat('%u/%u (done in %s)' % (n, m, eta))
+            self._last_dt = dct['dt']
+            # plot something
+            self.plot.plot([dct['sx']], [dct['det1']], symbol='o', color='k')
 
     @pyqtSlot(str)
     def print(self, msg):
         """
         Intercepts the stdout signal and adds it to a text box or so.
         """
-        self.txt.setTextColor(QColor('red'))  # for example
+        self.txt.setTextColor(QColor('gray'))  # for example
         if len(msg) < 2:
             # exclude empty strings
             return
@@ -96,7 +129,9 @@ class Example(QWidget):
         """
         if self.runner and self.runner.isRunning():
             return
-        self.runner = ScanRunner(AScan, *[bl.sx, 0, 1, 10, .1])
+        N = np.random.randint(5, 40)
+        self.progress.setMaximum(N + 1)
+        self.runner = ScanRunner(AScan, *[bl.sx, 0, 1, N, .1])
         self.runner.start()
 
 
