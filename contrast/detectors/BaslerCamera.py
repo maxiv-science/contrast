@@ -48,7 +48,7 @@ class BaslerCamera(Detector):
     def read(self):
         ret = {}
         for i in range(3):
-            # fet the last image acquired by the microscope
+            # fetch the last image acquired by the microscope
             try:
                 # for color images
                 image_raw = self.dev.LastImageEncoded
@@ -56,14 +56,9 @@ class BaslerCamera(Detector):
                 fmt, image_dec = codec.decode(image_raw)
                 image = image_dec.astype(int)
             except:
-                try:
-                    # for grayscale images
-                    image = self.dev.LastImage
-                except:
-                    #Random image if both fail
-                    image = np.zeros((1024,1280,3))
+                image = -1 * np.ones((1024,1280,3))
             # check if taking an image failed
-            if not np.sum(image) == 0:
+            if not np.sum(image) < 0:
                 break
             else:
                 print("[!] failed frame, taking another one")
