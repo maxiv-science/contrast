@@ -55,6 +55,12 @@ The most straightforward way of writing a ``contrast`` GUI is probably to direct
 A richer example with a full beamline script file, progress bar, conversion of ``Recorder`` data to pyqt signals, redirection of ``stdout`` to the GUI, etc, can be found in ``beamlines/gui-examples/pyqt-standalone/gui.py``.
 
 
+
+.. image:: gui.png
+  :width: 600
+  :alt: Example GUI written as a standalone PyQt application.
+
+
 Server/client models
 --------------------
 
