@@ -14,10 +14,10 @@ import os
 import sys
 import re
 print('******', os.getcwd())
+sys.path.insert(0, os.path.abspath('../..'))
+print('******', sys.path)
 from contrast.environment import env
 from collections import OrderedDict
-
-sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
