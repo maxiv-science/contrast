@@ -13,11 +13,11 @@
 import os
 import sys
 import re
+print('******', os.getcwd())
 from contrast.environment import env
 from collections import OrderedDict
 
 sys.path.insert(0, os.path.abspath('../..'))
-print('******', os.getcwd())
 
 
 # -- Project information -----------------------------------------------------
