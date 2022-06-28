@@ -85,14 +85,23 @@ class ImgSampleStage(object):
         self.proxy = PyTango.DeviceProxy(device)
         self.proxy.set_source(PyTango.DevSource.DEV)
 
-        # Set the velocities of the motors
-        command = 'X0Y8,%d;X1Y8,%d;X2Y8,%d' % (velocity, velocity, velocity)
-        self.proxy.arbitrarySend(command)
-
         # Set motor motion limits in the controller
         self._lims = {'m0min': 11000000, 'm0max': 35000000, 'm1min': 23500000, 'm1max': 88500000, 'm2min': 13000000, 'm2max': 80000000}
         command = 'X0Y3,%d;X0Y4,%d;X1Y3,%d;X1Y4,%d;X2Y3,%d;X2Y4,%d;' % (self._lims['m0min'], self._lims['m0max'], self._lims['m1min'], self._lims['m1max'], self._lims['m2min'], self._lims['m2max'])   
         self.proxy.arbitrarySend(command)
+
+        # Set target mode stop range
+        command = 'X0Y5,1000;X1Y5,1000;X2Y5,1000;' 
+        self.proxy.arbitrarySend(command)
+
+        # Set motor motion/encoder direction in the controller
+        command = 'X0Y6,1;X1Y6,0;X2Y6,0;' 
+        self.proxy.arbitrarySend(command)
+
+        # Set the velocities of the motors
+        command = 'X0Y8,%d;X1Y8,%d;X2Y8,%d' % (velocity, velocity, velocity)
+        self.proxy.arbitrarySend(command)
+
 
         self.axis_motors = [
             AxisMotor(manager=self, name=names[0], **kwargs),

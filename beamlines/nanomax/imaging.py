@@ -31,8 +31,8 @@ if __name__ == '__main__':
     from macros_img import *
     import os
     import time
-
     # add a scheduler to pause scans when shutters close
+    """
     env.scheduler = MaxivScheduler(
                         shutter_list=['B303A-FE/VAC/HA-01',
                                       'B303A-FE/PSS/BS-01',
@@ -40,7 +40,7 @@ if __name__ == '__main__':
                         avoid_injections=False,
                         respect_countdown=False,)
     """
-    env.userLevel = 2
+    env.userLevel = 1
     # arbitrarily chosen these levels:
     # 1 - simple user
     # 2 - power user
@@ -56,6 +56,11 @@ if __name__ == '__main__':
     zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', userlevel=1, scaling=-5e-4)
     csx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='csx', userlevel=1, scaling=-5e-4)
     csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', userlevel=1, scaling=-5e-4)
+    #gry = NanosMotor(device='test/ctl/nanos-01', axis=8, name='gry', userlevel=1, scaling=-5e-4)
+    #grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', userlevel=1, scaling=5e-4)
+    #gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', userlevel=1, scaling=5e-4)
+    #nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=11, name='nanos_dummy', userlevel=1, scaling=5e-4)
+
   
     # PiezoLEGS motors for coarse sample positioning
     bx, by, bz = ImgSampleStage(device='B303A/CTL/IMG-01', velocity=90, names=['bx', 'by', 'bz'], userlevel=1, scaling=1e-3, user_format='%.3f')
@@ -64,10 +69,12 @@ if __name__ == '__main__':
     #m2 = PiezoLegsMotor(device='B303A/CTL/IMG-01', axis=2, name='m2', userlevel=1, scaling=1e-3, user_format='%.3f')  
 
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='pinhole_x', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='pinhole_y', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=2, name='sr', userlevel=1, user_format='%.4f', dial_format='%.4f', velocity=6000)
-    mic = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='mic', velocity=10000, userlevel=1, user_format='%.0f', dial_format='%.0f')
+    #grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='grx', velocity=0, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='sr', velocity=3000, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    """
+    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='pinhole_x', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=4, name='pinhole_y', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    mic = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=5, name='mic', velocity=10000, userlevel=1, user_format='%.0f', dial_format='%.0f')
     np_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=6, name='np_x', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
     np_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=7, name='np_y', velocity=10000, scaling=-1, userlevel=1, user_format='%.3f', dial_format='%.3f')
     np_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=8, name='np_z', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
@@ -76,11 +83,11 @@ if __name__ == '__main__':
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
-    """
+
     # gap and taper
     ivu_gap = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
-    """
+
     # Diamond filter motors, sitting in diagnostics module 1
     #bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=6, dial_limits=(-36.04, 36.77))
     #bl_filter_2 = TangoMotor(device='b303a-o/opt/flt-02-yml', name='bl_filter_2', userlevel=6, dial_limits=(-36.24, 38.46))
@@ -230,6 +237,7 @@ if __name__ == '__main__':
         print(f'\nNote: inferring that the next scan number should be {last+1}')
     except:
         pass
+   """
 
     # add a memorizer so the motors keep their user positions and limits
     # after a restart note that this will overwrite the dial positions
@@ -237,4 +245,4 @@ if __name__ == '__main__':
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/sw/contrast_img/beamlines/nanomax/.memorizer')
 
-   """
+
