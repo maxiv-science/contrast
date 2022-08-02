@@ -44,10 +44,13 @@ if __name__ == '__main__':
 
     sx = DummyMotor(name='sx')
     sx.dial_limits = (-50, 50)
+    sx.velocity = 100
     sy = DummyMotor(name='sy')
     sy.dial_limits = (-50, 50)
+    sy.velocity = 100
     sz = DummyMotor(name='sz')
     sz.dial_limits = (-50, 50)
+    sz.velocity = 100
     sr = DummyMotor(name='sr')
     sr.dial_limits = (-180, 180)
     sr.velocity = 30

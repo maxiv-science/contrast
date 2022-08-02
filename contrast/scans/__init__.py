@@ -3,7 +3,7 @@ Provides basic acquisition macros and base classes for custom macros.
 """
 
 from .Scan import SoftwareScan, Ct, LoopScan
-from .Mesh import Mesh, DMesh
+from .Mesh import Mesh, DMesh, MeshJMesh
 from .AScan import AScan, DScan
 from .Tweak import Tweak
 from .Spiral import SpiralScan, FermatScan
