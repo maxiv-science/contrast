@@ -85,8 +85,8 @@ if __name__ == '__main__':
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # gap and taper
-    ivu_gap = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
-    ivu_taper = TangoMotor(device='g-v-csproxy-0:10000/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
+    ivu_gap = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
+    ivu_taper = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
 
     # Diamond filter motors, sitting in diagnostics module 1
     #bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=6, dial_limits=(-36.04, 36.77))
