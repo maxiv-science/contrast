@@ -2,11 +2,7 @@
 This module contains an interface to the Alba electrometer, as well as
 a contrast Detector class representing it.
 
-Requires the so-called fastbuffer mode of the electrometer, with data
-streaming, developed (but not yet formally delivered) by the MAX IV
-hardware group in 2021 as described here,
-
-https://gitlab.maxiv.lu.se/kits-maxiv/lib-cells-albaem2/-/tree/streaming-no-zeromq/nuc_SW/alin/extra.
+Requires the "STREAMING" mode now available as standard firmware.
 
 For the old school data-polling version, see LegacyAlbaEM.py.
 """
@@ -20,13 +16,16 @@ else:
 import telnetlib
 import numpy as np
 import time
-import socket
 import select
 from threading import Thread
+import zmq
+import json
 
 BUF_SIZE = 1024
 NUM_CHAN = 4
-TIMEOUT = None
+TIMEOUT = 5
+STREAM_PORT = 22003
+CMD_PORT = 5025
 VALID_RANGE_STRINGS = [
     '1mA', '100nA', '10nA', '1nA', '100uA', '10uA', '1uA', '100pA']
 VALID_FILTER_STRINGS = ['3200Hz', '100Hz', '10Hz', '1Hz', '0.5Hz']
@@ -36,13 +35,14 @@ IDLE_STATES = ('STATE_ON', )
 
 class Stream(Thread):
     """
-    Server which receives the electrometer's "fast buffer" stream.
+    Server which receives the electrometer stream.
     """
-    def __init__(self, port, debug=False):
+    def __init__(self, host, port, debug=False):
         super().__init__()
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind((socket.gethostname(), port))
-        self.server.listen(1)
+        context = zmq.Context()
+        self.sock = context.socket(zmq.PULL)
+        self.sock.set_hwm(10000000)
+        self.sock.connect('tcp://%s:%s' % (host, port))
         self.data = []
         self.do_debug = debug
 
@@ -51,24 +51,13 @@ class Stream(Thread):
             print(*args)
 
     def run(self):
+        keys = ['timestamp'] + ['CHAN%02u' % (i + 1) for i in range(NUM_CHAN)]
         while True:
-            client, address = self.server.accept()
-            self.debug('client connected')
-            data = b''
-            while True:
-                self.debug('server looping')
-                new = client.recv(BUF_SIZE)
-                if new == b'':
-                    self.debug('client disconnected')
-                    break
-                self.debug('received:', new)
-                data += new
-                parts = data.split(b'\n')
-                # empty if terminated with \n, otherwise dangling data:
-                data = parts[-1]
-                for part in parts[:-1]:
-                    self.data.append(list(map(float, part.split(b',')))[1:])
-                    self.debug('now have %u data points' % len(self.data))
+            msg = json.loads(self.sock.recv())
+            if msg['message_type'] == 'series-start':
+                self.data.clear()
+            elif msg['message_type'] == 'data':
+                self.data.append([msg[key] for key in keys])
 
 
 class Electrometer(object):
@@ -76,34 +65,23 @@ class Electrometer(object):
     Interface to a 4-channel Alba electrometer.
     """
 
-    def __init__(self, host='b-nanomax-em2-2', port=5025,
+    def __init__(self, host='b-nanomax-em2-2', port=CMD_PORT,
                  trig_source='DIO_1',
-                 stream_host=None, stream_port=50001):
+                 stream_host=None, stream_port=STREAM_PORT):
         try:
             self.em = telnetlib.Telnet(host, port, timeout=5)
         except telnetlib.socket.timeout:
             raise Exception('Could not connect to %s:%d' % (host, port))
-        self.query('ACQU:MODE CURRENT')
+        self.query('ACQU:MODE STREAMING')
         # the DIO channel used for triggering:
         self._trig_source = trig_source
-        # require SW version 2.0.04, below that soft triggers are broken
-        # and below 2.0.0 data indexing is wrong.
-        assert self.version >= (2, 0, 4), \
-            "Requires on-board SW version 2.0.04 or higher."
-        # Figure out host and port for the stream receiving server:
-        if not stream_host:
-            stream_host = socket.gethostbyname(socket.gethostname())
-        ok = False
-        while not ok:
-            try:
-                self.stream = Stream(port=stream_port, debug=False)
-                self.stream.start()
-                ok = True
-            except OSError:
-                stream_port += 1
-                print('trying again with port %u' % stream_port)
-        self.stream_host = stream_host
-        self.stream_port = stream_port
+        # require SW version 2.2.02 where zmq streaming is available,
+        # below 2.0.04 soft triggers were broken and below 2.0.0 data
+        # indexing was wrong.
+#        assert self.version >= (2, 2, 2), \
+#            "Requires on-board SW version 2.2.02 or higher."
+        self.stream = Stream(host=host, port=stream_port, debug=False)
+        self.stream.start()
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -116,12 +94,15 @@ class Electrometer(object):
         self._flush()
         cmd = (cmd + '\n').encode('utf-8')
         self.em.write(cmd)
-        reply = self.em.read_until(
-            b'\r\n', timeout=TIMEOUT).strip().decode('utf-8')
-        if reply:
-            return reply
-        else:
-            return None
+        ok = False
+        while not ok:
+            reply = self.em.read_until(
+                b'\r\n', timeout=TIMEOUT).strip().decode('utf-8')
+            if reply:
+                ok = True
+            else:
+                print('AlbaEM failed to respond in %.1f s. Trying again...' % TIMEOUT)
+        return reply
 
     def get_instant_current(self, ch):
         return float(self.query('CHAN%02u:INSC?' % ch))
@@ -175,13 +156,11 @@ class Electrometer(object):
         """
         latency = max(latency, .320e-3)
         acqtime = period - latency
-        self.stream.data.clear()
         self.query('ACQU:TIME %f' % (acqtime * 1000))
         self.query('ACQU:LOWT %f' % (latency * 1000))
         self.query('TRIG:MODE AUTOTRIGGER')
         self.query('ACQU:NTRI %u' % n)
-        self.query('ACQU:MODE fast_buffer')
-        self.query('ACQU:STAR %s %u' % (self.stream_host, self.stream_port))
+        self.query('ACQU:STAR')
 
     def arm(self, acqtime=1., n=1, hw=False):
         """
@@ -189,14 +168,12 @@ class Electrometer(object):
         """
         acqtime = acqtime * 1000  # ms
         acqtime = max(acqtime, 0.320)
-        self.stream.data.clear()
         self.query('ACQU:TIME %f' % acqtime)
         self.query('TRIG:MODE %s' % ('HARDWARE' if hw else 'SOFTWARE'))
         self.query('TRIG:INPU %s' % self._trig_source)
         self.query('TRIG:DELA 0.0')  # no delay
         self.query('ACQU:NTRI %u' % n)
-        self.query('ACQU:MODE fast_buffer')
-        self.query('ACQU:STAR %s %u' % (self.stream_host, self.stream_port))
+        self.query('ACQU:STAR')
 
     def soft_trigger(self):
         old = int(self.query('ACQU:NDAT?'))
@@ -270,7 +247,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         BurstDetector.__init__(self)
 
     def initialize(self):
-        self.em = Electrometer(stream_port=50013, **self.kwargs)
+        self.em = Electrometer(stream_port=STREAM_PORT, **self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
         self.channels = [ch + 1 for ch in range(NUM_CHAN)]
@@ -350,7 +327,6 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
                 'wrong number of points received'
             ret = {}
             data = np.array(self.em.stream.data)
-            data[:, 1:] = data[:, 1:] * 1e-6  # Amps
             for i in range(len(keys)):
                 ret[keys[i]] = data[:, i].reshape((1, -1))
             return ret
