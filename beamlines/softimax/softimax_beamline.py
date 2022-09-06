@@ -63,7 +63,7 @@ if __name__=='__main__':
     finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
  
     # detectors
-    andor = DhyanaAndor(device='B318A-EA01/dia/andor-zyla-01', name='andor')
+    andor = DhyanaAndor(device='B318A-EA01/dia/andor-zyla-01', name='andor', hdf_name='zyla')
 #    panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0')
     dhyana = DhyanaAndor(name='dhyana', hdf_name='dhyana', device='b318a-ea01/dia/dhyana')
     

@@ -46,11 +46,11 @@ class DhyanaAndor(Detector, BurstDetector):
             # This Tango DS insists on writing files, so make up a name
             self.dataid = None
             time_stamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-            fn = os.path.join(env.paths.directory, f'andor_ct_{time_stamp}.h5')
+            fn = os.path.join(env.paths.directory, f'{self.name}_ct_{time_stamp}.h5')
             try:
                 self.proxy.DestinationFilename = fn
             except BaseException as err:
-                raise Exception('Faild to set Andor DestinationFilename attr with the error: %s' % err)
+                raise Exception('Failed to set %s DestinationFilename attr with the error: %s' % (self.name, err))
         else:
             self.dataid = dataid  # needed for burst mode later
             if self.burst_n == 1:
@@ -78,9 +78,9 @@ class DhyanaAndor(Detector, BurstDetector):
             self.proxy.TriggerMode = 'SOFTWARE'
             self.debug('device trig mode is now %s' % self.proxy.TriggerMode)
             self.proxy.nTriggers = n_starts
-            self.debug('arming...')
-            self.proxy.Arm()  # counting on this blocking
-            self.debug('...returned')
+            self.proxy.Arm()
+            while not self.proxy.State() == DevState.RUNNING:
+                time.sleep(.01)
             self.frames_expected = 0
         elif self.burst_n > 1:
             self.proxy.TriggerMode = 'INTERNAL'
