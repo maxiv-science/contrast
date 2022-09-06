@@ -10,7 +10,6 @@ if __name__=='__main__':
     import time
     import contrast
     import tango
-    import signal
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
     from contrast.recorders import Hdf5Recorder, StreamRecorder
@@ -47,23 +46,21 @@ if __name__=='__main__':
     # finex = TangoMotor(device='PiezoPiE712/CTL/X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
     # finey = TangoMotor(device='PiezoPiE712/CTL/Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100), offset=50, scaling=-1)
 
-    finex = TangoMotor(device='B318A-EA01/CTL/PI_X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(-50, 50), offset=0, scaling=1)
-    finey = TangoMotor(device='B318A-EA01/CTL/PI_Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(-50, 50), offset=0, scaling=1)
+    # finex = TangoMotor(device='B318A-EA01/CTL/PI_X', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(-50, 50), offset=0, scaling=1)
+    # finey = TangoMotor(device='B318A-EA01/CTL/PI_Y', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(-50, 50), offset=0, scaling=1)
 
-    # fine_dum = TangoMotor(device='B318A/CTL/DUMMY-01', name='fine_dum', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     osax = TangoMotor(device='motor/osa_ctrl/1', name='osax', user_format='%.3f', dial_format='%.3f', offset=0.83)
     osay = TangoMotor(device='motor/osa_ctrl/2', name='osay', user_format='%.3f', dial_format='%.3f', offset=0.32)
     beamline_energy = TangoMotor(device='B318A/CTL/BEAMLINE-ENERGY', name='beamline_energy', user_format='%.3f', dial_format='%.3f', dial_limits=(275, 1600))
 
     shutter0 = SoftiPiezoShutter(device='B318A-EA01/CTL/PiezoShutter', name='shutter0')
 
-    #shutter = tango.DeviceProxy('B318A-EA01/CTL/PiezoShutter')
     zp = tango.DeviceProxy('B318A-EA01/CTL/ZPEnergy')
     zp_mot = TangoMotor(device='B318A-EA01/CTL/ZPEnergy', name='zp', user_format='%.3f', dial_format='%.3f', dial_limits=(-1300, -15000))
     zp_E_mot = TangoAttributeMotor(name='zp_E_mot', device='B318A-EA01/CTL/ZPEnergy', attribute='Energy')
     
-    #finex = TangoMotor(device='B318A/CTL/DUMMY-01', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
-    #finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
+    finex = TangoMotor(device='B318A/CTL/DUMMY-01', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
+    finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
  
     # detectors
     andor = DhyanaAndor(device='B318A-EA01/dia/andor-zyla-01', name='andor')
@@ -92,13 +89,11 @@ if __name__=='__main__':
         d.active = True
 
     def pre_scan_stuff(slf):
-            andor.stop()
             shutter0.Open()
             time.sleep(0.2)
 
     def post_scan_stuff(slf):
             shutter0.Close()
-            signal.alarm(0)
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
