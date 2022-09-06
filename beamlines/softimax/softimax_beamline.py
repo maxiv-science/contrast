@@ -12,6 +12,7 @@ if __name__=='__main__':
     import tango
     import signal
     from contrast.environment import env, runCommand
+    from contrast.environment.data import SdmPathFixer
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.detectors.PandaBoxSofti import PandaBoxSoftiPtycho, PandaBox0D
@@ -25,11 +26,8 @@ if __name__=='__main__':
 
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
 
-    sample_path = tango.DeviceProxy('B318A/CTL/SDM-01').SamplePath
-    
     env.userLevel = 5
-    #env.paths.directory = '/data/staff/softimax/commissioning/andor_data/20211210'
-    env.paths.directory = sample_path
+    env.paths = SdmPathFixer('B318A/CTL/SDM-01')
 
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
