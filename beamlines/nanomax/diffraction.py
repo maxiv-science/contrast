@@ -72,12 +72,6 @@ if __name__ == '__main__':
     basey = TangoMotor(device='motor/icepap_ctrl_1_expert/17', name='basey', userlevel=1)
     basez = TangoMotor(device='motor/icepap_ctrl_1_expert/18', name='basez', userlevel=1)
 
-    # HACK! using sardana pseudomotors while figuring out how to do it properly
-    #seh_vo = TangoMotor(device='pseudomotor/seh_vg_ctrl/2', name='seh_vo', userlevel=4)
-    #seh_ho = TangoMotor(device='pseudomotor/seh_hg_ctrl/2', name='seh_ho', userlevel=4)
-    #seh_vg = TangoMotor(device='pseudomotor/seh_vg_ctrl/1', name='seh_vg', userlevel=4)
-    #seh_hg = TangoMotor(device='pseudomotor/seh_hg_ctrl/1', name='seh_hg', userlevel=4)
-
     # gap and taper
     ivu_gap = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -150,10 +144,17 @@ if __name__ == '__main__':
     # xeol_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='xeol_z', userlevel=1, scaling=-1, velocity=1000)
 
     # controller 4 in OH2 for fast shutter and first diamondBPM
-    fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)
-    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)
-    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)
+    # gap and offset pseudo motors for slits in DM4
+    seh_vo = macros_common.SlitOffset([seh_top, seh_bottom], name="seh_vo", userlevel=4)
+    seh_vg = macros_common.SlitGap([seh_top, seh_bottom], name="seh_vg", userlevel=4)
+    seh_ho = macros_common.SlitOffset([seh_left, seh_right], name="seh_ho", userlevel=4)
+    seh_hg = macros_common.SlitGap([seh_left, seh_right], name="seh_hg", userlevel=4)
 
+    # gap and offset pseudo motors for slits in front of KB
+    skb_vo = macros_common.SlitOffset([skb_top, skb_bottom], name="skb_vo", userlevel=4)
+    skb_vg = macros_common.SlitGap([skb_top, skb_bottom], name="skb_vg", userlevel=4)
+    skb_ho = macros_common.SlitOffset([skb_left, skb_right], name="skb_ho", userlevel=4)
+    skb_hg = macros_common.SlitGap([skb_left, skb_right], name="skb_hg", userlevel=4)
     # we use ch0 on that controller for the long range sample motor for now
     # samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1)
 
