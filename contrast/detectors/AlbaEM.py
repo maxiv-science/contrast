@@ -66,7 +66,7 @@ class Electrometer(object):
     """
 
     def __init__(self, host='b-nanomax-em2-2', port=CMD_PORT,
-                 trig_source='DIO_1',
+                 trig_source='DIO_1', streaming=False,
                  stream_host=None, stream_port=STREAM_PORT):
         try:
             self.em = telnetlib.Telnet(host, port, timeout=5)
@@ -78,10 +78,13 @@ class Electrometer(object):
         # require SW version 2.2.02 where zmq streaming is available,
         # below 2.0.04 soft triggers were broken and below 2.0.0 data
         # indexing was wrong.
-#        assert self.version >= (2, 2, 2), \
-#            "Requires on-board SW version 2.2.02 or higher."
-        self.stream = Stream(host=host, port=stream_port, debug=False)
-        self.stream.start()
+        assert self.version >= (2, 2, 2), \
+            "Requires on-board SW version 2.2.02 or higher."
+        if streaming:
+            self.stream = Stream(host=host, port=stream_port, debug=False)
+            self.stream.start()
+        else:
+            self.stream = None
 
     def _flush(self):
         return self.em.read_eager().strip().decode('utf-8')
@@ -193,7 +196,10 @@ class Electrometer(object):
         ACQU:NDAT? increments before the integration time is over, so
         cannot be used. Look at the stream instead.
         """
-        return len(self.stream.data)
+        if self.stream is not None:
+            return len(self.stream.data)
+        else:
+            return None
 
     @property
     def version(self):
@@ -247,7 +253,8 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         BurstDetector.__init__(self)
 
     def initialize(self):
-        self.em = Electrometer(stream_port=STREAM_PORT, **self.kwargs)
+        self.em = Electrometer(stream_port=STREAM_PORT,
+                               streaming=True, **self.kwargs)
         self.burst_latency = 320e-6
         self.n_started = 0
         self.channels = [ch + 1 for ch in range(NUM_CHAN)]
@@ -318,7 +325,6 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if self.global_arm:
             # case 1 or 4, which means read a single point each time
             data = np.array(self.em.stream.data[-1])
-            data[1:] = data[1:] * 1e-6  # Amps
             return {k: v for k, v in zip(keys, data)}
         else:
             # case 2 or 3, return the last burst_n or hw_trig_n points
