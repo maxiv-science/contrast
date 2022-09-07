@@ -27,8 +27,8 @@ if __name__ == '__main__':
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
-    from macros_common import *
-    from macros_img import *
+    import macros_common
+    import macros_img
     import os
     import time
     # add a scheduler to pause scans when shutters close

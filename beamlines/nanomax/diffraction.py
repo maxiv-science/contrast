@@ -32,8 +32,8 @@ if __name__ == '__main__':
     from contrast.detectors.Keysight import Keysight2985
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
-    from macros_common import *
-    from macros_diff import *
+    import macros_common
+    import macros_diff
     import os
     import time
 
