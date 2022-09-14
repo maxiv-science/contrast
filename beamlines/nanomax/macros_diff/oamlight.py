@@ -49,7 +49,6 @@ class Oamlight(object):
             else:
                 group = 'all'
                 brightness = self.to_raw(self.args[0])
-                print(brightness, type(brightness))
                 self.set_group(self.led_groups[group], brightness)
         # if an even number of arguments is given, it must be a pair of a LED group and brightness or a list of LEDs and brightness
         elif len(self.args)%2 == 0:
