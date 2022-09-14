@@ -111,30 +111,31 @@ if __name__ == '__main__':
 
     # smaracts
     # controller 1
-    skb_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=0, name='skb_top', userlevel=2)
-    skb_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=1, name='skb_bottom', userlevel=2)
-    skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2)
-    skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2)
+    skb_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=0, name='skb_top', userlevel=2, velocity=1000)
+    skb_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=1, name='skb_bottom', userlevel=2, velocity=1000)
+    skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2, velocity=1000)
+    skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2, velocity=1000)
     # kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)
     # sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
-    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3)
-    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3)
-    pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3)
+    pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3, velocity=1000)
+    pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3, velocity=1000)
+    pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3, velocity=1000)
+
     # controller 2
-    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
-    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
-    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3)
-    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3)
-    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3)
-    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3)
-    attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2)
-    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2)
-    attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
-    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
+    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3, velocity=1000)
+    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3, velocity=1000)
+    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3, velocity=1000)
+    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3, velocity=1000)
+    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3, velocity=1000)
+    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3, velocity=1000)
+    attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2, velocity=5000)
+    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2, velocity=5000)
+    attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2, velocity=5000)
+    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2, velocity=5000)
     # fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
-    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
-    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2)
-    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2)
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3, velocity=5000)
+    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2, velocity=1000)
+    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2, velocity=1000)
     pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
     
     ## controller 3
@@ -142,21 +143,26 @@ if __name__ == '__main__':
     # xeol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='xeol_x', userlevel=1, velocity=1000)
     # xeol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='xeol_y', userlevel=1, scaling=-1, velocity=1000)
     # xeol_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='xeol_z', userlevel=1, scaling=-1, velocity=1000)
-
-    # controller 4 in OH2 for fast shutter and first diamondBPM
-    # gap and offset pseudo motors for slits in DM4
-    seh_vo = macros_common.SlitOffset([seh_top, seh_bottom], name="seh_vo", userlevel=4)
-    seh_vg = macros_common.SlitGap([seh_top, seh_bottom], name="seh_vg", userlevel=4)
-    seh_ho = macros_common.SlitOffset([seh_left, seh_right], name="seh_ho", userlevel=4)
-    seh_hg = macros_common.SlitGap([seh_left, seh_right], name="seh_hg", userlevel=4)
-
-    # gap and offset pseudo motors for slits in front of KB
-    skb_vo = macros_common.SlitOffset([skb_top, skb_bottom], name="skb_vo", userlevel=4)
-    skb_vg = macros_common.SlitGap([skb_top, skb_bottom], name="skb_vg", userlevel=4)
-    skb_ho = macros_common.SlitOffset([skb_left, skb_right], name="skb_ho", userlevel=4)
-    skb_hg = macros_common.SlitGap([skb_left, skb_right], name="skb_hg", userlevel=4)
     # we use ch0 on that controller for the long range sample motor for now
     # samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1)
+
+    # controller 4 in OH2 for fast shutter and first diamondBPM
+    fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3, velocity=1000)
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3, velocity=1000)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3, velocity=1000)
+
+    # gap and offset pseudo motors for slits in DM4
+    seh_posy = macros_common.SlitOffset([seh_top, seh_bottom], name="seh_posy", userlevel=4)
+    seh_gapy = macros_common.SlitGap([seh_top, seh_bottom], name="seh_gapy", userlevel=4)
+    seh_posx = macros_common.SlitOffset([seh_left, seh_right], name="seh_posx", userlevel=4)
+    seh_gapx = macros_common.SlitGap([seh_left, seh_right], name="seh_gapx", userlevel=4)
+
+
+    # gap and offset pseudo motors for slits in front of KB
+    skb_posy = macros_common.SlitOffset([skb_top, skb_bottom], name="skb_posy", userlevel=4)
+    skb_gapy = macros_common.SlitGap([skb_top, skb_bottom], name="skb_gapy", userlevel=4)
+    skb_posx = macros_common.SlitOffset([skb_left, skb_right], name="skb_posx", userlevel=4)
+    skb_gapx = macros_common.SlitGap([skb_left, skb_right], name="skb_gapx", userlevel=4)
 
     # KB mirror pitch piezos
     m1froll = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=1, name='m1froll', userlevel=2, dial_limits=(0,30))
