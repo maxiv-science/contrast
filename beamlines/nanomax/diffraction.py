@@ -248,12 +248,17 @@ if __name__ == '__main__':
 
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
-    NpointFlyscan.panda = panda0
+    macros_common.NpointFlyscan.panda = panda0
     pseudo = PseudoDetector(name='pseudo',
-                            variables={'c1': 'panda0/INENC1.VAL_Mean',
-                                       'c2': 'panda0/INENC2.VAL_Mean',
-                                       'c3': 'panda0/INENC3.VAL_Mean'},
-                            expression={'x': 'c2', 'y': 'c3', 'z': 'c1'})
+                            variables={#'c1': 'panda0/INENC1.VAL_Mean',
+                                       #'c2': 'panda0/INENC2.VAL_Mean',
+                                       #'c3': 'panda0/INENC3.VAL_Mean',
+                                       'adc1': 'panda0/FMC_IN.VAL1_Mean',
+                                       'adc2': 'panda0/FMC_IN.VAL2_Mean',
+                                       'adc3': 'panda0/FMC_IN.VAL3_Mean'},
+                            expression={#'x': 'c2', 'y': 'c3', 'z': 'c1',
+                                        'x': '-adc2*10', 'y': 'adc3*5', 'z': '-adc1*10'})
+#                                        'analog_x': '-adc2*5*10/2**31', 'analog_y': 'adc3*5*10/2**31', 'analog_z': '-adc1*5*10/2**31'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
     # keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
