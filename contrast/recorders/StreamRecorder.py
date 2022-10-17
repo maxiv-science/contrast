@@ -2,6 +2,7 @@ from . import Recorder, RecorderFooter
 from .Hdf5Recorder import Link
 import zmq
 import time
+import subprocess
 
 
 def walk_dict(dct):
@@ -60,7 +61,20 @@ class StreamRecorder(Recorder):
     def run(self):
         context = zmq.Context()
         self.socket = context.socket(zmq.PUB)
-        self.socket.bind("tcp://*:%s" % self.port)
+        try:
+            self.socket.bind("tcp://*:%s" % self.port)
+        except zmq.ZMQError:
+            print('%s could not bind to port %u - trying to kill whatever uses it...' % (self.name, self.port))
+            try:
+                pid = int(subprocess.check_output(['fuser', '-n', 'tcp', str(self.port)]))
+                subprocess.check_output(['kill', '-9', str(pid)])
+                time.sleep(2)
+                self.socket.bind("tcp://*:%s" % self.port)
+                print('...success!')
+            except subprocess.CalledProcessError:
+                print('...failed to find PID or kill process, giving up. This StreamRecorder won''t run.')
+            except zmq.ZMQError:
+                print('...still could not bind to port. Giving up.')
         super(StreamRecorder, self).run()
 
     def act_on_header(self, dct):

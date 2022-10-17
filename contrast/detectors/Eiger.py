@@ -54,7 +54,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 self.host, subsystem, self.api_version, key),
             timeout=timeout)
         if response:
-            if response.headers['content-type'] == 'application/json':
+            if 'application/json' in response.headers['content-type']:
                 return response.json()
             else:
                 print('unkown response type', response.headers['content-type'])

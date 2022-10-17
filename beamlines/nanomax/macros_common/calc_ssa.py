@@ -67,17 +67,17 @@ class Calc_SSA(object):
             self.accepteance_m = np.array(acc)
 
     def print_result(self):
-        print('    photon energy: ' + str(self.photon_energy_eV) + ' eV')
-        print('    distance from SSA: ' + str(self.d_ssa_m) + ' m')
-        print('    optics aperture: ' + str(self.accepteance_m) + ' m')
+        print(f'    photon energy: {self.photon_energy_eV} eV')
+        print(f'    distance from SSA: {self.d_ssa_m} m')
+        print(f'    optics aperture: {self.accepteance_m} m')
         if self.coherent:
             print('    beam: coherence mode')
         else:
             print('    beam: high flux mode')
-        print('-' * 20)
-        print('    required SSA opening:',
-              "ssa_gapx {0:.2f}".format(self.ssa_opening_m[0] * 1e6),
-              "ssa_gapy {0:.2f}".format(self.ssa_opening_m[1] * 1e6))
+        print(' ' * 4 +'-' * 20)
+        print('    required SSA opening:')
+        print(f'       ssa_gapx {self.ssa_opening_m[0] * 1e6 :.2f}')
+        print(f'       ssa_gapy {self.ssa_opening_m[1] * 1e6 :.2f}')
 
     def run(self):
         if self.input_validation():

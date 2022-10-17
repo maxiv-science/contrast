@@ -15,8 +15,14 @@ def dict_lookup(dct, path):
         pre, post = path.split('/', maxsplit=1)
         return dict_lookup(dct[pre], post)
     else:
-        return dct[path]
-
+        try:
+            return dct[path]
+        except KeyError:
+            # sometimes the actual keys are ints
+            try:
+                return dct[int(path)]
+            except ValueError:
+                raise KeyError(path)
 
 class PlotRecorder(Recorder):
     """
@@ -103,7 +109,10 @@ class PlotRecorder(Recorder):
             self.y[k].append(v)
         if self.xdata is not None:
             # checking if we have explicit x data
-            self.x.append(dct[self.xdata])
+            try:
+                self.x.append(dct[self.xdata])
+            except KeyError:
+                return
         else:
             self.x = range(len(self.y[k]))
         for k, l in self.lines.items():

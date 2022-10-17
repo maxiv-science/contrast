@@ -91,9 +91,9 @@ class MaxivScheduler(DummyScheduler):
             self.shutter_checker = TangoShutterChecker(*shutter_list)
             self.shutter_checker.start()
             self.injection_device = tango.DeviceProxy(
-                'g-v-csproxy-0:10000/R3-319S2/DIA/DCCT-01')
+                'g-v-csproxy-0:10303/R3-319S2/DIA/DCCT-01')
             self.countdown_device = tango.DeviceProxy(
-                'g-v-csproxy-0:10000/g/ctl/machinestatus')
+                'g-v-csproxy-0:10303/g/ctl/machinestatus')
             self.disabled = False
             self.avoid_injections = avoid_injections
             self.respect_countdown = respect_countdown

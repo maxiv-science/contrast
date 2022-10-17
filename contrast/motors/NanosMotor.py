@@ -24,6 +24,10 @@ class NanosMotor(Motor):
         self.proxy = PyTango.DeviceProxy(device)
         self.proxy.set_source(PyTango.DevSource.DEV)
         self._axis = int(axis)
+        if self.proxy.State() == PyTango.DevState.STANDBY:
+            self.proxy.Connect()
+        ax = '#%02d\r' % self._axis
+        self.proxy.ArbitrarySend(ax)
         val = 'Y8=%d' % velocity
         self.proxy.ArbitraryAsk(val)
 
