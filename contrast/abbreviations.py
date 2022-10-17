@@ -8,4 +8,7 @@ abbrv = [
     "CONTinuous RASTer",
     "COntrary Nanomax TRiggering and Acquisition SysTem",
     "COsaxs Now TRiggers with Absolutely Superb Timing",
+    "Could Other National Tree-based Research Applications Scan Thusly?",
+    "Can Observe Numerous Tired Researchers Alternate Scannning Trees",
+    "Carbon Or Nitrogen-edge Transmission Rastering All Synchronized Teriffically",
 ]

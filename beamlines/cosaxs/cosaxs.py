@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
 
     # detectors
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    
 
     # The pandabox and some related pseudodetectors
     # Pandabox at the diffraction station, which is needed for controlling the fast shutter
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('b310a/ctl/sdm-01')
 
-    """ ## commented out fr now desc = Failed to connect to database on host g-v-csproxy-0.maxiv.lu.se with port 10303
+    """## commented out fr now desc = Failed to connect to database on host g-v-csproxy-0.maxiv.lu.se with port 10303
     # add a scheduler to pause scans when shutters close
     env.scheduler = MaxivScheduler(
                         shutter_list=['b310a-fe/vac/ha-01',
@@ -190,8 +190,9 @@ if __name__ == '__main__':
 
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=2)
+    dummy1.velocity = 100
     dummy2 = DummyMotor(name='dummy2', userlevel=2)
-
+    dummy2.velocity = 100
 
 
 
@@ -202,6 +203,7 @@ if __name__ == '__main__':
     # Pandabox at CoSAXS to send the trigger to the Eiger
     #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0') # 172.16.197.26
     panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
+    alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48
 
     ########################################
     # recorders
@@ -224,11 +226,11 @@ if __name__ == '__main__':
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
         runCommand('stoplive')
-        runCommand('fsopen')
+        #runCommand('fsopen')
         pass
 
     def post_scan_stuff(slf):
-        runCommand('fsclose')
+        #runCommand('fsclose')
         pass
 
     SoftwareScan._before_scan = pre_scan_stuff
