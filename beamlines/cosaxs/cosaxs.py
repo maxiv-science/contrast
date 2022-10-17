@@ -27,7 +27,7 @@ if __name__ == '__main__':
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector, PseudoDetector
     from contrast.scans import SoftwareScan, Ct
-    from macros import * # beamline specific macros
+    import macros # beamline specific macros
     import os
     import time
 
@@ -70,17 +70,15 @@ if __name__ == '__main__':
 
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
-    energy = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/mono_bragg_ctrl/1', name='energy', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
+    energy = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/mono_bragg_ctrl/1', name='energy', userlevel=2, dial_limits=(5000, 32000), user_format='%.1f', scaling=1000.)
 
     # flight tube
     det_z = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/cosaxs_flight_ctrl/26', name='det_z', userlevel=2, dial_limits=(-569.65, 13865.0), user_format='%.4f')
 
 
     # attenuators
-    # to be checked if it works with MC2
     bcu01_x1pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x1pz', name='bcu01_x1pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     bcu01_x2pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x2pz', name='bcu01_x2pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
-
     # bcu01_x1pz
     #  32 - out - no absorber
     #  21 - Al 18um
