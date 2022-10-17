@@ -163,7 +163,9 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'
                       % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
-        self._set('stream', 'config/header_appendix',
+        #self._set('stream', 'config/header_appendix',
+        #          json.dumps({'filename': self.dpath}))
+        self._set('stream', 'config/image_appendix',
                   json.dumps({'filename': self.dpath}))
         self._set('detector', 'command/arm')
         self.n_started = 0

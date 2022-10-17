@@ -129,13 +129,9 @@ if __name__ == '__main__':
     energy_raw = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy_raw')
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_corr_ctrl/1', name='energy')
 
-    # some dummy motors
-    dummy1 = DummyMotor(name='dummy1', userlevel=2)
-    dummy2 = DummyMotor(name='dummy2', userlevel=2)
+
 
     # detectors
-    eiger = Eiger(name='eiger', host='b-nanomax-eiger-dc-1')
-    xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
 
     # The pandabox and some related pseudodetectors
@@ -164,18 +160,72 @@ if __name__ == '__main__':
     # scicatrec = ScicatRecorder(name='scicatrec')
     # scicatrec.start()
 
-    # default detector selection
+    """
+
+
+    # the environment keeps track of where to write data
+    env.paths = SdmPathFixer('b310a/ctl/sdm-01')
+
+    """ ## commented out fr now desc = Failed to connect to database on host g-v-csproxy-0.maxiv.lu.se with port 10303
+    # add a scheduler to pause scans when shutters close
+    env.scheduler = MaxivScheduler(
+                        shutter_list=['b310a-fe/vac/ha-01',
+                                      'b310a-fe/pss/bs-01',
+                                      'b310a-o/pss/bs-01'],
+                        avoid_injections=False,
+                        respect_countdown=False,)
+    """
+
+
+    env.userLevel = 2
+    # arbitrarily chosen these levels:
+    # 1 - simple user
+    # 2 - power user
+    # 3 - optics
+    # 4 - potentially dangerous
+
+    ########################################
+    # motors
+    ########################################
+
+    # some dummy motors
+    dummy1 = DummyMotor(name='dummy1', userlevel=2)
+    dummy2 = DummyMotor(name='dummy2', userlevel=2)
+
+
+
+
+    ########################################
+    # detectors
+    ########################################
+
+    # Pandabox at CoSAXS to send the trigger to the Eiger
+    #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0') # 172.16.197.26
+    panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
+
+    ########################################
+    # recorders
+    ########################################
+
+    # an hdf5 recorder
+    h5rec = Hdf5Recorder(name='h5rec')
+    h5rec.start()
+
+    # a zmq recorder
+    zmqrec = StreamRecorder(name='zmqrec')
+    zmqrec.start()  # removed for now
+
+    # default detector selection on contrast startup
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, eiger]:
+    for d in [panda0]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
         runCommand('stoplive')
         runCommand('fsopen')
-        b1.stop()   # making sure the base motors are not regulating
-        time.sleep(0.2)
+        pass
 
     def post_scan_stuff(slf):
         runCommand('fsclose')
@@ -186,36 +236,6 @@ if __name__ == '__main__':
     Ct._before_ct = pre_scan_stuff
     Ct._after_ct = post_scan_stuff
 
-    """
-
-    # add a scheduler to pause scans when shutters close
-    env.scheduler = MaxivScheduler(
-                        shutter_list=['b310a-de/vac/ha-01',
-                                      'b310a-de/pss/bs-01',
-                                      'b310a-O/pss/ba-01'],
-                        avoid_injections=False,
-                        respect_countdown=False,)
-
-    env.userLevel = 2
-    # arbitrarily chosen these levels:
-    # 1 - simple user
-    # 2 - power user
-    # 3 - optics
-    # 4 - potentially dangerous
-
-
-
-
-    # the environment keeps track of where to write data
-    env.paths = SdmPathFixer('b310a/ctl/sdm-01')
-
-    # an hdf5 recorder
-    h5rec = Hdf5Recorder(name='h5rec')
-    h5rec.start()
-
-    # a zmq recorder
-    zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start()  # removed for now
 
     contrast.wisdom()
 
