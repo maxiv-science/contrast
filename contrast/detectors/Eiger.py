@@ -25,7 +25,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         """
         self.host = host
         self.api_version = api_version
-        self._hdf_path = 'entry/measurement/Eiger/data'
+        self._hdf_path = 'entry/instrument/eiger/data'
         self.acqthread = None
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
@@ -163,8 +163,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'
                       % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
-        #self._set('stream', 'config/header_appendix',
-        #          json.dumps({'filename': self.dpath}))
+        self._set('stream', 'config/header_appendix',
+                  json.dumps({'filename': self.dpath}))
         self._set('stream', 'config/image_appendix',
                   json.dumps({'filename': self.dpath}))
         self._set('detector', 'command/arm')
