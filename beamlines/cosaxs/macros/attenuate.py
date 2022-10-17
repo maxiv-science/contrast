@@ -131,7 +131,7 @@ class Attenuate(object):
                 line = '    ' + self.carriers[i_carrier]
                 line += ' ' + str(carrier_positions[i_carrier]).rjust(10)
                 line += ' #' + str(self.thickness[i_pos, i_carrier]).rjust(5)
-                line += ' um of ' + str(self.elements[i_pos])
+                line += ' um of ' + str(self.elements[i_pos][i_carrier])
                 print(line)
 
     def input_validation(self):
