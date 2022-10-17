@@ -7,4 +7,5 @@ abbrv = [
     "Come On! Nanomax Tries Reasonable Acquisition and Sardana Trips",
     "CONTinuous RASTer",
     "COntrary Nanomax TRiggering and Acquisition SysTem",
+    "COsaxs Now TRiggers with Absolutely Superb Timing",
 ]
