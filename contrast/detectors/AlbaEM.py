@@ -205,7 +205,7 @@ class Electrometer(object):
     def version(self):
         res = self.query('*IDN?')
         version = res.split(',')[-1].strip()
-        return tuple(map(int, version.split('.')))
+        return tuple(map(int, version.split('.')[:3]))
 
     def test_soft_triggers(self, N=1000):
         """
