@@ -72,35 +72,25 @@ if __name__ == '__main__':
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
     energy = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/mono_bragg_ctrl/1', name='energy', userlevel=2, dial_limits=(5000, 32000), user_format='%.1f', scaling=1000.)
 
-    # flight tube
+    # detector table inside the flight tube
     det_z = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/cosaxs_flight_ctrl/26', name='det_z', userlevel=2, dial_limits=(-569.65, 13865.0), user_format='%.4f')
-
 
     # attenuators
     bcu01_x1pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x1pz', name='bcu01_x1pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     bcu01_x2pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x2pz', name='bcu01_x2pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
-    # bcu01_x1pz
-    #  32 - out - no absorber
-    #  21 - Al 18um
-    #  10 - Al 60um
-    #   0 - Al 180um
-    # -10 - Al 540um
-    # -20 - Al 1020um
-
-    # bcu01_x2pz
-    #  32 - out - no absorber
-    #  21 - Ti 75um
-    #  10 - Ti 225um
-    #   0 - Ti 375um
-    # -10 - Ti 525um
-    # -20 - Ti 675um
+    # bcu01_x1pz                       bcu01_x2pz
+    #  32 - out - no absorber           32 - out - no absorber
+    #  21 - Al 18um                     21 - Ti 75um
+    #  10 - Al 60um                     10 - Ti 225um
+    #   0 - Al 180um                     0 - Ti 375um
+    # -10 - Al 540um                   -10 - Ti 525um
+    # -20 - Al 1020um                  -20 - Ti 675um
 
     # slit 1 - for setting the coherence
     slit1_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/slit-01-xl', name='slit1_xl', userlevel=2, dial_limits=(-20, 20), user_format='%.4f') #mm
     slit1_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/slit-01-xr', name='slit1_xr', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     slit1_yb = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/slit-01-yb', name='slit1_yb', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     slit1_yt = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/slit-01-yt', name='slit1_yt', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
-
     slit1_xgap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/o02_v_slit1_ctrl/1', name='slit1_xgap', userlevel=2, dial_limits=(-20, 20), user_format='%.4f') #mm
     slit1_xpos = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/o02_v_slit1_ctrl/2', name='slit1_xpos', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     slit1_ygap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/o02_h_slit1_ctrl/1', name='slit1_ygap', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
@@ -114,20 +104,14 @@ if __name__ == '__main__':
     # detectors
     ########################################
 
-    # Pandabox at CoSAXS to send the trigger to the Eiger
     eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0') # 172.16.197.26
     panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
     alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48 # maybe channel 2
-
     pseudo = PseudoDetector(name='pseudo',
-                            variables={#'c1': 'panda0/INENC1.VAL_Mean',
-                                       #'c2': 'panda0/INENC2.VAL_Mean',
-                                       #'c3': 'panda0/INENC3.VAL_Mean',
-                                       'I0_m': 'panda0/FMC_IN.VAL5_Mean',
+                            variables={'I0_m': 'panda0/FMC_IN.VAL5_Mean',
                                        'It_m': 'panda0/FMC_IN.VAL6_Mean'},
-                            expression={#'x': 'c2', 'y': 'c3', 'z': 'c1',
-                                        #'x': '-adc2*10', 'y': 'adc3*5', 'z': '-adc1*10'})
-                                        'I0': 'I0_m', 'It': 'It_m'})
+                            expression={'I0': 'I0_m', 
+                                        'It': 'It_m'})
 
     ########################################
     # recorders
@@ -154,18 +138,17 @@ if __name__ == '__main__':
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
         runCommand('stoplive')
-        #runCommand('fsopen')
+        runCommand('fsopen')
         pass
 
     def post_scan_stuff(slf):
-        #runCommand('fsclose')
+        runCommand('fsclose')
         pass
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff
     Ct._before_ct = pre_scan_stuff
     Ct._after_ct = post_scan_stuff
-
 
     contrast.wisdom()
 
