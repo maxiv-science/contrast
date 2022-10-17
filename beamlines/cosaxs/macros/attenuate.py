@@ -92,7 +92,7 @@ class Attenuate(object):
         self.T_tot = [[T1 * T2 , i1, i2, [self.elements[i1][0], self.elements[i2][0]]]
                       for i1, T1 in enumerate(self.transmission[:, 0])
                       for i2, T2 in enumerate(self.transmission[:, 1])]
-        self.T_tot = np.array(self.T_tot)
+        self.T_tot = np.array(self.T_tot, dtype=object)
         self.T_tot = self.T_tot[np.argsort(self.T_tot[:, 0])]
 
     def run_command(self, command):
