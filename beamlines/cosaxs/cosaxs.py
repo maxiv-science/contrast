@@ -108,8 +108,8 @@ if __name__ == '__main__':
     panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
     alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48 # maybe channel 2
     pseudo = PseudoDetector(name='pseudo',
-                            variables={'I0_m': 'panda0/FMC_IN.VAL5_Mean',
-                                       'It_m': 'panda0/FMC_IN.VAL6_Mean'},
+                            variables={'I0_m': 'panda0/FMC_IN.VAL6_Mean',
+                                       'It_m': 'panda0/FMC_IN.VAL3_Mean'},
                             expression={'I0': 'I0_m', 
                                         'It': 'It_m'})
 
