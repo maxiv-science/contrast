@@ -21,6 +21,7 @@ if __name__ == '__main__':
     from contrast.motors.Pmd401Motor import Pmd401Motor
     from contrast.motors.Pmd401Motor import BaseYMotor
     from contrast.motors.Pmd401Motor import BaseZMotor
+    from contrast.motors.E727 import E727Motor
     from contrast.detectors.Eiger import Eiger
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
@@ -64,16 +65,27 @@ if __name__ == '__main__':
     dummy2.velocity = 100
 
     # PI NanoCube 3-axis piezo. To be used in temporary setups
-    # sx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    # sy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='sy', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    # sz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='sz', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    sx = E727Motor(device='B310A/CTL/PZCU-01', axis=2, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    sy = E727Motor(device='B310A/CTL/PZCU-01', axis=3, name='sy', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    sz = E727Motor(device='B310A/CTL/PZCU-01', axis=1, name='sz', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
 
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
     energy = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/mono_bragg_ctrl/1', name='energy', userlevel=2, dial_limits=(5000, 32000), user_format='%.1f', scaling=1000.)
 
     # detector table inside the flight tube
+    det_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e02/dia/tab-02-x', name='det_x', userlevel=2, dial_limits=(42, 200), user_format='%.4f')
+    det_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e02/dia/tab-02-y', name='det_y', userlevel=2, dial_limits=(36, 199), user_format='%.4f')
     det_z = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/cosaxs_flight_ctrl/26', name='det_z', userlevel=2, dial_limits=(-569.65, 13865.0), user_format='%.4f')
+
+    # pinhole - Thorlabs stages
+    pinhole_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-x', name='pinhole_x', userlevel=2, scaling= 1.0,dial_limits=(-5000, 5000), user_format='%.4f')
+    pinhole_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-y', name='pinhole_y', userlevel=2, scaling=-1.0, dial_limits=(-5000, 5000), user_format='%.4f')
+
+    # sample - Huber stages
+    sample_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-04-x', name='sample_x', userlevel=2, dial_limits=(10, 290), user_format='%.4f')
+    sample_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-04-y', name='sample_y', userlevel=2, dial_limits=(10, 80), user_format='%.4f')
+
 
     # attenuators
     bcu01_x1pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x1pz', name='bcu01_x1pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
