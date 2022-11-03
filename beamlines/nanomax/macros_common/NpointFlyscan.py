@@ -129,7 +129,3 @@ class NpointFlyscan(Mesh):
                           + 'piexo having trouble settling? trying again...')
                 time.sleep(.1)
 
-    def _while_acquiring(self):
-        s = '%.3f um' % self.fastmotor.user_position
-        print(s + '\r', end='')
-        time.sleep(.1)
