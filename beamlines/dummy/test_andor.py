@@ -71,9 +71,11 @@ if __name__ == '__main__':
     #det3 = Dummy1dDetector(name='det3')
     #det4 = DummyWritingDetector2(name='det4')
 
-    andor = Andor3(name='andor', device='zyla/test/1')
+    # andor = Andor3(name='andor', device='zyla/test/1') # inital test
+	andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
     #andor.proxy.rotation=1
     #andor.proxy.flipud=True
+	#andor.proxy.fliplr=True
 
     env.paths.directory = '/data/staff/nanomax/commissioning_2022-2/20221107_DESY_Andor_test/raw/sample/'
 
