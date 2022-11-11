@@ -92,7 +92,7 @@ class NewSample(object):
     """
     Set the sample directory at the diffraction endstation.
     Usage:
-        %NewSample '0000_setup'
+        %newsample '0000_setup'
 
     would set the data directory to:
     /data/visitors/nanomax/<proposalID>/<visit>/raw/0000_setup/
@@ -100,7 +100,7 @@ class NewSample(object):
     You can double check it by typing 'path' afterwards to show
     the current directory data is saved in.
     """
-    
+
     def __init__(self, NewSampleName):
         self.NewSampleName = NewSampleName
         self.sdm_mac = PyTango.DeviceProxy("B303A-E02/CTL/SDM-01")
