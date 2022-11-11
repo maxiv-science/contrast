@@ -37,6 +37,15 @@ if __name__ == '__main__':
     import os
     import time
 
+    # warn if we are not nanomax-service with correct umask
+    user = os.popen('whoami').read().strip()
+    umask = os.popen('umask').read().strip()
+    if not (user == 'nanomax-service' and umask =='0022'):
+        print(
+            '\033[91mWARNING! The correct way of running the beamline'
+            ' is as nanomax-service with umask 022\033[0m'
+        )
+
     # add a scheduler to pause scans when shutters close
     env.scheduler = MaxivScheduler(
         proxy_device='b303a/ctl/proxy-01',
