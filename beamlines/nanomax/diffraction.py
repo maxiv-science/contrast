@@ -39,6 +39,7 @@ if __name__ == '__main__':
 
     # add a scheduler to pause scans when shutters close
     env.scheduler = MaxivScheduler(
+        proxy_device='b303a/ctl/proxy-01',
         shutter_list=['B303A-FE/VAC/HA-01',
                       'B303A-FE/PSS/BS-01',
                       'B303A-O/PSS/BS-01',
@@ -72,9 +73,12 @@ if __name__ == '__main__':
     basey = TangoMotor(device='motor/icepap_ctrl_1_expert/17', name='basey', userlevel=1)
     basez = TangoMotor(device='motor/icepap_ctrl_1_expert/18', name='basez', userlevel=1)
 
-    # gap and taper
-    ivu_gap = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
-    ivu_taper = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
+    # gap and taper via a proxy in the local pool
+    ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
+    ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
+
+    # ring current via a local proxy
+    ring_current = TangoAttributeDetector(device='b303a/ctl/proxy-01', attribute='r3current', name='ring_current')
 
     # Diamond filter motors, sitting in diagnostics module 1
     bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=6, dial_limits=(-36.04, 36.77))
@@ -288,7 +292,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [alba2, panda0, pseudo]:  # eiger,
+    for d in [panda0, pseudo, alba2, ring_current]:  # eiger,
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
@@ -325,3 +329,4 @@ if __name__ == '__main__':
     # set above! delete the file to generate it again.
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
+
