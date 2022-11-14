@@ -31,6 +31,7 @@ if __name__ == '__main__':
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
     from contrast.detectors.BaslerCamera import BaslerCamera
+    from contrast.detectors.TangoAttributeDetector import TangoAttributeDetector
     from contrast.scans import SoftwareScan, Ct
     import macros_common
     import macros_diff
@@ -67,7 +68,7 @@ if __name__ == '__main__':
     # PI NanoCube 3-axis piezo. To be used in temporary setups
     # sx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     # sy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='sy', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    # sz = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=2, name='sz', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    # sz = E727Motor(device='B303A-EH/CTL/PZCU-02', aos.popen('whoami').read().strip()xis=2, name='sz', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
 
     # sample piezos
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
@@ -182,13 +183,6 @@ if __name__ == '__main__':
     m1fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=2, name='m1fpitch', userlevel=2, dial_limits=(0,30))
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
-    # KB cage legs
-    #kbv1 = TangoMotor(device='b303a-e02/opt/mir-01-v1ml', name='kbv1', userlevel=6, user_format='%.4f', dial_format='%.4f')
-    #kbv2 = TangoMotor(device='b303a-e02/opt/mir-01-v2ml', name='kbv2', userlevel=6, user_format='%.4f', dial_format='%.4f')
-    #kbv3 = TangoMotor(device='b303a-e02/opt/mir-01-v3ml', name='kbv3', userlevel=6, user_format='%.4f', dial_format='%.4f')
-    #kbh4 = TangoMotor(device='b303a-e02/opt/mir-01-h4ml', name='kbh4', userlevel=6, user_format='%.4f', dial_format='%.4f')
-    #kbh5 = TangoMotor(device='b303a-e02/opt/mir-01-h5ml', name='kbh5', userlevel=6, user_format='%.4f', dial_format='%.4f')
-
     # Robot
     # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
@@ -226,8 +220,8 @@ if __name__ == '__main__':
     xrf_x = TangoMotor(device='B303A-E02/DIA/DMA-01-X', name='xrf_x', userlevel=4, scaling=1.25, dial_limits=(0, 75))
 
     # detector motors
-    detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=3, dial_limits=(0, 295))
-    dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=3, dial_limits=(0, 31))
+    # detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=3, dial_limits=(0, 295))
+    # dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=3, dial_limits=(0, 31))
 
     # table motors
     table_front_x = TangoMotor(device='b303a-e02/dia/tab-01-x1', name='table_front_x', userlevel=5, dial_limits=(-10,10))
@@ -244,19 +238,26 @@ if __name__ == '__main__':
     dummy2 = DummyMotor(name='dummy2', userlevel=2)
 
     # The delay generator as a software source for hardware triggers
-    stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
+    # stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
-    pilatus = Pilatus(name='pilatus',
-                     hostname='b-nanomax-mobile-ipc-01')
+    #pilatus = Pilatus(name='pilatus',
+    #                 hostname='b-nanomax-mobile-ipc-01')
     merlin = Merlin(name='merlin', host='localhost')
+    # merlin = Merlin(name='merlin', host='b-daq-node-2', port=8001)
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
-    andor = Andor3(name='andor', device='staff/clewen/zyla')
-    andor.proxy.rotation=1
-    andor.proxy.flipud=True
-    eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
+    
+    #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
+    # settings for DESY Andor, needs to be changed for the NanoMAX Crytur Andor
+    #andor.proxy.rotation=1
+    #andor.proxy.flipud=False
+    #andor.proxy.fliplr=False
+    #andor.proxy.sensorcooling=True
+
+    #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    # eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
+    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
