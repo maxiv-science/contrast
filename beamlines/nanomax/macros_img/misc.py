@@ -45,6 +45,27 @@ class ShClose(object):
 
 
 @macro
+class NewSample(object):
+    """
+    Set the sample directory at the imaging endstation.
+    Usage:
+        %newsample '0000_setup'
+
+    would set the data directory to:
+    /data/visitors/nanomax/<proposalID>/<visit>/raw/0000_setup/
+
+    You can double check it by typing 'path' afterwards to show
+    the current directory data is saved in.
+    """
+
+    def __init__(self, NewSampleName):
+        self.NewSampleName = NewSampleName
+        self.sdm_mac = PyTango.DeviceProxy("B303A-E01/CTL/SDM-01")
+
+    def run(self):
+        self.sdm_mac.Sample  = self.NewSampleName
+
+@macro
 class GripperHoming(object):
     """
     Homing the motors for the sample gripper
