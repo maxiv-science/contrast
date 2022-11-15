@@ -14,7 +14,7 @@ if __name__=='__main__':
     from contrast.environment.data import SdmPathFixer
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     from contrast.motors.TangoMotor import TangoMotor
-    from contrast.detectors.PandaBoxSofti import PandaBoxSoftiPtycho, PandaBox0D
+#    from contrast.detectors.PandaBoxSofti import PandaBoxSoftiPtycho, PandaBox0D
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.TangoAttributeDetector import TangoAttributeDetector
     from contrast.detectors.DhyanaAndor import DhyanaAndor
@@ -53,39 +53,29 @@ if __name__=='__main__':
     osay = TangoMotor(device='motor/osa_ctrl/2', name='osay', user_format='%.3f', dial_format='%.3f', offset=0.32)
     beamline_energy = TangoMotor(device='B318A/CTL/BEAMLINE-ENERGY', name='beamline_energy', user_format='%.3f', dial_format='%.3f', dial_limits=(275, 1600))
 
-    shutter0 = SoftiPiezoShutter(device='B318A-EA01/CTL/PiezoShutter', name='shutter0')
+#    shutter0 = SoftiPiezoShutter(device='B318A-EA01/CTL/PiezoShutter', name='shutter0')
+    shutter0 = SoftiPiezoShutter(device='B318A-EA01/CTL/GalilShutter', name='shutter0')
 
-    zp = tango.DeviceProxy('B318A-EA01/CTL/ZPEnergy')
-    zp_mot = TangoMotor(device='B318A-EA01/CTL/ZPEnergy', name='zp', user_format='%.3f', dial_format='%.3f', dial_limits=(-1300, -15000))
-    zp_E_mot = TangoAttributeMotor(name='zp_E_mot', device='B318A-EA01/CTL/ZPEnergy', attribute='Energy')
+    zp = tango.DeviceProxy('B318A-EA01/CTL/SoftiZPEnergy')
+    zp_mot = TangoMotor(device='B318A-EA01/CTL/SoftiZPEnergy', name='zp', user_format='%.3f', dial_format='%.3f', dial_limits=(-1300, -15000))
+    zp_E_mot = TangoAttributeMotor(name='zp_E_mot', device='B318A-EA01/CTL/SoftiZPEnergy', attribute='Energy')
     
     finex = TangoMotor(device='B318A/CTL/DUMMY-01', name='finex', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
     finey = TangoMotor(device='B318A/CTL/DUMMY-02', name='finey', user_format='%.3f', dial_format='%.3f', dial_limits=(0, 100))
  
-    # detectors
+    # cameras
     andor = DhyanaAndor(device='B318A-EA01/dia/andor-zyla-01', name='andor', hdf_name='zyla')
-#    panda0 = PandaBoxSoftiPtycho(name='panda0', host='b-softimax-panda-0')
     dhyana = DhyanaAndor(name='dhyana', hdf_name='dhyana', device='b318a-ea01/dia/dhyana')
-    
-    #panda0 = PandaBox0D(name='panda0', device='B318A-EA01/CTL/PandaPosTrig')
+
+    # other detectors    
     abs_x = TangoAttributeDetector('abs_x', 'B318A-EA01/CTL/PandaPosTrig', 'AbsX')
     abs_y = TangoAttributeDetector('abs_y', 'B318A-EA01/CTL/PandaPosTrig', 'AbsY')
     roi = TangoAttributeDetector('roi', 'B318A-EA01/dia/andor-requests', 'data_mean')
     
-    """ pseudo = PseudoDetector(name='pseudo',
-                            variables={'enc_x':'panda0/INENC1.VAL_Value',
-                                       'enc_y':'panda0/INENC2.VAL_Value',
-                                       'c1':'panda0/COUNTER1.OUT_DIFF',
-                                       'c2':'panda0/COUNTER2.OUT_DIFF',
-                                       'c3':'panda0/COUNTER3.OUT_DIFF'},
-                            expression={'x':'enc_x', 'y':'enc_z', 'count1':'c1', 'count2':'c2', 'count3':'c3'})
-    diode = PandaBox0D(name='diode', type='diode')
-    pmt = PandaBox0D(name='pmt', type='PMT') """
-
      # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [andor, roi, abs_x, abs_y, panda0]:
+    for d in [andor, roi, abs_x, abs_y]:
         d.active = True
 
     def pre_scan_stuff(slf):
@@ -112,3 +102,4 @@ if __name__=='__main__':
 
     print('\n\nThe current polarization mode is: ', pol_ctrl.get_polarization())
     print('The beamline energy is: ', tango.DeviceProxy('B318A/CTL/BEAMLINE-ENERGY').Position)
+

@@ -131,7 +131,7 @@ class DhyanaAndor(Detector, BurstDetector):
         return am_busy
 
     def read(self):
-        if self.dataid:
+        if self.dataid is not None:
             path, f_name = os.path.split(self.proxy.DestinationFilename)
             return Link(self.proxy.DestinationFilename, 'entry/instrument/%s/data' % self.hdf_name, universal=(self.burst_n==1))
         else:
