@@ -4,8 +4,7 @@ can be monitored during scans.
 """
 
 from .Detector import Detector
-import tango
-
+import PyTango
 
 class TangoAttributeDetector(Detector):
     """
@@ -14,16 +13,15 @@ class TangoAttributeDetector(Detector):
     of Tango attributes and are never busy.
     """
     def __init__(self, name, device, attribute):
-        self.device_name = device
-        self.attribute = attribute
         super(TangoAttributeDetector, self).__init__(name=name)
+        self.proxy = PyTango.DeviceProxy(device)
+        self.attribute = attribute
 
     def initialize(self):
-        self.proxy = tango.DeviceProxy(self.device_name)
+        pass
 
     def start(self):
         super(TangoAttributeDetector, self).start()
-        self.val = self.proxy.read_attribute(self.attribute).value
 
     def stop(self):
         pass
@@ -32,7 +30,4 @@ class TangoAttributeDetector(Detector):
         return False
 
     def read(self):
-        try:
-            return self.val
-        except AttributeError:
-            raise Exception('Detector not started!')
+        return self.proxy.read_attribute(self.attribute).value
