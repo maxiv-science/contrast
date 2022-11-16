@@ -130,18 +130,29 @@ class DummyMotor(Motor):
     """
     Dummy motor which can be harmlessly moved with a velocity of 1 / s.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, velocity=None, dial_position=None, *args, **kwargs):
         super(DummyMotor, self).__init__(*args, **kwargs)
-        self._aim = 0.0
-        self._oldpos = 0.0
+
+        if dial_position:
+            self._aim = dial_position
+            self._oldpos = dial_position
+        else:
+            self._aim = 0.0
+            self._oldpos = 0.0
+
+        if velocity is None:
+            self.velocity = 1.
+        else:
+            self.velocity = velocity
+        self.moving_velocity = self.velocity
+
         self._started = 0.0
-        self.velocity = 1.0
 
     @property
     def dial_position(self):
         dpos = self._aim - self._oldpos
         dt = time.time() - self._started
-        T = abs(dpos / self.velocity)
+        T = abs(dpos / self.moving_velocity)
         if dt < T:
             return self._oldpos + dpos * dt / T
         else:
@@ -152,6 +163,7 @@ class DummyMotor(Motor):
         self._oldpos = self.dial_position
         self._started = time.time()
         self._aim = pos
+        self.moving_velocity = self.velocity
 
     def busy(self):
         return not np.isclose(self._aim, self.dial_position)
