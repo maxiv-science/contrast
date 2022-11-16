@@ -5,7 +5,7 @@ Sets up a some actual nanomax hardware.
 # need this main guard here because Process.start() (so our recorders)
 # import __main__, and we don't want the subprocess to start new sub-
 # processes etc.
-if __name__=='__main__':
+if __name__ == '__main__':
 
     import contrast
     from contrast.environment import env, runCommand
@@ -17,16 +17,16 @@ if __name__=='__main__':
     from contrast.motors.TangoMotor import TangoMotor
     # from contrast.detectors.Ni6602 import Ni6602CounterCard
     # from contrast.detectors.AdLink import AdLinkAnalogInput
-    from contrast.detectors import DummyDetector, Dummy1dDetector, DummyWritingDetector, DummyWritingDetector2
+    from contrast.detectors import (DummyDetector, Dummy1dDetector,
+                                    DummyWritingDetector,
+                                    DummyWritingDetector2)
     from contrast.detectors import Detector, TriggeredDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.PandaBox import PandaBox
-    # from nanomax_beamline_macros import *
     from NpointFlyscan import NpointFlyscan
-    #from macro_attenuate import *
     from contrast.scans import SoftwareScan, Ct
     import os
-    
+
     env.userLevel = 4
     # chosen these levels here:
     # 1 - simple user
@@ -56,7 +56,6 @@ if __name__=='__main__':
     panda.initialize()
 
     # Detectors
-    #ni = Ni6602CounterCard(name='ni', device='B303A/CTL/NI6602-01')
     det1 = DummyDetector(name='det1')
     det2 = DummyWritingDetector(name='det2')
     det3 = Dummy1dDetector(name='det3')
@@ -64,7 +63,6 @@ if __name__=='__main__':
     det1.active = True
     det2.active = True
     det3.active = True
-
 
     # the environment keeps track of where to write data
     env.paths = PathFixer()
@@ -76,18 +74,18 @@ if __name__=='__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start() # removed for now
+    zmqrec.start()
 
-    # add a memorizer so the motors keep their user positions and limits after a restart
-    # note that this will overwrite the dial positions set above! delete the file to generate it again.
-    memorizer = MotorMemorizer(name='memorizer', filepath='/tmp/nanomotionlab_memorizer')
+    # add a memorizer so the motors keep their user positions and limits
+    # after a restart. note that this will overwrite the dial positions
+    # set above! delete the file to generate it again.
+    memorizer = MotorMemorizer(
+        name='memorizer', filepath='/tmp/nanomotionlab_memorizer')
 
-    
     # define pre- and post-scan actions, per scan base class
-    import PyTango
-    import time
     def pre_scan_stuff(slf):
         runCommand('stoplive')
+
     def post_scan_stuff(slf):
         pass
 
