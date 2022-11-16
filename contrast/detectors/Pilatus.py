@@ -1,5 +1,6 @@
 from .Detector import (
-    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
+    Detector, SoftwareLiveDetector, LiveDetector,
+    TriggeredDetector, BurstDetector)
 from ..environment import env
 from ..recorders.Hdf5Recorder import Link
 import os
@@ -7,17 +8,21 @@ import re
 import time
 import socket
 import select
+import tango
 
 BUF_SIZE = 1024
 TIMEOUT = 20
 
 
-class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
+class Pilatus2(Detector, SoftwareLiveDetector, TriggeredDetector,
               BurstDetector):
     """
     Provides an interface to the Pilatus streaming manager,
 
     https://github.com/maxiv-science/pilatus-streamer
+    https://gitlab.maxiv.lu.se/nanomax-beamline/streaming-receiver
+
+    This class talks socket directly to the camserver.
     """
 
     def __init__(self, hostname, name=None):
@@ -29,10 +34,12 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
         self._hdf_path = 'entry/measurement/Pilatus/data'
         self.hostname = hostname
 
+        # this is also used for non-burst acquisition:
+        self.burst_latency = .003
+
     def initialize(self):
         self._initialize_socket()
         self.imgpath = '/lima_data/'
-        self.burst_latency = .003
 
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
@@ -41,7 +48,7 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
-        if dataid is None:
+        if (dataid is None) or (env.paths.directory is None):
             # no saving
             self.saving_file = ''
         else:
@@ -253,3 +260,111 @@ class Pilatus(Detector, SoftwareLiveDetector, TriggeredDetector,
         res = self._query('imgpath %s' % value)
         if res is None or not res.startswith('10 OK'):
             raise Exception('Error setting imgpath')
+
+
+class Pilatus3(Detector, LiveDetector, TriggeredDetector,
+               BurstDetector):
+    """
+    Provides an interface to the MAX IV Pilatus Tango DS,
+
+    https://gitlab.maxiv.lu.se/kits-maxiv/dev-pilatus
+    https://github.com/maxiv-science/pilatus-streamer
+    https://gitlab.maxiv.lu.se/nanomax-beamline/streaming-receiver
+
+    There's no soft trigger on this detector. Also, the DS
+    seems not to have HW triggered burst mode exposed.
+    """
+
+    HDF_PATH = 'entry/measurement/Pilatus/data'
+
+    def __init__(self, device_name, **kwargs):
+        SoftwareLiveDetector.__init__(self)
+        TriggeredDetector.__init__(self)
+        BurstDetector.__init__(self)
+        Detector.__init__(self, **kwargs)
+
+        # arm waits for answer from streaming receiver, which
+        # occasionally takes time, so increase timeout.
+        self.proxy = tango.DeviceProxy(device_name)
+        self.proxy.set_timeout_millis(10000)
+
+        # this is also used for non-burst acquisition:
+        self.burst_latency = .001
+
+    def start_live(self, acqtime=1.0):
+        self.proxy.nTriggers = 10000
+        self.proxy.TriggerMode = 'INTERNAL'
+        self.proxy.ExposureTime = acqtime
+        self.proxy.FrameTime = acqtime + .1
+        self.proxy.Arm()
+
+    def stop_live(self):
+        self.proxy.Stop()
+        while self.busy():
+            time.sleep(.1)
+
+    def prepare(self, acqtime, dataid, n_starts):
+        BurstDetector.prepare(self, acqtime, dataid, n_starts)
+        acqtime = self.acqtime
+
+        if self.busy():
+            raise Exception('%s is busy!' % self.name)
+
+        if self.hw_trig and (self.burst_n > 1):
+            raise ValueError(
+                '%s Tango DS does not allow triggered burst mode.' % self.name)
+
+        if (dataid is None) or (env.paths.directory is None):
+            # no saving
+            self.saving_file = ''
+        else:
+            # saving
+            path = env.paths.directory
+            fn = 'scan_%06d_%s.hdf5' % (dataid, self.name)
+            self.saving_file = os.path.join(path, fn)
+            if os.path.exists(self.saving_file):
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
+                raise Exception('%s hdf5 file already exists' % self.name)
+        self.proxy.Filename = self.saving_file
+
+        # any any mode,
+        self.proxy.ExposureTime = acqtime
+        self.proxy.FrameTime = self.burst_latency + acqtime
+
+        if self.hw_trig:
+            # arm here for simple hw triggers to save time
+            self.proxy.TriggerMode = 'EXTERNAL_MULTI'
+            self.proxy.nTriggers = self.hw_trig_n
+            self.proxy.Arm()
+        else:
+            # arm on each image or burst, later
+            self.proxy.TriggerMode = 'INTERNAL'
+            self.proxy.nTriggers = self.burst_n
+
+    def arm(self):
+        pass
+
+    def start(self):
+        """
+        Start acquisition for any software triggered detectors.
+        """
+        if not self.hw_trig:
+            self.proxy.Arm()
+
+    def initialize(self):
+        pass
+
+    def stop(self):
+        self.proxy.Stop()
+
+    def busy(self):
+        return not (self.proxy.State() == tango.DevState.ON)
+
+    def read(self):
+        if self.saving_file == '':
+            return None
+        else:
+            return {'frames': Link(self.saving_file, self.HDF_PATH,
+                                   universal=True),
+                    'thumbs:': None, }

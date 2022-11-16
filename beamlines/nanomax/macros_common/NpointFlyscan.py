@@ -47,13 +47,13 @@ class NpointFlyscan(Mesh):
         print('Flyscan controlled by %s' % self.panda.name)
 
     def _set_det_trig(self, on):
-        # set up all triggered detectors
-        for d in Detector.get_active():
-            if isinstance(d, TriggeredDetector) and not d.name == 'panda2':
-                d.hw_trig = on
-                d.hw_trig_n = self.fastmotorintervals + 1
         # special treatment for the panda box which rules all
         panda = self.panda
+        # set up all triggered detectors
+        for d in Detector.get_active():
+            if isinstance(d, TriggeredDetector) and not d.name == panda.name:
+                d.hw_trig = on
+                d.hw_trig_n = self.fastmotorintervals + 1
         if on:
             self.old_hw_trig = panda.hw_trig
             self.old_burst_n = panda.burst_n
@@ -129,9 +129,3 @@ class NpointFlyscan(Mesh):
                           + 'piexo having trouble settling? trying again...')
                 time.sleep(.1)
 
-    def _while_acquiring(self):
-        s = ''
-        for d in Detector.get_active():
-            # it would be nice to print some numbers here
-            pass
-        print(s + '\r', end='')

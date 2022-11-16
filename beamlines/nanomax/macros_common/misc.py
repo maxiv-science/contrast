@@ -6,6 +6,7 @@ a separate file so as not to clutter the main beamline file.
 import PyTango
 from contrast.environment import macro, register_shortcut
 from contrast.detectors import Detector
+from contrast.motors import Motor
 
 # some handy shortcuts
 register_shortcut('diode1in', 'umv diode1_x 18000')
@@ -54,3 +55,27 @@ class FsClose(object):
     """
     def run(self):
         fastshutter_action(True, 'panda0')
+
+
+@macro
+class Optics(object):
+    """
+    Turn the optics motors on, off, or see their state.
+
+    optics <on / off>
+    optics  - prints status
+    """
+    def __init__(self, arg=None):
+        self.arg = arg
+
+    def run(self):
+        for m in Motor.getinstances():
+            if ('hfm_' in m.name
+                or 'vfm_' in m.name
+                or ('mono_' in m.name and not 'f' in m.name)):
+                if self.arg is None:
+                    print('(%s) %s' % ({True:'on', False:'OFF'}[m.proxy.PowerOn], m.name))
+                else:
+                    print('Turning %s %s' % (self.arg, m.name))
+                    m.proxy.PowerOn = (self.arg.lower() == 'on')
+
