@@ -20,7 +20,7 @@ if __name__ == '__main__':
     from contrast.motors.SmaractMotor import SmaractRotationMotor
     from contrast.motors.E727 import E727Motor
     from contrast.motors.KukaMotor import KukaRobot
-    from contrast.detectors.Pilatus import Pilatus
+    from contrast.detectors.Pilatus import Pilatus2, Pilatus3
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Andor3 import Andor3
@@ -241,10 +241,10 @@ if __name__ == '__main__':
     # stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
-    #pilatus = Pilatus(name='pilatus',
+    #pilatus = Pilatus2(name='pilatus',
     #                 hostname='b-nanomax-mobile-ipc-01')
+    pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus3')
     merlin = Merlin(name='merlin', host='localhost')
-    # merlin = Merlin(name='merlin', host='b-daq-node-2', port=8001)
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
     #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
