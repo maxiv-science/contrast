@@ -6,6 +6,7 @@ from ptypy import utils as u
 from contrast.environment import macro, env
 from contrast.recorders import active_recorders, RecorderHeader, RecorderFooter
 
+
 @macro
 class Dummy_Ptycho(object):
     """
@@ -32,10 +33,10 @@ class Dummy_Ptycho(object):
         data.num_frames = 400
         data.density = .1
         data.min_frames = 1
-        data.label=None
-        data.psize=172e-6
-        data.energy= 6.2
-        data.center='fftshift'
+        data.label = None
+        data.psize = 172e-6
+        data.energy = 6.2
+        data.center = 'fftshift'
         data.distance = 7
         data.auto_center = None
         data.orientation = None
@@ -56,8 +57,12 @@ class Dummy_Ptycho(object):
         # send a header to the recorders
         snap = env.snapshot.capture()
         for r in active_recorders():
-            r.queue.put(RecorderHeader(scannr=self.scannr, path=env.paths.directory,
-                                       snapshot=snap, description=self._command))
+            r.queue.put(
+                RecorderHeader(
+                    scannr=self.scannr, path=env.paths.directory,
+                    snapshot=snap, description=self._command
+                )
+            )
 
         try:
             n = 0
@@ -76,7 +81,8 @@ class Dummy_Ptycho(object):
                     r.queue.put(dct)
 
                 # print spec-style info
-                print('%-6u%-10.4f%-10.4f%10s' % (n, dct['x']*1e6, dct['y']*1e6, dct['diff'].shape))
+                print('%-6u%-10.4f%-10.4f%10s'
+                      % (n, dct['x'] * 1e6, dct['y'] * 1e6, dct['diff'].shape))
                 n += 1
                 time.sleep(.2)
 

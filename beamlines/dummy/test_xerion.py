@@ -13,6 +13,7 @@ if __name__ == '__main__':
     from contrast.detectors import (DummyDetector, Dummy1dDetector,
                                     DummyWritingDetector,
                                     DummyWritingDetector2)
+    from contrast.motors.TangoMotor import TangoMotor
     from contrast.environment import env, register_shortcut
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     import os
@@ -21,6 +22,9 @@ if __name__ == '__main__':
     # from sim_ptycho_scan import *
 
     env.userLevel = 1  # we're not experts!
+
+    # Xerion rotation stage
+    sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
 
     samx = DummyMotor(name='samx')
     samx.dial_limits = (0, 10)
@@ -51,9 +55,9 @@ if __name__ == '__main__':
     sz = DummyMotor(name='sz')
     sz.dial_limits = (-50, 50)
     sz.velocity = 100
-    sr = DummyMotor(name='sr')
-    sr.dial_limits = (-180, 180)
-    sr.velocity = 30
+    #sr = DummyMotor(name='sr')
+    #sr.dial_limits = (-180, 180)
+    #sr.velocity = 30
 
     energy = DummyMotor(name='energy')
     energy.dial_limits = (5000, 35000)

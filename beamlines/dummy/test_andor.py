@@ -13,6 +13,8 @@ if __name__ == '__main__':
     from contrast.detectors import (DummyDetector, Dummy1dDetector,
                                     DummyWritingDetector,
                                     DummyWritingDetector2)
+    from contrast.detectors.Andor3 import Andor3
+    from contrast.motors.TangoMotor import TangoMotor
     from contrast.environment import env, register_shortcut
     from contrast.recorders import Hdf5Recorder, StreamRecorder
     import os
@@ -21,16 +23,6 @@ if __name__ == '__main__':
     # from sim_ptycho_scan import *
 
     env.userLevel = 1  # we're not experts!
-
-    samx = DummyMotor(name='samx')
-    samx.dial_limits = (0, 10)
-
-    samy = DummyMotor(name='samy')
-    samy.dial_limits = (-5, 5)
-
-    samr = DummyMotor(name='samr')
-    samr.dial_limits = (-180, 180)
-    samr.velocity = 30
 
     basex = DummyMotor(name='basex')
     basex.dial_limits = (-8000, 8000)
@@ -51,9 +43,6 @@ if __name__ == '__main__':
     sz = DummyMotor(name='sz')
     sz.dial_limits = (-50, 50)
     sz.velocity = 100
-    sr = DummyMotor(name='sr')
-    sr.dial_limits = (-180, 180)
-    sr.velocity = 30
 
     energy = DummyMotor(name='energy')
     energy.dial_limits = (5000, 35000)
@@ -75,20 +64,20 @@ if __name__ == '__main__':
 
     gap = DummyMotor(name='gap', userlevel=5, user_format='%.5f')
 
-    diff = ExamplePseudoMotor([samx, samy], name='diff')
+    diff = ExamplePseudoMotor([basex, basey], name='diff')
 
-    det1 = DummyDetector(name='det1')
-    det2 = DummyWritingDetector(name='det2')
-    det3 = Dummy1dDetector(name='det3')
-    det4 = DummyWritingDetector2(name='det4')
+    #det1 = DummyDetector(name='det1')
+    #det2 = DummyWritingDetector(name='det2')
+    #det3 = Dummy1dDetector(name='det3')
+    #det4 = DummyWritingDetector2(name='det4')
 
-    env.paths.directory = '/tmp'
+    # andor = Andor3(name='andor', device='zyla/test/1') # inital test
+	andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
+    #andor.proxy.rotation=1
+    #andor.proxy.flipud=True
+	#andor.proxy.fliplr=True
 
-    # remove old files
-    files = os.listdir(env.paths.directory)
-    for file in files:
-        if file.endswith(".h5"):
-            os.remove(os.path.join(env.paths.directory, file))
+    env.paths.directory = '/data/staff/nanomax/commissioning_2022-2/20221107_DESY_Andor_test/raw/sample/'
 
     # the Hdf5Recorder later gets its path from the env object
     h5rec = Hdf5Recorder(name='h5rec')
