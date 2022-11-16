@@ -13,11 +13,11 @@
 import os
 import sys
 import re
-from contrast.environment import env
 from collections import OrderedDict
 
+# PEP8 crime, but need path to import contrast
 sys.path.insert(0, os.path.abspath('../..'))
-
+from contrast.environment import env
 
 # -- Project information -----------------------------------------------------
 
@@ -75,7 +75,6 @@ html_static_path = ['_static']
 # -- Special handling of macro classes ---------------------------------------
 def label_macros(app, what, name, obj, options, lines):
     """ Find macros and mark them as such in the docs. """
-    from contrast.environment import env
     if what == 'class':
         name = obj.__name__.lower()
         if name in env.registeredMacros:
