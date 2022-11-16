@@ -20,7 +20,9 @@ if __name__=='__main__':
     from contrast.detectors.DhyanaAndor import DhyanaAndor
     from contrast.scans import SoftwareScan, Ct
 
-    from contrast.motors import DummyMotor, SoftiPiezoShutter, SoftiPolarizationCtrl
+    from contrast.motors import DummyMotor
+    from contrast.motors.SoftiPiezoShutter import SoftiPiezoShutter
+    from contrast.motors.SoftiPolarizationCtrl import SoftiPolarizationCtrl
     from contrast.detectors import DummyDetector
 
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
