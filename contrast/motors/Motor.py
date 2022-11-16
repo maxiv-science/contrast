@@ -1,6 +1,7 @@
 import time
 import numpy as np
-import os, ast
+import os
+import ast
 
 from ..Gadget import Gadget
 from ..environment import macro, env
@@ -9,22 +10,24 @@ from .. import utils
 # a central list of defined bookmarks, to avoid garbage collection
 bookmark_refs = []
 
+
 class Motor(Gadget):
     """
     General base class for motors.
 
     Motors have dial and user positions, which are related by an offset
     and a scaling factor. The user position is supposed to be used in
-    all macros and movements. The dial position is hard coded in the Motor
-    subclass to closely reflect what the underlying device quotes. ::
+    all macros and movements. The dial position is hard coded in the
+    Motor subclass to closely reflect what the underlying device
+    quotes. ::
 
         user = dial * scaling + offset,
         dial = (user - offset) / scaling
 
     The user position can be changed, which updates the offset but not
-    the scaling. In the same way, limits on the user position are internally
-    converted to dial limits, such that setting the user position leaves
-    the dial limits unchanged.
+    the scaling. In the same way, limits on the user position are
+    internally converted to dial limits, such that setting the user
+    position leaves the dial limits unchanged.
     """
 
     def __init__(self, scaling=1.0, offset=0.0, dial_limits=(None, None),
@@ -58,9 +61,9 @@ class Motor(Gadget):
         if None not in (_uplim, _lowlim):
             l1 = _lowlim * self._scaling + self._offset
             l2 = _uplim * self._scaling + self._offset
+            return tuple(sorted([l1, l2]))
         else:
-            l1, l2 = None, None
-        return tuple(sorted([l1, l2]))
+            return (None, None)
 
     @user_limits.setter
     def user_limits(self, lims):
@@ -84,7 +87,7 @@ class Motor(Gadget):
             raise Exception('Motor is busy')
         dial = (pos - self._offset) / self._scaling
         try:
-            _lowlim, _uplim = self.dial_position
+            _lowlim, _uplim = self.dial_limits
             assert dial <= _uplim
             assert dial >= _lowlim
         except AssertionError:
@@ -174,7 +177,8 @@ class MotorBookmark(object):
         self.name = name
         if positions is None:
             positions = [m.dial_position for m in motors]
-        self.dct = {m:p for m,p in zip(motors, positions)}
+        self.dct = {m: p for m, p in zip(motors, positions)}
+
 
 class MotorMemorizer(Gadget):
     """
@@ -206,24 +210,31 @@ class MotorMemorizer(Gadget):
                         # this is an existing motor!
                         motors[dct['name']]._offset = dct['_offset']
                         if dct['dial_limits']:
-                            motors[dct['name']].dial_limits = dct['dial_limits']
+                            motors[dct['name']].dial_limits = (
+                                dct['dial_limits'])
                     elif '_offset' not in dct.keys():
                         # this is a bookmark!
                         motor_names = list(dct.keys())
                         motor_names.remove('name')
-                        available_motors = list(Motor.getinstances())
+                        avail_motors = list(Motor.getinstances())
                         motor_objs = []
                         bail = False
                         for m in motor_names:
-                            match = [m_ for m_ in available_motors if m_.name==m]
+                            match = [m_ for m_ in avail_motors if m_.name == m]
                             if not len(match):
-                                print('Could not find motor %s, ignoring bookmark %s'%(m, dct['name']))
+                                print('Could not find motor %s, '
+                                      'ignoring bookmark %s'
+                                      % (m, dct['name']))
                                 bail = True
                                 break
                             motor_objs.append(match[0])
                         if bail:
                             break
-                        bookmark_refs.append(MotorBookmark(name=dct['name'], motors=motor_objs, positions=[dct[n] for n in motor_names]))
+                        bookmark_refs.append(
+                            MotorBookmark(name=dct['name'],
+                                          motors=motor_objs,
+                                          positions=[
+                                              dct[n] for n in motor_names]))
             print('Loaded motor states and bookmarks from %s' % self.filepath)
         except (FileNotFoundError,):
             print("Memorizer file %s doesn't exist" % self.filepath)
@@ -240,12 +251,19 @@ class MotorMemorizer(Gadget):
                            'dial_limits': m.dial_limits}
                     fp.write(str(dct) + '\n')
                 for b in bookmark_refs:
-                    dct = {m.name:p for m,p in b.dct.items()}
+                    dct = {m.name: p for m, p in b.dct.items()}
                     dct['name'] = b.name
                     fp.write(str(dct) + '\n')
             print('Saved motor states and bookmarks to %s' % self.filepath)
         except (FileNotFoundError,):
             print("Cant write to %s, doesn't exist")
+
+
+def expect_motors(motors):
+    for m in motors:
+        if not isinstance(m, Motor):
+            raise Exception('%s is not a Motor object!' % m)
+
 
 @macro
 class Mv(object):
@@ -258,10 +276,11 @@ class Mv(object):
     def __init__(self, *args):
         self.motors = args[::2]
         self.targets = np.array(args[1::2])
+        expect_motors(self.motors)
 
     def _run_while_waiting(self):
         pass
-    
+
     def run(self):
         if max(m.userlevel for m in self.motors) > env.userLevel:
             print('You are trying to move motors above your user level!')
@@ -276,6 +295,7 @@ class Mv(object):
             for m in self.motors:
                 m.stop()
 
+
 @macro
 class Mvd(object):
     """
@@ -283,6 +303,7 @@ class Mvd(object):
     """
     def run(self):
         raise NotImplementedError
+
 
 @macro
 class Mvr(Mv):
@@ -298,6 +319,7 @@ class Mvr(Mv):
         current = np.array([m.position() for m in self.motors])
         self.targets = current + displacements
 
+
 @macro
 class Umv(Mv):
     """
@@ -305,8 +327,9 @@ class Umv(Mv):
     when the move is complete.
     """
     def _run_while_waiting(self):
-        l = ['%s: %s' % (m.name, m._uformat%m.user_position) for m in self.motors]
-        s = '; '.join(l)
+        ll = ['%s: %s' % (m.name, m._uformat % m.user_position)
+              for m in self.motors]
+        s = '; '.join(ll)
         print(s + '\r', end='')
 
     def run(self):
@@ -314,12 +337,14 @@ class Umv(Mv):
         super(Umv, self).run()
         self._run_while_waiting()
 
+
 @macro
 class Umvr(Mvr, Umv):
     """
     Like umv, but in positions relative to the current ones.
     """
-    pass # less is more
+    pass  # less is more
+
 
 @macro
 class Wm(object):
@@ -330,7 +355,9 @@ class Wm(object):
     """
     def __init__(self, *args):
         self.motors = args
-        self.out    = True
+        self.out = True
+        expect_motors(self.motors)
+
     def run(self, *args):
         ret = None
         titles = ['motor', 'user pos.', 'limits', 'dial pos.', 'limits']
@@ -345,25 +372,30 @@ class Wm(object):
                     ulims = '(None, None)'
                     dlims = '(None, None)'
                 else:
-                    ulims = ('(%s, %s)' % (2*(m._uformat,))) % m.user_limits
-                    dlims = ('(%s, %s)' % (2*(m._dformat,))) % m.dial_limits
+                    ulims = ('(%s, %s)' % (2 * (m._uformat,))) % m.user_limits
+                    dlims = ('(%s, %s)' % (2 * (m._dformat,))) % m.dial_limits
                 table.append([m.name, upos, ulims, dpos, dlims])
             except:
                 print('Could not get position of %s' % m.name)
                 ret = None
-        if self.out: 
-            print(utils.list_to_table(lst=table, titles=titles, margins=[5,2,5,2,0]))
+        if self.out:
+            print(utils.list_to_table(lst=table, titles=titles,
+                                      margins=[5, 2, 5, 2, 0]))
         return ret
+
+
 @macro
 class WmS(Wm):
     """
-    Silent 'where motor'. Print the positions of one or more motors but do not print any output. ::
+    Silent 'where motor'. Print the positions of one or more motors but
+    do not print any output. ::
 
         wms <motor1> <motor2> ...
     """
     def __init__(self, *args):
         self.motors = args
         self.out = False
+
 
 @macro
 class Wa(Wm):
@@ -375,6 +407,7 @@ class Wa(Wm):
                        if m.userlevel <= env.userLevel]
         self.out = True
 
+
 @macro
 class LsM(object):
     """
@@ -384,6 +417,7 @@ class LsM(object):
         dct = {m.name: m.__class__ for m in Motor.getinstances()
                if m.userlevel <= env.userLevel}
         print(utils.dict_to_table(dct, titles=('name', 'class'), sort=True))
+
 
 @macro
 class SetLim(object):
@@ -398,6 +432,7 @@ class SetLim(object):
         self.motors = args[::3]
         self.lowers = args[1::3]
         self.uppers = args[2::3]
+        expect_motors(self.motors)
 
     def run(self):
         for m, l, u in zip(self.motors, self.lowers, self.uppers):
@@ -406,6 +441,7 @@ class SetLim(object):
         # memorize the new state
         for m in MotorMemorizer.getinstances():
             m.dump()
+
 
 @macro
 class SetPos(object):
@@ -420,6 +456,7 @@ class SetPos(object):
     def __init__(self, *args):
         self.motors = args[::2]
         self.positions = args[1::2]
+        expect_motors(self.motors)
 
     def run(self):
         for m, p in zip(self.motors, self.positions):
@@ -428,6 +465,7 @@ class SetPos(object):
         # memorize the new state
         for m in MotorMemorizer.getinstances():
             m.dump()
+
 
 class BookmarkMacroBase(object):
     """
@@ -448,6 +486,7 @@ class BookmarkMacroBase(object):
                 if b.name == name:
                     self.bookmarks.append(b)
 
+
 @macro
 class LsBook(BookmarkMacroBase):
     """
@@ -458,11 +497,18 @@ class LsBook(BookmarkMacroBase):
     """
     def run(self):
         if self.specific:
-            dct = {m.name:(p*m._scaling+m._offset) for m,p in self.bookmarks[0].dct.items()}
-            print(utils.dict_to_table(dct, titles=('motor', 'user pos.'), sort=True))
+            dct = {m.name: (p * m._scaling + m._offset)
+                   for m, p in self.bookmarks[0].dct.items()}
+            print(utils.dict_to_table(dct,
+                                      titles=('motor', 'user pos.'),
+                                      sort=True))
         else:
-            dct = {b.name: ', '.join([k.name for k in b.dct.keys()]) for b in bookmark_refs}
-            print(utils.dict_to_table(dct, titles=('name', 'members'), sort=True))
+            dct = {b.name: ', '.join([k.name for k in b.dct.keys()])
+                   for b in bookmark_refs}
+            print(utils.dict_to_table(dct,
+                                      titles=('name', 'members'),
+                                      sort=True))
+
 
 @macro
 class Bookmark(object):
@@ -477,16 +523,19 @@ class Bookmark(object):
     def __init__(self, name, *args):
         self.name = name
         self.motors = args
+        expect_motors(self.motors)
 
     def run(self):
-        existing = [b for b in bookmark_refs if b.name==self.name]
+        existing = [b for b in bookmark_refs if b.name == self.name]
         [bookmark_refs.remove(b) for b in existing]
-        bookmark_refs.append(MotorBookmark(name=self.name, motors=self.motors,
+        bookmark_refs.append(MotorBookmark(
+            name=self.name, motors=self.motors,
             positions=[m.dial_position for m in self.motors]))
 
         # memorize the new state
         for m in MotorMemorizer.getinstances():
             m.dump()
+
 
 @macro
 class Restore(BookmarkMacroBase):
@@ -496,10 +545,12 @@ class Restore(BookmarkMacroBase):
     def run(self):
         if not self.specific:
             return
-        dct = {m:(p*m._scaling+m._offset) for m,p in self.bookmarks[0].dct.items()}
+        dct = {m: (p * m._scaling + m._offset)
+               for m, p in self.bookmarks[0].dct.items()}
         args = [val for pair in dct.items() for val in pair]
         umv = Umv(*args)
         umv.run()
+
 
 @macro
 class RmBook(BookmarkMacroBase):
@@ -512,7 +563,8 @@ class RmBook(BookmarkMacroBase):
     """
     def run(self):
         if not self.specific:
-            if input('Are you sure you want to remove all bookmarks? [y/n] ') != 'y':
+            msg = 'Are you sure you want to remove all bookmarks? [y/n] '
+            if input(msg).lower() != 'y':
                 return
 
         for b in self.bookmarks:

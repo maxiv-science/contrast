@@ -1,5 +1,6 @@
 import weakref
 
+
 class Gadget(object):
     """
     Base class for motors, detectors, etc. Main purpose is to keep track
@@ -23,11 +24,15 @@ class Gadget(object):
     @classmethod
     def getinstances(cls):
         """
-        Returns a generator over all instances of this class and its children. ::
+        Returns a generator over all instances of this class and its
+        children. ::
 
-            [g.name for g in Gadget.getinstances()]      # a list of all motors, detectors, etc.
-            [m.name for m in Motor.getinstances()]       # a list of all motors.
-            [m.name for m in DummyMotor.getinstances()]  # a list of all dummy motors.
+            [g.name for g in Gadget.getinstances()]
+                - a list of all motors, detectors, etc.
+            [m.name for m in Motor.getinstances()]
+                - a list of all motors.
+            [m.name for m in DummyMotor.getinstances()]
+                - a list of all dummy motors.
         """
         dead = set()
         for ref in cls._base_class_instances:

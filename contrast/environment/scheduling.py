@@ -9,7 +9,7 @@ from threading import Thread
 try:
     import tango
 except:
-    pass # makes building docs easier
+    pass  # makes building docs easier
 
 
 class DummyScheduler(object):
@@ -49,16 +49,17 @@ class DummyInjectionScheduler(DummyScheduler):
         whole_secs = 60 - time.localtime().tm_sec
         return whole_mins * 60 + whole_secs
 
+
 class TangoShutterChecker(Thread):
     """
     Helper class which asynchronously checks the status of a number of
     shutters and keeps their last statuses in a GIL-protected list,
     which can be accessed at any time.
     """
-    def __init__(self, *shutter_devices):
+    def __init__(self, *shutter_devs):
         super().__init__()
-        self.device_list = [tango.DeviceProxy(name) for name in shutter_devices]
-        self.status_list = [True,] * len(shutter_devices)
+        self.device_list = [tango.DeviceProxy(name) for name in shutter_devs]
+        self.status_list = [True, ] * len(shutter_devs)
         self.stopped = False
 
     def run(self):
@@ -67,7 +68,8 @@ class TangoShutterChecker(Thread):
                 try:
                     status = 'OPEN' in dev.status()
                 except:
-                    print('there was a problem reading shutter %s' % dev.name())
+                    print('there was a problem reading shutter %s'
+                          % dev.name())
                     status = True
                 self.status_list[i] = status
             time.sleep(3)
@@ -82,15 +84,27 @@ class MaxivScheduler(DummyScheduler):
 
     NOTE: Using threaded status checkers here to avoid polling a large
     number of potentially slow shutter devices on a different control system.
+
+    At MAX IV, there is a local proxy device with countdown and ring
+    current attributes.
     """
-    def __init__(self, shutter_list, avoid_injections=True, respect_countdown=True):
-        self.shutter_checker = TangoShutterChecker(*shutter_list)
-        self.shutter_checker.start()
-        self.injection_device = tango.DeviceProxy('g-v-csproxy-0:10000/R3-319S2/DIA/DCCT-01')
-        self.countdown_device = tango.DeviceProxy('g-v-csproxy-0:10000/g/ctl/machinestatus')
-        self.disabled = False
-        self.avoid_injections = avoid_injections
-        self.respect_countdown = respect_countdown
+    def __init__(self,
+                 proxy_device,
+                 shutter_list,
+                 avoid_injections=True,
+                 respect_countdown=True):
+        try:
+            self.shutter_checker = TangoShutterChecker(*shutter_list)
+            self.shutter_checker.start()
+            self.proxy = tango.DeviceProxy(proxy_device)
+            self.injection_device = tango.DeviceProxy(
+                'g-v-csproxy-0:10303/R3-319S2/DIA/DCCT-01')  # awaiting a local proxy solution
+            self.disabled = False
+            self.avoid_injections = avoid_injections
+            self.respect_countdown = respect_countdown
+        except Exception as e:
+            print('Failed to initialize scheduler:')
+            print(e)
 
     def _ready(self):
         if self.disabled:
@@ -99,11 +113,13 @@ class MaxivScheduler(DummyScheduler):
             shutters_ok = False not in self.shutter_checker.status_list
             try:
                 if self.avoid_injections:
-                    injection_ok = (self.injection_device.lifetime > 0) # negative when refilling
+                    # negative when refilling:
+                    injection_ok = (self.injection_device.lifetime > 0)
                 else:
                     injection_ok = True
             except:
-                print("Couldn't reach the injection device %s, ignoring"%self.injection_device.name())
+                print("Couldn't reach the injection device %s, ignoring"
+                      % self.injection_device.name())
                 injection_ok = True
             return (shutters_ok and injection_ok)
 
@@ -111,9 +127,10 @@ class MaxivScheduler(DummyScheduler):
         if not self.respect_countdown:
             return None
         try:
-            dl = self.countdown_device.r3topup
+            dl = self.proxy.countdowndevice  # this is an int
             dl = 1 if (dl < 0) else dl
             return dl
         except:
             print('MaxivScheduler: Problem getting the topup countdown value')
             return None
+

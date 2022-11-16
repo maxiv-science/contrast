@@ -1,4 +1,5 @@
-from .Detector import Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector
+from .Detector import (
+    Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector)
 from ..recorders.Hdf5Recorder import Link
 from ..environment import env
 
@@ -10,6 +11,7 @@ import json
 import zmq
 from threading import Thread
 from base64 import b64encode, b64decode
+
 
 class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
@@ -37,7 +39,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
         # set up the detector
         self._set('detector', 'command/disarm')
-        self._set('detector', 'command/cancel') # who knows
+        self._set('detector', 'command/cancel')  # who knows
         self._set('detector', 'config/threshold/1/mode', 'enabled')
         self._set('detector', 'config/threshold/2/mode', 'disabled')
         self._set('stream', 'config/mode', 'enabled')
@@ -47,9 +49,12 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         self._set('detector', 'config/counting_mode', 'retrigger')
 
     def _get(self, subsystem, key, timeout=3.0):
-        response = self.session.get('http://%s/%s/api/%s/%s' %(self.host, subsystem, self.api_version, key), timeout=timeout)
+        response = self.session.get(
+            'http://%s/%s/api/%s/%s' % (
+                self.host, subsystem, self.api_version, key),
+            timeout=timeout)
         if response:
-            if response.headers['content-type'] == 'application/json':
+            if 'application/json' in response.headers['content-type']:
                 return response.json()
             else:
                 print('unkown response type', response.headers['content-type'])
@@ -58,7 +63,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             print(response)
 
     def _set(self, subsystem, key, value=None, timeout=3.0):
-        url = 'http://%s/%s/api/%s/%s' %(self.host, subsystem, self.api_version, key)
+        url = 'http://%s/%s/api/%s/%s' % (
+            self.host, subsystem, self.api_version, key)
         if value is None:
             payload = None
         else:
@@ -70,12 +76,14 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def busy(self):
         if self.acqthread and self.acqthread.is_alive():
             return True
-        return not self._get('detector', 'status/state')['value'] in ('idle', 'ready')
+        return not self._get(
+            'detector', 'status/state')['value'] in ('idle', 'ready')
 
     @property
     def max_count_rate(self):
         """ Maximum count rate according to the server """
-        val = self._get('detector', 'config/countrate_correction_count_cutoff')['value']
+        val = self._get(
+            'detector', 'config/countrate_correction_count_cutoff')['value']
         return int(val)
 
     @property
@@ -101,7 +109,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if (val < 4) or (val > 30):
             print('Bad energy value, should be in keV and between 4-30')
             return
-        val = float(val)*1000
+        val = float(val) * 1000
         self._set('detector', 'config/photon_energy', val)
 
     @property
@@ -116,7 +124,8 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     @property
     def pixel_splitting(self):
         """ Whether to use virtual pixel splitting """
-        return self._get('detector', 'config/virtual_pixel_correction_applied')['value']
+        return self._get(
+            'detector', 'config/virtual_pixel_correction_applied')['value']
 
     @pixel_splitting.setter
     def pixel_splitting(self, val):
@@ -134,23 +143,28 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self._set('detector', 'config/nimages', self.burst_n)
-        self._set('detector', 'config/frame_time', self.acqtime + self.burst_latency)
+        self._set('detector', 'config/frame_time',
+                  self.acqtime + self.burst_latency)
         self._set('detector', 'config/count_time', self.acqtime)
         if self.hw_trig:
             self._set('detector', 'config/trigger_mode', 'exts')
-            self._set('detector', 'config/ntrigger', int(self.hw_trig_n * n_starts))
+            self._set('detector', 'config/ntrigger',
+                      int(self.hw_trig_n * n_starts))
         else:
             self._set('detector', 'config/trigger_mode', 'ints')
-            self._set('detector', 'config/ntrigger', int(n_starts)) # np.int64 isn't json serializable
+            # np.int64 isn't json serializable:
+            self._set('detector', 'config/ntrigger', int(n_starts))
         if dataid is None:
             self.dpath = ''
         else:
             filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
             self.dpath = os.path.join(env.paths.directory, filename)
             if os.path.exists(self.dpath):
-                print('%s: this hdf5 file exists, I am raising an error now'%self.name)
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
-        self._set('stream', 'config/header_appendix', json.dumps({'filename': self.dpath}))
+        self._set('stream', 'config/header_appendix',
+                  json.dumps({'filename': self.dpath}))
         self._set('detector', 'command/arm')
         self.n_started = 0
 
@@ -161,16 +175,19 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     def start(self):
         self.n_started += 1
         if not self.hw_trig:
-            self.acqthread = Thread(target=self._set, args=('detector', 'command/trigger'), kwargs={'timeout':None})
+            self.acqthread = Thread(target=self._set,
+                                    args=('detector', 'command/trigger'),
+                                    kwargs={'timeout': None})
             self.acqthread.start()
 
     def stop(self):
-        self._set('detector', 'command/disarm') # there's also cancel - not sure which to use
+        # there's also cancel - not sure which to use:
+        self._set('detector', 'command/disarm')
 
     def read(self):
         if self.dpath:
-            ret = {'frames': Link(self.dpath , self._hdf_path, universal=True),
-                   'thumbs:': None,}
+            ret = {'frames': Link(self.dpath, self._hdf_path, universal=True),
+                   'thumbs:': None}
         else:
             ret = None
         return ret
@@ -196,25 +213,25 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         """
         Get the Eiger mask, taken from the example in the manual.
         """
-        darray = self._get('detector', 'config/pixel_mask', timeout=15)['value']
+        darray = self._get(
+            'detector', 'config/pixel_mask', timeout=15)['value']
         dtype = np.dtype(str(darray['type']))
         shape = darray['shape']
-        mask = np.frombuffer(b64decode(darray['data']), dtype=dtype).reshape(shape)
+        mask = np.frombuffer(
+            b64decode(darray['data']), dtype=dtype).reshape(shape)
         return mask.copy()
 
     def set_mask(self, array):
         """
         Set the Eiger mask, also adapted from the manual.
         """
-        data = {'__darray__': (1,0,0),
+        data = {'__darray__': (1, 0, 0),
                 'type': array.dtype.str,
                 'shape': array.shape,
                 'filters': ['base64'],
-                'data': b64encode(array.data).decode('ascii')
-        }
+                'data': b64encode(array.data).decode('ascii')}
         self._set('detector', 'config/pixel_mask', data, timeout=15)
 
         # arming and disarming stores it:
         self._set('detector', 'command/arm')
         self._set('detector', 'command/disarm')
-

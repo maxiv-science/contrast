@@ -10,6 +10,7 @@ import select
 SOCK_RECV = 4096
 RECV_DELAY = 1e-4
 
+
 class PandaBox(Detector, TriggeredDetector, BurstDetector):
     """
     Basic class for treating a PandaBox as a detector, capable
@@ -24,13 +25,16 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
     #. flickering the "A" bit causes a trigger.
     """
 
-    def __init__(self, name=None, host='172.16.126.88',
-                 ctrl_port=8888, data_port=8889):
+    def __init__(self, name=None, host='172.16.126.101',
+                 ctrl_port=8888, data_port=8889, bitblock='BITS1',
+                 debug=False):
         self.host = host
         self.ctrl_port = ctrl_port
         self.data_port = data_port
         self.acqthread = None
         self.burst_latency = .003
+        self.bitblock = bitblock
+        self.debug = debug
         Detector.__init__(self, name=name)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
@@ -42,8 +46,13 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         self.ctrl_sock.connect((self.host, self.ctrl_port))
 
     def query(self, cmd):
+        if self.debug:
+            print('*** sending:', cmd)
         self.ctrl_sock.sendall(bytes(cmd + '\n', 'ascii'))
-        return self.ctrl_sock.recv(SOCK_RECV).decode()
+        ret = self.ctrl_sock.recv(SOCK_RECV).decode()
+        if self.debug:
+            print('### got:', ret)
+        return ret
 
     def busy(self):
         if self.acqthread and self.acqthread.is_alive():
@@ -55,19 +64,27 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         self.query('PULSE1.PULSES=%d' % self.burst_n)
         self.query('PULSE1.WIDTH=%f' % self.acqtime)
-        self.query('PULSE1.STEP=%f' % (self.burst_latency+self.acqtime))
+        self.query('PULSE1.STEP=%f' % (self.burst_latency + self.acqtime))
 
     def arm(self):
         self.acqthread = Thread(target=self._acquire)
         self.acqthread.start()
-        self.query('*PCAP.ARM=')
-        done = False
-        while not done:
+        armed = False
+        # since early 2022, we get stuck here because the panda doesn't
+        # take the arm. never happened before, happens all the time now.
+        while not armed:
+            ret = self.query('*PCAP.ARM=')
+            if 'OK' in ret:
+                armed = True
+            else:
+                print('failed to arm %s (trying again): "%s"' % (self.name, ret[:-1]))
+        ready = False
+        while not ready:
             ret = self.query('*PCAP.COMPLETION?')
             if 'Busy' in ret:
-                done = True
+                ready = True
             time.sleep(.005)
-        time.sleep(.05) # necessary hack
+#        time.sleep(.05)  # necessary hack
 
     def _acquire(self):
         """
@@ -93,9 +110,12 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
         # Then put the rest of the data into the same buffer and continue
         n = 0
-        data = {ch:[] for ch in channels}
-        
-        num_points = self.hw_trig_n * self.burst_n
+        data = {ch: [] for ch in channels}
+
+        if self.hw_trig:
+            num_points = self.hw_trig_n * self.burst_n
+        else:
+            num_points = self.burst_n
 
         while n < num_points:
             # anything more to read?
@@ -103,7 +123,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             if ready:
                 buff += s.recv(SOCK_RECV)
 
-            #anything more to parse?
+            # anything more to parse?
             if b'\n' in buff:
                 line, buff = buff.split(b'\n', 1)
                 vals = line.strip().split()
@@ -123,9 +143,9 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
     def start(self):
         if not self.hw_trig:
-            self.query('BITS.A=1')
-            time.sleep(.001)
-            self.query('BITS.A=0')
+            self.query('%s.A=1' % self.bitblock)
+            time.sleep(0.001)
+            self.query('%s.A=0' % self.bitblock)
 
     def stop(self):
         self.query('*PCAP.DISARM=')

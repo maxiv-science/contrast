@@ -2,6 +2,7 @@ from .Detector import Detector
 from ..Gadget import Gadget
 import string
 
+
 def get_dict_recursive(dct, key):
     """
     Helper function to get the value corresponding to path/to/key from a nested
@@ -18,19 +19,20 @@ def get_dict_recursive(dct, key):
             ret = dct[int(key)]
         return ret
 
+
 class PseudoDetector(Detector):
     """
-    Derived detector which transforms signals from other Detector objects.
-    Defines a dict of variables corresponding to detector labels, and
-    one or more expressions to apply to these.
+    Derived detector which transforms signals from other Detector
+    objects. Defines a dict of variables corresponding to detector
+    labels, and one or more expressions to apply to these.
 
     Variables can be of the form detector/sub/value, where "detector" is
-    interpreted as the basic gadget, and "sub/value" are components keys
-    into the value dictionary.
+    interpreted as the basic gadget, and "sub/value" are components
+    keys into the value dictionary.
 
-    If 'expressions' is a string, the detector will return a single value,
-    if it's a dict, the detector will return a corresponding dict of
-    results.
+    If 'expressions' is a string, the detector will return a single
+    value, if it's a dict, the detector will return a corresponding
+    dict of results.
 
     Example::
 
@@ -54,8 +56,9 @@ class PseudoDetector(Detector):
                 self.gadgets[g.name] = g
 
         for lbl in labels:
-            if not lbl in self.gadgets.keys():
-                print('WARNING! PseudoDetector "%s" cant find its constituent "%s"'%(self.name, lbl))
+            if lbl not in self.gadgets.keys():
+                print('WARNING! PseudoDetector "%s" cant find its'
+                      'constituent "%s"' % (self.name, lbl))
 
     def stop(self):
         pass
@@ -64,7 +67,7 @@ class PseudoDetector(Detector):
         return False
 
     def read(self):
-        gadget_data = {g.name:g.read() for g in self.gadgets.values()}
+        gadget_data = {g.name: g.read() for g in self.gadgets.values()}
         variable_data = {}
         for key, path in self.variables.items():
             gadget_name = path.split('/')[0]

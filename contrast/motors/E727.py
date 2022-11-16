@@ -5,6 +5,7 @@ Provides a Motor subclass for the PI E727 piezo driver.
 import PyTango
 from . import Motor
 
+
 class E727Motor(Motor):
     """
     Single axis on the E727.

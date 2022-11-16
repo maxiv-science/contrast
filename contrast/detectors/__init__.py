@@ -8,6 +8,9 @@ everywhere.
 """
 
 
-from .Detector import Detector, TriggerSource, DetectorGroup, LiveDetector, TriggeredDetector
-from .Dummies import DummyDetector, Dummy1dDetector, DummyWritingDetector, DummyWritingDetector2, DummyDictDetector, DummyTriggerSource
+from .Detector import (Detector, TriggerSource, DetectorGroup, LiveDetector,
+                       TriggeredDetector, BurstDetector)
+from .Dummies import (DummyDetector, Dummy1dDetector, DummyWritingDetector,
+                      DummyWritingDetector2, DummyDictDetector,
+                      DummyTriggerSource)
 from .Pseudo import PseudoDetector
