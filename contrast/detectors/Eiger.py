@@ -19,14 +19,15 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     """
 
     def __init__(self, name=None, host='b-nanomax-eiger-dc-1.maxiv.lu.se',
-                 api_version='1.8.0'):
+                 api_version='1.8.0', use_image_appendix=False):
         """
         Class to interact directly with the Eiger Simplon API.
         """
         self.host = host
         self.api_version = api_version
-        self._hdf_path = 'entry/measurement/Eiger/data'
+        self._hdf_path = 'entry/instrument/eiger/data'
         self.acqthread = None
+        self.use_image_appendix = use_image_appendix
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
@@ -165,6 +166,9 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
                 raise Exception('%s hdf5 file already exists' % self.name)
         self._set('stream', 'config/header_appendix',
                   json.dumps({'filename': self.dpath}))
+        if self.use_image_appendix: # for CoSAXS tango server
+            self._set('stream', 'config/image_appendix',
+                      json.dumps({'filename': self.dpath}))
         self._set('detector', 'command/arm')
         self.n_started = 0
 
