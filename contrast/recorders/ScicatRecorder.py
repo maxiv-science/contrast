@@ -1,7 +1,6 @@
 from . import Recorder
 from .Hdf5Recorder import H5_NAME_FORMAT, Link
 from .StreamRecorder import walk_dict
-from scifish import SciFish
 from ..detectors import Detector
 from ..utils import str_to_args
 import os
@@ -13,7 +12,16 @@ class ScicatRecorder(Recorder):
     Recorder which submits acquisition info to the SciCat database via a
     helper library.
     """
+
+    try:
+        from scifish import SciFish
+    except ImportError:
+        SciFish = None
+
     def __init__(self, name=None, verbose=False):
+        if not self.SciFish:
+            raise ImportError('ScicatRecorder needs the MAX IV '
+                              'scifish library')
         Recorder.__init__(self, name=name)
         self.verbose = verbose
 
@@ -22,7 +30,7 @@ class ScicatRecorder(Recorder):
         Give SciCat all the info for this scan. Enters the whole snapshot.
         """
         # standard fields
-        self.entry = SciFish()
+        self.entry = self.SciFish()
         self.entry.start_scan()
         self.entry.scicat_data.datasetName = dct['scannr']
         self.entry.scicat_data.sampleId = dct['scannr']
