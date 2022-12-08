@@ -194,6 +194,7 @@ class SoftwareScan(object):
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
 
             # tell the recorders that the scan is over
+            snap = env.snapshot.capture()
             for r in active_recorders():
                 r.queue.put(RecorderFooter(scannr=self.scannr,
                                            status='finished',
@@ -206,6 +207,7 @@ class SoftwareScan(object):
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
 
             # tell the recorders that the scan was interrupted
+            snap = env.snapshot.capture()
             for r in active_recorders():
                 r.queue.put(RecorderFooter(scannr=self.scannr,
                                            status='interrupted',

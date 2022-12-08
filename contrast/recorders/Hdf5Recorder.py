@@ -47,7 +47,7 @@ class Hdf5Recorder(Recorder):
                 print('*******************************')
                 print(e)
                 self.fp = None
-            self.act_on_data({'snapshot': dct['snapshot']}, base='entry/')
+            self.act_on_data({'snapshots/pre_scan/': dct['snapshot']}, base='entry/')
             self.act_on_data({'description': dct['description']},
                              base='entry/')
 
@@ -140,8 +140,10 @@ class Hdf5Recorder(Recorder):
 
     def act_on_footer(self, dct):
         """
-        Closes the file after the scan.
+        Takes another snapshot (post scan) and then
+        closes the file after the scan.
         """
         if self.fp is not None:
+            self.act_on_data({'snapshots/post_scan/': dct['snapshot']}, base='entry/')
             self.fp.flush()
             self.fp.close()
