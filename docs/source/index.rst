@@ -15,6 +15,7 @@ This document was built automatically from Contrast version |release|.
    :caption: Contents:
    
    concepts
+   tutorials.ipynb
    usage
    guis
    macros
