@@ -8,6 +8,13 @@ class EmptySnapshot(object):
     """
     Define the API.
     """
+    def init(self):
+        """
+        some miniim of attributes
+        """
+        self.pre_scan = True
+        self.post_scan = False
+
     def capture(self):
         """
         Returns a dict of label-value pairs.
