@@ -10,7 +10,7 @@ class EmptySnapshot(object):
     """
     def init(self):
         """
-        some miniim of attributes
+        Some minimum of attributes for when to perform the snapshot
         """
         self.pre_scan = True
         self.post_scan = False
