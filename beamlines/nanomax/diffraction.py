@@ -184,7 +184,7 @@ if __name__ == '__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, dial_limits=(0,30))
 
     # Robot
-    gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
@@ -241,9 +241,8 @@ if __name__ == '__main__':
     # stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
-    pilatus = Pilatus2(name='pilatus',
-                       hostname='b-nanomax-mobile-ipc-01')
-    # pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
+    #pilatus = Pilatus2(name='pilatus', hostname='b-nanomax-mobile-ipc-01')
+    #pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
