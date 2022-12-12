@@ -5,6 +5,7 @@ beam using the absorbers at the NanoMAX beamline
 
 import os
 import numpy as np
+from math import isclose
 from contrast.environment import env, macro, register_shortcut, runCommand
 
 #   ToDo
@@ -86,15 +87,24 @@ class Attenuate(object):
                     self.transmission[i, j] = 1. * T
 
     def calcualte_possible_permutations(self):
-        self.T_tot = [[T1 * T2 * T3 * T4, i1, i2, i3, i4,
-                       [self.elements[i1], self.elements[i2],
-                        self.elements[i3], self.elements[i4]]]
+        self.T_tot = [[T1 * T2 * T3 * T4, i1, i2, i3, i4]
                       for i1, T1 in enumerate(self.transmission[:, 0])
                       for i2, T2 in enumerate(self.transmission[:, 1])
                       for i3, T3 in enumerate(self.transmission[:, 2])
                       for i4, T4 in enumerate(self.transmission[:, 3])]
+
+        self.T_tot_el = [[self.elements[i1], self.elements[i2],
+                          self.elements[i3], self.elements[i4]]
+                        for i1, T1 in enumerate(self.transmission[:, 0])
+                        for i2, T2 in enumerate(self.transmission[:, 1])
+                        for i3, T3 in enumerate(self.transmission[:, 2])
+                        for i4, T4 in enumerate(self.transmission[:, 3])]
+
         self.T_tot = np.array(self.T_tot)
-        self.T_tot = self.T_tot[np.argsort(self.T_tot[:, 0])]
+        self.T_tot_el = np.array(self.T_tot_el)
+        sorted_index = np.argsort(self.T_tot[:, 0])
+        self.T_tot = self.T_tot[sorted_index]
+        self.T_tot_el = self.T_tot_el[sorted_index]
 
     def run_command(self, command):
         runCommand(command)
@@ -147,13 +157,13 @@ class Attenuate(object):
 
     def check_possible_permutations_for_elements(self):
         self.T_allowed = []
-        for permutation in self.T_tot:
+        for i, permutation in enumerate(self.T_tot_el):
             works = 0
-            for have_to_use in permutation[5]:
+            for have_to_use in permutation:
                 if have_to_use in self.use_ele:
                     works += 1
-            if works == len(permutation[5]):
-                self.T_allowed.append(permutation)
+            if works == len(permutation):
+                self.T_allowed.append(self.T_tot[i])
         self.T_allowed = np.array(self.T_allowed)
 
     def run(self):
@@ -200,14 +210,14 @@ class Attenuate(object):
 
             # print an output
             if self.verbosity >= 3 or self.how == 'safe':
-                print('aimed for:')
-                print('    absorption  ', self.attenuate_to)
-                print('    transmission', max(0, 1 - self.attenuate_to))
-                print('    at currently', self.photon_energy, 'eV')
-                print('can achieve:')
-                print('    absorption  ', str(1 - self.T_choosen[0]))
-                print('    transmission', str(self.T_choosen[0]))
-                print('with motor setting:')
+                print(f'aimed for:')
+                print(f'    absorption   {self.attenuate_to}')
+                print(f'    transmission {max(0, 1 - self.attenuate_to)}')
+                print(f'    at currently {self.photon_energy} eV')
+                print(f'can achieve:')
+                print(f'    absorption   {1 - self.T_choosen[0]}')
+                print(f'    transmission {self.T_choosen[0]}')
+                print(f'with motor setting:')
 
                 for i_carrier, i_pos in enumerate(
                         self.T_choosen[1:1 + len(self.carriers)]):
@@ -230,12 +240,13 @@ class Attenuate(object):
 
                     # check that the motors have moved to the calculated pos.
                     self.show_current_attenuation(printing=False)
-                    if self.T_currently != self.T_choosen[0]:
-                        msg = 'mattenuation was NOT set'
-                        print('\x1b[0;49;91[ERROR] %s\x1b[0m' % msg)
-                    else:
+                    if isclose(self.T_currently, self.T_choosen[0], rel_tol=1e-05):
                         msg = 'successfully set the attenuation'
                         print('\x1b[0;49;92m%s\x1b[0m' % msg)
+                    else:
+                        msg = 'mattenuation was NOT set'
+                        print('\x1b[0;49;91[ERROR] %s\x1b[0m' % msg)
+
 
             else:
                 for command in commands:
