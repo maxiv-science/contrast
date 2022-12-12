@@ -25,7 +25,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         """
         self.host = host
         self.api_version = api_version
-        self._hdf_path = 'entry/instrument/eiger/data'
+        self._hdf_path = 'entry/measurement/Eiger/data'
         self.acqthread = None
         self.use_image_appendix = use_image_appendix
         Detector.__init__(self, name=name)

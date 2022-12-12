@@ -154,9 +154,9 @@ if __name__ == '__main__':
     
     ## controller 3
     # stages removed from DM4
-    # xeol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='xeol_x', userlevel=1, velocity=1000)
-    # xeol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='xeol_y', userlevel=1, scaling=-1, velocity=1000)
-    # xeol_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='xeol_z', userlevel=1, scaling=-1, velocity=1000)
+    #modx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='modx', userlevel=1, scaling=+1, velocity=1000)
+    #mody = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='mody', userlevel=1, scaling=+1, velocity=1000)
+    #modz = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='modz', userlevel=1, scaling=+1, velocity=1000)
     # we use ch0 on that controller for the long range sample motor for now
     # samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1)
 
@@ -241,9 +241,9 @@ if __name__ == '__main__':
     # stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
-    # pilatus = Pilatus2(name='pilatus',
-    #                  hostname='b-nanomax-mobile-ipc-01')
-    pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus3')
+    pilatus = Pilatus2(name='pilatus',
+                       hostname='b-nanomax-mobile-ipc-01')
+    # pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
