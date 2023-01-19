@@ -153,8 +153,14 @@ class SoftwareScan(object):
         group.prepare(self.exposuretime, self.scannr, self.n_positions,
                       trials=10)
         t0 = time.time()
+
+        # take a pre scan snapshot
+        if env.snapshot.pre_scan:
+            snap = env.snapshot.capture()
+        else:
+            snap = {}
+
         # send a header to the recorders
-        snap = env.snapshot.capture()
         for r in active_recorders():
             r.queue.put(RecorderHeader(scannr=self.scannr,
                                        status='started',
@@ -193,6 +199,11 @@ class SoftwareScan(object):
                 self.output(i, dct.copy())
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
 
+            # take a post scan snapshot
+            if env.snapshot.post_scan:
+                snap = env.snapshot.capture()
+            else:
+                snap = {}
             # tell the recorders that the scan is over
             for r in active_recorders():
                 r.queue.put(RecorderFooter(scannr=self.scannr,
@@ -205,6 +216,11 @@ class SoftwareScan(object):
             group.stop()
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
 
+            # take a post scan snapshot
+            if env.snapshot.post_scan:
+                snap = env.snapshot.capture()
+            else:
+                snap = {}
             # tell the recorders that the scan was interrupted
             for r in active_recorders():
                 r.queue.put(RecorderFooter(scannr=self.scannr,

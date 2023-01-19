@@ -332,18 +332,19 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
         self.proxy.ExposureTime = acqtime
         self.proxy.FrameTime = self.burst_latency + acqtime
 
+        # arming at the top of the scan is not possible with the Pilatus,
+        # because the camserver wants the ramdisk to be big enough to
+        # save the whole scan.
         if self.hw_trig:
-            # arm here for simple hw triggers to save time
             self.proxy.TriggerMode = 'EXTERNAL_MULTI'
             self.proxy.nTriggers = self.hw_trig_n
-            self.proxy.Arm()
         else:
-            # arm on each image or burst, later
             self.proxy.TriggerMode = 'INTERNAL'
             self.proxy.nTriggers = self.burst_n
 
     def arm(self):
-        pass
+        if self.hw_trig:
+            self.proxy.Arm()
 
     def start(self):
         """
