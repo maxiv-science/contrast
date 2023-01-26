@@ -9,7 +9,7 @@ How to maintain and build this documentation:
 
     make html
 
-- Sphinx build the documentation from docstrings by importing the code. The latest version therefore has to be installed first, in the environment where you plan to build.
+- Sphinx builds the documentation from docstrings by importing the code. The latest version therefore has to be installed first, in the environment where you plan to build.
 
 - If new modules (new source files) are added, they need to be added to the ``docs/source/contrast.*.rst`` hierarchy so that ``autodoc`` can include them.
 
