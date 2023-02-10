@@ -19,6 +19,7 @@ if __name__ == '__main__':
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.SmaractMotor import SmaractRotationMotor
     from contrast.motors.E727 import E727Motor
+    from contrast.motors.PiezoLegsMotor import PiezoLegsMotor
     from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus2, Pilatus3
     from contrast.detectors.Merlin import Merlin
@@ -78,10 +79,17 @@ if __name__ == '__main__':
     # Xerion rotation stage
     # sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
 
-    # base motors through sardana
-    basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
-    basey = TangoMotor(device='motor/icepap_ctrl_1_expert/17', name='basey', userlevel=1)
-    basez = TangoMotor(device='motor/icepap_ctrl_1_expert/18', name='basez', userlevel=1)
+    ## base motors through sardana (obsolete)
+    #basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
+    #basey = TangoMotor(device='motor/icepap_ctrl_1_expert/17', name='basey', userlevel=1)
+    #basez = TangoMotor(device='motor/icepap_ctrl_1_expert/18', name='basez', userlevel=1)
+    # base motors using PMD301 controller
+    basex = PiezoLegsMotor(device='B303A-EH/CTL/PZCU-08', axis=0, name='basex', userlevel=1,
+                           scaling=-1e-3, velocity=200, offset=+23735.076, dial_limits=(13734076, 33736076), user_format='%.3f', dial_format='%.0f')
+    basey = PiezoLegsMotor(device='B303A-EH/CTL/PZCU-08', axis=1, name='basey', userlevel=1,
+                           scaling=+1e-3, velocity=200, offset=-25102.563, dial_limits=(15101563, 35103563) ,user_format='%.3f', dial_format='%.0f')
+    basez = PiezoLegsMotor(device='B303A-EH/CTL/PZCU-08', axis=2, name='basez', userlevel=1,
+                           scaling=-1e-3, velocity=200, offset=+24346.752, dial_limits=(14345752, 34247752), user_format='%.3f', dial_format='%.0f') 
 
     # gap and taper via a proxy in the local pool
     ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
