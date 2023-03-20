@@ -31,6 +31,7 @@ if __name__ == '__main__':
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
+    from contrast.detectors.epoch import Epoch
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.detectors.TangoAttributeDetector import TangoAttributeDetector
     from contrast.scans import SoftwareScan, Ct
@@ -249,6 +250,7 @@ if __name__ == '__main__':
     # stanford = StanfordTriggerSource(name='stanford', device_name='B303A-A100380CAB03/CTL/DLY-01')
 
     # detectors
+    epoch = Epoch(name='epoch')
     #pilatus = Pilatus2(name='pilatus', hostname='b-nanomax-mobile-ipc-01')
     #pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
     merlin = Merlin(name='merlin', host='localhost')
@@ -310,7 +312,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, ring_current]:  # eiger,
+    for d in [panda0, pseudo, alba2, ring_current, epoch]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
