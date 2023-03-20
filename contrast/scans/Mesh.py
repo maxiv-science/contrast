@@ -67,6 +67,10 @@ class Mesh(SoftwareScan):
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
 
+    def _before_arm(self):
+        for m in self.motors:
+            if m.name in ['basex','basey','basez']:
+                m.stop()
 
 @macro
 class DMesh(Mesh):

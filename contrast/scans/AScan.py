@@ -39,6 +39,11 @@ class AScan(SoftwareScan):
         for i in range(len(positions[0])):
             yield {m.name: pos[i] for (m, pos) in zip(self.motors, positions)}
 
+    def _before_arm(self):
+        for m in self.motors:
+            if m.name in ['basex','basey','basez']:
+                m.stop()
+
 
 @macro
 class DScan(AScan):

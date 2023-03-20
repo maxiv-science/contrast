@@ -318,6 +318,9 @@ if __name__ == '__main__':
         assert h5rec.is_alive(), 'hdf5 recorder is dead! this can''t be good. maybe restart contrast.'
         runCommand('stoplive')
         runCommand('fsopen')
+        basex.stop()   # making sure the base motor are not regulating
+        basey.stop()   # making sure the base motor are not regulating
+        basez.stop()   # making sure the base motor are not regulating
         time.sleep(0.2)
 
     def post_scan_stuff(slf):
