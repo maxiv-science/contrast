@@ -289,7 +289,8 @@ if __name__ == '__main__':
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
     # keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
-    # keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage')
+    # keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage', dial_limits=(-10,10))
+    # keysight_range = TangoAttributeMotor(name='keysight_range', device='B303A-EH/CTL/KEYSIGHT-01', attribute='current_range', dial_format='%E', user_format='%E')
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A-E02/CTL/SDM-01')
