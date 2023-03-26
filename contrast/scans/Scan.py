@@ -151,10 +151,16 @@ class SoftwareScan(object):
                   % (', '.join([d.name for d in group if d.busy()])))
             return
         group.prepare(self.exposuretime, self.scannr, self.n_positions,
-                      trials=100)
+                      trials=10)
         t0 = time.time()
+
+        # take a pre scan snapshot
+        if env.snapshot.pre_scan:
+            snap = env.snapshot.capture()
+        else:
+            snap = {}
+
         # send a header to the recorders
-        snap = env.snapshot.capture()
         for r in active_recorders():
             r.queue.put(RecorderHeader(scannr=self.scannr,
                                        status='started',
@@ -174,7 +180,7 @@ class SoftwareScan(object):
                 group.arm()
                 # start detectors
                 self._before_start()
-                group.start(trials=100)
+                group.start(trials=10)
                 while det_group.busy():
                     self._while_acquiring()
                     time.sleep(.01)
@@ -193,6 +199,11 @@ class SoftwareScan(object):
                 self.output(i, dct.copy())
             print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
 
+            # take a post scan snapshot
+            if env.snapshot.post_scan:
+                snap = env.snapshot.capture()
+            else:
+                snap = {}
             # tell the recorders that the scan is over
             for r in active_recorders():
                 r.queue.put(RecorderFooter(scannr=self.scannr,
@@ -205,6 +216,11 @@ class SoftwareScan(object):
             group.stop()
             print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
 
+            # take a post scan snapshot
+            if env.snapshot.post_scan:
+                snap = env.snapshot.capture()
+            else:
+                snap = {}
             # tell the recorders that the scan was interrupted
             for r in active_recorders():
                 r.queue.put(RecorderFooter(scannr=self.scannr,

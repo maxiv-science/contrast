@@ -205,7 +205,7 @@ class Electrometer(object):
     def version(self):
         res = self.query('*IDN?')
         version = res.split(',')[-1].strip()
-        return tuple(map(int, version.split('.')))
+        return tuple(map(int, version.split('.')[:3]))
 
     def test_soft_triggers(self, N=1000):
         """
@@ -329,10 +329,15 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         else:
             # case 2 or 3, return the last burst_n or hw_trig_n points
             chunk = self.hw_trig_n if self.hw_trig else self.burst_n
-            assert (len(self.em.stream.data) == chunk), \
-                'wrong number of points received'
             ret = {}
             data = np.array(self.em.stream.data)
+            if not (len(self.em.stream.data) == chunk):
+                # data missing, don't do a hard assert, pad and warn loudly.
+                missing = chunk - len(self.em.stream.data)
+                data = np.pad(data, pad_width=((0, missing), (0, 0)))
+                print('*** WARNING! wrong number of data points received '
+                      'from %s. Padding with zeros, electrometer data will '
+                      'be SCREWED UP ***' % self.name)
             for i in range(len(keys)):
                 ret[keys[i]] = data[:, i].reshape((1, -1))
             return ret

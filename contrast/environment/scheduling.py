@@ -84,16 +84,21 @@ class MaxivScheduler(DummyScheduler):
 
     NOTE: Using threaded status checkers here to avoid polling a large
     number of potentially slow shutter devices on a different control system.
+
+    At MAX IV, there is a local proxy device with countdown and ring
+    current attributes.
     """
-    def __init__(self, shutter_list, avoid_injections=True,
+    def __init__(self,
+                 proxy_device,
+                 shutter_list,
+                 avoid_injections=True,
                  respect_countdown=True):
         try:
             self.shutter_checker = TangoShutterChecker(*shutter_list)
             self.shutter_checker.start()
+            self.proxy = tango.DeviceProxy(proxy_device)
             self.injection_device = tango.DeviceProxy(
-                'g-v-csproxy-0:10310/R3-319S2/DIA/DCCT-01')
-            self.countdown_device = tango.DeviceProxy(
-                'g-v-csproxy-0:10310/g/ctl/machinestatus')
+                'g-v-csproxy-0:10303/R3-319S2/DIA/DCCT-01')  # awaiting a local proxy solution
             self.disabled = False
             self.avoid_injections = avoid_injections
             self.respect_countdown = respect_countdown
@@ -122,9 +127,10 @@ class MaxivScheduler(DummyScheduler):
         if not self.respect_countdown:
             return None
         try:
-            dl = self.countdown_device.r3topup
+            dl = self.proxy.countdowndevice  # this is an int
             dl = 1 if (dl < 0) else dl
             return dl
         except:
             print('MaxivScheduler: Problem getting the topup countdown value')
             return None
+

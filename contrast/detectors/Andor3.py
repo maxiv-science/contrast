@@ -39,7 +39,7 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
         if dataid is None:
             # no saving
             self.saving_file = ''
-            self.proxy.filename = ''
+            self.proxy.Filename = ''
         else:
             # saving
             path = env.paths.directory
@@ -49,17 +49,17 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'
                       % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
-            self.proxy.filename = self.saving_file
+            self.proxy.Filename = self.saving_file
 
         # arming and numbers of frames
-        self.proxy.exposure_time = acqtime
+        self.proxy.ExposureTime = acqtime
         if self.burst_n == 1:
-            self.proxy.trigger_mode = 'Software'
-            self.proxy.frame_count = n_starts
-            self.proxy.start()
+            self.proxy.TriggerMode = 'Software'
+            self.proxy.nTriggers = n_starts
+            self.proxy.Arm()
         else:
-            self.proxy.trigger_mode = 'Internal'
-            self.proxy.frame_count = self.burst_n
+            self.proxy.TriggerMode = 'Internal'
+            self.proxy.nTriggers = self.burst_n
         self.frames_expected = 0
 
     def arm(self):
@@ -67,21 +67,21 @@ class Andor3(Detector, SoftwareLiveDetector, BurstDetector):
 
     def start(self):
         if self.burst_n == 1:
-            self.proxy.software_trigger()
+            self.proxy.SoftwareTrigger()
             self.frames_expected += 1
         else:
-            self.proxy.start()
+            self.proxy.Arm()
             self.frames_expected = self.burst_n
 
     def stop(self):
-        self.proxy.stop()
+        self.proxy.Stop()
 
     def busy(self):
         st = self.proxy.State()
         if st in (PyTango.DevState.STANDBY, PyTango.DevState.ON):
             return False
         elif st == PyTango.DevState.RUNNING:
-            if self.proxy.acquired_frames == self.frames_expected:
+            if self.proxy.nFramesAcquired == self.frames_expected:
                 return False
         return True
 

@@ -5,5 +5,7 @@ dist/*
 contrast.egg*
 docs/build
 macros.rst
-
+.zhistory
 .vscode/*
+*log.txt
+

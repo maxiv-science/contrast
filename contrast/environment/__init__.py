@@ -28,7 +28,8 @@ class Env(object):
         self.paths = PathFixer()
         self.scheduler = DummyScheduler()
         self.snapshot = MotorSnapshot()
-
+        self.snapshot.pre_scan = True
+        self.snapshot.post_scan = True
 
 env = Env()
 
