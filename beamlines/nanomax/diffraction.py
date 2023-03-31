@@ -193,7 +193,7 @@ if __name__ == '__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
 
     # Robot
-    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
@@ -212,8 +212,8 @@ if __name__ == '__main__':
     topm_zoom = TangoMotor(device='b303a-e02/dia/om-02-zoom', name='topm_zoom', userlevel=1)
 
     # goniometer
-    gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=3, user_format='%.4f', dial_format='%.4f')
-    gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=3, user_format='%.4f', dial_format='%.4f')
+    gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=2, user_format='%.4f', dial_format='%.4f')
+    gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=2, user_format='%.4f', dial_format='%.4f')
     gonx1 = TangoMotor(device='b303a-e02/dia/gon-01-x1', name='gonx1', userlevel=4)
     gonx2 = TangoMotor(device='b303a-e02/dia/gon-01-x2', name='gonx2', userlevel=4)
     gonx3 = TangoMotor(device='b303a-e02/dia/gon-01-x3', name='gonx3', userlevel=4)
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     # detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=3, dial_limits=(0, 295))
     # dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=3, dial_limits=(0, 31))
 
-    # table motors
+    # table motor
     table_front_x = TangoMotor(device='b303a-e02/dia/tab-01-x1', name='table_front_x', userlevel=5, dial_limits=(-10,10))
     table_back_x = TangoMotor(device='b303a-e02/dia/tab-01-x2', name='table_back_x', userlevel=5, dial_limits=(-10,10))
     table_front_y = TangoMotor(device='b303a-e02/dia/tab-01-y1', name='table_front_y', userlevel=5, dial_limits=(-10,10))
@@ -252,7 +252,7 @@ if __name__ == '__main__':
     # detectors
     epoch = Epoch(name='epoch')
     #pilatus = Pilatus2(name='pilatus', hostname='b-nanomax-mobile-ipc-01')
-    #pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
+    pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
     merlin = Merlin(name='merlin', host='localhost')
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
@@ -266,7 +266,7 @@ if __name__ == '__main__':
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     # eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
@@ -284,9 +284,10 @@ if __name__ == '__main__':
                                        'c3': 'panda0/INENC3.VAL_Mean',
                                        'adc1': 'panda0/FMC_IN.VAL1_Mean',
                                        'adc2': 'panda0/FMC_IN.VAL2_Mean',
-                                       'adc3': 'panda0/FMC_IN.VAL3_Mean'},
+                                       'adc3': 'panda0/FMC_IN.VAL3_Mean',
+                                       'adc4': 'panda0/FMC_IN.VAL4_Mean'},
                             expression={'x': 'c2', 'y': 'c3', 'z': 'c1',
-                                        'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5'})
+                                        'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5',})
 #                                        'analog_x': '-adc2*5*10/2**31', 'analog_y': 'adc3*5*10/2**31', 'analog_z': '-adc1*5*10/2**31'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
@@ -312,12 +313,13 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, ring_current, epoch]:
+    for d in [panda0, pseudo, alba2, ring_current, epoch, eiger1m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
         assert h5rec.is_alive(), 'hdf5 recorder is dead! this can''t be good. maybe restart contrast.'
+        runCommand('optics on')
         runCommand('stoplive')
         runCommand('fsopen')
         basex.stop()   # making sure the base motor are not regulating
