@@ -20,6 +20,7 @@ if __name__ == '__main__':
     from contrast.motors.NanosMotor import NanosMotor
     from contrast.motors.PiezoLegsMotor import PiezoLegsMotor
     from contrast.motors.PiezoLegsMotor import ImgSampleStage
+    from contrast.motors.DacMotor import DacMotor
     from contrast.detectors.Eiger import Eiger
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
@@ -31,6 +32,8 @@ if __name__ == '__main__':
     import macros_img
     import os
     import time
+
+
     # add a scheduler to pause scans when shutters close
     """
     env.scheduler = MaxivScheduler(
@@ -56,6 +59,10 @@ if __name__ == '__main__':
             ' is as nanomax-service with umask 022\033[0m'
         )
 
+    # sample piezos through National Instruments DAC device
+    sx = DacMotor(device='B303A/CTL/IMG-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
+    sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
+    
     # Nanos motors for central stop, zone plate and order sorting aperture positioning
     osax = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osax', userlevel=1, scaling=-5e-4)
     osay = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osay', userlevel=1, scaling=-5e-4)
@@ -65,12 +72,11 @@ if __name__ == '__main__':
     zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', userlevel=1, scaling=-5e-4)
     csx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='csx', userlevel=1, scaling=-5e-4)
     csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', userlevel=1, scaling=-5e-4)
-    #gry = NanosMotor(device='test/ctl/nanos-01', axis=8, name='gry', userlevel=1, scaling=-5e-4)
-    #grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', userlevel=1, scaling=5e-4)
-    #gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', userlevel=1, scaling=5e-4)
+    gry = NanosMotor(device='test/ctl/nanos-01', axis=8, name='gry', userlevel=1, scaling=-5e-4)
+    grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', userlevel=1, scaling=5e-4)
+    gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', userlevel=1, scaling=5e-4)
     #nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=11, name='nanos_dummy', userlevel=1, scaling=5e-4)
-
-  
+    
     # PiezoLEGS motors for coarse sample positioning
     bx, by, bz = ImgSampleStage(device='B303A/CTL/IMG-01', velocity=90, names=['bx', 'by', 'bz'], userlevel=1, scaling=1e-3, user_format='%.3f')
     #m0 = PiezoLegsMotor(device='B303A/CTL/IMG-01', axis=0, name='m0', userlevel=1, scaling=1e-3, user_format='%.3f')
@@ -78,8 +84,9 @@ if __name__ == '__main__':
     #m2 = PiezoLegsMotor(device='B303A/CTL/IMG-01', axis=2, name='m2', userlevel=1, scaling=1e-3, user_format='%.3f')  
 
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    #grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='grx', velocity=0, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='sr', velocity=3000, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='sr', velocity=3000, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='grx', velocity=0, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    #osar = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=17, name='osar', velocity=3000, userlevel=1, user_format='%.4f', dial_format='%.4f')
     """
     pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='pinhole_x', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
     pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=4, name='pinhole_y', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
@@ -92,7 +99,7 @@ if __name__ == '__main__':
     sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
-
+    """
     # gap and taper
     ivu_gap = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_gap', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='g-v-csproxy-0:10303/r3-303l/id/idivu-01_taper', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -137,8 +144,12 @@ if __name__ == '__main__':
     attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2)
     attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
     attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
-    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
-
+    # fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3, velocity=5000)
+    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2, velocity=1000)
+    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2, velocity=1000)
+    pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
+    
     # controller 3
     # diode2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='diode2_y', userlevel=3)#)
     # diode2_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='diode2_z', userlevel=3)#)
@@ -165,9 +176,10 @@ if __name__ == '__main__':
     
     # detectors
     eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
-    eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
-    x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
+    #eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
+    #x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
     alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    #alba3 = AlbaEM(name='alba3', host='b-nanomax-em2-3')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
     #E01cam01 = BaslerCamera(name='E01cam01', device='basler/e01-cam-01/main')
@@ -180,9 +192,15 @@ if __name__ == '__main__':
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     # Pandabox reading the LC400 encoders, both digital (AquadB) and analog
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
-    NpointFlyscan.panda = panda2
+    #NpointFlyscan.panda = panda2
     # Pandabox reading the Attocube (AquadB) encoders
     # panda3 = PandaBox(name='panda3', host='b-nanomax-pandabox-3')
+    macros_common.Csnake.panda = panda2
+    macros_common.Csnake.dac_0 = sx
+    macros_common.Csnake.dac_1 = sy
+    macros_common.Cspiral.panda = panda2
+    macros_common.Cspiral.dac_0 = sx
+    macros_common.Cspiral.dac_1 = sy
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',
@@ -191,10 +209,12 @@ if __name__ == '__main__':
                                        'a1': 'panda2/FMC_IN.VAL1_Mean',
                                        'a2': 'panda2/FMC_IN.VAL2_Mean',
                                        'a3': 'panda2/FMC_IN.VAL3_Mean'},
-                            expression={'x': 'c1', 'y': 'c3', 'z': 'c2',
-                                        'x_analog': 'a1',
-                                        'y_analog': 'a3',
-                                        'z_analog': 'a2'})
+                            expression={'laser_x': 'c1', 
+                                        'laser_y': 'c2', 
+                                        'laser_z': 'c3',
+                                        'x': 'a1',
+                                        'y': 'a3',
+                                        'z': 'a2'})
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A-E01/CTL/SDM-01')
@@ -214,11 +234,12 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo]:
+    for d in [panda2, pseudo, eiger4m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
+        assert h5rec.is_alive(), 'hdf5 recorder is dead! this can''t be good. maybe restart contrast.'
         runCommand('stoplive')
         runCommand('fsopen')
         bx.stop()   # making sure the base motor are not regulating
@@ -246,7 +267,6 @@ if __name__ == '__main__':
         print(f'\nNote: inferring that the next scan number should be {last+1}')
     except:
         pass
-   """
 
     # add a memorizer so the motors keep their user positions and limits
     # after a restart note that this will overwrite the dial positions

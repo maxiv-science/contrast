@@ -7,6 +7,7 @@ import os
 import numpy as np
 from math import isclose
 from contrast.environment import env, macro, register_shortcut, runCommand
+from contrast.motors.SmaractMotor import SmaractLinearMotor
 
 #   ToDo
 #       - avoid elements with absorption edges close to the current energy
