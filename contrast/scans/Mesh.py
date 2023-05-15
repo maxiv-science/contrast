@@ -67,6 +67,10 @@ class Mesh(SoftwareScan):
         for i in range(len(grids[0].flat)):
             yield {m.name: pos.flat[i] for (m, pos) in zip(self.motors, grids)}
 
+    def _before_arm(self):
+        for m in self.motors:
+            if m.name in ['basex','basey','basez']:
+                m.stop()
 
 @macro
 class DMesh(Mesh):
@@ -227,3 +231,37 @@ class MeshJMesh(SoftwareScan):
         for i, pos in enumerate(self.pos_12):
             yield {self.motors[0].name: pos[0],
                    self.motors[1].name: pos[1]}
+
+@macro
+class ListScan(SoftwareScan):
+    """
+    Software scan one or more motors in parallel with manually given position
+    lists for each of the motors. Can be used for unusual scan requirements.
+    The position lists must be given as python lists, but without any spaces.
+        
+        listscan <motor1> <position_list> ...  <exp_time>
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.motors = []
+        self.pos_lists = []
+        try:
+            exposuretime = float(args[-1])
+            super(ListScan, self).__init__(exposuretime)
+            for i in range(int((len(args) - 1) / 2)):
+                self.motors.append(args[2*i])
+                self.pos_lists.append(args[2*i+1])
+            self.n_positions = len(self.pos_lists[0])
+            assert all_are_motors(self.motors)
+            assert (len(args) - 1) % 2 == 0
+            assert self.check_length_postlists()
+        except:
+            raise MacroSyntaxError
+
+    def _generate_positions(self):
+        for i in range(len(self.pos_lists[0])):
+            yield {m.name: pos[i] for (m, pos) in zip(self.motors, self.pos_lists)}
+
+    def check_length_postlists(self):
+        lengths = [len(x) for x in self.pos_lists]
+        return all(x==lengths[0] for x in lengths)

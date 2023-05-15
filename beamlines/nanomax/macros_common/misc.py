@@ -19,6 +19,8 @@ register_shortcut('watten', 'wm attenuator*')
 register_shortcut('wsample', 'wm base* s?')
 register_shortcut('wbl', 'wm ivu_* energy mono_x2per ssa_gap*')
 register_shortcut('wtab', 'wm table*')
+register_shortcut('wrobot', 'wm gamma delta radius')
+
 
 
 def fastshutter_action(state, name):

@@ -43,6 +43,7 @@ class PiezoLegsMotor(Motor):
         self.proxy.write_attribute(attr, pos)
 
     def busy(self):
+        time.sleep(0.025)
         attr = 'channel%02d_state' % self._axis
         return (self.proxy.read_attribute(attr).value == 'running')
 

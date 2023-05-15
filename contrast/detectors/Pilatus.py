@@ -296,6 +296,7 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
         self.proxy.TriggerMode = 'INTERNAL'
         self.proxy.ExposureTime = acqtime
         self.proxy.FrameTime = acqtime + .1
+        self.proxy.Filename = ''
         self.proxy.Arm()
 
     def stop_live(self):

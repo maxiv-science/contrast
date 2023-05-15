@@ -43,3 +43,8 @@ class Keysight2985(Detector):
     @property
     def current_range(self):
         return self.dev.current_range
+
+    @current_range.setter
+    def current_range(self, curr_range):
+        self.dev.current_range = curr_range
+
