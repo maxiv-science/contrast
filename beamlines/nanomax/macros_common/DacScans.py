@@ -3,6 +3,7 @@ from contrast.environment import macro, env, MacroSyntaxError, runCommand
 from contrast.detectors import Detector, TriggeredDetector, TriggerSource
 from contrast.recorders import active_recorders, RecorderHeader, RecorderFooter
 from contrast.utils import SpecTable
+from contrast.scans.Scan import SoftwareScan
 from collections import OrderedDict
 import sys
 
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
 @macro
-class Cspiral():
+class Cspiral(SoftwareScan):
     """
     Continuous spiral scan macro for the NI dac box.
 
@@ -76,6 +77,7 @@ class Cspiral():
         This is the main acquisition loop where interaction with motors,
         detectors and other ``Gadget`` objects happens.
         """
+        self._before_scan()
         print('\nScan #%d starting at %s\n' % (self.scannr, time.asctime()))
 
         # find and prepare the detectors
@@ -88,7 +90,7 @@ class Cspiral():
             return
         # start by setting up triggering on all compatible detectors
         self._set_det_trig(True)
-        group.prepare(self.exptime, self.scannr, self.n_steps,
+        group.prepare(self.exptime, self.scannr, 1,
                       trials=10)
         t0 = time.time()
 
@@ -153,9 +155,11 @@ class Cspiral():
         self._set_det_trig(False)
         self.dac_0.proxy.stop_waveform()
 
+        # do any user-defined cleanup actions
+        self._after_scan()
 
 @macro
-class Csnake():
+class Csnake(SoftwareScan):
     """
     Continuous snake scan macro for the NI dac box.
 
@@ -190,7 +194,9 @@ class Csnake():
         self.stepsize = float(args[4])
         self.exptime = float(args[5])
         self.latency = 0.001
-        self.n_steps = int(((self.dac_0_end - self.dac_0_start)/self.stepsize+1) * ((self.dac_1_end - self.dac_1_start)/self.stepsize+1)-1)
+        N_points_per_line = int((self.dac_0_end - self.dac_0_start) / self.stepsize) + 1
+        N_lines = int((self.dac_1_end - self.dac_1_start) / self.stepsize) + 1
+        self.n_steps = N_points_per_line * N_lines
         self.print_progress = False
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
@@ -230,6 +236,7 @@ class Csnake():
         This is the main acquisition loop where interaction with motors,
         detectors and other ``Gadget`` objects happens.
         """
+        self._before_scan()
         print('\nScan #%d starting at %s\n' % (self.scannr, time.asctime()))
 
         # find and prepare the detectors
@@ -242,7 +249,7 @@ class Csnake():
             return
         # start by setting up triggering on all compatible detectors
         self._set_det_trig(True)
-        group.prepare(self.exptime, self.scannr, self.n_steps,
+        group.prepare(self.exptime, self.scannr, 1,
                       trials=10)
         t0 = time.time()
 
@@ -306,6 +313,9 @@ class Csnake():
         # set back the triggering state
         self._set_det_trig(False)
         self.dac_0.proxy.stop_waveform()
+
+                # do any user-defined cleanup actions
+        self._after_scan()
 
 class dac_waveform():
 

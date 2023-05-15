@@ -56,8 +56,8 @@ class NanosMotor(Motor):
         self.proxy.ArbitrarySend('O0\r')
 
     def home(self):
-        print('Homeing is currently not safe to execute. No action right now.')
-        """
+        #print('Homeing is currently not safe to execute. No action right now.')
+
         ax = '#%02d\r' % self._axis
         self.proxy.ArbitrarySend(ax)
         time.sleep(0.1)
@@ -69,4 +69,4 @@ class NanosMotor(Motor):
             print(mess)
             time.sleep(2)
         print('Homing finished')
-        """
+
