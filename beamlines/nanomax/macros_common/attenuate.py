@@ -12,6 +12,8 @@ from contrast.environment import env, macro, register_shortcut, runCommand
 #       - avoid elements with absorption edges close to the current energy
 #       - way of printing the closest possible absorption values
 
+#needs to be here so it can be stopped after moving -> prevents humming
+attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
 
 @macro
 class Attenuate(object):
@@ -251,3 +253,6 @@ class Attenuate(object):
             else:
                 for command in commands:
                     self.run_command(command)
+
+            # prevent humming when in closed loop 
+            attenuator3_x.stop()
