@@ -16,7 +16,6 @@ from contrast.motors.SmaractMotor import SmaractLinearMotor
 #needs to be here so it can be stopped after moving -> prevents humming
 attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
 
-
 @macro
 class Attenuate(object):
     """
