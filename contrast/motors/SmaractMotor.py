@@ -6,7 +6,10 @@ Controls these via a MAX IV Tango device,
 https://gitlab.maxiv.lu.se/kits-maxiv/dev-maxiv-mcs
 """
 
-import tango
+try:
+    import tango
+except ImportError:
+    pass
 from . import Motor
 import time
 
@@ -15,7 +18,7 @@ class SmaractLinearMotor(Motor):
     """
     Single Smaract motor axis.
     """
-    def __init__(self, device, axis, velocity=None, **kwargs):
+    def __init__(self, device, axis, velocity=None, frequency=None, **kwargs):
         """
         :param device: Path to the MCS Tango device
         :type device: str
@@ -32,6 +35,8 @@ class SmaractLinearMotor(Motor):
         if velocity is not None:
             attr = 'velocity_%d' % self.axis
             self.proxy.write_attribute(attr, velocity * 1e3)
+        if frequency is not None:
+            self.frequency(frequency)
 
     @property
     def dial_position(self):
@@ -53,6 +58,10 @@ class SmaractLinearMotor(Motor):
         while self.busy():
             time.sleep(.1)
         print('homing done')
+    
+    def frequency(self, freq):
+        # set the maximum closed loop frequency of the positioner
+        self.proxy.arbitraryCommand(f"SCLF{self.axis:d},{int(freq):d}")        
 
     def stop(self):
         self.proxy.stopAll()  # safety first

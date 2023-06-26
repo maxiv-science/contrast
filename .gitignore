@@ -10,4 +10,6 @@ macros.rst
 *log.txt
 .*
 !/.gitignore
-
+.ipynb_checkpoints
+savefig
+_static

@@ -14,7 +14,7 @@ import datetime
 import time
 import numpy as np
 from threading import Event
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtWidgets import (QWidget, QTextEdit, QVBoxLayout,
                              QHBoxLayout, QApplication, QPushButton,
                              QTreeView, QProgressBar)
@@ -57,12 +57,9 @@ class StxmGui(QWidget):
         self.stop_btn.clicked.connect(self.stop_evt.set)
 
         # A sort of Gadget widget - here using pyqt's model/view concept
-        self.model = GadgetModel()
-        self.tree = QTreeView()
-        self.tree.setModel(self.model)
-        self.tree.expandAll()
+        self.tree = GadgetTree()
         self.monitor = GadgetMonitor()
-        self.monitor.update.connect(self.model.motor_update)
+        self.monitor.update.connect(self.tree.motor_update)
         self.monitor.start()
 
         # A progress bar for scans
@@ -85,8 +82,8 @@ class StxmGui(QWidget):
         col2.addWidget(self.im_view, 2)
         col2.addWidget(self.txt)
         col2.addLayout(btns)
-        hbox.addLayout(col1)
-        hbox.addLayout(col2, 2)
+        hbox.addLayout(col1, 1)
+        hbox.addLayout(col2, 3)
         self.setLayout(hbox)
         self.resize(1200, 700)
 
@@ -212,27 +209,6 @@ class StreamReader(QThread):
             self.signal.emit(msg)
 
 
-class GadgetModel(QStandardItemModel):
-    """
-    Basic PyQT model representing the Gadget tree, could in principle
-    be made richer with status and positions, etc.
-    """
-    def __init__(self):
-        super().__init__()
-        top = QStandardItem('Gadget')
-        self.appendRow(top)
-        for sub in Gadget.__subclasses__():
-            row = QStandardItem(sub.__name__)
-            for g in sub.getinstances():
-                row.appendRow(QStandardItem(g.name))
-            top.appendRow(row)
-        self.top = top
-
-    @pyqtSlot(dict)
-    def motor_update(self, pos):
-        pass  # update model here
-
-
 class PyQtRecorder(Recorder):
     """
     Recorder which just puts stuff in a queue for RecorderEmitter.
@@ -275,6 +251,9 @@ class GadgetMonitor(QThread):
     Helper thread which goes around checking states and positions of
     Gadget objects at regular intervals, and issues signals with the
     results.
+
+    In a real GUI, this would ideally be replaced by something like
+    Tango events.
     """
     update = pyqtSignal(dict)
 
@@ -289,6 +268,44 @@ class GadgetMonitor(QThread):
                 dct[m.name] = (m.user_position, m.busy())
             self.update.emit(dct)
             time.sleep(2)
+
+
+class GadgetTree(QTreeView):
+    """
+    Basic PyQT tree of gadgets.
+    """
+    def __init__(self):
+        super().__init__()
+
+        model = QStandardItemModel(parent=self)
+        model.setHorizontalHeaderLabels(['Name', 'Position', 'Busy'])
+
+        top = QStandardItem('Gadget')
+        model.appendRow(top)
+        for sub in Gadget.__subclasses__():
+            row = QStandardItem(sub.__name__)
+            for g in sub.getinstances():
+                row.appendRow([QStandardItem(g.name),
+                               QStandardItem(),
+                               QStandardItem()])
+            top.appendRow(row)
+
+        self.model = model
+        self.setModel(model)
+        self.expandAll()
+
+    def find_index(self, name):
+        itm = self.model.findItems(name, flags=Qt.MatchRecursive)[0]
+        return self.model.indexFromItem(itm)
+
+    @pyqtSlot(dict)
+    def motor_update(self, dct):
+        parent = self.find_index('Motor')
+        for k, v in dct.items():
+            row = self.find_index(k).row()
+            for i in (0, 1):
+                ind = self.model.index(row, i + 1, parent)
+                self.model.setData(ind, str(v[i]))
 
 
 if __name__ == '__main__':

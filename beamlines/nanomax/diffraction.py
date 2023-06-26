@@ -50,15 +50,15 @@ if __name__ == '__main__':
         )
 
     # add a scheduler to pause scans when shutters close
-    env.scheduler = MaxivScheduler(
-        proxy_device='b303a/ctl/proxy-01',
-        shutter_list=['B303A-FE/VAC/HA-01',
-                      'B303A-FE/PSS/BS-01',
-                      'B303A-O/PSS/BS-01',
-                      'B303A-E/PSS/BS-01'],
-        avoid_injections=False,
-        respect_countdown=False
-    )
+#    env.scheduler = MaxivScheduler(
+#        proxy_device='b303a/ctl/proxy-01',
+#        shutter_list=['B303A-FE/VAC/HA-01',
+#                      'B303A-FE/PSS/BS-01',
+#                      'B303A-O/PSS/BS-01',
+#                      'B303A-E/PSS/BS-01'],
+#        avoid_injections=False,
+#        respect_countdown=False
+#    )
 
     env.userLevel = 2
     # arbitrarily chosen these levels:
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
-    # sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
+    #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
 
     ## base motors through sardana (obsolete)
     #basex = TangoMotor(device='motor/icepap_ctrl_1_expert/16', name='basex', userlevel=1)
@@ -98,6 +98,12 @@ if __name__ == '__main__':
 
     # ring current via a local proxy
     ring_current = TangoAttributeDetector(device='b303a/ctl/proxy-01', attribute='r3current', name='ring_current')
+
+    # # Front end movable masks
+    # mm1_x = TangoMotor(device='b303a-fe/opt/mm-01-xml', name='mm1_x', userlevel=10)
+    # mm1_y = TangoMotor(device='b303a-fe/opt/mm-01-yml', name='mm1_y', userlevel=10)
+    # mm2_x = TangoMotor(device='b303a-fe/opt/mm-02-xml', name='mm2_x', userlevel=10)
+    # mm2_y = TangoMotor(device='b303a-fe/opt/mm-02-yml', name='mm2_y', userlevel=10)
 
     # Diamond filter motors, sitting in diagnostics module 1
     bl_filter_1 = TangoMotor(device='b303a-o/opt/flt-01-yml', name='bl_filter_1', userlevel=6, dial_limits=(-36.04, 36.77))
@@ -145,20 +151,20 @@ if __name__ == '__main__':
     pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3, velocity=1000)
 
     # controller 2
-    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3, velocity=1000)
-    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3, velocity=1000)
-    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3, velocity=1000)
-    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3, velocity=1000)
-    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3, velocity=1000)
-    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3, velocity=1000)
-    attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2, velocity=5000)
-    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2, velocity=5000)
-    attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2, velocity=5000)
-    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2, velocity=5000)
-    # fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
-    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3, velocity=5000)
-    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2, velocity=1000)
-    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2, velocity=1000)
+    dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=3)
+    dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
+    seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3)
+    seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3)
+    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3)
+    seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3)
+    attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2)
+    attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2)
+    attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
+    attenuator4_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=9, name='attenuator4_x', userlevel=2)
+    ### fastshutter_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=10, name='fastshutter_x', userlevel=3)
+    diode1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=11, name='diode1_x', userlevel=3)
+    pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=2)
+    pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=2)
     pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
     
     ## controller 3
@@ -193,7 +199,7 @@ if __name__ == '__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
 
     # Robot
-    # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
@@ -266,7 +272,7 @@ if __name__ == '__main__':
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     # eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
@@ -313,7 +319,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, ring_current, epoch, eiger1m]:
+    for d in [panda0, pseudo, alba2, merlin, ring_current, epoch]: #, eiger1m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class

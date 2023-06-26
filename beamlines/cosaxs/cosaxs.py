@@ -34,7 +34,8 @@ if __name__ == '__main__':
 
 
     # the environment keeps track of where to write data
-    env.paths = SdmPathFixer('b310a/ctl/sdm-01')
+    env.paths = SdmPathFixer('b310a/ctl/sdm-01')   ### 2023 03 24 - pathFixer does not create the sample path
+    #env.paths.directory = '/data/visitors/cosaxs/20230065/2023032408/raw/0001_setup/'
 
     """## commented out fr now desc = Failed to connect to database on host g-v-csproxy-0.maxiv.lu.se with port 10303
     # add a scheduler to pause scans when shutters close
@@ -64,10 +65,15 @@ if __name__ == '__main__':
     dummy2 = DummyMotor(name='dummy2', userlevel=2)
     dummy2.velocity = 100
 
+    # sample piezos 
+    #sx = LC400Motor(device='b310A/ctl/pzcu-users-01', axis=1, name='sx', scaling=+1.0, dial_limits=(-100,100), user_format='%.3f')
+    #sy = LC400Motor(device='b310A/ctl/pzcu-users-01', axis=3, name='sy', scaling=+1.0, dial_limits=( -50, 50), user_format='%.3f')
+    #sz = LC400Motor(device='b310A/ctl/pzcu-users-01', axis=2, name='sz', scaling=-1.0, dial_limits=(-100,100), user_format='%.3f')
+
     # PI NanoCube 3-axis piezo. To be used in temporary setups
-    sx = E727Motor(device='B310A/CTL/PZCU-01', axis=2, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    sy = E727Motor(device='B310A/CTL/PZCU-01', axis=3, name='sy', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-    sz = E727Motor(device='B310A/CTL/PZCU-01', axis=1, name='sz', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    #sx = E727Motor(device='B310A/CTL/PZCU-01', axis=2, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    #sy = E727Motor(device='B310A/CTL/PZCU-01', axis=3, name='sy', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+    #sz = E727Motor(device='B310A/CTL/PZCU-01', axis=1, name='sz', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
 
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
@@ -108,10 +114,34 @@ if __name__ == '__main__':
     slit1_ygap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/o02_h_slit1_ctrl/1', name='slit1_ygap', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     slit1_ypos = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/o02_h_slit1_ctrl/2', name='slit1_ypos', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
 
+    # more slits
+    uhvslit1_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-xr', name='uhvslit1_xr', userlevel=2, user_format='%.4f')
+
     # granite table
     table_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/tab-01-x', name='table_x', userlevel=2, dial_limits=(-11.6, 11.15), user_format='%.4f') #mm
     table_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/tab-01-y', name='table_y', userlevel=2, dial_limits=(-11.6, 11.15), user_format='%.4f')
 
+    # horizontal focussing mirror motors
+    hfm1_bend01 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-03-bend01', name='hfm1_bend01', userlevel=2, user_format='%.4f')
+    hfm1_bend02 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-03-bend02', name='hfm1_bend02', userlevel=2, user_format='%.4f')
+    hfm1_pit    = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-03-pit',    name='hfm1_pit',    userlevel=2, user_format='%.4f')
+    hfm2_bend01 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-04-bend01', name='hfm2_bend01', userlevel=2, user_format='%.4f')
+    hfm2_bend02 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-04-bend02', name='hfm2_bend02', userlevel=2, user_format='%.4f')
+    hfm2_pit    = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-04-pit',    name='hfm2_pit',    userlevel=2, user_format='%.4f')
+    hfm2_x      = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-04-x',      name='hfm2_x',      userlevel=2, user_format='%.4f')
+    hfm_y       = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mrch-02-y',     name='hfm_y',       userlevel=2, user_format='%.4f')
+    
+    # vertical focussing mirror motors
+    vfm1_bend01 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-01-bend01', name='vfm1_bend01', userlevel=2, user_format='%.4f')
+    vfm1_bend02 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-01-bend01', name='vfm1_bend02', userlevel=2, user_format='%.4f')
+    vfm1_pit    = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-01-pit',    name='vfm1_pit',    userlevel=2, user_format='%.4f')
+    vfm2_bend01 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-02-bend01', name='vfm2_bend01', userlevel=2, user_format='%.4f')
+    vfm2_bend02 = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-02-bend01', name='vfm2_bend02', userlevel=2, user_format='%.4f')
+    vfm2_pit    = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-02-pit',    name='vfm2_pit',    userlevel=2, user_format='%.4f')
+    vfm2_y      = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mir-02-y',      name='vfm2_y',      userlevel=2, user_format='%.4f')
+    vfm_x       = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mrch-01-x',     name='vfm_x',       userlevel=2, user_format='%.4f')
+    vfm_y       = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/mrch-01-y',     name='vfm_y',       userlevel=2, user_format='%.4f')
+       
     ########################################
     # detectors
     ########################################
@@ -121,9 +151,15 @@ if __name__ == '__main__':
     alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48 # maybe channel 2
     pseudo = PseudoDetector(name='pseudo',
                             variables={'I0_m': 'panda0/FMC_IN.VAL6_Mean',
-                                       'It_m': 'panda0/FMC_IN.VAL3_Mean'},
+                                       'It_m': 'panda0/FMC_IN.VAL3_Mean',
+                                       'adc1': 'panda0/FMC_IN.VAL4_Mean',
+                                       'adc2': 'panda0/FMC_IN.VAL5_Mean',
+                                       'adc3': 'panda0/FMC_IN.VAL8_Mean'},
                             expression={'I0': 'I0_m', 
-                                        'It': 'It_m'})
+                                        'It': 'It_m',
+                                        'x': 'adc1*10', 
+                                        'y': 'adc2*5', 
+                                        'z': '-adc3*10'})
 
     ########################################
     # recorders

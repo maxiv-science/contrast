@@ -1,6 +1,5 @@
 from . import Recorder, RecorderFooter
 from .Hdf5Recorder import Link
-import zmq
 import time
 import subprocess
 
@@ -53,12 +52,19 @@ class StreamRecorder(Recorder):
          'status': 'running'}
 
     """
+
+    try:
+        import zmq
+    except ImportError:
+        zmq = None
+
     def __init__(self, name=None, port=5556):
         super(StreamRecorder, self).__init__(name=name)
         self.last_heartbeat = time.time()
         self.port = port
 
     def run(self):
+        zmq = self.zmq
         context = zmq.Context()
         self.socket = context.socket(zmq.PUB)
         try:
