@@ -88,7 +88,7 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector,
     def start(self):
         if self.hw_trig:
             return
-        self.proxy.SoftwareTrigger()
+        self.proxy.SoftwareTrigger()            
 
     def stop(self):
         self.proxy.Stop()
@@ -113,3 +113,18 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector,
             return None
         else:
             return Link(self.saving_file, '/entry/instrument/xspress3/', universal=True)
+
+    def stop_live(self):
+        """
+        Stops background acquisition.
+        """
+        # if the thread has been stopped or never started
+        if self.thread is None:
+            return
+        # if the thread has died by itself for some reason
+        if not self.thread.is_alive():
+            return
+        self.stopped = True
+        self.thread.join()
+        self.thread = None
+        self.stop()
