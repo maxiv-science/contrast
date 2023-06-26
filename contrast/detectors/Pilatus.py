@@ -8,7 +8,11 @@ import re
 import time
 import socket
 import select
-import tango
+
+try:
+    import tango
+except ImportError:
+    pass
 
 BUF_SIZE = 1024
 TIMEOUT = 20

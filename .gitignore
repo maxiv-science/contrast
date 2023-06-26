@@ -8,4 +8,7 @@ macros.rst
 .zhistory
 .vscode/*
 *log.txt
+.ipynb_checkpoints
+savefig
+_static
 

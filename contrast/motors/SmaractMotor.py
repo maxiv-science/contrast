@@ -6,7 +6,10 @@ Controls these via a MAX IV Tango device,
 https://gitlab.maxiv.lu.se/kits-maxiv/dev-maxiv-mcs
 """
 
-import tango
+try:
+    import tango
+except ImportError:
+    pass
 from . import Motor
 import time
 
