@@ -8,4 +8,6 @@ macros.rst
 .zhistory
 .vscode/*
 *log.txt
+.*
+!/.gitignore
 
