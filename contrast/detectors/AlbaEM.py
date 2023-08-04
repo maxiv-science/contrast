@@ -244,9 +244,10 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
     (as of SW version 2.0.04) does not allow for triggered burst
     acquisition, as reflected in the code.
     """
-    def __init__(self, name=None, debug=False, **kwargs):
+    def __init__(self, name=None, debug=False, hw_trig_min_latency=320e-6, **kwargs):
         self.kwargs = kwargs
         self.do_debug = debug
+        self.hw_trig_min_latency=hw_trig_min_latency
         Detector.__init__(self, name=name)
         LiveDetector.__init__(self)
         TriggeredDetector.__init__(self)

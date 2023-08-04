@@ -18,16 +18,18 @@ class Xspress3(Detector, SoftwareLiveDetector, TriggeredDetector,
     https://github.com/maxiv-science/xspress3-streamer
     """
 
-    def __init__(self, device='staff/alebjo/xspress3', name=None):
+    def __init__(self, device='staff/alebjo/xspress3', name=None, hw_trig_min_latency=100e-9):
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
         # do this last so that initialize() can overwrite parent defaults:
         Detector.__init__(self, name=name)
         self.proxy = PyTango.DeviceProxy(device)
+        self.hw_trig_min_latency = hw_trig_min_latency
+        self.burst_latency = 100e-9
 
     def initialize(self):
-        self.burst_latency = 100e-9
+        pass
 
     def prepare(self, acqtime, dataid, n_starts):
         if self.busy():

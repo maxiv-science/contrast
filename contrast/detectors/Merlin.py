@@ -21,12 +21,14 @@ class Merlin(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     https://github.com/maxiv-science/merlin-streamer
     """
     def __init__(self, name=None,
-                 host='b-nanomax-controlroom-cc-2', port=8000):
+                 host='b-nanomax-controlroom-cc-2', port=8000,
+                 hw_trig_min_latency=1.64e-3):
         self.host = host
         self.port = port
         self._hdf_path = 'entry/measurement/Merlin/data'
         self.acqthread = None
         self._gapless = False
+        self.hw_trig_min_latency=hw_trig_min_latency
         Detector.__init__(self, name=name)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)

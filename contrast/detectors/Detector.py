@@ -187,6 +187,9 @@ class TriggeredDetector(object):
     def __init__(self):
         self.hw_trig = False  # whether to arm for hw triggering
         self.hw_trig_n = 1    # the number of triggers per sw step
+        # let child classes set this if they want
+        if not hasattr(self, 'hw_trig_min_latency'):
+            self.hw_trig_min_latency = 0.0 # minimum latency between acquisitions
 
 
 class BurstDetector(object):

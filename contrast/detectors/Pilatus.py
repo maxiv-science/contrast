@@ -29,7 +29,7 @@ class Pilatus2(Detector, SoftwareLiveDetector, TriggeredDetector,
     This class talks socket directly to the camserver.
     """
 
-    def __init__(self, hostname, name=None):
+    def __init__(self, hostname, name=None, hw_trig_min_latency=3e-3):
         BurstDetector.__init__(self)
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
@@ -37,6 +37,7 @@ class Pilatus2(Detector, SoftwareLiveDetector, TriggeredDetector,
         Detector.__init__(self, name=name)
         self._hdf_path = 'entry/measurement/Pilatus/data'
         self.hostname = hostname
+        self.hw_trig_min_latency = hw_trig_min_latency
 
         # this is also used for non-burst acquisition:
         self.burst_latency = .003
@@ -281,7 +282,7 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
 
     HDF_PATH = 'entry/measurement/Pilatus/data'
 
-    def __init__(self, device_name, **kwargs):
+    def __init__(self, device_name, hw_trig_min_latency = 0.95e-3, **kwargs):
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
@@ -293,7 +294,8 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
         self.proxy.set_timeout_millis(10000)
 
         # this is also used for non-burst acquisition:
-        self.burst_latency = .001
+        self.burst_latency = hw_trig_min_latency
+        self.hw_trig_min_latency = hw_trig_min_latency
 
     def start_live(self, acqtime=1.0):
         self.proxy.nTriggers = 10000
