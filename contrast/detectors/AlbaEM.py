@@ -75,14 +75,19 @@ class Electrometer(object):
         self.query('ACQU:MODE STREAMING')
         # the DIO channel used for triggering:
         self._trig_source = trig_source
+        self._host = host
+        self.data = []
+        self.pull_sock = None
+        self.ndata = 0
         # require SW version 2.2.02 where zmq streaming is available,
         # below 2.0.04 soft triggers were broken and below 2.0.0 data
         # indexing was wrong.
         assert self.version >= (2, 2, 2), \
             "Requires on-board SW version 2.2.02 or higher."
         if streaming:
-            self.stream = Stream(host=host, port=stream_port, debug=False)
-            self.stream.start()
+            self.context = zmq.Context()
+            #self.stream = Stream(host=host, port=stream_port, debug=False)
+            #self.stream.start()
         else:
             self.stream = None
 
@@ -152,31 +157,35 @@ class Electrometer(object):
         val = max(val, 0.320)
         self.query('ACQU:TIME %f' % val)
 
-    def burst(self, period=1., n=1, latency=320e-6):
-        """
-        Take a series of measurements with internal timing. No
-        triggering is possible, the series starts immediately.
-        """
-        latency = max(latency, .320e-3)
-        acqtime = period - latency
-        self.query('ACQU:TIME %f' % (acqtime * 1000))
-        self.query('ACQU:LOWT %f' % (latency * 1000))
-        self.query('TRIG:MODE AUTOTRIGGER')
-        self.query('ACQU:NTRI %u' % n)
+    def prepare(self, acqtime, n_starts, burst_n, latency=320e-6, hw=False, burst=False):
+        self.ndata = 0
+        self.data.clear()
+        self.pull_sock = self.context.socket(zmq.PULL)
+        self.pull_sock.connect(f'tcp://{self._host}:22003')
+
+        self.query('ACQU:TIME %f' % (acqtime * 1000)) # in ms
+        self.query('ACQU:LOWT %f' % (latency * 1000)) # in ms
+        self.total_frames = n_starts * burst_n
+        self.query('ACQU:NTRI %u' % self.total_frames)
+        self.query('TRIG:DELA 0.0')
+        if burst:
+            self.query('TRIG:MODE AUTOTRIGGER')
+        else:
+            self.query('TRIG:MODE %s' % ('HARDWARE' if hw else 'SOFTWARE'))
         self.query('ACQU:STAR')
 
-    def arm(self, acqtime=1., n=1, hw=False):
-        """
-        Prepare for hw- or sw-triggered acquisition, n x acqtime.
-        """
-        acqtime = acqtime * 1000  # ms
-        acqtime = max(acqtime, 0.320)
-        self.query('ACQU:TIME %f' % acqtime)
-        self.query('TRIG:MODE %s' % ('HARDWARE' if hw else 'SOFTWARE'))
-        self.query('TRIG:INPU %s' % self._trig_source)
-        self.query('TRIG:DELA 0.0')  # no delay
-        self.query('ACQU:NTRI %u' % n)
-        self.query('ACQU:STAR')
+    # non blocking
+    def read(self):
+        if self.pull_sock is None:
+            return
+        keys = ['timestamp'] + ['CHAN%02u' % (i + 1) for i in range(NUM_CHAN)]
+        while not self.pull_sock.closed and self.pull_sock.poll(0):
+            msg = self.pull_sock.recv_json()
+            if msg['message_type'] == 'data':
+                self.data.append([msg[key] for key in keys])
+                self.ndata += 1
+                if self.ndata == self.total_frames:
+                    self.pull_sock.close()
 
     def soft_trigger(self):
         old = int(self.query('ACQU:NDAT?'))
@@ -189,17 +198,6 @@ class Electrometer(object):
         while int(self.query('ACQU:NDAT?')) == old:
             time.sleep(.001)
         assert ret == 'ACK'
-
-    @property
-    def ndata(self):
-        """
-        ACQU:NDAT? increments before the integration time is over, so
-        cannot be used. Look at the stream instead.
-        """
-        if self.stream is not None:
-            return len(self.stream.data)
-        else:
-            return None
 
     @property
     def version(self):
@@ -271,14 +269,16 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         assert not (self.hw_trig and (self.burst_n > 1)), msg
         if self.global_arm:
             self.armed_so_far = 0
-            self.em.arm(self.acqtime, self.n_starts, self.hw_trig)
+            self.repetitions = self.hw_trig_n if self.hw_trig else 1
+            self.em.prepare(self.acqtime, self.n_starts, self.repetitions, hw=self.hw_trig)
 
     @property
     def global_arm(self):
         # This checks whether to arm the EM for several SW starts.
         # This corresponds to cases 1 and 4 (above).
-        return ((self.hw_trig and self.hw_trig_n == 1)
-                or (not self.hw_trig and self.burst_n == 1))
+        return self.burst_n <= 1
+        #return ((self.hw_trig and self.hw_trig_n == 1)
+        #        or (not self.hw_trig and self.burst_n == 1))
 
     def start_live(self, acqtime=1.0):
         # The Alba EM:s are always in live mode, exposing the "instant
@@ -290,16 +290,15 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         pass
 
     def arm(self):
-        if (self.hw_trig and self.hw_trig_n > 1):
-            self.em.arm(self.acqtime, self.hw_trig_n, True)
+        pass
 
     def start(self):
-        self.n_started += 1
+        self.n_started += self.repetitions
         if self.hw_trig:
             return
         elif self.burst_n > 1:
             period = self.acqtime + self.burst_latency
-            self.em.burst(period, self.burst_n, self.burst_latency)
+            self.em.prepare(period, 1, self.burst_n, self.burst_latency, burst=True)
         else:
             self.em.soft_trigger()
 
@@ -309,6 +308,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
             time.sleep(.01)
 
     def busy(self):
+        self.em.read()
         st = self.em.state()
         if st in IDLE_STATES:
             return False
@@ -321,27 +321,16 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         assert(False), "Should never get here!"
 
     def read(self):
-        chs = self.channels
         keys = ['t', ] + self.channels
-        if self.global_arm:
-            # case 1 or 4, which means read a single point each time
-            data = np.array(self.em.stream.data[-1])
-            return {k: v for k, v in zip(keys, data)}
-        else:
-            # case 2 or 3, return the last burst_n or hw_trig_n points
-            chunk = self.hw_trig_n if self.hw_trig else self.burst_n
-            ret = {}
-            data = np.array(self.em.stream.data)
-            if not (len(self.em.stream.data) == chunk):
-                # data missing, don't do a hard assert, pad and warn loudly.
-                missing = chunk - len(self.em.stream.data)
-                data = np.pad(data, pad_width=((0, missing), (0, 0)))
-                print('*** WARNING! wrong number of data points received '
-                      'from %s. Padding with zeros, electrometer data will '
-                      'be SCREWED UP ***' % self.name)
-            for i in range(len(keys)):
-                ret[keys[i]] = data[:, i].reshape((1, -1))
-            return ret
+        data = np.array(self.em.data)
+        self.em.data.clear()
+        ret={}
+        for i in range(len(keys)):
+            values = data[:, i]
+            if self.burst_n > 1:
+                values = values.reshape((1, -1))
+            ret[keys[i]] = values
+        return ret
 
 
 if __name__ == '__main__':
@@ -351,4 +340,3 @@ if __name__ == '__main__':
     while em.ndata < 60000:
         print('Now have %u points' % len(em.stream.data))
         time.sleep(.1)
-
