@@ -116,7 +116,7 @@ class NpointFlyscan(Mesh):
             self.fastmotor.dial_position = wf.absolutstartposition
             # wait for move to finish
             while self.fastmotor.busy():
-                time.sleep(0.01)
+                time.sleep(0.05)
 
             # run the main part
             super(NpointFlyscan, self).run()

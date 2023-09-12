@@ -174,7 +174,7 @@ class SoftwareScan(object):
                 for m in self.motors:
                     m.move(pos[m.name])
                 while True in [m.busy() for m in self.motors]:
-                    time.sleep(.01)
+                    time.sleep(.05)
                 # arm detectors
                 self._before_arm()
                 group.arm()
@@ -183,7 +183,7 @@ class SoftwareScan(object):
                 group.start(trials=10)
                 while det_group.busy():
                     self._while_acquiring()
-                    time.sleep(.01)
+                    time.sleep(.05)
                 # read detectors and motors
                 dt = time.time() - t0
                 dct = OrderedDict()
