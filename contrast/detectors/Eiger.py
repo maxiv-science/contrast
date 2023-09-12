@@ -20,7 +20,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
 
     def __init__(self, name=None, host='b-nanomax-eiger-dc-1.maxiv.lu.se',
                  api_version='1.8.0', use_image_appendix=False,
-                 hdf_path='entry/measurement/Eiger/data',
+                 hdf_path='entry/instrument/Eiger/data',
                  hw_trig_min_latency=100e-9):
         """
         Class to interact directly with the Eiger Simplon API.

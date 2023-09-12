@@ -280,13 +280,12 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
     seems not to have HW triggered burst mode exposed.
     """
 
-    HDF_PATH = 'entry/measurement/Pilatus/data'
-
-    def __init__(self, device_name, hw_trig_min_latency = 0.95e-3, **kwargs):
+    def __init__(self, device_name, hw_trig_min_latency = 0.95e-3, hdf_path='entry/instrument/Pilatus3/data', **kwargs):
         SoftwareLiveDetector.__init__(self)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
         Detector.__init__(self, **kwargs)
+        self._hdf_path = hdf_path
 
         # arm waits for answer from streaming receiver, which
         # occasionally takes time, so increase timeout.
@@ -373,6 +372,6 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
         if self.saving_file == '':
             return None
         else:
-            return {'frames': Link(self.saving_file, self.HDF_PATH,
+            return {'frames': Link(self.saving_file, self._hdf_path,
                                    universal=True),
                     'thumbs:': None, }
