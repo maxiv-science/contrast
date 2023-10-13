@@ -96,6 +96,7 @@ if __name__ == '__main__':
     # attenuators
     bcu01_x1pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x1pz', name='bcu01_x1pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     bcu01_x2pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x2pz', name='bcu01_x2pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
+    bcu01_x3pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x3pz', name='bcu01_x3pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
     # bcu01_x1pz                       bcu01_x2pz
     #  32 - out - no absorber           32 - out - no absorber
     #  21 - Al 18um                     21 - Ti 75um
@@ -146,7 +147,8 @@ if __name__ == '__main__':
     # detectors
     ########################################
 
-    eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0',  use_image_appendix=True, hdf_path='entry/instrument/eiger/data') # 172.16.197.26
+    #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0',  use_image_appendix=True, hdf_path='entry/instrument/eiger/data') # 172.16.197.26
+    eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0')#, hdf_path='entry/instrument/eiger/data')
     panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
     alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48 # maybe channel 2
     pseudo = PseudoDetector(name='pseudo',
