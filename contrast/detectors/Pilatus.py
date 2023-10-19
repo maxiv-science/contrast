@@ -310,9 +310,10 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
             time.sleep(.1)
 
     def prepare(self, acqtime, dataid, n_starts):
+        
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
         acqtime = self.acqtime
-
+        self.n_started = 0
         if self.busy():
             raise Exception('%s is busy!' % self.name)
 
@@ -337,36 +338,41 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
         # any any mode,
         self.proxy.ExposureTime = acqtime
         self.proxy.FrameTime = self.burst_latency + acqtime
-
+        self.repetitions = self.hw_trig_n if self.hw_trig else 1
         # arming at the top of the scan is not possible with the Pilatus,
         # because the camserver wants the ramdisk to be big enough to
         # save the whole scan.
         if self.hw_trig:
             self.proxy.TriggerMode = 'EXTERNAL_MULTI'
-            self.proxy.nTriggers = self.hw_trig_n
+            self.proxy.nTriggers = self.hw_trig_n * n_starts
+            self.proxy.Arm()
         else:
             self.proxy.TriggerMode = 'INTERNAL'
             self.proxy.nTriggers = self.burst_n
 
     def arm(self):
-        if self.hw_trig:
-            self.proxy.Arm()
+        pass
 
     def start(self):
         """
         Start acquisition for any software triggered detectors.
         """
+        self.n_started += self.repetitions
         if not self.hw_trig:
             self.proxy.Arm()
 
     def initialize(self):
-        pass
+        self.n_started = 0
 
     def stop(self):
         self.proxy.Stop()
+        self.n_started = 0
 
     def busy(self):
-        return not (self.proxy.State() == tango.DevState.ON)
+        if self.proxy.nFramesAcquired < self.n_started:
+            return True
+        else:
+            return False
 
     def read(self):
         if self.saving_file == '':
@@ -375,3 +381,18 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
             return {'frames': Link(self.saving_file, self._hdf_path,
                                    universal=True),
                     'thumbs:': None, }
+
+    @property
+    def energy(self):
+        """ Operating energy """
+        val = 1. * self.proxy.energy
+        return val
+
+    @energy.setter
+    def energy(self, val):
+        if (val < 4500) or (val > 36000):
+            print('Bad energy value, should be in between 4500 eV and 36000 eV')
+            return
+        val = float(val)
+        self.proxy.energy = val
+        print(f'energy of {self.name} has been set to {val} eV')

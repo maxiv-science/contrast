@@ -106,15 +106,16 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
     @property
     def energy(self):
         """ Operating energy in keV """
-        return self._get('detector', 'config/photon_energy')['value'] / 1000
+        return self._get('detector', 'config/photon_energy')['value']
 
     @energy.setter
     def energy(self, val):
-        if (val < 4) or (val > 30):
-            print('Bad energy value, should be in keV and between 4-30')
+        if (val < 4000) or (val > 30000):
+            print('Bad energy value, should be in between 4000 eV and 30000 eV')
             return
-        val = float(val) * 1000
+        val = float(val)
         self._set('detector', 'config/photon_energy', val)
+        print(f'energy of {self.name} has been set to {val} eV')
 
     @property
     def mask_applied(self):
