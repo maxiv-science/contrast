@@ -1,0 +1,4 @@
+ Si Density=2.33 Thickness=1. microns
+ Photon Energy (eV), Transmission
+    5000.0      1.0    
+    25000.      1.0    

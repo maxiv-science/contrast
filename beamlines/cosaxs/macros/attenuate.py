@@ -29,20 +29,20 @@ class Attenuate(object):
     """
 
     # absorber settings at the NanoMAX beamline - status 2019-10-06
-    position = [32, 21, 10, 0, -10, -20]
-    carriers = ['bcu01_x1pz', 'bcu01_x2pz']
-    thickness = [[   0,   0],   # in um
-                 [  18,  75],
-                 [  60, 225],
-                 [ 180, 375],
-                 [ 540, 525],
-                 [1020, 675]]
-    elements = [['Al', 'Ti'],
-                ['Al', 'Ti'],
-                ['Al', 'Ti'],
-                ['Al', 'Ti'],
-                ['Al', 'Ti'],
-                ['Al', 'Ti']]
+    position = [32, 21, 10, 0, -10, -21]
+    carriers = ['bcu01_x1pz', 'bcu01_x2pz', 'bcu01_x3pz']
+    thickness = [[   0,   0,    0],   # in um
+                 [  18,  75,  165],
+                 [  60, 225,  110],
+                 [ 180, 375,   55],
+                 [ 540, 525,    0],
+                 [1020, 675,    0]]
+    elements = [['None', 'None', 'None'],
+                ['Al',     'Ti',   'Si'],
+                ['Al',     'Ti',   'Si'],
+                ['Al',     'Ti',   'Si'],
+                ['Al',     'Ti',   'Si'],
+                ['Al',     'Ti',   'Si']]
     thickness = np.array(thickness)
 
     # loading offline data between 5 and 25 keV
@@ -63,7 +63,7 @@ class Attenuate(object):
         self.how = how
         self.verbosity = verbosity
         self.use_ele = use_ele
-        self.use_ele.append(None)
+        self.use_ele.append('None')
 
     def get_current_energy(self):
         runCommand('wms energy')
@@ -89,9 +89,10 @@ class Attenuate(object):
                 self.transmission[i, j] = 1. * T
 
     def calcualte_possible_permutations(self):
-        self.T_tot = [[T1 * T2 , i1, i2, [self.elements[i1][0], self.elements[i2][0]]]
+        self.T_tot = [[T1 * T2 * T3, i1, i2, i3, [self.elements[i1][0], self.elements[i2][1], self.elements[i3][2]]]
                       for i1, T1 in enumerate(self.transmission[:, 0])
-                      for i2, T2 in enumerate(self.transmission[:, 1])]
+                      for i2, T2 in enumerate(self.transmission[:, 1])
+                      for i3, T3 in enumerate(self.transmission[:, 2])]
         self.T_tot = np.array(self.T_tot, dtype=object)
         self.T_tot = self.T_tot[np.argsort(self.T_tot[:, 0])]
 
@@ -148,10 +149,10 @@ class Attenuate(object):
         self.T_allowed = []
         for permutation in self.T_tot:
             works = 0
-            for have_to_use in permutation[3]:
+            for have_to_use in permutation[4]:
                 if have_to_use in self.use_ele:
                     works += 1
-            if works == len(permutation[3]):
+            if works == len(permutation[4]):
                 self.T_allowed.append(permutation)
         self.T_allowed = np.array(self.T_allowed)
 
@@ -188,6 +189,7 @@ class Attenuate(object):
             except ValueError:
                 print("Oops!  That was no valid input")
 
+
             # get needed mv motor commands
             commands = []
             for i_carrier, i_pos in enumerate(
@@ -206,6 +208,9 @@ class Attenuate(object):
                 print('can achieve:')
                 print('    absorption  ', str(1 - self.T_choosen[0]))
                 print('    transmission', str(self.T_choosen[0]))
+
+
+                
                 print('with motor setting:')
 
                 for i_carrier, i_pos in enumerate(
@@ -239,3 +244,4 @@ class Attenuate(object):
             else:
                 for command in commands:
                     self.run_command(command)
+            
