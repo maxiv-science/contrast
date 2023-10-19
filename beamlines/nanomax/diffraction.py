@@ -97,7 +97,7 @@ if __name__ == '__main__':
     ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
 
     # ring current via a local proxy
-    ring_current = TangoAttributeDetector(device='b303a/ctl/proxy-01', attribute='r3current', name='ring_current')
+    # ring_current = TangoAttributeDetector(device='b303a/ctl/proxy-01', attribute='r3current', name='ring_current')
 
     # # Front end movable masks
     # mm1_x = TangoMotor(device='b303a-fe/opt/mm-01-xml', name='mm1_x', userlevel=10)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2, velocity=1000)
     skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2, velocity=1000)
     # kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)
-    # sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
+    #sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
     pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3, velocity=1000)
     pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3, velocity=1000)
     pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3, velocity=1000)
@@ -257,9 +257,9 @@ if __name__ == '__main__':
 
     # detectors
     epoch = Epoch(name='epoch')
-    #pilatus = Pilatus2(name='pilatus', hostname='b-nanomax-mobile-ipc-01')
     pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
-    merlin = Merlin(name='merlin', host='localhost')
+    pilatus.hw_trig = True
+    # merlin = Merlin(name='merlin', host='localhost')
     xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
     #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
@@ -271,8 +271,8 @@ if __name__ == '__main__':
 
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
-    # eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
+    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
@@ -319,18 +319,20 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, merlin, ring_current, epoch]: #, eiger1m]:
+    for d in [epoch, panda0, pseudo, alba2, eiger500k, eiger1m]: #, ring_current]: #, eiger1m]:
         d.active = True
+    for d in [alba2, xspress3, eiger500k, eiger1m, pilatus]:
+        d.hw_trig = True
 
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
         assert h5rec.is_alive(), 'hdf5 recorder is dead! this can''t be good. maybe restart contrast.'
-        runCommand('optics on')
-        runCommand('stoplive')
-        runCommand('fsopen')
         basex.stop()   # making sure the base motor are not regulating
         basey.stop()   # making sure the base motor are not regulating
         basez.stop()   # making sure the base motor are not regulating
+        runCommand('optics on')
+        runCommand('stoplive')
+        runCommand('fsopen')
         time.sleep(0.2)
 
     def post_scan_stuff(slf):
