@@ -115,7 +115,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
             return
         val = float(val)
         self._set('detector', 'config/photon_energy', val)
-        print(f'energy of {self.name} has been set to {val} eV')
+        print(f'energy of {self.name} has been set to {self.energy} eV')
 
     @property
     def mask_applied(self):

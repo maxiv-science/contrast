@@ -395,4 +395,5 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
             return
         val = float(val)
         self.proxy.energy = val
-        print(f'energy of {self.name} has been set to {val} eV')
+        time.sleep(3) # needs time to actually change the energy
+        print(f'energy of {self.name} has been set to {self.energy} eV')
