@@ -38,6 +38,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         Detector.__init__(self, name=name)
         TriggeredDetector.__init__(self)
         BurstDetector.__init__(self)
+        self.hw_trig = False
 
     def initialize(self):
         self.ctrl_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
