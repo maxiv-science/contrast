@@ -3,7 +3,8 @@ import datetime
 import numpy as np
 from ..environment import macro, env
 from ..recorders import active_recorders, RecorderHeader, RecorderFooter
-from ..detectors import Detector, TriggerSource
+from ..detectors import Detector, TriggeredDetector, TriggerSource
+from contrast.detectors.PandaBox import PandaBox
 from ..utils import SpecTable
 from collections import OrderedDict
 import sys
@@ -35,6 +36,7 @@ class SoftwareScan(object):
         self.n_positions = None
         self.print_progress = True
         env.nextScanID += 1
+        self.flyscan = False
 
     def output(self, i, dct):
         # ignore dicts that are too long
@@ -150,6 +152,10 @@ class SoftwareScan(object):
             print('These gadgets are busy: %s'
                   % (', '.join([d.name for d in group if d.busy()])))
             return
+        if not self.flyscan:
+            for d in group:
+                if isinstance(d, TriggeredDetector) and not isinstance(d, PandaBox):
+                    d.hw_trig_n = 1
         group.prepare(self.exposuretime, self.scannr, self.n_positions,
                       trials=10)
         t0 = time.time()
@@ -276,6 +282,7 @@ class Ct(object):
     """
     def __init__(self, exp_time=1, print_nd=True):
         self.exposuretime = float(exp_time)
+        self.flyscan = False
 
     def _before_ct(self):
         """
@@ -296,6 +303,10 @@ class Ct(object):
         # find and prepare the detectors
         det_group = Detector.get_active()
         group = det_group + TriggerSource.get_active()
+        if not self.flyscan:
+            for d in group:
+                if isinstance(d, TriggeredDetector) and not isinstance(d, PandaBox):
+                    d.hw_trig_n = 1
         group.prepare(self.exposuretime, dataid=None, n_starts=1)
         # arm and start detectors
         group.arm()

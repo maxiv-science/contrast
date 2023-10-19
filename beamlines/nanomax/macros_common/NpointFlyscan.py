@@ -31,6 +31,7 @@ class NpointFlyscan(Mesh):
         """
         assert all_are_motors(args[:-2:4])
         super(NpointFlyscan, self).__init__(*args[4:])
+        self.flyscan = True
         self.fastmotor = args[0]
         # convert to dial coordinates, as the LC400 operates in dial units
         self.fastmotorstart = ((float(args[1]) - self.fastmotor._offset)
@@ -70,7 +71,7 @@ class NpointFlyscan(Mesh):
         # set up all triggered detectors
         for d in Detector.get_active():
             if isinstance(d, TriggeredDetector) and not d.name == panda.name:
-                d.hw_trig = on
+                d.hw_trig = True   # hw_trig is not set back to False after the scan
                 d.hw_trig_n = self.fastmotorintervals + 1
         if on:
             self.old_hw_trig = panda.hw_trig
