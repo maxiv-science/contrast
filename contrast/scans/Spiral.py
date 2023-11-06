@@ -49,13 +49,10 @@ class SpiralAScan(DScan):
     Software scan across a 2D Archimedes spiral centered on a 
     given position. :
         
-        spiralscan <motor1> <pos1> <motor2> <pos2> <stepsize> <positions> <exp_time>
+        spiralascan <motor1> <pos1> <motor2> <pos2> <stepsize> <positions> <exp_time>
     """
 
     def __init__(self, m1, pos1,  m2, pos2, stepsize, npos, exptime, **kwargs):
-        # Parse arguments. We're inheriting DScan to get its nice run()
-        # method, but we'll call the SoftwareScan constructor anyway bacause
-        # we're not interested in DScan's way of parsing arguments.
         try:
             SoftwareScan.__init__(self, float(exptime))
             self.motors = [m1, m2]
