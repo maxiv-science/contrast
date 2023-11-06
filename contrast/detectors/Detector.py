@@ -375,6 +375,7 @@ class StartLive(object):
     def run(self):
         for d in self.dets:
             if isinstance(d, LiveDetector):
+                d.hw_trig=False
                 d.start_live(float(self.exptime))
             else:
                 print('%s is not a LiveDetector' % d.name)
