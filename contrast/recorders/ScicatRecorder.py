@@ -4,7 +4,7 @@ from .StreamRecorder import walk_dict
 from ..detectors import Detector
 from ..utils import str_to_args
 import os
-import datetime
+from datetime import datetime
 
 
 class ScicatRecorder(Recorder):
@@ -19,23 +19,25 @@ class ScicatRecorder(Recorder):
         SciFish = None
 
     def __init__(self, name=None, verbose=False):
-        if not self.SciFish:
+        if self.SciFish == None:
             raise ImportError('ScicatRecorder needs the MAX IV '
                               'scifish library')
         Recorder.__init__(self, name=name)
         self.verbose = verbose
+
 
     def act_on_header(self, dct):
         """
         Give SciCat all the info for this scan. Enters the whole snapshot.
         """
         # standard fields
-        self.entry = self.SciFish()
+        
+        self.entry = self.SciFish()  # can not move to init ... yet, conflicets with multiprocessing in recorder class and kafka
         self.entry.start_scan()
+        self.entry.scicat_data.files = []
         self.entry.scicat_data.datasetName = dct['scannr']
-        self.entry.scicat_data.sampleId = dct['scannr']
         # self.entry.scicat_data.dataFormat = ""
-        # self.entry.scicat_data.sourceFolder = "" # default from sdm
+        self.entry.scicat_data.sourceFolder = dct['path'] # default from sdm
         # self.entry.scicat_data.description = ""
         self.entry.environment_data.title = dct['description']
         self.entry.environment_data.scanID = dct['scannr']
@@ -53,9 +55,6 @@ class ScicatRecorder(Recorder):
         guess = H5_NAME_FORMAT % dct['scannr']
         guess = os.path.join(dct['path'], guess)
         self.file_list = [guess, ]
-
-        # send start, so the entry becomes visible in scanlog
-        self.entry.send_start()
 
         self.posted_detectors = False
 
@@ -86,15 +85,18 @@ class ScicatRecorder(Recorder):
             print(self.entry.show())
 
         # deal with the file list (timestamps and sizes)
-        files = []
         for fn in self.file_list:
-            tm = ''  # UTC iso format, like 2021-11-27T14:29:06.900250
-            tm = datetime.utcfromtimestamp(os.path.getmtime()).isoformat()
-            sz = os.path.getsize(fn)
-            file.append(
-                {'path': fn,
-                 'time': tm,
-                 'size': sz}
-            )
+            try:
+                tm = ''  # UTC iso format, like 2021-11-27T14:29:06.900250
+                tm = datetime.utcfromtimestamp(os.path.getmtime(fn)).isoformat()
+                sz = os.path.getsize(fn)
+                self.entry.scicat_data.files.append(
+                    {'path': fn,
+                     'time': tm,
+                     'size': sz}
+                )
+            except OSError:
+                pass
+
 
         self.entry.end_scan()
