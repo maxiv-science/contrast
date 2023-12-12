@@ -91,8 +91,12 @@ class dac_waveform():
         pulse = np.append(pulse, np.full(int(exptime*cls.dac_rate), cls.ttl_high))
         pulses = np.tile(pulse,steps)
         pulses[-1] = 0
+        print('spiral', np.shape(spiral))
+        print('pulses', np.shape(pulses))
         spiral = np.append(spiral, pulses)
+        print('spiral 2 ', np.shape(spiral))
         wf = spiral.reshape((4, -1))
+        print('wf', np.shape(wf))
         return wf, steps
 
     @classmethod
@@ -145,6 +149,46 @@ class dac_waveform():
         pulses[-1] = 0
         wf = np.vstack([wf_x, wf_y, np.zeros(len(pulses)),pulses])
         return wf, nsteps
+
+        get_fermat_wf(self.dac_0_start, self.dac_0_end, 
+                                          self.dac_1_start, self.dac_1_end,
+                                          self.stepsize, self.exptime, 
+                                          self.latency, self.optimize)
+
+    
+    @classmethod
+    def _make_step_wf(cls, dac_positions, latency, exptime):
+        """
+        takes a list of dac position, the latency and the exposure time
+        and creates the waveform for a waveform step scan
+
+        dac_positions come as a 2D array with the ast dimension
+        being a list of 3 values: x, y and z coordinates and
+        the 2nd dimension being the various scan points
+        
+        latency and exp time come in seconds
+        """
+
+        # number of scan points
+        n_p, n_steps = np.shape(dac_positions)
+        # number of sampling points in the waveform
+        n_latency = int(latency * cls.dac_rate)
+        n_exposure = int(exptime * cls.dac_rate)
+        n_perpoint = n_latency + n_exposure
+
+        # create position array with waveform sampling # shape [3,n]
+        positions = dac_positions.repeat(n_perpoint, axis=1)
+        # create the array of trigger pulses at waveform sampling # shape [1,n]
+        pulse = np.append(np.zeros((1, n_latency)), np.full((1, n_exposure), cls.ttl_high))
+        pulses = np.tile(pulse, (1, n_steps))
+        # lets merge them to a waveform # shape [4, n]
+        wf = np.concatenate((positions, pulses), axis=0)
+        # lets add one sampling point, to lower the trigger again
+        wf =  np.concatenate((wf, wf[:,-1:]), axis=-1)
+        wf[-1, -1] = 0
+
+        # return the waveform (shape [4, n]) and the number of scan/data points
+        return wf, n_steps
 
 
 
@@ -326,6 +370,127 @@ class WFspiral(WFstepscan):
         returns the waveform and the number of points in the scan
         """
         return dac_waveform.get_spiral_wf(self.stepsize, self.n_steps, self.latency, self.exptime, True)
+
+
+@macro
+class WFfermat(WFstepscan):
+    """
+    Waveform fermat spiral step scan
+
+    wffermat <horizontal left> <horizontal right> 
+             <vertical bottom> <vertical top>
+             <step size> <exp time> <latency time> <optimize>
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Parse arguments
+        """
+        self._command = None  # updated if run via macro
+        self.scannr = env.nextScanID
+        self.print_progress = True
+        env.nextScanID += 1
+        # convert to dial coordinates, as the dac operates in dial units
+        self.dac_0_start = ((float(args[0]) - self.dac_0._offset) / self.dac_0._scaling)
+        self.dac_0_end   = ((float(args[1]) - self.dac_0._offset) / self.dac_0._scaling)
+        self.dac_1_start = ((float(args[2]) - self.dac_1._offset) / self.dac_1._scaling)
+        self.dac_1_end   = ((float(args[3]) - self.dac_1._offset) / self.dac_1._scaling)
+        self.stepsize    =  (float(args[4]) / self.dac_1._scaling)
+        self.exptime = float(args[5])
+        self.latency = float(args[6])
+        self.optimize = bool(args[7])
+        self.print_progress = False
+        if self.panda is None:
+            raise Exception('Set DacScan.panda to your panda master')
+
+    def _calc_2d_positions(self):
+        """
+        calculates x y positions
+        """
+        # scaling factors and angular step width
+        c_0    = 0.524   # 3rd closest neighbor is on average one step away
+        c      = c_0*self.stepsize
+        phi    = 0.5*(1+np.sqrt(5))
+        phi_0  = 2*np.pi/(1+phi)
+        # center and size of the rectangular scan field
+        center = [0.5*(self.dac_0_start+self.dac_0_end), 0.5*(self.dac_1_start+self.dac_1_end)] 
+        size   = [np.abs(self.dac_0_start-self.dac_0_end), np.abs(self.dac_1_start-self.dac_1_end)]
+        # max radius of and scan points in the spiral
+        r_max  = 0.5*np.sqrt(size[0]**2+size[1]**2)
+        n_max  = int(np.ceil((r_max/c)**2))
+        # calculate all positions until n_max (and thus r_max)
+        n      = np.linspace(0,n_max,n_max+1, endpoint=True)
+        pos_1  = c*np.sqrt(n)*np.sin(n*phi_0)+center[0]
+        pos_2  = c*np.sqrt(n)*np.cos(n*phi_0)+center[1]
+        # remove positions outside the scan rectangle
+        pos_12 = []
+        for i, p1 in enumerate(pos_1):
+            p2 = pos_2[i]
+            if not(p1>self.dac_0_start):
+                continue
+            if not(p1<self.dac_0_end):
+                continue
+            if not(p2>self.dac_1_start):
+                continue
+            if not(p2<self.dac_1_end):
+                continue
+            pos_12.append([p1,p2])
+        pos_12 = np.array(pos_12)
+        # finding a short(er) scan path
+        if self.optimize:
+            # basically... solving the TSP problem
+            best_path = self.two_opt(pos_12)
+            self.pos_12 = pos_12[best_path]
+        else:
+            # sort on the first motor axis
+            best_path = np.argsort(pos_12[:,0])
+            self.pos_12 = pos_12[best_path]
+
+    def two_opt(self, cities, improvement_threshold=0.5, max_iter=4):
+        # 2-opt Algorithm adapted from https://en.wikipedia.org/wiki/2-opt
+        # from https://stackoverflow.com/questions/25585401/travelling-salesman-in-scipy
+
+        # Calculate the euclidian distance in n-space of the route r 
+        # traversing cities c, ending at the path start.
+        def path_distance(r,c): 
+            return np.sum([np.linalg.norm(c[r[p]]-c[r[p-1]]) for p in range(len(r))])
+
+        # Reverse the order of all elements from element i to element k in array r.
+        def two_opt_swap(r,i,k): 
+            return np.concatenate((r[0:i],r[k:-len(r)+i-1:-1],r[k+1:len(r)]))
+
+        route = np.arange(cities.shape[0])
+        improvement_factor = 1 
+        iterations = 0
+        best_distance = path_distance(route,cities) 
+        while improvement_factor > improvement_threshold and iterations<max_iter: 
+            distance_to_beat = best_distance 
+            for swap_first in range(1,len(route)-2): 
+                for swap_last in range(swap_first+1,len(route)): 
+                    new_route = two_opt_swap(route,swap_first,swap_last)
+                    new_distance = path_distance(new_route,cities) 
+                    if new_distance < best_distance: 
+                        route = new_route
+                        best_distance = new_distance 
+            improvement_factor = 1 - best_distance/distance_to_beat 
+            iterations += 1
+        return route
+
+
+    def _generate_waveform(self):
+        """
+        create the wave form in shape of the step scanned spiral
+        returns the waveform and the number of points in the scan
+        """
+
+        # caclucalte the 2D positions
+        self._calc_2d_positions()
+        # add a third column
+        n_steps, n_p = np.shape(self.pos_12)
+        dac_positions = np.concatenate((self.pos_12, np.zeros((n_steps,1))), axis=-1)
+        dac_positions = dac_positions.T
+        # calculate the step waveform and number of data points
+        return dac_waveform._make_step_wf(dac_positions, self.latency, self.exptime)
 
 
 @macro

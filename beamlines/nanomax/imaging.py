@@ -199,6 +199,11 @@ if __name__ == '__main__':
     macros_common.WFspiral.panda = panda2
     macros_common.WFspiral.dac_0 = sx
     macros_common.WFspiral.dac_1 = sy
+    macros_common.WFfermat.panda = panda2
+    macros_common.WFfermat.dac_0 = sx
+    macros_common.WFfermat.dac_1 = sy
+
+
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',

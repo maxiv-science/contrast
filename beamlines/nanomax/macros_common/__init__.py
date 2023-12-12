@@ -8,4 +8,4 @@ from .DacScans import Csnake
 from .DacScans import Cspiral
 from .DacScans import WFsnake
 from .DacScans import WFspiral
-
+from .DacScans import WFfermat
