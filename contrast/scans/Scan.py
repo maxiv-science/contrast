@@ -1,6 +1,8 @@
 import time
 import datetime
 import numpy as np
+import requests
+
 from ..environment import macro, env
 from ..recorders import active_recorders, RecorderHeader, RecorderFooter
 from ..detectors import Detector, TriggeredDetector, TriggerSource
@@ -136,6 +138,11 @@ class SoftwareScan(object):
         """
         pass
 
+    def _set_triggermap(self, gen_positions, streams):
+        triggermap = {stream:[[{"constraint": i}] for i in range(gen_positions)] for stream in streams}
+        triggermap["contrast"] = [[{"constraint": i}] for i in range(gen_positions)]
+        requests.post("http://nanomax-pipeline-controller.daq.maxiv.lu.se/api/v1/mapping", json=triggermap)
+
     def run(self):
         """
         This is the main acquisition loop where interaction with motors,
@@ -146,6 +153,12 @@ class SoftwareScan(object):
         positions = self._generate_positions()
         # find and prepare the detectors
         det_group = Detector.get_active()
+
+        if "x3mini" in [d.name for d in det_group]:
+            gen_positions = sum(1 for _ in self._generate_positions())
+            print('\nNumber of Positions are', gen_positions)
+            self._set_triggermap(gen_positions, ["x3mini"])
+
         trg_group = TriggerSource.get_active()
         group = det_group + trg_group
         if group.busy():

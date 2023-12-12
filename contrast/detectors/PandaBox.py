@@ -85,7 +85,7 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
             if 'Busy' in ret:
                 ready = True
             time.sleep(.005)
-#        time.sleep(.05)  # necessary hack
+        #time.sleep(.05)  # necessary hack
 
     def _acquire(self):
         """
