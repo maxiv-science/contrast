@@ -18,11 +18,12 @@ class ScicatRecorder(Recorder):
     except ImportError:
         SciFish = None
 
-    def __init__(self, name=None, verbose=False):
+    def __init__(self, name=None, pathfixer='b303a-e02/ctl/sdm-01' ,verbose=False):
         if self.SciFish == None:
             raise ImportError('ScicatRecorder needs the MAX IV '
                               'scifish library')
         Recorder.__init__(self, name=name)
+        self.pathfixer = pathfixer
         self.verbose = verbose
 
 
@@ -32,7 +33,7 @@ class ScicatRecorder(Recorder):
         """
         # standard fields
         
-        self.entry = self.SciFish()  # can not move to init ... yet, conflicets with multiprocessing in recorder class and kafka
+        self.entry = self.SciFish(pathfixer=self.pathfixer)  # can not move to init ... yet, conflicets with multiprocessing in recorder class and kafka
         self.entry.start_scan()
         self.entry.scicat_data.files = []
         self.entry.scicat_data.datasetName = dct['scannr']

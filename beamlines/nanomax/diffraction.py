@@ -28,6 +28,7 @@ if __name__ == '__main__':
     from contrast.detectors.Eiger import Eiger
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
+    from contrast.detectors.xandy import Xandy
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
     from contrast.detectors.Keysight import Keysight2985
@@ -145,7 +146,7 @@ if __name__ == '__main__':
     skb_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=2, name='skb_left', userlevel=2, velocity=1000)
     skb_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=3, name='skb_right', userlevel=2, velocity=1000)
     # kbfluox = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=4, name='kbfluox', userlevel=3)
-    #sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='sr', userlevel=1, user_format='%.3f', dial_format='%.3f')
+    #modr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-03', axis=5, name='modr', userlevel=1, user_format='%.3f', dial_format='%.3f')
     pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=6, name='pinhole_x', userlevel=3, velocity=1000)
     pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=7, name='pinhole_y', userlevel=3, velocity=1000)
     pinhole_z = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-03', axis=8, name='pinhole_z', userlevel=3, velocity=1000)
@@ -170,8 +171,8 @@ if __name__ == '__main__':
     ## controller 3
     # stages removed from DM4
     #modx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='modx', userlevel=1, scaling=+1, velocity=1000)
-    #mody = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='mody', userlevel=1, scaling=+1, velocity=1000)
-    #modz = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='modz', userlevel=1, scaling=+1, velocity=1000)
+    #mody = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=2, name='mody', userlevel=1, scaling=-1, velocity=1000)
+    #modz = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=1, name='modz', userlevel=1, scaling=-1, velocity=1000)
     # we use ch0 on that controller for the long range sample motor for now
     # samplez = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-05', axis=0, name='samplez', userlevel=1)
 
@@ -269,11 +270,14 @@ if __name__ == '__main__':
     #andor.proxy.fliplr=False
     #andor.proxy.sensorcooling=True
 
+    # CIVIDEC XandY
+    #xandy = Xandy(name="xandy", host='b-nanomax-user-devices-0', debug=0, amplification='Micro', sampling=10000, range='100 uA')
+    
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
-    alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
+    #alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    #alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
     #E01cam01 = BaslerCamera(name='E01cam01', device='basler/e01-cam-01/main')
@@ -310,18 +314,18 @@ if __name__ == '__main__':
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
-    zmqrec.start()
+    zmqrec.start() 
 
     # a scicat recorder - paused until further notice
-    # scicatrec = ScicatRecorder(name='scicatrec')
-    # scicatrec.start()
+    scicatrec = ScicatRecorder(name='scicatrec', pathfixer='b303a-e02/ctl/sdm-01')
+    scicatrec.start()
 
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [epoch, panda0, pseudo, alba2, eiger500k, eiger1m]: #, ring_current]: #, eiger1m]:
+    for d in [panda0, pseudo]: #alba0 alba2, eiger500k, eiger1m]: #, ring_current]: #, eiger1m]:
         d.active = True
-    for d in [alba2, xspress3, eiger500k, eiger1m, pilatus]:
+    for d in [xspress3, eiger500k, eiger1m, pilatus]: #alba2, 
         d.hw_trig = True
 
     # define pre- and post-scan actions, per scan base class

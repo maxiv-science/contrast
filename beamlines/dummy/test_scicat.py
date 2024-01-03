@@ -95,7 +95,7 @@ if __name__ == '__main__':
     h5rec.start()
 
     # a scicat recorder - paused until further notice
-    scicatrec = ScicatRecorder(name='scicatrec')
+    scicatrec = ScicatRecorder(name='scicatrec', pathfixer='b303a-e02/ctl/sdm-01')
     scicatrec.start()
 
     # a zmq recorder
