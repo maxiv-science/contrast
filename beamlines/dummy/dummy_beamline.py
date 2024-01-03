@@ -14,7 +14,7 @@ if __name__ == '__main__':
                                     DummyWritingDetector,
                                     DummyWritingDetector2)
     from contrast.environment import env, register_shortcut
-    from contrast.recorders import Hdf5Recorder, StreamRecorder
+    from contrast.recorders import Hdf5Recorder, StreamRecorder, ScicatRecorder
     import os
 
     # if you have ptypy installed, you can generate mock ptycho data

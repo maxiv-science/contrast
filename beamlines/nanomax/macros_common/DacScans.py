@@ -56,7 +56,8 @@ class Cspiral(SoftwareScan):
             self.old_hw_trig = panda.hw_trig
             self.old_burst_n = panda.burst_n
             self.old_burst_lat = panda.burst_latency
-           # print(f"{self.n_steps = }")
+            # print(f"{self.n_steps = }")
+            print(f'self.n_steps {self.n_steps}')
             panda.burst_n = self.n_steps
             panda.burst_latency = self.latency
             panda.hw_trig_n = 1
@@ -374,7 +375,8 @@ class Cwaveform(SoftwareScan):
             self.old_hw_trig = panda.hw_trig
             self.old_burst_n = panda.burst_n
             self.old_burst_lat = panda.burst_latency
-           # print(f"{self.n_steps = }")
+            # print(f"{self.n_steps = }")
+            print(f'self.n_steps {self.n_steps}')
             panda.burst_n = self.n_steps
             panda.burst_latency = self.latency
             panda.hw_trig_n = 1
