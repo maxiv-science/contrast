@@ -21,37 +21,44 @@ class dac_waveform():
     trig_high = 255 # set value in range 0-255 to activate digital output 0-7
 
     @classmethod
-    def save_h5_file(cls, path, waveform):
+    def save_h5_file(cls, path, wf):
         wf_file = path
-        #wf_file = os.path.join(path)
+        # setting the triggers to low by extending the waveform length 
+        wf =  np.concatenate((wf, wf[:,-1:]), axis=-1)
+        wf[-1, -1] = 0
         with h5py.File(wf_file, 'w') as ofp:
-            ofp.create_dataset('entry/measurement/waveform/data', data=waveform, compression='gzip')
+            ofp.create_dataset('entry/measurement/waveform/data', data=wf, compression='gzip')
 
     @classmethod
-    def get_spiral_wf(cls, stepsize, steps, latency, exptime, step_scan):
+    def get_spiral_wf(cls, motors, stepsize, steps, latency, exptime, step_scan):
         pixeltime = (latency + exptime)
-        spiral = None
+        wf = np.zeros((5, int(steps * cls.dac_rate * pixeltime)))
+        wf[0,:] = np.full(int(steps * cls.dac_rate * pixeltime), motors[0].position())
+        wf[1,:] = np.full(int(steps * cls.dac_rate * pixeltime), motors[1].position())
+        wf[2,:] = np.full(int(steps * cls.dac_rate * pixeltime), motors[0].position())
+        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
+        trig = np.zeros(int(latency*cls.dac_rate))
+        trig = np.append(trig, np.full(int(exptime*cls.dac_rate), cls.trig_high))
+        triggers = np.tile(trig,steps)
+        wf[4,:] = triggers
+
         if step_scan:
             #step scanning
             npositions = np.arange(0, steps)
             A = stepsize * np.sqrt(npositions/np.pi)
             B = np.sqrt(4 * np.pi * npositions)
-            spiral = np.append(A*np.cos(B), A*np.sin(B))
-            spiral = np.repeat(spiral, cls.dac_rate*pixeltime)
+            spiral_a = np.repeat(A*np.cos(B), cls.dac_rate*pixeltime)
+            spiral_b = np.repeat(A*np.sin(B), cls.dac_rate*pixeltime)
         else:
             # continuous scanning
             npositions = np.arange(0, int(cls.dac_rate * steps * pixeltime))
             A = stepsize * np.sqrt(npositions/(cls.dac_rate*pixeltime*np.pi))
             B = np.sqrt(4 * np.pi * npositions/(cls.dac_rate*pixeltime))
-            spiral = np.append(A*np.cos(B), A*np.sin(B))
-        # adding zeros for the third and fourth channels
-        spiral = np.append(spiral, np.zeros(2*int(cls.dac_rate * steps * pixeltime)))
-        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
-        trig = np.zeros(int(latency*cls.dac_rate))
-        trig = np.append(trig, np.full(int(exptime*cls.dac_rate), cls.trig_high))
-        triggers = np.tile(trig,steps)
-        spiral = np.append(spiral, triggers)
-        wf = spiral.reshape((5, -1))
+            spiral_a = A*np.cos(B)
+            spiral_b = A*np.sin(B)
+
+        wf[motors[0].axis,:] = spiral_a
+        wf[motors[1].axis,:] = spiral_b
         wf =  np.concatenate((wf, wf[:,-1:]), axis=-1)
         wf[-1, -1] = 0
         return wf, steps
@@ -164,6 +171,9 @@ class WFtrigscan(SoftwareScan):
     dac_1 = None
     dac_2 = None
     p_latency = 0.0001 
+    dac_rate = 1000
+    trig_high = 255 # set value in range 0-255 to activate digital output 0-7
+    
 
     def __init__(self, *args, **kwargs):
         # to be implemented by the exact shape of scan to be performed
@@ -427,7 +437,7 @@ class WFspiral(WFtrigscan):
     """
     Waveform spiral step scan
 
-    wfspiral <step size> <positions> <exp time> <latency time>
+    wfspiral <motor 1> <motor 2> <step size> <positions> <exp time> <latency time>
     """
 
     def __init__(self, *args, **kwargs):
@@ -438,10 +448,12 @@ class WFspiral(WFtrigscan):
         self.scannr = env.nextScanID
         self.print_progress = True
         env.nextScanID += 1
-        self.stepsize = float(args[0])
-        self.n_steps = int(args[1])
-        self.exptime = float(args[2])
-        self.latency = float(args[3])
+        self.fast_axis = args[0].axis
+        self.slow_axis = args[1].axis
+        self.stepsize = float(args[2])
+        self.n_steps = int(args[3])
+        self.exptime = float(args[4])
+        self.latency = float(args[5])
         self.print_progress = False
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
@@ -451,14 +463,32 @@ class WFspiral(WFtrigscan):
         create the wave form in shape of the step scanned spiral
         returns the waveform and the number of points in the scan
         """
-        return dac_waveform.get_spiral_wf(self.stepsize, self.n_steps, self.latency, self.exptime, True)
+        pixeltime = (self.latency + self.exptime)
+        wf = np.zeros((5, int(self.n_steps * self.dac_rate * pixeltime)))
+        wf[0,:] = np.full(int(self.n_steps * self.dac_rate * pixeltime), self.dac_0.position())
+        wf[1,:] = np.full(int(self.n_steps * self.dac_rate * pixeltime), self.dac_1.position())
+        wf[2,:] = np.full(int(self.n_steps * self.dac_rate * pixeltime), self.dac_2.position())
+        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
+        trig = np.zeros(int(self.latency*self.dac_rate))
+        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        triggers = np.tile(trig,self.n_steps)
+        wf[4,:] = triggers
+
+        n_positions = np.arange(0, self.n_steps)
+        A = self.stepsize * np.sqrt(n_positions/np.pi)
+        B = np.sqrt(4 * np.pi * n_positions)
+        spiral_a = np.repeat(A*np.cos(B), self.dac_rate*pixeltime)
+        spiral_b = np.repeat(A*np.sin(B), self.dac_rate*pixeltime)
+        wf[self.fast_axis,:] = spiral_a
+        wf[self.slow_axis,:] = spiral_b
+        return wf, self.n_steps
 
 @macro
 class Cspiral(WFtrigscan):
     """
     Waveform spiral continuous scan
 
-    cspiral <step size> <positions> <exp time>
+    cspiral <motor 1> <motor 2> <step size> <positions> <exp time>
     """
 
     def __init__(self, *args, **kwargs):
@@ -469,9 +499,11 @@ class Cspiral(WFtrigscan):
         self.scannr = env.nextScanID
         self.print_progress = True
         env.nextScanID += 1
-        self.stepsize = float(args[0])
-        self.n_steps = int(args[1])
-        self.exptime = float(args[2])
+        self.fast_axis = args[0].axis
+        self.slow_axis = args[1].axis
+        self.stepsize = float(args[2])
+        self.n_steps = int(args[3])
+        self.exptime = float(args[4])
         self.latency = 0.001
         self.print_progress = False
         if self.panda is None:
@@ -482,7 +514,25 @@ class Cspiral(WFtrigscan):
         create the wave form in shape of the step scanned spiral
         returns the waveform and the number of points in the scan
         """
-        return dac_waveform.get_spiral_wf(self.stepsize, self.n_steps, self.latency, self.exptime, False)
+        pixeltime = (self.latency + self.exptime)
+        wf = np.zeros((5, int(self.n_steps * self.dac_rate * pixeltime)))
+        wf[0,:] = np.full(int(self.n_steps * self.dac_rate * pixeltime), self.dac_0.position())
+        wf[1,:] = np.full(int(self.n_steps * self.dac_rate * pixeltime), self.dac_1.position())
+        wf[2,:] = np.full(int(self.n_steps * self.dac_rate * pixeltime), self.dac_2.position())
+        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
+        trig = np.zeros(int(self.latency*self.dac_rate))
+        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        triggers = np.tile(trig,self.n_steps)
+        wf[4,:] = triggers
+
+        n_positions = np.arange(0, int(self.dac_rate * self.n_steps * pixeltime))
+        A = self.stepsize * np.sqrt(n_positions/(self.dac_rate*pixeltime*np.pi))
+        B = np.sqrt(4 * np.pi * n_positions/(self.dac_rate*pixeltime))
+        spiral_a = A*np.cos(B)
+        spiral_b = A*np.sin(B)
+        wf[self.fast_axis,:] = spiral_a
+        wf[self.slow_axis,:] = spiral_b
+        return wf, self.n_steps
 
 @macro
 class WFsnake(WFtrigscan):
@@ -572,152 +622,4 @@ class Csnake(WFtrigscan):
                                          self.dac_1_start, self.dac_1_end, self.steps_y,
                                          self.latency, self.exptime, False)
 
-"""
-class Cscan(SoftwareScan):
 
-    # Base class for any continous(fly) performed as a single waveform for the NI dac box.
-    # On purpuse this one is not a macro, so it can not be called by itself 
-
-    panda = None
-    dac_0 = None
-    dac_1 = None
-    dac_2 = None
-
-    def __init__(self, *args, **kwargs):
-        # to be implemented by the exact shape of scan to be performed
-        pass
-
-    def _generate_waveform(self):
-        # to be implemented by the exact shape of scan to be performed
-        # only return waveform
-        pass
-
-
-    def _set_det_trig(self, on):
-        # special treatment for the panda box which rules all
-        panda = self.panda
-        panda.stop()
-        # set up all triggered detectors
-        for d in Detector.get_active():
-            if isinstance(d, TriggeredDetector) and not d.name == panda.name:
-                d.hw_trig = on
-                d.hw_trig_n = self.n_steps
-        if on:
-            self.old_hw_trig = panda.hw_trig
-            self.old_burst_n = panda.burst_n
-            self.old_burst_lat = panda.burst_latency
-            panda.burst_n = self.n_steps
-            panda.burst_latency = self.latency
-            panda.hw_trig_n = 1
-            panda.hw_trig = on
-            # setting the PandaBox up to create the actually used triggers
-            # using its pulse generator timed to react on the first 
-            # (and only) external trigger  
-            panda.query('%s.A=0' % panda.bitblock)
-        else:
-            panda.burst_n = self.old_burst_n
-            panda.burst_latency = self.old_burst_lat
-            panda.hw_trig = self.old_hw_trig
-            panda.query('%s.A=0' % panda.bitblock)
-
-    def _while_acquiring(self):
-        x = self.dac_0.position()
-        y = self.dac_1.position()
-        et = self.dac_0.proxy.get_end_time()
-        print('\rEstimated finish time: %s - X:%7.3f um Y:%7.3f um' % (et, x, y), end='')
-
-    def run(self):
-
-        # This is the main acquisition loop where interaction with motors,
-        # detectors and other ``Gadget`` objects happens.
-
-        self._before_scan()
-        print('\nScan #%d starting at %s\n' % (self.scannr, time.asctime()))
-
-        # generating the waveform file
-        print('Generating waveform file...   ', end='')
-        wf = self._generate_waveform()
-        wf_file=os.path.join(env.paths.directory, 'scan_%06u_waveform.hdf5'%self.scannr)
-        dac_waveform.save_h5_file(wf_file, wf)
-        self.dac_0.proxy.waveform_path = wf_file
-        print('Waveform file generated ')
-
-        # find and prepare the detectors
-        det_group = Detector.get_active()
-        trg_group = TriggerSource.get_active()
-        group = det_group + trg_group
-        if group.busy():
-            print('These gadgets are busy: %s'
-                  % (', '.join([d.name for d in group if d.busy()])))
-            return
-        # start by setting up triggering on all compatible detectors
-        self._set_det_trig(True)
-        group.prepare(self.exptime, self.scannr, 1,
-                      trials=10)
-        t0 = time.time()
-
-        # send a header to the recorders
-        snap = env.snapshot.capture()
-        for r in active_recorders():
-            r.queue.put(RecorderHeader(scannr=self.scannr,
-                                       status='started',
-                                       path=env.paths.directory,
-                                       snapshot=snap,
-                                       description=self._command))
-        try:
-
-            # we'll also need the pandabox
-            self.panda.active = True
-            group.arm()
-            group.start(trials=10)
-            self.dac_0.proxy.start_waveform()
-            while det_group.busy():
-                time.sleep(1)
-                self._while_acquiring()
-
-            # read detectors and motors
-            dt = time.time() - t0
-            dct = OrderedDict()
-            for d in det_group:
-                dct[d.name] = d.read()
-            dct['dt'] = dt
-            # pass data to recorders
-            for r in active_recorders():
-                r.queue.put(dct)
-            print('\n\nScan #%d ending at %s' % (self.scannr, time.asctime()))
-
-            # tell the recorders that the scan is over
-            for r in active_recorders():
-                r.queue.put(RecorderFooter(scannr=self.scannr,
-                                           status='finished',
-                                           path=env.paths.directory,
-                                           snapshot=snap,
-                                           description=self._command))
-
-        except KeyboardInterrupt:
-            group.stop()
-
-            print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
-
-            # tell the recorders that the scan was interrupted
-            for r in active_recorders():
-                r.queue.put(RecorderFooter(scannr=self.scannr,
-                                           status='interrupted',
-                                           path=env.paths.directory,
-                                           snapshot=snap,
-                                           description=self._command))
-
-        except:
-            self._cleanup()
-            raise
-
-        self._cleanup()
-
-    def _cleanup(self):
-        # set back the triggering state
-        self._set_det_trig(False)
-        self.dac_0.proxy.stop_waveform()
-
-        # do any user-defined cleanup actions
-        self._after_scan()
-"""

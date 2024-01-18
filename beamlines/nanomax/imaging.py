@@ -187,23 +187,26 @@ if __name__ == '__main__':
     #NpointFlyscan.panda = panda2
     # Pandabox reading the Attocube (AquadB) encoders
     # panda3 = PandaBox(name='panda3', host='b-nanomax-pandabox-3')
-    macros_common.Csnake.panda = panda2
-    macros_common.Csnake.dac_0 = sx
-    macros_common.Csnake.dac_1 = sy
-    macros_common.Cspiral.panda = panda2
-    macros_common.Cspiral.dac_0 = sx
-    macros_common.Cspiral.dac_1 = sy
-    macros_common.WFsnake.panda = panda2
-    macros_common.WFsnake.dac_0 = sx
-    macros_common.WFsnake.dac_1 = sy
-    macros_common.WFspiral.panda = panda2
-    macros_common.WFspiral.dac_0 = sx
-    macros_common.WFspiral.dac_1 = sy
-    macros_common.WFfermat.panda = panda2
-    macros_common.WFfermat.dac_0 = sx
-    macros_common.WFfermat.dac_1 = sy
-
-
+    macros_common.WFtrigscan.panda = panda2
+    macros_common.WFtrigscan.dac_0 = sx
+    macros_common.WFtrigscan.dac_1 = sy
+    macros_common.WFtrigscan.dac_2 = sz
+    #macros_common.Csnake.panda = panda2
+    #macros_common.Csnake.dac_0 = sx
+    #macros_common.Csnake.dac_1 = sy
+    #macros_common.Csnake.dac_2 = sz
+    #macros_common.WFsnake.panda = panda2
+    #macros_common.WFsnake.dac_0 = sx
+    #macros_common.WFsnake.dac_1 = sy
+    #macros_common.WFsnake.dac_2 = sz
+    #macros_common.WFspiral.panda = panda2
+    #macros_common.WFspiral.dac_0 = sx
+    #macros_common.WFspiral.dac_1 = sy
+    #macros_common.WFspiral.dac_2 = sz
+    #macros_common.WFfermat.panda = panda2
+    #macros_common.WFfermat.dac_0 = sx
+    #macros_common.WFfermat.dac_1 = sy
+    #macros_common.WFfermat.dac_2 = sz
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',
@@ -239,7 +242,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, eiger4m, x3mini]:
+    for d in [panda2, pseudo, x3mini, eiger4m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
