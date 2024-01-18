@@ -236,8 +236,8 @@ if __name__ == '__main__':
     zmqrec.start()  # removed for now
 
     # a scicat recorder - paused until further notice
-    # scicatrec = ScicatRecorder(name='scicatrec')
-    # scicatrec.start()
+    scicatrec = ScicatRecorder(name='scicatrec', pathfixer='b303a-e01/ctl/sdm-01')
+    scicatrec.start()
 
     # default detector selection
     for d in Detector.getinstances():
