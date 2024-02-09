@@ -64,7 +64,7 @@ class SmaractLinearMotor(Motor):
         self.proxy.arbitraryCommand(f"SCLF{self.axis:d},{int(freq):d}")        
 
     def stop(self):
-        self.proxy.stopAll()  # safety first
+        self.proxy.stopOne(self.axis)  # safety first
 
 
 class SmaractRotationMotor(SmaractLinearMotor):
