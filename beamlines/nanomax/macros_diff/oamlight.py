@@ -20,7 +20,7 @@ class Oamlight(object):
           Switch all LEDs off
           
       oamlight top on left 70
-          Set the LEDs in the top group on and the LEDs in the left goup to 70% brightness
+          Set the LEDs in the top group on and the LEDs in the left group to 70% brightness
           
       oamlight [1,2,3,4,5] 30 [6,7,8,9] off
           Set LEDs 1,2,3,4,5 to 30% brightness and switch LEDs 6,7,8,9 off

@@ -199,7 +199,7 @@ class LC400Waveform(object):
 
         if len(x) > self.MAXPOINTS:
             raise Exception("waveform too long")
-        print(f"points in wafeform : {len(x)}")
+        print(f"points in waveform : {len(x)}")
         # offset whole waveform so it starts at 0.
         # Waveforms in the LC400 are relative motions with respect to
         # the physical start position of the motor

@@ -315,7 +315,7 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
         acqtime = self.acqtime
         self.n_started = 0
         if self.busy():
-            raise Exception('%s is busy!' % self.name)
+            raise Exception(f'{self.name} is busy!')
 
         if self.hw_trig and (self.burst_n > 1):
             raise ValueError(
@@ -384,7 +384,7 @@ class Pilatus3(Detector, LiveDetector, TriggeredDetector,
 
     @property
     def energy(self):
-        """ Operating energy """
+        """ Operating energy in eV"""
         val = 1. * self.proxy.energy
         return val
 
