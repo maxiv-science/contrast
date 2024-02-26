@@ -12,7 +12,7 @@ class NanosMotor(Motor):
     Single Nanos motor axis.
     """
 
-    def __init__(self, device, axis, velocity=500, **kwargs):
+    def __init__(self, device, axis, velocity=500, stop_window=100, **kwargs):
         """
         :param device: Path to the Bmc101 Tango device
         :type device: str
@@ -27,8 +27,11 @@ class NanosMotor(Motor):
         if self.proxy.State() == PyTango.DevState.STANDBY:
             self.proxy.Connect()
         ax = '#%02d\r' % self._axis
+        print('Initializing Nanos #%d' % axis) 
         self.proxy.ArbitrarySend(ax)
         val = 'Y8=%d' % velocity
+        self.proxy.ArbitraryAsk(val)
+        val = 'Y5=%d' % stop_window
         self.proxy.ArbitraryAsk(val)
 
     @property

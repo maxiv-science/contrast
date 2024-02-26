@@ -64,30 +64,26 @@ if __name__ == '__main__':
     sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sz = DacMotor(device='B303A/CTL/IMG-02', axis=2, name='sz', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     
-
     # Nanos motors for central stop, zone plate and order sorting aperture positioning
-    osax = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osax', userlevel=2, scaling=-5e-4)
-    osay = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osay', userlevel=2, scaling=-5e-4)
-    osaz = NanosMotor(device='test/ctl/nanos-01', axis=2, name='osaz', userlevel=2, scaling=-5e-4)
-    zpx = NanosMotor(device='test/ctl/nanos-01', axis=3, name='zpx', userlevel=2, scaling=5e-4)
-    zpy = NanosMotor(device='test/ctl/nanos-01', axis=4, name='zpy', userlevel=2, scaling=-5e-4)
-    zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', userlevel=2, scaling=-5e-4)
-    csx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='csx', userlevel=2, scaling=-5e-4)
-    csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', userlevel=2, scaling=-5e-4)
-    gry = NanosMotor(device='test/ctl/nanos-01', axis=8, name='gry', userlevel=1, scaling=-5e-4)
-    grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', userlevel=1, scaling=5e-4)
-    gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', userlevel=1, scaling=5e-4)
+    osax = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osax', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    osay = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osay', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    osaz = NanosMotor(device='test/ctl/nanos-01', axis=2, name='osaz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    zpx = NanosMotor(device='test/ctl/nanos-01', axis=3, name='zpx', velocity=500, stop_window=10, userlevel=2, scaling=5e-4)
+    zpy = NanosMotor(device='test/ctl/nanos-01', axis=4, name='zpy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    csx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='csx', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    gry = NanosMotor(device='test/ctl/nanos-01', axis=8, name='gry', velocity=500, stop_window=1000, userlevel=1, scaling=-5e-4)
+    grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', velocity=500, stop_window=1000, userlevel=1, scaling=5e-4)
+    gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', velocity=500, stop_window=1000, userlevel=1, scaling=5e-4)
     #nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=11, name='nanos_dummy', userlevel=1, scaling=5e-4)
 
     # PiezoLEGS motors for coarse sample positioning
     bx, by, bz = ImgSampleStage(device='B303A/CTL/IMG-01', velocity=90, names=['bx', 'by', 'bz'], userlevel=1, scaling=1e-3, user_format='%.3f')
-    #m0 = PiezoLegsMotor(device='B303A/CTL/IMG-01', axis=0, name=1m0', userlevel=1, scaling=1e-3, user_format='%.3f')
-    #m1 = PiezoLegsMotor(device='B303A/CTL/IMG-01', axis=1, name='m1', userlevel=1, scaling=1e-3, user_format='%.3f')
-    #m2 = PiezoLegsMotor(device='B303A/CTL/IMG-01', axis=2, name='m2', userlevel=1, scaling=1e-3, user_format='%.3f')  
 
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='sr', velocity=3000, userlevel=1, user_format='%.4f', dial_format='%.4f')
-    grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='grx', velocity=0, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
     
     # Pixel detector and XRF motors, optical microsope and screen motors
     xrf1_x = TangoMotor(device='B303A-E01/DIA/XRF-01-X', name='xrf1_x', userlevel=2, user_format='%.3f')
@@ -96,7 +92,6 @@ if __name__ == '__main__':
     pixdet_y = TangoMotor(device='B303A-E01/DIA/PIXDET-Y', name='pixdet_y', userlevel=2, user_format='%.3f')
     screen = TangoMotor(device='B303A-E01/DIA/OPT-SCR', name='screen', userlevel=1, user_format='%.3f')
     mic = TangoMotor(device='B303A-E01/DIA/OPT-MIC', name='mic', userlevel=1, user_format='%.3f')
-
 
     #pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='pinhole_x', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
     #pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=4, name='pinhole_y', velocity=10000, userlevel=1, user_format='%.3f', dial_format='%.3f')
@@ -217,13 +212,13 @@ if __name__ == '__main__':
     zmqrec.start()  # removed for now
 
     # a scicat recorder - paused until further notice
-    scicatrec = ScicatRecorder(name='scicatrec', pathfixer='b303a-e01/ctl/sdm-01')
-    scicatrec.start()
+    #scicatrec = ScicatRecorder(name='scicatrec', pathfixer='b303a-e01/ctl/sdm-01')
+    #scicatrec.start()
 
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, eiger4m]:
+    for d in [panda2, pseudo, eiger4m, x3mini]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
