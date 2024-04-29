@@ -490,53 +490,6 @@ class WFspiral(WFtrigscan):
         return wf, self.n_steps
 
 @macro
-class Cspiral(WFtrigscan):
-    """
-    Waveform spiral continuous scan
-
-    cspiral <motor 1> <motor 2> <step size> <intervals> <exp time>
-    """
-
-    def __init__(self, *args, **kwargs):
-        """
-        Parse arguments
-        """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        self.fast_motor = args[0]
-        self.slow_motor = args[1]
-        self.stepsize = float(args[2])
-        self.n_steps = int(args[3])
-        self.exptime = float(args[4])
-        self.latency = 0.001
-        self.print_progress = False
-        if self.panda is None:
-            raise Exception('Set DacScan.panda to your panda master')
-
-    def _generate_waveform(self):
-        """
-        create the wave form in shape of the continuously scanned spiral
-        returns the waveform and the number of points in the scan
-        """
-        pixeltime = self.latency + self.exptime
-        n_positions = np.arange(0, int(self.dac_rate * self.n_steps * pixeltime))
-        A = self.stepsize * np.sqrt(n_positions/(self.dac_rate*pixeltime*np.pi))
-        B = np.sqrt(4 * np.pi * n_positions/(self.dac_rate*pixeltime))
-        spiral_a = A*np.cos(B)
-        spiral_b = A*np.sin(B)
-        wf = self._get_constant_waveform(len(spiral_a))
-        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
-        trig = np.zeros(int(self.latency*self.dac_rate))
-        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
-        triggers = np.tile(trig,self.n_steps)
-        wf[4,:] = triggers
-        wf[self.fast_motor.axis,:] = spiral_a
-        wf[self.slow_motor.axis,:] = spiral_b
-        return wf, self.n_steps
-
-@macro
 class WFsnake(WFtrigscan):
     """
     Waveform snake step scan
@@ -603,15 +556,61 @@ class WFsnake(WFtrigscan):
         trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
         triggers = np.tile(trig,n_steps)
         wf[4,:] = triggers
-
         return wf, n_steps
 
 @macro
-class Csnake(WFtrigscan):
+class Flyspiral(WFtrigscan):
+    """
+    Waveform spiral continuous scan
+
+    Flyspiral <motor 1> <motor 2> <step size> <intervals> <exp time>
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Parse arguments
+        """
+        self._command = None  # updated if run via macro
+        self.scannr = env.nextScanID
+        self.print_progress = True
+        env.nextScanID += 1
+        self.fast_motor = args[0]
+        self.slow_motor = args[1]
+        self.stepsize = float(args[2])
+        self.n_steps = int(args[3])
+        self.exptime = float(args[4])
+        self.latency = 0.001
+        self.print_progress = False
+        if self.panda is None:
+            raise Exception('Set DacScan.panda to your panda master')
+
+    def _generate_waveform(self):
+        """
+        create the wave form in shape of the continuously scanned spiral
+        returns the waveform and the number of points in the scan
+        """
+        pixeltime = self.latency + self.exptime
+        n_positions = np.arange(0, int(self.dac_rate * self.n_steps * pixeltime))
+        A = self.stepsize * np.sqrt(n_positions/(self.dac_rate*pixeltime*np.pi))
+        B = np.sqrt(4 * np.pi * n_positions/(self.dac_rate*pixeltime))
+        spiral_a = A*np.cos(B)
+        spiral_b = A*np.sin(B)
+        wf = self._get_constant_waveform(len(spiral_a))
+        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
+        trig = np.zeros(int(self.latency*self.dac_rate))
+        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        triggers = np.tile(trig,self.n_steps)
+        wf[4,:] = triggers
+        wf[self.fast_motor.axis,:] = spiral_a
+        wf[self.slow_motor.axis,:] = spiral_b
+        return wf, self.n_steps
+
+@macro
+class Flysnake(WFtrigscan):
     """
     Waveform snake continuous scan
 
-    csnake  <motor 1>  <start> <stop> <intervals>
+    flysnake  <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
             <exp time>
     """
@@ -626,18 +625,18 @@ class Csnake(WFtrigscan):
         env.nextScanID += 1
         # convert to dial coordinates, as the dac operates in dial units
         self.fast_motor = args[0]
-        self.fa_start = ((float(args[1]) - self.fast_motor._offset) / self.fast_motor._scaling)
-        self.fa_end = ((float(args[2]) - self.fast_motor._offset) / self.fast_motor._scaling)
-        self.steps_f = int(args[3])
+        self.fa_start = float(args[1])
+        self.fa_end = float(args[2])
+        self.fa_steps = int(args[3])
         self.slow_motor = args[4]
-        self.sa_start = ((float(args[5]) - self.slow_motor._offset) / self.slow_motor._scaling)
-        self.sa_end = ((float(args[6]) - self.slow_motor._offset) / self.slow_motor._scaling)
-        self.steps_s = int(args[7])
+        self.sa_start = float(args[5])
+        self.sa_end = float(args[6])
+        self.sa_steps = int(args[7])
         self.exptime = float(args[8])
         self.latency = 0.001
         self.print_progress = False
-        if self.panda is None:
-            raise Exception('Set DacScan.panda to your panda master')
+        #if self.panda is None:
+        #    raise Exception('Set DacScan.panda to your panda master')
 
     def _generate_waveform(self):
         """
@@ -645,38 +644,116 @@ class Csnake(WFtrigscan):
         returns the waveform and the number of points in the scan
         """
         pixeltime = int(self.dac_rate*(self.latency + self.exptime))
-        #nsteps = (self.steps_f+1) * (self.steps_s+1)-1
-        stepsize_f = (self.fa_end-self.fa_start)/self.steps_f
-        stepsize_s = (self.sa_end-self.sa_start)/self.steps_s
+        n_steps = (self.fa_steps+1) * (self.sa_steps+1)
+        fa_stepsize = (self.fa_end-self.fa_start)/self.fa_steps
+        if self.sa_steps > 0:
+            sa_stepsize = (self.sa_end-self.sa_start)/self.sa_steps
+        else:
+            sa_stepsize = 0
 
         # contiuous scanning
-        sec_f0 = np.linspace(self.fa_start, self.fa_end, pixeltime * self.steps_f)
-        sec_f1 = np.full(pixeltime, self.fa_end)
-        sec_f2 = np.linspace(self.fa_end, self.fa_start, pixeltime * self.steps_f)
-        sec_f3 = np.full(pixeltime, self.fa_start)
-        sec_s0 = np.full(pixeltime * self.steps_f, self.sa_start)
-        sec_s1 = np.linspace(self.sa_start, self.sa_start+stepsize_s, pixeltime)
-        sec_s1 = np.append(sec_s1, np.full(pixeltime * self.steps_f, self.sa_start+stepsize_s))
-        wf_f = sec_f0
-        wf_s = sec_s0
-        for i in range(0, self.steps_s):
+        sec_f0 = np.linspace(self.fa_start-0.5*fa_stepsize, self.fa_end+0.5*fa_stepsize, pixeltime * (self.fa_steps + 1))
+        sec_f1 = np.full(pixeltime, self.fa_end+0.5*fa_stepsize)
+        sec_f2 = np.flip(sec_f0, 0)
+        sec_f3 = np.full(pixeltime, self.fa_start-0.5*fa_stepsize)
+        sec_s0 = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
+        sec_s1 = np.linspace(self.sa_start, self.sa_start+sa_stepsize, pixeltime)
+        sec_s1 = np.append(sec_s1, np.full(pixeltime * (self.fa_steps+1), self.sa_start+sa_stepsize))
+        trig_pulse = np.zeros(int(self.latency*self.dac_rate))
+        trig_pulse = np.append(trig_pulse, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        sec_trig_fast_axis = np.tile(trig_pulse,self.fa_steps + 1)
+        sec_trig_slow_axis = np.zeros(pixeltime)
+        wf_fast = sec_f0
+        wf_slow = sec_s0
+        wf_trig = sec_trig_fast_axis
+        for i in range(0, self.sa_steps+1):
             if not i % 2:
-                wf_f = np.append(wf_f, sec_f1)
-                wf_f = np.append(wf_f, sec_f2)
-                wf_s = np.append(wf_s, sec_s1+i*stepsize_s)
+                wf_fast = np.append(wf_fast, sec_f1)
+                wf_fast = np.append(wf_fast, sec_f2)
             else:
-                wf_f = np.append(wf_f, sec_f3)
-                wf_f = np.append(wf_f, sec_f0)
-                wf_s = np.append(wf_s, sec_s1+i*stepsize_s)
+                wf_fast = np.append(wf_fast, sec_f3)
+                wf_fast = np.append(wf_fast, sec_f0)
+            wf_trig = np.append(wf_trig, sec_trig_slow_axis)
+            wf_trig = np.append(wf_trig, sec_trig_fast_axis)
+            wf_slow = np.append(wf_slow, sec_s1+i*sa_stepsize)
 
-        n_steps = int(wf_f.shape[0] / pixeltime)
-        wf = self._get_constant_waveform(wf_f.shape[0])
-        wf[self.fast_motor.axis,:] = wf_f
-        wf[self.slow_motor.axis,:] = wf_s
-        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
-        trig = np.zeros(int(self.latency*self.dac_rate))
-        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
-        triggers = np.tile(trig,n_steps)
-        wf[4,:] = triggers
-
+        wf = self._get_constant_waveform(wf_fast.shape[0])
+        wf[self.fast_motor.axis,:] = wf_fast
+        wf[self.slow_motor.axis,:] = wf_slow
+        wf[4,:] = wf_trig
         return wf, n_steps
+
+@macro
+class Flymesh(WFtrigscan):
+    """
+    Waveform snake continuous scan
+
+    flymesh  <motor 1>  <start> <stop> <intervals>
+            <motor 2> <start> <stop> <intervals>
+            <exp time>
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Parse arguments
+        """
+        self._command = None  # updated if run via macro
+        self.scannr = env.nextScanID
+        self.print_progress = True
+        env.nextScanID += 1
+        # convert to dial coordinates, as the dac operates in dial units
+        self.fast_motor = args[0]
+        self.fa_start = float(args[1])
+        self.fa_end = float(args[2])
+        self.fa_steps = int(args[3])
+        self.slow_motor = args[4]
+        self.sa_start = float(args[5])
+        self.sa_end = float(args[6])
+        self.sa_steps = int(args[7])
+        self.exptime = float(args[8])
+        self.latency = 0.001
+        self.print_progress = False
+        self.returntime = 0.2
+        #if self.panda is None:
+        #    raise Exception('Set DacScan.panda to your panda master')
+
+    def _generate_waveform(self):
+        """
+        create the wave form in shape of the step scanned snake
+        returns the waveform and the number of points in the scan
+        """
+        pixeltime = int(self.dac_rate*(self.latency + self.exptime))
+        returntime = int(self.returntime*self.dac_rate)
+        n_steps = (self.fa_steps+1) * (self.sa_steps+1)
+        fa_stepsize = (self.fa_end-self.fa_start)/self.fa_steps
+        if self.sa_steps > 0:
+            sa_stepsize = (self.sa_end-self.sa_start)/self.sa_steps
+        else:
+            sa_stepsize = 0
+
+        # contiuous scanning
+        sec_f0 = np.linspace(self.fa_start-0.5*fa_stepsize, self.fa_end+0.5*fa_stepsize, pixeltime * (self.fa_steps + 1))
+        sec_s0 = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
+        sec_f1 = np.linspace(self.fa_end+0.5*fa_stepsize, self.fa_start-0.5*fa_stepsize, returntime)
+        sec_s1 = np.linspace(self.sa_start, self.sa_start+sa_stepsize, returntime)
+        trig_pulse = np.zeros(int(self.latency*self.dac_rate))
+        trig_pulse = np.append(trig_pulse, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        sec_trig_fast_axis = np.tile(trig_pulse,self.fa_steps + 1)
+        sec_trig_slow_axis = np.zeros(returntime)
+        wf_fast = sec_f0
+        wf_slow = sec_s0
+        wf_trig = sec_trig_fast_axis
+        for i in range(0, self.sa_steps+1):
+            wf_fast = np.append(wf_fast, sec_f1)
+            wf_fast = np.append(wf_fast, sec_f0)
+            wf_slow = np.append(wf_slow, sec_s1+i*sa_stepsize)
+            wf_slow = np.append(wf_slow, sec_s0+(i+1)*sa_stepsize)
+            wf_trig = np.append(wf_trig, sec_trig_slow_axis)
+            wf_trig = np.append(wf_trig, sec_trig_fast_axis)
+
+        wf = self._get_constant_waveform(wf_fast.shape[0])
+        wf[self.fast_motor.axis,:] = wf_fast
+        wf[self.slow_motor.axis,:] = wf_slow
+        wf[4,:] = wf_trig
+        return wf, n_steps
+
