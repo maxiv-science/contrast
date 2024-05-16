@@ -9,6 +9,8 @@ if __name__ == '__main__':
 
     import contrast
     from contrast.motors import DummyMotor, MotorMemorizer, ExamplePseudoMotor
+    from contrast.motors.EurothermDSMotor import EuroThermDSMotor
+    from contrast.detectors.EurothermDSDetector import EuroThermDSDetector
     from contrast.scans import *
     from contrast.detectors import (DummyDetector, Dummy1dDetector,
                                     DummyWritingDetector,
@@ -21,6 +23,10 @@ if __name__ == '__main__':
     # from sim_ptycho_scan import *
 
     env.userLevel = 1  # we're not experts!
+
+    #heater_motor = EuroThermDSMotor(device="B303A/DIA/TRC-01", name='heater_motor')
+    #heater_detector = EuroThermDSDetector(device="B303A/DIA/TRC-01", name='heater_detector')
+
 
     samx = DummyMotor(name='samx')
     samx.dial_limits = (0, 10)
