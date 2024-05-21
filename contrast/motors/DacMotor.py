@@ -24,20 +24,20 @@ class DacMotor(Motor):
         super(DacMotor, self).__init__(**kwargs)
         self.proxy = PyTango.DeviceProxy(device)
         self.proxy.set_source(PyTango.DevSource.DEV)
-        self._axis = int(axis)
+        self.axis = int(axis)
 
     @property
     def dial_position(self):
-        attr = 'dac_%d_position' % self._axis
+        attr = 'dac_%d_position' % self.axis
         return self.proxy.read_attribute(attr).value
 
     @dial_position.setter
     def dial_position(self, pos):
-        attr = 'dac_%d_position' % self._axis
+        attr = 'dac_%d_position' % self.axis
         self.proxy.write_attribute(attr, pos)
 
     def busy(self):
-        return self.proxy.read_attribute('dac_%d_is_moving' % self._axis).value
+        return self.proxy.read_attribute('dac_%d_is_moving' % self.axis).value
  
 
 

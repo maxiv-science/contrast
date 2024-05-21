@@ -5,8 +5,50 @@ a separate file so as not to clutter the main beamline file.
 
 import PyTango
 import time
-from contrast.environment import macro, runCommand
+from contrast.environment import macro, runCommand, register_shortcut
 from contrast.motors import Motor
+from contrast.detectors import Detector
+
+# some handy shortcuts
+register_shortcut('wtab', 'wm table*')
+register_shortcut('wrobot', 'wm gamma delta radius')
+register_shortcut('wsample', 'wm base* s?')
+
+
+def fastshutter_action(state, name):
+    """
+    Open (state=False) or close (state=True) the fast shutter,
+    by setting BITS1.outb high or low on the panda box with
+    the give name.
+    """
+    try:
+        panda = [m for m in Detector.getinstances() if m.name == name][0]
+    except IndexError:
+        raise Exception('No Gadget named %s' % name)
+    response = panda.query('BITS1.B=%u' % (int(state)))
+    if 'OK' in response:
+        act = {False: 'opened', True: 'closed'}[state]
+        print('Fastshutter %s' % act)
+    else:
+        print('Could not actuate the shutter')
+
+
+@macro
+class FsOpen(object):
+    """
+    Opens the fast shutter.
+    """
+    def run(self):
+        fastshutter_action(False, 'panda0')
+
+
+@macro
+class FsClose(object):
+    """
+    Closes the fast shutter.
+    """
+    def run(self):
+        fastshutter_action(True, 'panda0')
 
 
 @macro
