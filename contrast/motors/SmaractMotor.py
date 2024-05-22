@@ -34,19 +34,19 @@ class SmaractLinearMotor(Motor):
         self.axis = int(axis)
         if velocity is not None:
             attr = 'velocity_%d' % self.axis
-            self.proxy.write_attribute(attr, velocity * 1e3)
+            self.proxy.write_attribute(attr, velocity )
         if frequency is not None:
             self.proxy.arbitraryCommand("SCLF%u,%u" % (self.axis, frequency))
 
     @property
     def dial_position(self):
         attr = 'position_%d' % self.axis
-        return self.proxy.read_attribute(attr).value * 1e-3
+        return self.proxy.read_attribute(attr).value
 
     @dial_position.setter
     def dial_position(self, pos):
         attr = 'position_%d' % self.axis
-        self.proxy.write_attribute(attr, pos * 1e3)
+        self.proxy.write_attribute(attr, pos)
 
     def busy(self):
         attr = 'state_%d' % self.axis
@@ -84,4 +84,20 @@ class SmaractRotationMotor(SmaractLinearMotor):
         rev = int(pos // 360)
         attr = 'angle_%d' % self.axis
         val = '%d,%d' % (angle, rev)
+        self.proxy.write_attribute(attr, val)
+
+
+class SmaractRotationMotor_MCS2(SmaractLinearMotor):
+
+    @property
+    def dial_position(self):
+        attr = 'position_%d' % self.axis
+        val = self.proxy.read_attribute(attr).value
+        pos = val * 3.1415 * 2.50
+        return pos
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        attr = 'position_%d' % self.axis
+        val = pos / 3.1415 / 2.50
         self.proxy.write_attribute(attr, val)

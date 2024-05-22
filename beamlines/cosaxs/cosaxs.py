@@ -16,7 +16,7 @@ if __name__ == '__main__':
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
-    from contrast.motors.SmaractMotor import SmaractRotationMotor
+    from contrast.motors.SmaractMotor import SmaractRotationMotor, SmaractRotationMotor_MCS2
     from contrast.motors.NanosMotor import NanosMotor
     from contrast.motors.Pmd401Motor import Pmd401Motor
     from contrast.motors.Pmd401Motor import BaseYMotor
@@ -74,6 +74,19 @@ if __name__ == '__main__':
     #sx = E727Motor(device='B310A/CTL/PZCU-01', axis=2, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     #sy = E727Motor(device='B310A/CTL/PZCU-01', axis=3, name='sy', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     #sz = E727Motor(device='B310A/CTL/PZCU-01', axis=1, name='sz', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
+
+
+    # DESY smaracts MCS
+    sma0 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=0, name='sma0', userlevel=2, velocity=1, user_format='%.4f')  # tilt stack ... long linear
+    sma1 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=1, name='sma1', userlevel=2, velocity=1, user_format='%.4f')  # tilt stack ... short linear on top of long, but sideways
+    sma2 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=2, name='sma2', userlevel=2, velocity=1, user_format='%.4f')  # tilt stack ... short vertical on top of long
+    sma3 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=3, name='sma3', userlevel=2, velocity=1, user_format='%.4f')  # two stack ... short / end
+    sma4 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=4, name='sma4', userlevel=2, velocity=1, user_format='%.4f')  # two stack ... long / end
+    sma5 = SmaractRotationMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=5, name='sma5', userlevel=2, velocity=0.2, user_format='%.4f')  # rotation stage ... 11.5 makes baout 90 degrees
+    sma6 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=6, name='sma6', userlevel=2, velocity=1, user_format='%.4f')  # lower tilt stage
+    sma7 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=7, name='sma7', userlevel=2, velocity=1, user_format='%.4f')  # upper tilt stage
+
+
 
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
