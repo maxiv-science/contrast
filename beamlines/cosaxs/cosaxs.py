@@ -10,7 +10,7 @@ if __name__ == '__main__':
     from contrast.environment import env, runCommand
     from contrast.environment.data import SdmPathFixer
     from contrast.environment.scheduling import MaxivScheduler
-    from contrast.recorders import Hdf5Recorder, StreamRecorder #, ScicatRecorder
+    from contrast.recorders import Hdf5Recorder, StreamRecorder, ScicatRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
     from contrast.motors.TangoMotor import TangoMotor
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     from contrast.motors.Pmd401Motor import BaseYMotor
     from contrast.motors.Pmd401Motor import BaseZMotor
     from contrast.motors.E727 import E727Motor
-    from contrast.detectors.Eiger import Eiger
+    from contrast.detectors.Eiger import Eiger, EigerTango
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     det_z = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/cosaxs_flight_ctrl/26', name='det_z', userlevel=2, dial_limits=(-569.65, 13865.0), user_format='%.4f')
 
     # pinhole - Thorlabs stages
-    pinhole_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-x', name='pinhole_x', userlevel=2, scaling= 1.0,dial_limits=(-5000, 5000), user_format='%.4f')
-    pinhole_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-y', name='pinhole_y', userlevel=2, scaling=-1.0, dial_limits=(-5000, 5000), user_format='%.4f')
+    #pinhole_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-x', name='pinhole_x', userlevel=2, scaling= 1.0,dial_limits=(-5000, 5000), user_format='%.4f')
+    #pinhole_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-y', name='pinhole_y', userlevel=2, scaling=-1.0, dial_limits=(-5000, 5000), user_format='%.4f')
 
     # sample - Huber stages
     sample_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-04-x', name='sample_x', userlevel=2, dial_limits=(10, 290), user_format='%.4f')
@@ -148,7 +148,9 @@ if __name__ == '__main__':
     ########################################
 
     #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0',  use_image_appendix=True, hdf_path='entry/instrument/eiger/data') # 172.16.197.26
-    eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0')#, hdf_path='entry/instrument/eiger/data')
+    #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0')#, hdf_path='entry/instrument/eiger/data')
+    eiger4m = EigerTango(name='eiger4m', device_name='B310A-E/DIA/det-01')
+
     panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
     alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48 # maybe channel 2
     pseudo = PseudoDetector(name='pseudo',
@@ -175,14 +177,17 @@ if __name__ == '__main__':
     zmqrec = StreamRecorder(name='zmqrec')
     zmqrec.start()  # removed for now
 
-    # a scicat recorder - paused until further notice
-    # scicatrec = ScicatRecorder(name='scicatrec')
-    # scicatrec.start()
+    # a scicat recorder  ... switched off, 
+    ###   File "/data/visitors/nanomax/common/sw/conda_envs/contrast_cosaxs/lib/python3.9/site-packages/scifish/scifish.py", line 37, in __init__
+    ###       raise Exception("Cannot connect to Kafka: %s" % str(exc))
+    #scicatrec = ScicatRecorder(name='scicatrec', pathfixer='b310a/ctl/sdm-01')
+    #scicatrec.start()
 
     # default detector selection on contrast startup
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, alba0, pseudo, eiger4m]:
+    #for d in [panda0, alba0, pseudo, eiger4m]:
+    for d in [eiger4m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
