@@ -65,29 +65,26 @@ if __name__ == '__main__':
     dummy2 = DummyMotor(name='dummy2', userlevel=2)
     dummy2.velocity = 100
 
-    # sample piezos 
+    # sample piezos (borrowed from NanoMAX)
     #sx = LC400Motor(device='b310A/ctl/pzcu-users-01', axis=1, name='sx', scaling=+1.0, dial_limits=(-100,100), user_format='%.3f')
     #sy = LC400Motor(device='b310A/ctl/pzcu-users-01', axis=3, name='sy', scaling=+1.0, dial_limits=( -50, 50), user_format='%.3f')
     #sz = LC400Motor(device='b310A/ctl/pzcu-users-01', axis=2, name='sz', scaling=-1.0, dial_limits=(-100,100), user_format='%.3f')
 
-    # PI NanoCube 3-axis piezo. To be used in temporary setups
+    # PI NanoCube 3-axis piezo. To be used in temporary setups (borrowed from NanoMAX)
     #sx = E727Motor(device='B310A/CTL/PZCU-01', axis=2, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     #sy = E727Motor(device='B310A/CTL/PZCU-01', axis=3, name='sy', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     #sz = E727Motor(device='B310A/CTL/PZCU-01', axis=1, name='sz', userlevel=1, scaling=+1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
 
-
-    # DESY smaracts MCS
+    # DESY Smaract MCS2
     sma0 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=0, name='sma0', userlevel=2, velocity=1, user_format='%.4f')  # tilt stack ... long linear
     sma1 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=1, name='sma1', userlevel=2, velocity=1, user_format='%.4f')  # tilt stack ... short linear on top of long, but sideways
     sma2 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=2, name='sma2', userlevel=2, velocity=1, user_format='%.4f')  # tilt stack ... short vertical on top of long
-    sma3 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=3, name='sma3', userlevel=2, velocity=1, user_format='%.4f')  # two stack ... short / end
-    sma4 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=4, name='sma4', userlevel=2, velocity=1, user_format='%.4f')  # two stack ... long / end
-    sma5 = SmaractRotationMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=5, name='sma5', userlevel=2, velocity=0.2, user_format='%.4f')  # rotation stage ... 11.5 makes baout 90 degrees
+    pinx = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=3, name='pinx', userlevel=2, velocity=1, user_format='%.4f')  # two stack ... short / end
+    piny = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=4, name='piny', userlevel=2, velocity=1, user_format='%.4f')  # two stack ... long / end
+    sma5 = SmaractRotationMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=5, name='sma5', userlevel=2, velocity=0.2, user_format='%.4f')  # rotation stage ... 11.5 makes about 90 degrees
     sma6 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=6, name='sma6', userlevel=2, velocity=1, user_format='%.4f')  # lower tilt stage
     sma7 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=7, name='sma7', userlevel=2, velocity=1, user_format='%.4f')  # upper tilt stage
-
-
-
+    
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
     energy = TangoMotor(device='b-v-cosaxs-csdb-0:10000/pm/mono_bragg_ctrl/1', name='energy', userlevel=2, dial_limits=(5000, 32000), user_format='%.1f', scaling=1000.)
@@ -105,11 +102,15 @@ if __name__ == '__main__':
     sample_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-04-x', name='sample_x', userlevel=2, dial_limits=(10, 290), user_format='%.4f')
     sample_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-04-y', name='sample_y', userlevel=2, dial_limits=(10, 80), user_format='%.4f')
 
-
+    
     # attenuators
-    bcu01_x1pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x1pz', name='bcu01_x1pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
-    bcu01_x2pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x2pz', name='bcu01_x2pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
-    bcu01_x3pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x3pz', name='bcu01_x3pz', userlevel=2, dial_limits=(-20, 20), user_format='%.4f')
+    bcu01_x1pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x1pz', name='bcu01_x1pz', userlevel=2, dial_limits=(-33, 33), user_format='%.4f')
+    bcu01_x2pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x2pz', name='bcu01_x2pz', userlevel=2, dial_limits=(-33, 33), user_format='%.4f')
+    bcu01_x3pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x3pz', name='bcu01_x3pz', userlevel=2, dial_limits=(-33, 33), user_format='%.4f')
+    bcu01_x4pz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-x4pz', name='bcu01_x4pz', userlevel=2, dial_limits=(-33, 33), user_format='%.4f')
+    bcu01_bsxpz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-bsxpz', name='bcu01_bsxpz', userlevel=2, dial_limits=(-33, 33), user_format='%.4f')
+    bcu01_bsypz = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/bcu01-bsypz', name='bcu01_bsypz', userlevel=2, dial_limits=(-33, 33), user_format='%.4f')
+
     # bcu01_x1pz                       bcu01_x2pz
     #  32 - out - no absorber           32 - out - no absorber
     #  21 - Al 18um                     21 - Ti 75um
@@ -117,6 +118,7 @@ if __name__ == '__main__':
     #   0 - Al 180um                     0 - Ti 375um
     # -10 - Al 540um                   -10 - Ti 525um
     # -20 - Al 1020um                  -20 - Ti 675um
+    
 
     # slit 1 - for setting the coherence
     slit1_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-o02/opt/slit-01-xl', name='slit1_xl', userlevel=2, dial_limits=(-20, 20), user_format='%.4f') #mm
@@ -161,8 +163,7 @@ if __name__ == '__main__':
     ########################################
 
     #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0',  use_image_appendix=True, hdf_path='entry/instrument/eiger/data') # 172.16.197.26
-    #eiger4m = Eiger(name='eiger4m', host='b-cosaxs-eiger-dc-0')#, hdf_path='entry/instrument/eiger/data')
-    eiger4m = EigerTango(name='eiger4m', device_name='B310A-E/DIA/det-01')
+    eiger4m = EigerTango(name='eiger4m', device_name='B310A-E/DIA/det-01', hdf_path='entry/instrument/eiger/data')
 
     panda0 = PandaBox(name='panda0', host='b-cosaxs-pandabox-0') # 172.16.198.70
     alba0 = AlbaEM(name='alba0', host='172.16.198.48') #172.16.198.48 # maybe channel 2
