@@ -30,8 +30,8 @@ class Attenuate(object):
 
     # absorber settings at the NanoMAX beamline - status 2019-10-06
     position = [32, 21, 10, 0, -10, -21]
-    #carriers = ['bcu01_x1pz', 'bcu01_x2pz', 'bcu01_x3pz']
-    carriers = ['bcu01_x4pz', 'bcu01_bsxpz', 'bcu01_bsypz']  ### breakout modules A and B switched
+    carriers = ['bcu01_x1pz', 'bcu01_x2pz', 'bcu01_x3pz']
+    #carriers = ['bcu01_x4pz', 'bcu01_bsxpz', 'bcu01_bsypz']  ### breakout modules A and B switched
     thickness = [[   0,   0,    0],   # in um
                  [  18,  75,  165],
                  [  60, 225,  110],
