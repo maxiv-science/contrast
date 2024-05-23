@@ -15,7 +15,7 @@ if __name__ == '__main__':
     from contrast.motors.LC400 import LC400Motor
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
-    from contrast.motors.SmaractMotor import SmaractLinearMotor
+    from contrast.motors.SmaractMotor import SmaractLinearMotor, SmaractLinearMotor_MCS2
     from contrast.motors.SmaractMotor import SmaractRotationMotor, SmaractRotationMotor_MCS2
     from contrast.motors.NanosMotor import NanosMotor
     from contrast.motors.Pmd401Motor import Pmd401Motor
@@ -79,14 +79,14 @@ if __name__ == '__main__':
     # linear stages in um (, scaling=1000.)
     # rotation stages in deg
     # tilt stages ... who knows, default
-    sz = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=0, name='sz', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... long linear
-    sx = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=1, name='sx', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... short linear on top of long, but sideways
-    sy = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=2, name='sy', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... short vertical on top of long
-    pinx = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=3, name='pinx', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # two stack ... short / end
-    piny = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=4, name='piny', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # two stack ... long / end
+    sz = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=0, name='sz', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... long linear
+    sx = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=1, name='sx', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... short linear on top of long, but sideways
+    sy = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=2, name='sy', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... short vertical on top of long
+    pinx = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=3, name='pinx', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # two stack ... short / end
+    piny = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=4, name='piny', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # two stack ... long / end
     sr = SmaractRotationMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=5, name='sr', userlevel=2, velocity=0.2, user_format='%.4f')  # rotation stage ... 11.5 makes about 90 degrees
     #sma6 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=6, name='sma6', userlevel=2, velocity=1, user_format='%.4f')  # lower tilt stage
-    theta = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=7, name='theta', userlevel=2, velocity=1, user_format='%.4f')  # upper tilt stage
+    theta = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=7, name='theta', userlevel=2, velocity=1, user_format='%.4f')  # upper tilt stage
     
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
@@ -135,6 +135,13 @@ if __name__ == '__main__':
 
     # more slits
     uhvslit1_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-xr', name='uhvslit1_xr', userlevel=2, user_format='%.4f')
+
+
+    # last slits before the lens array / pinhole / sample ... in [mm]
+    hvslit_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-03-xr', name='hvslit_xr', userlevel=2, user_format='%.4f') # last slit horizontal right hand side blade
+    hvslit_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-03-xl', name='hvslit_xl', userlevel=2, user_format='%.4f') # last slit horizontal left hand side blade
+    hvslit_yt = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-03-yt', name='hvslit_yt', userlevel=2, user_format='%.4f') # last slit vertical top side blade
+    hvslit_yb = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-03-yb', name='hvslit_yb', userlevel=2, user_format='%.4f') # last slit vertical bottom side blade
 
     # granite table
     table_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/tab-01-x', name='table_x', userlevel=2, dial_limits=(-11.6, 11.15), user_format='%.4f') #mm
