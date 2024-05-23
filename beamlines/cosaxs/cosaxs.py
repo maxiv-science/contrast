@@ -135,7 +135,14 @@ if __name__ == '__main__':
 
     # more slits
     uhvslit1_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-xr', name='uhvslit1_xr', userlevel=2, user_format='%.4f')
-
+    uhvslit1_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-xl', name='uhvslit1_xl', userlevel=2, user_format='%.4f')
+    uhvslit1_yt = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-yt', name='uhvslit1_yt', userlevel=2, user_format='%.4f')
+    uhvslit1_yb = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-yb', name='uhvslit1_yb', userlevel=2, user_format='%.4f')
+    
+    uhvslit2_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-xr', name='uhvslit2_xr', userlevel=2, user_format='%.4f')
+    uhvslit2_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-xl', name='uhvslit2_xl', userlevel=2, user_format='%.4f')
+    uhvslit2_yt = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-yt', name='uhvslit2_yt', userlevel=2, user_format='%.4f')
+    uhvslit2_yb = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-yb', name='uhvslit2_yb', userlevel=2, user_format='%.4f')
 
     # last slits before the lens array / pinhole / sample ... in [mm]
     hvslit_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-03-xr', name='hvslit_xr', userlevel=2, user_format='%.4f') # last slit horizontal right hand side blade
