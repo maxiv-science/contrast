@@ -87,6 +87,11 @@ class SmaractRotationMotor(SmaractLinearMotor):
         self.proxy.write_attribute(attr, val)
 
 
+class SmaractLinearMotor_MCS2(SmaractLinearMotor):
+
+    def stop(self):
+        self.proxy.stop(self.axis)  # no stopone for MCS2... yet
+
 class SmaractRotationMotor_MCS2(SmaractLinearMotor):
 
     @property
