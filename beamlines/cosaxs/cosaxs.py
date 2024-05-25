@@ -79,14 +79,14 @@ if __name__ == '__main__':
     # linear stages in um (, scaling=1000.)
     # rotation stages in deg
     # tilt stages ... who knows, default
-    sz = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=0, name='sz', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... long linear
-    sx = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=1, name='sx', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... short linear on top of long, but sideways
+    sz = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=0, name='sz', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # tilt stack ... long linear
+    sx = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=1, name='sx', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # tilt stack ... short linear on top of long, but sideways
     sy = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=2, name='sy', userlevel=2, velocity=1, user_format='%.4f', scaling=-1000.)  # tilt stack ... short vertical on top of long
     pinx = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=3, name='pinx', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # two stack ... short / end
     piny = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=4, name='piny', userlevel=2, velocity=1, user_format='%.4f', scaling=1000.)  # two stack ... long / end
     sr = SmaractRotationMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=5, name='sr', userlevel=2, velocity=0.2, user_format='%.4f')  # rotation stage ... 11.5 makes about 90 degrees
     #sma6 = SmaractLinearMotor(device='b310a-e01/ctl/pzsscu-02', axis=6, name='sma6', userlevel=2, velocity=1, user_format='%.4f')  # lower tilt stage
-    theta = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=7, name='theta', userlevel=2, velocity=1, user_format='%.4f')  # upper tilt stage
+    #theta = SmaractLinearMotor_MCS2(device='b310a-e01/ctl/pzsscu-02', axis=7, name='theta', userlevel=2, velocity=1, user_format='%.4f')  # upper tilt stage
     
     # undulator
     ivu_gap = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.599, 49.9), user_format='%.4f')
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     det_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e02/dia/tab-02-y', name='det_y', userlevel=2, dial_limits=(36, 199), user_format='%.4f')
     det_z = TangoMotor(device='b-v-cosaxs-csdb-0:10000/motor/cosaxs_flight_ctrl/26', name='det_z', userlevel=2, dial_limits=(-569.65, 13865.0), user_format='%.4f')
 
-    # pinhole - Thorlabs stages
+    # Thorlabs stages
     #pinhole_x = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-x', name='pinhole_x', userlevel=2, scaling= 1.0,dial_limits=(-5000, 5000), user_format='%.4f')
     #pinhole_y = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/dia/sams-01-y', name='pinhole_y', userlevel=2, scaling=-1.0, dial_limits=(-5000, 5000), user_format='%.4f')
 
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     uhvslit1_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-xl', name='uhvslit1_xl', userlevel=2, user_format='%.4f')
     uhvslit1_yt = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-yt', name='uhvslit1_yt', userlevel=2, user_format='%.4f')
     uhvslit1_yb = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-01-yb', name='uhvslit1_yb', userlevel=2, user_format='%.4f')
-    
+
     uhvslit2_xr = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-xr', name='uhvslit2_xr', userlevel=2, user_format='%.4f')
     uhvslit2_xl = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-xl', name='uhvslit2_xl', userlevel=2, user_format='%.4f')
     uhvslit2_yt = TangoMotor(device='b-v-cosaxs-csdb-0:10000/b310a-e01/opt/slit-02-yt', name='uhvslit2_yt', userlevel=2, user_format='%.4f')
@@ -218,13 +218,15 @@ if __name__ == '__main__':
     for d in Detector.getinstances():
         d.active = False
     #for d in [panda0, alba0, pseudo, eiger4m]:
-    for d in [eiger4m]:
+    for d in [eiger4m, alba0]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
     def pre_scan_stuff(slf):
         runCommand('stoplive')
         runCommand('fsopen')
+        if eiger4m.active == True:
+            eiger4m.energy = int(energy.position())
         pass
 
     def post_scan_stuff(slf):
