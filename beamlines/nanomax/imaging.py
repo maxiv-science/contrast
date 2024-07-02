@@ -28,7 +28,7 @@ if __name__ == '__main__':
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
-    import macros_common
+    #import macros_common
     import macros_img
     import os
     import time
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
     zmqrec.start()  # removed for now
-    """
+
     #######################################################################################################
     # Experimental station equipment
     #######################################################################################################
@@ -142,9 +142,9 @@ if __name__ == '__main__':
     sx = DacMotor(device='B303A/CTL/IMG-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sz = DacMotor(device='B303A/CTL/IMG-02', axis=2, name='sz', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
-    
+   
     # Nanos motors for central stop, zone plate and order sorting aperture positioning
-    """
+
     osax = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osax', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     osay = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osay', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     osaz = NanosMotor(device='test/ctl/nanos-01', axis=2, name='osaz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
@@ -157,12 +157,12 @@ if __name__ == '__main__':
     grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
     gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
     #nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=11, name='nanos_dummy', userlevel=1, scaling=5e-4)
-    """
 
+    """
     # PiezoLEGS motors for coarse sample positioning
-    basex, basey, basez = ImgSampleStage(device='B303A/CTL/IMG-01', velocity=90, names=['basex', 'basey', 'basez'], userlevel=1, scaling=1e-3, user_format='%.3f')
-    """
+    basex, basey, basez = ImgSampleStage(device='B303A-E01/CTL/PZCU-02', velocity=90, names=['basex', 'basey', 'basez'], userlevel=1, scaling=1e-3, user_format='%.3f')
 
+    """
     # Smaract motors for sample rotation and first clean-up aperture positioning 
     sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
     grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
@@ -181,7 +181,6 @@ if __name__ == '__main__':
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=3)
     dummy2 = DummyMotor(name='dummy2', userlevel=3)
-    """
     # detectors
     eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
@@ -194,10 +193,10 @@ if __name__ == '__main__':
     # Pandabox reading the LC400 encoders analog and controlling the fast shutter
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
 
-    macros_common.WFtrigscan.panda = panda2
-    macros_common.WFtrigscan.dac_0 = sx
-    macros_common.WFtrigscan.dac_1 = sy
-    macros_common.WFtrigscan.dac_2 = sz
+    #macros_common.WFtrigscan.panda = panda2
+    #macros_common.WFtrigscan.dac_0 = sx
+    #macros_common.WFtrigscan.dac_1 = sy
+    #macros_common.WFtrigscan.dac_2 = sz
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',
@@ -252,6 +251,7 @@ if __name__ == '__main__':
     Ct._after_ct = post_scan_stuff
 
     contrast.wisdom()
+    """
 
     # find the latest scan number and initialize env.nextScanID
     try:
