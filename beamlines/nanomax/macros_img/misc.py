@@ -34,7 +34,6 @@ def fastshutter_action(state, name):
     else:
         print('Could not actuate the shutter')
 
-
 @macro
 class FsOpen(object):
     """
@@ -43,7 +42,6 @@ class FsOpen(object):
     def run(self):
         fastshutter_action(False, 'panda2')
 
-
 @macro
 class FsClose(object):
     """
@@ -51,7 +49,6 @@ class FsClose(object):
     """
     def run(self):
         fastshutter_action(True, 'panda2')
-
 
 @macro
 class ShOpen(object):
@@ -85,7 +82,6 @@ class ShClose(object):
                 return
         print('Shutter could not be closed!')
 
-
 @macro
 class NewSample(object):
     """
@@ -106,5 +102,33 @@ class NewSample(object):
 
     def run(self):
         self.sdm_mac.Sample  = self.NewSampleName
+
+@macro
+class M1shift(object):
+    """
+    Shift the focal plane of the vertically focusing KB
+    mirror (M1) by the specified distance (in microns).
+    """
+    def __init__(self, dist):
+        self.dist = dist
+
+    def run(self):
+        cmd = 'mvr m1fpitch %f' % (self.dist / -1381.0)
+        print("Moving the M1 fine pitch piezo like this:\n%s" % cmd)
+        runCommand(cmd)
+
+@macro
+class M2shift(object):
+    """
+    Shift the focal plane of the horizontally focusing KB
+    mirror (M2) by the specified distance (in microns).
+    """
+    def __init__(self, dist):
+        self.dist = dist
+
+    def run(self):
+        cmd = 'mvr m2fpitch %f' % (self.dist / -857.0)
+        print("Moving the M2 fine pitch piezo like this:\n%s" % cmd)
+        runCommand(cmd)
 
 

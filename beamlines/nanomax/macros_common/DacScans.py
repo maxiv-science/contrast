@@ -15,118 +15,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
-class dac_waveform():
+class WFtrigscan(SoftwareScan):
+    """
+    Base class for any step or continuous scan performed as a single waveform for the NI dac box.
+    The waveform contains 4 DAC channels and a fifth column defining the trigger.  
+    On purpuse this one is not a macro, so it can not be called by itself 
+    """
+    panda = None
+    dac_0 = None
+    dac_1 = None
+    dac_2 = None
+    p_latency = 0.0001 
+    dac_rate = 1000
+    trig_high = 255 # set value in range 0-255 to activate digital output 0-7    
 
-    dac_rate  = 1000
-    trig_high = 255 # set value in range 0-255 to activate digital output 0-7
+    def __init__(self, *args, **kwargs):
+        # to be implemented by the exact shape of scan to be performed
+        pass
 
-    @classmethod
-    def save_h5_file(cls, path, wf):
+    def _generate_waveform(self):
+        # to be implemented by the exact shape of scan to be performed
+        # return the waveform and the number of points in the scan
+        pass
+
+    def _save_h5_file(self, path, wf):
         wf_file = path
         # setting the triggers to low by extending the waveform length 
         wf =  np.concatenate((wf, wf[:,-1:]), axis=-1)
         wf[-1, -1] = 0
         with h5py.File(wf_file, 'w') as ofp:
             ofp.create_dataset('entry/measurement/waveform/data', data=wf, compression='gzip')
-    """
-    @classmethod
-    def get_spiral_wf(cls, motors, stepsize, steps, latency, exptime, step_scan):
-        pixeltime = (latency + exptime)
-        wf = np.zeros((5, int(steps * cls.dac_rate * pixeltime)))
-        wf[0,:] = np.full(int(steps * cls.dac_rate * pixeltime), motors[0].position())
-        wf[1,:] = np.full(int(steps * cls.dac_rate * pixeltime), motors[1].position())
-        wf[2,:] = np.full(int(steps * cls.dac_rate * pixeltime), motors[0].position())
-        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
-        trig = np.zeros(int(latency*cls.dac_rate))
-        trig = np.append(trig, np.full(int(exptime*cls.dac_rate), cls.trig_high))
-        triggers = np.tile(trig,steps)
-        wf[4,:] = triggers
 
-        if step_scan:
-            #step scanning
-            npositions = np.arange(0, steps)
-            A = stepsize * np.sqrt(npositions/np.pi)
-            B = np.sqrt(4 * np.pi * npositions)
-            spiral_a = np.repeat(A*np.cos(B), cls.dac_rate*pixeltime)
-            spiral_b = np.repeat(A*np.sin(B), cls.dac_rate*pixeltime)
-        else:
-            # continuous scanning
-            npositions = np.arange(0, int(cls.dac_rate * steps * pixeltime))
-            A = stepsize * np.sqrt(npositions/(cls.dac_rate*pixeltime*np.pi))
-            B = np.sqrt(4 * np.pi * npositions/(cls.dac_rate*pixeltime))
-            spiral_a = A*np.cos(B)
-            spiral_b = A*np.sin(B)
-
-        wf[motors[0].axis,:] = spiral_a
-        wf[motors[1].axis,:] = spiral_b
-        wf =  np.concatenate((wf, wf[:,-1:]), axis=-1)
-        wf[-1, -1] = 0
-        return wf, steps
-
-    @classmethod
-    def get_snake_wf(cls, x1, x2, steps_x, y1, y2, steps_y, latency, exptime, step_scan):
-        pixeltime = int(cls.dac_rate*(latency + exptime))
-        nsteps = (steps_x+1) * (steps_y+1)-1
-        stepsize_x = (x2-x1)/steps_x
-        stepsize_y = (y2-y1)/steps_y
-
-        if step_scan:
-            # step scanning
-            sec_x0 = np.linspace(x1, x2, steps_x+1)
-            sec_x0 =np.repeat(sec_x0, pixeltime)
-            sec_x2 = np.linspace(x2, x1, steps_x+1)
-            sec_x2 =np.repeat(sec_x2, pixeltime)
-            sec_y0 = np.full(pixeltime * (steps_x+1), y1)
-            wf_x = sec_x0
-            wf_y = sec_y0
-            for i in range(1, steps_y+1):
-                wf_y = np.append(wf_y, sec_y0+i*stepsize_y)
-                if not i % 2:
-                    wf_x = np.append(wf_x, sec_x0)
-                else:
-                    wf_x = np.append(wf_x, sec_x2)
-        else:
-            # contiuous scanning
-            sec_x0 = np.linspace(x1, x2, pixeltime * steps_x)
-            sec_x1 = np.full(pixeltime, x2)
-            sec_x2 = np.linspace(x2, x1, pixeltime * steps_x)
-            sec_x3 = np.full(pixeltime, x1)
-            sec_y0 = np.full(pixeltime * steps_x, y1)
-            sec_y1 = np.linspace(y1, y1+stepsize_y, pixeltime)
-            sec_y1 = np.append(sec_y1, np.full(pixeltime * steps_x, y1+stepsize_y))
-            wf_x = sec_x0
-            wf_y = sec_y0
-            for i in range(0, steps_y):
-                if not i % 2:
-                    wf_x = np.append(wf_x, sec_x1)
-                    wf_x = np.append(wf_x, sec_x2)
-                    wf_y = np.append(wf_y, sec_y1+i*stepsize_y)
-                else:
-                    wf_x = np.append(wf_x, sec_x3)
-                    wf_x = np.append(wf_x, sec_x0)
-                    wf_y = np.append(wf_y, sec_y1+i*stepsize_y)
-
-        nsteps = int(wf_x.shape[0] / pixeltime)
-
-        # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
-        trig = np.zeros(int(latency*cls.dac_rate))
-        trig = np.append(trig, np.full(int(exptime*cls.dac_rate), cls.trig_high))
-        triggers = np.tile(trig,nsteps)
-        wf = np.vstack([wf_x, wf_y, np.zeros(len(triggers)), np.zeros(len(triggers)), triggers])
-        wf =  np.concatenate((wf, wf[:,-1:]), axis=-1)
-        wf[-1, -1] = 0
-
-        return wf, nsteps
-
-        get_fermat_wf(self.dac_0_start, self.dac_0_end, 
-                                          self.dac_1_start, self.dac_1_end,
-                                          self.stepsize, self.exptime, 
-                                          self.latency, self.optimize)
-    
-    """
-
-    @classmethod
-    def _make_step_wf(cls, dac_positions, latency, exptime):
+    def _make_step_wf(self, dac_positions, latency, exptime):
         """
         takes a list of dac position, the latency and the exposure time
         and creates the waveform for a waveform step scan
@@ -141,14 +61,14 @@ class dac_waveform():
         # number of scan points
         n_p, n_steps = np.shape(dac_positions)
         # number of sampling points in the waveform
-        n_latency = int(latency * cls.dac_rate)
-        n_exposure = int(exptime * cls.dac_rate)
+        n_latency = int(latency * self.dac_rate)
+        n_exposure = int(exptime * self.dac_rate)
         n_perpoint = n_latency + n_exposure
 
         # create position array with waveform sampling # shape [3,n]
         positions = dac_positions.repeat(n_perpoint, axis=1)
         # create the array of trigger pulses at waveform sampling # shape [1,n]
-        trig = np.append(np.zeros((1, n_latency)), np.full((1, n_exposure), cls.trig_high))
+        trig = np.append(np.zeros((1, n_latency)), np.full((1, n_exposure), self.trig_high))
         triggers = np.tile(trig, (1, n_steps))
         # create a waveform for the fourth, not used, analog output channel
         wf_dac_3 = np.zeros((1, n_steps * n_perpoint))
@@ -160,30 +80,6 @@ class dac_waveform():
 
         # return the waveform (shape [5, n]) and the number of scan/data points
         return wf, n_steps
-
-class WFtrigscan(SoftwareScan):
-    """
-    Base class for any step or continuous scan performed as a single waveform for the NI dac box.
-    The waveform contains 4 DAC channels and a fifth column defining the trigger.  
-    On purpuse this one is not a macro, so it can not be called by itself 
-    """
-    panda = None
-    dac_0 = None
-    dac_1 = None
-    dac_2 = None
-    p_latency = 0.0001 
-    dac_rate = 1000
-    trig_high = 255 # set value in range 0-255 to activate digital output 0-7
-    
-
-    def __init__(self, *args, **kwargs):
-        # to be implemented by the exact shape of scan to be performed
-        pass
-
-    def _generate_waveform(self):
-        # to be implemented by the exact shape of scan to be performed
-        # return the waveform and the number of points in the scan
-        pass
 
     def _get_constant_waveform(self, size):
         # creates a <5xsize> waveform, initiated with current positions of the scanner
@@ -247,7 +143,7 @@ class WFtrigscan(SoftwareScan):
         print('Generating waveform file...   ', end='', flush=True)
         wf, self.n_steps = self._generate_waveform()
         wf_file=os.path.join(env.paths.directory, 'scan_%06u_waveform.hdf5'%self.scannr)
-        dac_waveform.save_h5_file(wf_file, wf)
+        self._save_h5_file(wf_file, wf)
         self.dac_0.proxy.waveform_path = wf_file
         print('Waveform file generated ')
 
@@ -331,11 +227,11 @@ class WFtrigscan(SoftwareScan):
         self._after_scan()
 
 @macro
-class WFfermat(WFtrigscan):
+class Hwstepfermat(WFtrigscan):
     """
     Waveform fermat spiral step scan
 
-    wffermat <horizontal left> <horizontal right> 
+    hwstepfermat <horizontal left> <horizontal right> 
              <vertical bottom> <vertical top>
              <step size> <exp time> <latency time> <optimize>
     """
@@ -344,20 +240,23 @@ class WFfermat(WFtrigscan):
         """
         Parse arguments
         """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        # convert to dial coordinates, as the dac operates in dial units
-        self.dac_0_start = ((float(args[0]) - self.dac_0._offset) / self.dac_0._scaling)
-        self.dac_0_end   = ((float(args[1]) - self.dac_0._offset) / self.dac_0._scaling)
-        self.dac_1_start = ((float(args[2]) - self.dac_1._offset) / self.dac_1._scaling)
-        self.dac_1_end   = ((float(args[3]) - self.dac_1._offset) / self.dac_1._scaling)
-        self.stepsize    =  (float(args[4]) / self.dac_1._scaling)
-        self.exptime = float(args[5])
-        self.latency = float(args[6])
-        self.optimize = bool(args[7])
-        self.print_progress = False
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            # convert to dial coordinates, as the dac operates in dial units
+            self.dac_0_start = ((float(args[0]) - self.dac_0._offset) / self.dac_0._scaling)
+            self.dac_0_end   = ((float(args[1]) - self.dac_0._offset) / self.dac_0._scaling)
+            self.dac_1_start = ((float(args[2]) - self.dac_1._offset) / self.dac_1._scaling)
+            self.dac_1_end   = ((float(args[3]) - self.dac_1._offset) / self.dac_1._scaling)
+            self.stepsize    =  (float(args[4]) / self.dac_1._scaling)
+            self.exptime = float(args[5])
+            self.latency = float(args[6])
+            self.optimize = bool(args[7])
+            self.print_progress = False
+        except:
+            raise MacroSyntaxError
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
 
@@ -448,69 +347,38 @@ class WFfermat(WFtrigscan):
         dac_positions = np.concatenate((self.pos_12, np.zeros((n_steps,1))), axis=-1)
         dac_positions = dac_positions.T
         # calculate the step waveform and number of data points
-        return dac_waveform._make_step_wf(dac_positions, self.latency, self.exptime)
+        return self._make_step_wf(dac_positions, self.latency, self.exptime)
 
 @macro
-class WFspiral(WFtrigscan):
+class Hwstepspiral(WFtrigscan):
     """
     Waveform spiral step scan
 
-    wfspiral <motor 1> <motor 2> <step size> <intervals> <exp time> <latency time>
+    hwstepspiral <motor 1> <motor 2> <step size> <intervals> <exp time> <latency time>
     """
 
     def __init__(self, *args, **kwargs):
         """
         Parse arguments
         """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        self.fast_motor = args[0]
-        self.slow_motor = args[1]
-        self.stepsize = float(args[2])
-        self.n_steps = int(args[3])
-        self.exptime = float(args[4])
-        self.latency = float(args[5])
-        self.print_progress = False
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            self.fast_motor = args[0]
+            self.slow_motor = args[1]
+            self.stepsize = float(args[2])
+            self.n_steps = int(args[3])
+            self.exptime = float(args[4])
+            self.latency = float(args[5])
+            self.print_progress = False
+        except:
+            raise MacroSyntaxError
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
 
-<<<<<<< HEAD
-    def _set_det_trig(self, on):
-        # special treatment for the panda box which rules all
-        panda = self.panda
-        panda.stop()
-        # set up all triggered detectors
-        for d in Detector.get_active():
-            if isinstance(d, TriggeredDetector) and not d.name == panda.name:
-                d.hw_trig = on
-                d.hw_trig_n = self.n_steps
-        if on:
-            self.old_hw_trig = panda.hw_trig
-            self.old_burst_n = panda.burst_n
-            self.old_burst_lat = panda.burst_latency
-            # print(f"{self.n_steps = }")
-            print(f'self.n_steps {self.n_steps}')
-            panda.burst_n = self.n_steps
-            panda.burst_latency = self.latency
-            panda.hw_trig_n = 1
-            panda.hw_trig = on
-        else:
-            panda.burst_n = self.old_burst_n
-            panda.burst_latency = self.old_burst_lat
-            panda.hw_trig = self.old_hw_trig
-
-    def _while_acquiring(self):
-        x = self.dac_0.position()
-        y = self.dac_1.position()
-        et = self.dac_0.proxy.get_end_time()
-        print('\rEstimated finish time: %s - X:%7.3f um Y:%7.3f um' % (et, x, y), end='') 
-
-    def run(self):
-=======
     def _generate_waveform(self):
->>>>>>> dacscan-dev
         """
         create the wave form in shape of the step scanned spiral
         returns the waveform and the number of points in the scan
@@ -532,11 +400,11 @@ class WFspiral(WFtrigscan):
         return wf, self.n_steps
 
 @macro
-class WFsnake(WFtrigscan):
+class Hwstepsnake(WFtrigscan):
     """
     Waveform snake step scan
 
-    wfsnake <motor 1>  <start> <stop> <intervals>
+    hwstepsnake <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
             <exp time> <latency time> 
     """
@@ -545,22 +413,24 @@ class WFsnake(WFtrigscan):
         """
         Parse arguments
         """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        # convert to dial coordinates, as the dac operates in dial units
-        self.fast_motor = args[0]
-        self.fa_start = ((float(args[1]) - self.fast_motor._offset) / self.fast_motor._scaling)
-        self.fa_end = ((float(args[2]) - self.fast_motor._offset) / self.fast_motor._scaling)
-        self.steps_f = int(args[3])
-        self.slow_motor = args[4]
-        self.sa_start = ((float(args[5]) - self.slow_motor._offset) / self.slow_motor._scaling)
-        self.sa_end = ((float(args[6]) - self.slow_motor._offset) / self.slow_motor._scaling)
-        self.steps_s = int(args[7])
-        self.exptime = float(args[8])
-        self.latency = float(args[9])
-        self.print_progress = False
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            self.fast_motor = args[0]
+            self.fa_start = float(args[1])
+            self.fa_end = float(args[2])
+            self.steps_f = int(args[3])
+            self.slow_motor = args[4]
+            self.sa_start = float(args[5])
+            self.sa_end = float(args[6])
+            self.steps_s = int(args[7])
+            self.exptime = float(args[8])
+            self.latency = float(args[9])
+            self.print_progress = False
+        except:
+            raise MacroSyntaxError
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
 
@@ -601,28 +471,107 @@ class WFsnake(WFtrigscan):
         return wf, n_steps
 
 @macro
-class Flyspiral(WFtrigscan):
+class Hwstepmesh(WFtrigscan):
     """
-    Waveform spiral continuous scan
+    Waveform snake step scan
 
-    Flyspiral <motor 1> <motor 2> <step size> <intervals> <exp time>
+    Hwstepmesh <motor 1>  <start> <stop> <intervals>
+            <motor 2> <start> <stop> <intervals>
+            <exp time> <latency time> 
     """
 
     def __init__(self, *args, **kwargs):
         """
         Parse arguments
         """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        self.fast_motor = args[0]
-        self.slow_motor = args[1]
-        self.stepsize = float(args[2])
-        self.n_steps = int(args[3])
-        self.exptime = float(args[4])
-        self.latency = 0.001
-        self.print_progress = False
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            self.fast_motor = args[0]
+            self.fa_start = float(args[1])
+            self.fa_end = float(args[2])
+            self.steps_f = int(args[3])
+            self.slow_motor = args[4]
+            self.sa_start = float(args[5])
+            self.sa_end = float(args[6])
+            self.steps_s = int(args[7])
+            self.exptime = float(args[8])
+            self.latency = float(args[9])
+            self.print_progress = False
+            self.returntime = 0.2
+        except:
+            raise MacroSyntaxError
+        if self.panda is None:
+            raise Exception('Set DacScan.panda to your panda master')
+
+    def _generate_waveform(self):
+        """
+        create the wave form in shape of the step scanned mesh
+        returns the waveform and the number of points in the scan
+        """
+        pixeltime = int(self.dac_rate*(self.latency + self.exptime))
+        returntime = int(self.returntime*self.dac_rate)
+        stepsize_f = (self.fa_end-self.fa_start)/self.steps_f
+        stepsize_s = (self.sa_end-self.sa_start)/self.steps_s
+
+        # step scanning
+        sec_f0 = np.linspace(self.fa_start, self.fa_end, self.steps_f+1)
+        sec_f0 =np.repeat(sec_f0, pixeltime)
+        sec_s0 = np.full(pixeltime * (self.steps_f+1), self.sa_start)
+        sec_f1 = np.linspace(self.fa_end, self.fa_start, returntime)
+        sec_s1 = np.linspace(self.sa_start, self.sa_start+stepsize_s, returntime)
+        trig = np.zeros(int(self.latency*self.dac_rate))
+        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        wf_f = sec_f0
+        wf_s = sec_s0
+        wf_t = np.tile(trig,self.steps_f + 1)
+        print(wf_f.shape, wf_t.shape)
+        for i in range(1, self.steps_s+1):
+            wf_f = np.append(wf_f, sec_f1)
+            wf_s = np.append(wf_s, sec_s1+i*stepsize_s)
+            wf_t = np.append(wf_t, np.zeros(returntime))
+            print(wf_f.shape, wf_t.shape)
+            wf_f = np.append(wf_f, sec_f0)
+            wf_s = np.append(wf_s, sec_s0+i*stepsize_s)
+            wf_t = np.append(wf_t, np.tile(trig,self.steps_f + 1))
+            print(wf_f.shape, wf_t.shape)
+
+        wf = self._get_constant_waveform(wf_f.shape[0])
+        wf[self.fast_motor.axis,:] = wf_f
+        wf[self.slow_motor.axis,:] = wf_s
+        print(wf_f.shape, wf_t.shape)
+        wf[4,:] = wf_t
+        n_steps = (self.steps_f + 1)*(self.steps_s + 1)
+        return wf, n_steps
+
+@macro
+class Hwflyspiral(WFtrigscan):
+    """
+    Waveform spiral continuous scan
+
+    hwflyspiral <motor 1> <motor 2> <step size> <intervals> <exp time>
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Parse arguments
+        """
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            self.fast_motor = args[0]
+            self.slow_motor = args[1]
+            self.stepsize = float(args[2])
+            self.n_steps = int(args[3])
+            self.exptime = float(args[4])
+            self.latency = 0.001
+            self.print_progress = False
+        except:
+            raise MacroSyntaxError
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
 
@@ -648,11 +597,11 @@ class Flyspiral(WFtrigscan):
         return wf, self.n_steps
 
 @macro
-class Flysnake(WFtrigscan):
+class Hwflysnake(WFtrigscan):
     """
     Waveform snake continuous scan
 
-    flysnake  <motor 1>  <start> <stop> <intervals>
+    hwflysnake  <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
             <exp time>
     """
@@ -661,24 +610,26 @@ class Flysnake(WFtrigscan):
         """
         Parse arguments
         """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        # convert to dial coordinates, as the dac operates in dial units
-        self.fast_motor = args[0]
-        self.fa_start = float(args[1])
-        self.fa_end = float(args[2])
-        self.fa_steps = int(args[3])
-        self.slow_motor = args[4]
-        self.sa_start = float(args[5])
-        self.sa_end = float(args[6])
-        self.sa_steps = int(args[7])
-        self.exptime = float(args[8])
-        self.latency = 0.001
-        self.print_progress = False
-        #if self.panda is None:
-        #    raise Exception('Set DacScan.panda to your panda master')
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            self.fast_motor = args[0]
+            self.fa_start = float(args[1])
+            self.fa_end = float(args[2])
+            self.fa_steps = int(args[3])
+            self.slow_motor = args[4]
+            self.sa_start = float(args[5])
+            self.sa_end = float(args[6])
+            self.sa_steps = int(args[7])
+            self.exptime = float(args[8])
+            self.latency = 0.001
+            self.print_progress = False
+        except:
+            raise MacroSyntaxError
+        if self.panda is None:
+            raise Exception('Set DacScan.panda to your panda master')
 
     def _generate_waveform(self):
         """
@@ -726,11 +677,11 @@ class Flysnake(WFtrigscan):
         return wf, n_steps
 
 @macro
-class Flymesh(WFtrigscan):
+class Hwflymesh(WFtrigscan):
     """
     Waveform snake continuous scan
 
-    flymesh  <motor 1>  <start> <stop> <intervals>
+    hwflymesh  <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
             <exp time>
     """
@@ -739,25 +690,27 @@ class Flymesh(WFtrigscan):
         """
         Parse arguments
         """
-        self._command = None  # updated if run via macro
-        self.scannr = env.nextScanID
-        self.print_progress = True
-        env.nextScanID += 1
-        # convert to dial coordinates, as the dac operates in dial units
-        self.fast_motor = args[0]
-        self.fa_start = float(args[1])
-        self.fa_end = float(args[2])
-        self.fa_steps = int(args[3])
-        self.slow_motor = args[4]
-        self.sa_start = float(args[5])
-        self.sa_end = float(args[6])
-        self.sa_steps = int(args[7])
-        self.exptime = float(args[8])
-        self.latency = 0.001
-        self.print_progress = False
-        self.returntime = 0.2
-        #if self.panda is None:
-        #    raise Exception('Set DacScan.panda to your panda master')
+        try:
+            self._command = None  # updated if run via macro
+            self.scannr = env.nextScanID
+            self.print_progress = True
+            env.nextScanID += 1
+            self.fast_motor = args[0]
+            self.fa_start = float(args[1])
+            self.fa_end = float(args[2])
+            self.fa_steps = int(args[3])
+            self.slow_motor = args[4]
+            self.sa_start = float(args[5])
+            self.sa_end = float(args[6])
+            self.sa_steps = int(args[7])
+            self.exptime = float(args[8])
+            self.latency = 0.001
+            self.print_progress = False
+            self.returntime = 0.2
+        except:
+            raise MacroSyntaxError
+        if self.panda is None:
+            raise Exception('Set DacScan.panda to your panda master')
 
     def _generate_waveform(self):
         """

@@ -1,5 +1,5 @@
 """
-This file contains convenience macros for nanomax, kept in
+This file contains convenience macros for nanomax whole beamline, kept in
 a separate file so as not to clutter the main beamline file.
 """
 
@@ -40,31 +40,5 @@ class Optics(object):
                 else:
                     print('Turning %s %s' % (self.arg, m.name))
                     m.proxy.PowerOn = (self.arg.lower() == 'on')
-
-@macro
-class Scanner(object):
-    """
-    Turn the scanner motors on, off, or see their state.
-
-    scanner <on / off>
-    scanner  - prints status
-    """
-    def __init__(self, arg=None):
-        self.arg = arg
-
-    def run(self):
-        for m in Motor.getinstances():
-            if ('sx' == m.name):
-                if self.arg is None:
-                    pass
-                    #print(f"({{True:'on', False:'OFF'}[m.proxy.axis1_pid_enable]}) axis1")
-                    #print(f"({{True:'on', False:'OFF'}[m.proxy.axis2_pid_enable]}) axis2")
-                    #print(f"({{True:'on', False:'OFF'}[m.proxy.axis3_pid_enable]}) axis3")
-                else:
-                    print(f'Turning scanner {self.arg.lower()}')
-                    state = (self.arg.lower() == 'on')
-                    m.proxy.axis1_pid_enable = state
-                    m.proxy.axis2_pid_enable = state
-                    m.proxy.axis3_pid_enable = state
 
 

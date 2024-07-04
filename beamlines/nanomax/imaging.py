@@ -28,7 +28,7 @@ if __name__ == '__main__':
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
-    #import macros_common
+    import macros_common
     import macros_img
     import os
     import time
@@ -127,8 +127,7 @@ if __name__ == '__main__':
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy_raw = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy_raw')
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_corr_ctrl/1', name='energy')
-
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    """
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
@@ -142,7 +141,7 @@ if __name__ == '__main__':
     sx = DacMotor(device='B303A/CTL/IMG-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sz = DacMotor(device='B303A/CTL/IMG-02', axis=2, name='sz', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
-   
+    """
     # Nanos motors for central stop, zone plate and order sorting aperture positioning
 
     osax = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osax', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
@@ -166,6 +165,8 @@ if __name__ == '__main__':
     # Smaract motors for sample rotation and first clean-up aperture positioning 
     sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
     grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    apx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='apx', frequency=1000, userlevel=2, user_format='%.3f', dial_format='%.3f')
+    apy = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=4, name='apy', frequency=1000, userlevel=2, user_format='%.3f', dial_format='%.3f')
     
     # Pixel detector and XRF motors, optical microsope and screen motors
     xrf1_x = TangoMotor(device='B303A-E01/DIA/XRF-01-X', name='xrf1_x', userlevel=2, user_format='%.3f')
@@ -174,29 +175,29 @@ if __name__ == '__main__':
     pixdet_y = TangoMotor(device='B303A-E01/DIA/PIXDET-Y', name='pixdet_y', userlevel=2, user_format='%.3f')
     screen = TangoMotor(device='B303A-E01/DIA/OPT-SCR', name='screen', userlevel=1, user_format='%.3f')
     mic = TangoMotor(device='B303A-E01/DIA/OPT-MIC', name='mic', userlevel=1, user_format='%.3f')
-
-    #pinhole_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='pinhole_x', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    #pinhole_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=4, name='pinhole_y', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    """
 
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=3)
     dummy2 = DummyMotor(name='dummy2', userlevel=3)
     # detectors
-    eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
+    #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
     #E01cam01 = BaslerCamera(name='E01cam01', device='basler/e01-cam-01/main')
     #E01cam02 = BaslerCamera(name='E01cam02', device='basler/e01-cam-02/main')
     #E01cam03 = BaslerCamera(name='E01cam03', device='basler/e01-cam-03/main')
     #E01cam04 = BaslerCamera(name='E01cam04', device='basler/e01-cam-04/main')
 
+    alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
+
     # The pandabox and some related pseudodetectors
     # Pandabox reading the LC400 encoders analog and controlling the fast shutter
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
 
-    #macros_common.WFtrigscan.panda = panda2
-    #macros_common.WFtrigscan.dac_0 = sx
-    #macros_common.WFtrigscan.dac_1 = sy
-    #macros_common.WFtrigscan.dac_2 = sz
+    macros_common.WFtrigscan.panda = panda2
+    macros_common.WFtrigscan.dac_0 = sx
+    macros_common.WFtrigscan.dac_1 = sy
+    macros_common.WFtrigscan.dac_2 = sz
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',
@@ -251,7 +252,7 @@ if __name__ == '__main__':
     Ct._after_ct = post_scan_stuff
 
     contrast.wisdom()
-    """
+
 
     # find the latest scan number and initialize env.nextScanID
     try:
