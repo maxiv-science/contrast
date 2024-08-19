@@ -189,7 +189,7 @@ class SoftwareScan(object):
                 group.start(trials=10)
                 while det_group.busy():
                     self._while_acquiring()
-                    time.sleep(.05)
+                    time.sleep(.025)
                 # read detectors and motors
                 dt = time.time() - t0
                 dct = OrderedDict()
