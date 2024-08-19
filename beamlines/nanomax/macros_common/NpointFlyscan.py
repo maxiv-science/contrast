@@ -130,7 +130,14 @@ class NpointFlyscan(Mesh):
     def _cleanup(self):
         # set back the triggering state
         self._set_det_trig(False)
-        self.fastmotor.proxy.stop_waveform()
+        try:
+            self.fastmotor.proxy.stop_waveform()
+        except:
+            print("#"*80)
+            print("# LC400 failed during cleanup. Initializing Tango server now.")
+            print("#"*80)
+            self.fastmotor.proxy.init()
+            self.fastmotor.proxy.stop_waveform()
 
     def _before_start(self):
         ok = False
