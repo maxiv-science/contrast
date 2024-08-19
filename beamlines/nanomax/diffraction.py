@@ -25,7 +25,7 @@ if __name__ == '__main__':
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Andor3 import Andor3
-    from contrast.detectors.Eiger import Eiger
+    from contrast.detectors.Eiger import Eiger, EigerTango
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors.xandy import Xandy
@@ -270,13 +270,13 @@ if __name__ == '__main__':
     #andor.proxy.fliplr=False
     #andor.proxy.sensorcooling=True
 
-    # CIVIDEC XandY
-    #xandy = Xandy(name="xandy", host='b-nanomax-user-devices-0', debug=0, amplification='Micro', sampling=10000, range='100 uA')
-    
-    #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
-    eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
-    eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    # eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
+    eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m')
+    eiger1m.rotation = 0
+    #eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
+    eiger500k = EigerTango('b303a/dia/eiger-500k', name='eiger500k')
+    eiger500k.rotation = 2
+    # Ion chamber at KB (Ch1), portable PIN diode (Ch3), PIN diode in DM4 (Ch4)
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
     #E02_topm = BaslerCamera(name='topm', device='basler/top_microscope/main')
