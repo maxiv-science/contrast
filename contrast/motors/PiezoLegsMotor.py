@@ -216,7 +216,7 @@ class ImgSampleStage(object):
         if self.motor2index(motor) == 0:
             self.proxy.arbitrarySend('X0M2')
         elif self.motor2index(motor) > 0:
-            self.proxy.arbitrarySend('X1M2')
+            self.proxy.arbitrarySend('X2M1')
             self.proxy.arbitrarySend('X2M2')
 
     def info(self):

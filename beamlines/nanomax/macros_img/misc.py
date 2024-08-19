@@ -5,10 +5,52 @@ a separate file so as not to clutter the main beamline file.
 
 import PyTango
 import time
-from contrast.environment import env, macro, runCommand
+from contrast.environment import env, macro, runCommand, register_shortcut
 from contrast.motors import Motor
 from contrast.motors.SmaractMotor import SmaractLinearMotor
 from contrast.motors.NanosMotor import NanosMotor
+from contrast.detectors import Detector
+
+# some handy shortcuts
+register_shortcut('wopt', 'wm cs* zp* osa*')
+register_shortcut('wgrip', 'wm bx by bz sx sy sz sr gr*')
+register_shortcut('wsample', 'wm bx by bz sx sy sz sr')
+register_shortcut('wnimis', 'wm bx by bz sx sy sz sr gr* cs* zp* osa* xrf* pixdet* mic screen')
+
+def fastshutter_action(state, name):
+    """
+    Open (state=False) or close (state=True) the fast shutter,
+    by setting BITS1.outb high or low on the panda box with
+    the give name.
+    """
+    try:
+        panda = [m for m in Detector.getinstances() if m.name == name][0]
+    except IndexError:
+        raise Exception('No Gadget named %s' % name)
+    response = panda.query('BITS1.B=%u' % (int(state)))
+    if 'OK' in response:
+        act = {False: 'opened', True: 'closed'}[state]
+        print('Fastshutter %s' % act)
+    else:
+        print('Could not actuate the shutter')
+
+
+@macro
+class FsOpen(object):
+    """
+    Opens the fast shutter.
+    """
+    def run(self):
+        fastshutter_action(False, 'panda2')
+
+
+@macro
+class FsClose(object):
+    """
+    Closes the fast shutter.
+    """
+    def run(self):
+        fastshutter_action(True, 'panda2')
 
 
 @macro
@@ -64,119 +106,5 @@ class NewSample(object):
 
     def run(self):
         self.sdm_mac.Sample  = self.NewSampleName
-
-@macro
-class GripperHoming(object):
-    """
-    Homing the motors for the sample gripper
-    """
-
-    def run(self):
-        for m in Motor.getinstances():
-            if m.name == 'grx':
-                self.grx = m
-            elif m.name == 'gry':
-                self.gry = m
-            elif m.name == 'grz':
-                self.grz = m
-            elif m.name == 'gripper':
-                self.gripper = m
-        
-        # homing of gripper y position. The homing is against the top hard stop. Note, this stage doesn't have a functioning reference mark. 
-        if input('Home gripper y-motion (y/n)?').lower().strip() == 'y':   
-            self.gry.position()
-            self.gry.proxy.ArbitraryAsk('N8') 
-            while self.gry.proxy.ArbitraryAsk('n') != '0':
-                print('Searching gry upper hard stop...')
-                time.sleep(1)
-            print(self.gry.position())
-
-        # homing of gripper z position. The homing is against the top hard stop, then on the reference mark. 
-        if input('Home gripper z-motion (y/n)?').lower().strip() == 'y':   
-            self.grz.position()
-            self.grz.proxy.ArbitraryAsk('N7')
-            while self.grz.proxy.ArbitraryAsk('n') != '0':
-                print('Searching grz downstream hard stop')
-                time.sleep(1)
-            print(self.grz.position())
-
-        # homing of gripper tweezer. The homing is against the most closed hard stop. The reference mark is not reachable. 
-        if input('Home gripper tweezer (y/n)?').lower().strip() == 'y':   
-            self.gripper.position()
-            self.gripper.proxy.ArbitraryAsk('N8') 
-            while self.gripper.proxy.ArbitraryAsk('n') != '0':
-                print('Searching tweezer closed hard stop...')
-                time.sleep(1)
-            print(self.gripper.position())
-
-        if input('Home gripper x-motion (y/n)?').lower().strip() == 'y':   
-            self.grx.proxy.arbitraryCommand('FRM0,1,1000,1')
-            time.sleep(10)
-            print(self.grx.position())
-
-        #self.grx.move(0)
-        #self.gry.move(0)
-        #self.grz.move(0)
-        #self.gripper.move(0)
-
-@macro
-class SamplePickAndReturn(object):
-    """
-    Test sequence
-    """
-
-    def run(self):
-        for m in Motor.getinstances():
-            if m.name == 'grx':
-                self.grx = m
-            elif m.name == 'gry':
-                self.gry = m
-            elif m.name == 'grz':
-                self.grz = m
-            elif m.name == 'gripper':
-                self.gripper = m
-
-        time.sleep(10)
-        print('# pick first sample and move')
-        runCommand('umv gripper 2500')
-        runCommand('wm gr*')
-        runCommand('umv gry 2600')
-        runCommand('wm gr*')
-        runCommand('umv grz 5000')
-        runCommand('wm gr*')
-        runCommand('umv grx -6600')
-        runCommand('wm gr*')
-        runCommand('umv grz -6000')
-        runCommand('wm gr*')
-        runCommand('umv grx -7100')
-        runCommand('wm gr*')
-        runCommand('umv gripper 1400')
-        runCommand('wm gr*')
-        runCommand('umv gry 7500')
-        runCommand('wm gr*')
-        runCommand('umv grz 5000')
-        runCommand('wm gr*')
-        runCommand('umv grx 60000')
-        runCommand('wm gr*')
-        
-        print('# return sample to tray')
-        runCommand('umv gry 7500')
-        runCommand('wm gr*')
-        runCommand('umv grz 5000')
-        runCommand('wm gr*')
-        runCommand('umv grx -7100')
-        runCommand('wm gr*')
-        runCommand('umv grz -6000')
-        runCommand('wm gr*')
-        runCommand('umv gry 2600')
-        runCommand('wm gr*')
-        runCommand('umv gripper 2500')
-        runCommand('wm gr*')
-        runCommand('umv grx -6600')
-        runCommand('wm gr*')
-        runCommand('umv grz 5000')
-        runCommand('wm gr*')
-        runCommand('umv grx -60000')
-        runCommand('wm gr*')
 
 
