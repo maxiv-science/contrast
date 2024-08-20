@@ -16,11 +16,10 @@ if __name__ == '__main__':
     from contrast.detectors.LC400Buffer import LC400Buffer
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
-    from contrast.motors.SmaractMotor import SmaractLinearMotor
-    from contrast.motors.SmaractMotor import SmaractRotationMotor
+    from contrast.motors.SmaractMotor import SmaractLinearMotor, SmaractRotationMotor
     from contrast.motors.E727 import E727Motor
     from contrast.motors.PiezoLegsMotor import PiezoLegsMotor
-    from contrast.motors.DacMotor import DacMotor
+    # from contrast.motors.DacMotor import DacMotor
     from contrast.motors.KukaMotor import KukaRobot
     from contrast.detectors.Pilatus import Pilatus2, Pilatus3
     from contrast.detectors.Merlin import Merlin
@@ -315,10 +314,10 @@ if __name__ == '__main__':
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     macros_common.NpointFlyscan.panda = panda0
-    macros_common.WFtrigscan.panda = panda0
-    #macros_common.WFtrigscan.dac_0 = dx
-    #macros_common.WFtrigscan.dac_1 = dy
-    #macros_common.WFtrigscan.dac_2 = dz
+    # macros_common.WFtrigscan.panda = panda0
+    # macros_common.WFtrigscan.dac_0 = dx
+    # macros_common.WFtrigscan.dac_1 = dy
+    # macros_common.WFtrigscan.dac_2 = dz
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',

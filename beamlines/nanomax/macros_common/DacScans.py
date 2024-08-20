@@ -476,7 +476,6 @@ class WFspiral(WFtrigscan):
         if self.panda is None:
             raise Exception('Set DacScan.panda to your panda master')
 
-<<<<<<< HEAD
     def _set_det_trig(self, on):
         # special treatment for the panda box which rules all
         panda = self.panda
