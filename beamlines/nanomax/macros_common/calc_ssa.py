@@ -15,32 +15,39 @@ class Calc_SSA(object):
     Calculate the SSA settings needed for coherent / incohernet beam
     at either the diffraction (D) or the imaging (I) endstation.
 
-    %calc_ssa <endstation D/I> <coherent_beam> optional: <FZP_diameter_in_um>
+    %calc_ssa <endstation D/I/I_FZP> <coherent_beam> optional: <FZP_diameter_in_um>
 
     usage / examples:
-        %calc_ssa D False     # calculates the SSA setting for a high-flux beam
-                              # at the current energy at the diffraction
-                              # endstation
-        %calc_ssa I True 75   # calculates the SSA setting for a fully coherent
-                              # beam at the current energy at the imaging
-                              # endstation for a FZP of 75um diameter
+        %calc_ssa D False         # calculates the SSA setting for a high-flux beam
+                                  # at the current energy at the diffraction
+                                  # endstation
+
+        %calc_ssa I False         # calculates the SSA setting for a fully coherent beam
+                                  # at the current energy at the imaging endstation
+                                  # assuming the KBs and mounted and not any FZP
+                                  
+        %calc_ssa I_FZP True 75   # calculates the SSA setting for a fully coherent
+                                  # beam at the current energy at the imaging
+                                  # endstation for a FZP of 75um diameter
     """
 
     def __init__(self, endstation=None, coherent=True, FZP_diameter_um=None):
         self.endstation = endstation
         self.coherent = coherent
         self.FZP_diameter_um = FZP_diameter_um
-        self.accepted_names_D = ['D', 'd', 'Diffraction', 'diffraction', 'KB']
-        self.accepted_names_I = ['I', 'i', 'Imaging', 'imaging', 'FZP']
+        self.accepted_names_D = ['D', 'd', 'Diffraction', 'diffraction']
+        self.accepted_names_I_KB = ['I', 'i', 'Imaging', 'imaging', 'I_KB', 'i_kb', 'Imaging_KB', 'imaging_kb']
+        self.accepted_names_I_FZP = ['I_FZP', 'i_fzp', 'Imaging_FZP', 'imaging_fzp', 'FZP', 'fzp']
 
     def input_validation(self):
         if not (self.endstation in self.accepted_names_D
-                or self.endstation in self.accepted_names_I):
+                or self.endstation in self.accepted_names_I_KB
+                or self.endstation in self.accepted_names_I_FZP):
             print("    [ERROR] No correct endstation given.")
             print("            Use 'D' for the diffraction endstation.")
             print("            Use 'I' for the imaging endstation.")
             return False
-        elif (self.endstation in self.accepted_names_I
+        elif (self.endstation in self.accepted_names_I_FZP
               and not (isinstance(self.FZP_diameter_um, (int, float)))):
             print("    [ERROR] The FZP diameter is not given as a number.")
             return False
@@ -56,13 +63,17 @@ class Calc_SSA(object):
     def get_distance_from_ssa(self):
         if self.endstation in self.accepted_names_D:
             self.d_ssa_m = 46.7
-        elif self.endstation in self.accepted_names_I:
-            self.d_ssa_m = 35.0
+        elif self.endstation in self.accepted_names_I_KB:
+            self.d_ssa_m = np.array([34.300, 34.420])
+        elif self.endstation in self.accepted_names_I_FZP:
+            self.d_ssa_m = 34.5
 
     def get_acceptance(self):
         if self.endstation in self.accepted_names_D:
             self.accepteance_m = np.array([225e-6, 379e-6])
-        elif self.endstation in self.accepted_names_I:
+        elif self.endstation in self.accepted_names_I_KB:
+            self.accepteance_m = np.array([525e-6, 210e-6])
+        elif self.endstation in self.accepted_names_I_FZP:
             acc = [1e-6 * self.FZP_diameter_um, 1e-6 * self.FZP_diameter_um]
             self.accepteance_m = np.array(acc)
 
