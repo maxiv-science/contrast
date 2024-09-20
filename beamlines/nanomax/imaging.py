@@ -12,6 +12,7 @@ if __name__ == '__main__':
     from contrast.environment.scheduling import MaxivScheduler
     from contrast.recorders import Hdf5Recorder, StreamRecorder, ScicatRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
+    from contrast.motors.E727 import E727Motor
     from contrast.motors.LC400 import LC400Motor
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     from contrast.motors.PiezoLegsMotor import PiezoLegsMotor
     from contrast.motors.PiezoLegsMotor import ImgSampleStage
     from contrast.motors.DacMotor import DacMotor
-    from contrast.detectors.Eiger import Eiger
+    from contrast.detectors.Eiger import Eiger, EigerTango
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     #######################################################################################################
     # Beamline equipment. Comment out when not used
     #######################################################################################################
-    """
+
     # gap and taper via a proxy in the local pool
     ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -124,10 +125,13 @@ if __name__ == '__main__':
     ssa_posx = TangoMotor(device='B303A-O/opt/SLIT-01-POSXPM', name='ssa_posx', userlevel=3)
     ssa_posy = TangoMotor(device='B303A-O/opt/SLIT-01-POSYPM', name='ssa_posy', userlevel=3)
 
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
+
+
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy_raw = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy_raw')
     energy = TangoMotor(device='pseudomotor/nanomaxenergy_corr_ctrl/1', name='energy')
-    """
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
@@ -137,6 +141,11 @@ if __name__ == '__main__':
     # Experimental station equipment
     #######################################################################################################
 
+    # KB mirror pitch piezos
+    m1pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=1, name='m1pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
+    m2pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=2, name='m2pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
+    m1roll = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=3, name='m1roll', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
+        
     # sample piezos through National Instruments DAC device
     sx = DacMotor(device='B303A/CTL/IMG-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
@@ -152,21 +161,22 @@ if __name__ == '__main__':
     zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     csx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='csx', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    """
     gry = NanosMotor(device='test/ctl/nanos-01', axis=11, name='gry', velocity=500, stop_window=10000, userlevel=1, scaling=-5e-4)
     grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
     gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
     #nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=11, name='nanos_dummy', userlevel=1, scaling=5e-4)
 
-    """
+
     # PiezoLEGS motors for coarse sample positioning
     basex, basey, basez = ImgSampleStage(device='B303A-E01/CTL/PZCU-02', velocity=90, names=['basex', 'basey', 'basez'], userlevel=1, scaling=1e-3, user_format='%.3f')
 
-    """
+
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    sr = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-06', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
-    grx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    apx = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=3, name='apx', frequency=1000, userlevel=2, user_format='%.3f', dial_format='%.3f')
-    apy = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-06', axis=4, name='apy', frequency=1000, userlevel=2, user_format='%.3f', dial_format='%.3f')
+    sr = SmaractRotationMotor(device='B303A-E01/CTL/PZCU-01', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    grx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    apx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=15, name='apx', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    apy = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=16, name='apy', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
     
     # Pixel detector and XRF motors, optical microsope and screen motors
     xrf1_x = TangoMotor(device='B303A-E01/DIA/XRF-01-X', name='xrf1_x', userlevel=2, user_format='%.3f')
@@ -175,13 +185,15 @@ if __name__ == '__main__':
     pixdet_y = TangoMotor(device='B303A-E01/DIA/PIXDET-Y', name='pixdet_y', userlevel=2, user_format='%.3f')
     screen = TangoMotor(device='B303A-E01/DIA/OPT-SCR', name='screen', userlevel=1, user_format='%.3f')
     mic = TangoMotor(device='B303A-E01/DIA/OPT-MIC', name='mic', userlevel=1, user_format='%.3f')
-    """
 
     # some dummy motors
     dummy1 = DummyMotor(name='dummy1', userlevel=3)
     dummy2 = DummyMotor(name='dummy2', userlevel=3)
     # detectors
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
+    eiger4m = EigerTango('b303a/dia/eiger-4m', name='eiger4m')
+    eiger4m.rotation = 2
+
     x3mini = Xspress3(name='x3mini', device='staff/alebjo/xspress3mini')
     #E01cam01 = BaslerCamera(name='E01cam01', device='basler/e01-cam-01/main')
     #E01cam02 = BaslerCamera(name='E01cam02', device='basler/e01-cam-02/main')
@@ -229,7 +241,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, x3mini]:
+    for d in [panda2, pseudo, eiger4m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class

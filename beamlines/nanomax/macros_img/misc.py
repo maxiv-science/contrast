@@ -13,9 +13,9 @@ from contrast.detectors import Detector
 
 # some handy shortcuts
 register_shortcut('wopt', 'wm cs* zp* osa*')
-register_shortcut('wgrip', 'wm bx by bz sx sy sz sr gr*')
-register_shortcut('wsample', 'wm bx by bz sx sy sz sr')
-register_shortcut('wnimis', 'wm bx by bz sx sy sz sr gr* cs* zp* osa* xrf* pixdet* mic screen')
+register_shortcut('wgrip', 'wm basex basey basez sx sy sz sr gr*')
+register_shortcut('wsample', 'wm basex basey basez sx sy sz sr')
+register_shortcut('wnimis', 'wm basex basey basez sx sy sz sr gr* cs* zp* osa* xrf* pixdet* mic screen')
 
 def fastshutter_action(state, name):
     """
@@ -113,7 +113,7 @@ class M1shift(object):
         self.dist = dist
 
     def run(self):
-        cmd = 'mvr m1fpitch %f' % (self.dist / -1381.0)
+        cmd = 'mvr m1pitch %f' % (self.dist / -617.6) #733
         print("Moving the M1 fine pitch piezo like this:\n%s" % cmd)
         runCommand(cmd)
 
@@ -127,8 +127,28 @@ class M2shift(object):
         self.dist = dist
 
     def run(self):
-        cmd = 'mvr m2fpitch %f' % (self.dist / -857.0)
+        cmd = 'mvr m2pitch %f' % (self.dist / 227.0) #332.0
         print("Moving the M2 fine pitch piezo like this:\n%s" % cmd)
+        runCommand(cmd)
+
+@macro
+class Eiger4_kb_position(object):
+    """
+    Move the eiger 4M into good position for KB-mirrors
+    """
+    def run(self):
+        cmd = 'umv pixdet_x -143 pixdet_y -56'
+        print("Move the eiger 4M into good position for KB-mirrors")
+        runCommand(cmd)
+        
+@macro
+class Eiger4_bypass_position(object):
+    """
+    Move the eiger 4M into good position for KB-mirrors
+    """
+    def run(self):
+        cmd = 'umv pixdet_x -200 pixdet_y -90'
+        print("Move the eiger 4M into the beam bypass position")
         runCommand(cmd)
 
 
