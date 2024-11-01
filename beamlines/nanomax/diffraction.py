@@ -155,9 +155,9 @@ if __name__ == '__main__':
 
     # detectors
     # DBPM at SSA
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     # DBPM in DM4
-    alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
+    # alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
 
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
@@ -263,8 +263,10 @@ if __name__ == '__main__':
     xrf_x = TangoMotor(device='B303A-E02/DIA/DMA-01-X', name='xrf_x', userlevel=4, scaling=1.25, dial_limits=(0, 75))
 
     # detector motors
-    # detx = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='detx', userlevel=3, dial_limits=(0, 295))
-    # dety = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='dety', userlevel=3, dial_limits=(0, 31))
+    # detx
+    # det_x = TangoMotor(device='motor/icepap_ctrl_1_expert/11', name='det_x', userlevel=3)
+    # dety
+    # det_y = TangoMotor(device='motor/icepap_ctrl_1_expert/12', name='det_y', userlevel=3)
 
     # table motor
     table_front_x = TangoMotor(device='b303a-e02/dia/tab-01-x1', name='table_front_x', userlevel=5, dial_limits=(-10,10))
@@ -287,8 +289,13 @@ if __name__ == '__main__':
     pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
     pilatus.hw_trig = True
     # merlin = Merlin(name='merlin', host='localhost')
-    xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
+    # old # 
+    #xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
+    
+    # new #
+    xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
+
     #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
     # settings for DESY Andor, needs to be changed for the NanoMAX Crytur Andor
     #andor.proxy.rotation=1
@@ -350,13 +357,13 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2]:# :eiger500k, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2, xspress3]:# :eiger500k, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
 
     # define pre- and post-scan actions, per scan base class
-    def pre_scan_stuff(slf):
+    def pre_scan_stuff(self):
         assert h5rec.is_alive(), 'hdf5 recorder is dead! this can''t be good. maybe restart contrast.'
         basex.stop()   # making sure the base motor are not regulating
         basey.stop()   # making sure the base motor are not regulating
@@ -366,9 +373,11 @@ if __name__ == '__main__':
         runCommand('fsopen')
         time.sleep(0.2)
 
-    def post_scan_stuff(slf):
+    def post_scan_stuff(self):
         runCommand('fsclose')
         pass
+
+
 
     SoftwareScan._before_scan = pre_scan_stuff
     SoftwareScan._after_scan = post_scan_stuff

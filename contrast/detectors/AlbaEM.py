@@ -182,10 +182,16 @@ class Electrometer(object):
         while not self.pull_sock.closed and self.pull_sock.poll(0):
             msg = self.pull_sock.recv_json()
             if msg['message_type'] == 'data':
-                self.data.append([msg[key] for key in keys])
-                self.ndata += 1
-                if self.ndata == self.total_frames:
-                    self.pull_sock.close()
+                new_data = [msg[key] for key in keys]
+                if len(new_data) > 1:
+                    self.data.append(new_data)
+                    self.ndata += 1
+                    if self.ndata == self.total_frames:
+                        self.pull_sock.close()
+                else:
+                    print(f"WARNING: No data in stream from AlbaEM")
+                    print(f"just got:")
+                    print(msg)
 
     def soft_trigger(self):
         old = int(self.query('ACQU:NDAT?'))
