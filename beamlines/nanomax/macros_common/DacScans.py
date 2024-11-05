@@ -79,7 +79,7 @@ class WFtrigscan(SoftwareScan):
         wf[-1, -1] = 0
 
         # return the waveform (shape [5, n]) and the number of scan/data points
-        return wf, n_steps
+        return wf, self._count_trigger_pulses(wf)
 
     def _get_constant_waveform(self, size):
         # creates a <5xsize> waveform, initiated with current positions of the scanner
@@ -89,6 +89,16 @@ class WFtrigscan(SoftwareScan):
         wf[1,:] = np.full(size, self.dac_1.position())
         wf[2,:] = np.full(size, self.dac_2.position())
         return wf
+
+    def _count_trigger_pulses(self, wf):
+        trigger_wf = wf[4,:]
+        num_of_triggers = 0
+        for i in range(0, len(trigger_wf)-1):
+            if(trigger_wf[i] == 0) & (trigger_wf[i+1] > 0):
+                num_of_triggers += 1
+        print('Waveform has %d trigger pulses.   ' % num_of_triggers, end='', flush=True) 
+
+        return num_of_triggers
 
     def _set_det_trig(self, on):        
         # special treatment for the panda box which rules all
@@ -140,12 +150,12 @@ class WFtrigscan(SoftwareScan):
         print('\nScan #%d starting at %s\n' % (self.scannr, time.asctime()))
 
         # generating the waveform file
-        print('Generating waveform file...   ', end='', flush=True)
+        print('Generating waveform...   ', end='', flush=True)
         wf, self.n_steps = self._generate_waveform()
         wf_file=os.path.join(env.paths.directory, 'scan_%06u_waveform.hdf5'%self.scannr)
         self._save_h5_file(wf_file, wf)
         self.dac_0.proxy.waveform_path = wf_file
-        print('Waveform file generated ')
+        print('Waveform file saved.\r')
 
         # find and prepare the detectors
         det_group = Detector.get_active()
@@ -397,7 +407,7 @@ class Hwstepspiral(WFtrigscan):
         wf[4,:] = triggers
         wf[self.fast_motor.axis,:] = spiral_a
         wf[self.slow_motor.axis,:] = spiral_b
-        return wf, self.n_steps
+        return wf, self._count_trigger_pulses(wf)
 
 @macro
 class Hwstepsnake(WFtrigscan):
@@ -421,11 +431,11 @@ class Hwstepsnake(WFtrigscan):
             self.fast_motor = args[0]
             self.fa_start = float(args[1])
             self.fa_end = float(args[2])
-            self.steps_f = int(args[3])
+            self.fa_steps = int(args[3])
             self.slow_motor = args[4]
             self.sa_start = float(args[5])
             self.sa_end = float(args[6])
-            self.steps_s = int(args[7])
+            self.sa_steps = int(args[7])
             self.exptime = float(args[8])
             self.latency = float(args[9])
             self.print_progress = False
@@ -440,35 +450,36 @@ class Hwstepsnake(WFtrigscan):
         returns the waveform and the number of points in the scan
         """
         pixeltime = int(self.dac_rate*(self.latency + self.exptime))
-        #nsteps = (self.steps_f+1) * (self.steps_s+1)-1
-        stepsize_f = (self.fa_end-self.fa_start)/self.steps_f
-        stepsize_s = (self.sa_end-self.sa_start)/self.steps_s
+        stepsize_f = (self.fa_end-self.fa_start)/self.fa_steps
+        stepsize_s = (self.sa_end-self.sa_start)/self.sa_steps
 
         # step scanning
-        sec_f0 = np.linspace(self.fa_start, self.fa_end, self.steps_f+1)
-        sec_f0 =np.repeat(sec_f0, pixeltime)
-        sec_f2 = np.linspace(self.fa_end, self.fa_start, self.steps_f+1)
-        sec_f2 =np.repeat(sec_f2, pixeltime)
-        sec_s0 = np.full(pixeltime * (self.steps_f+1), self.sa_start)
-        wf_f = sec_f0
-        wf_s = sec_s0
-        for i in range(1, self.steps_s+1):
-            wf_s = np.append(wf_s, sec_s0+i*stepsize_s)
+        sec0_f = np.linspace(self.fa_start, self.fa_end, self.fa_steps+1)
+        sec0_f =np.repeat(sec0_f, pixeltime)
+        sec2_f = np.linspace(self.fa_end, self.fa_start, self.fa_steps+1)
+        sec2_f =np.repeat(sec2_f, pixeltime)
+        sec0_s = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
+        trig_pulse = np.zeros(int(self.latency*self.dac_rate))
+        trig_pulse = np.append(trig_pulse, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        wf_fast = []
+        wf_slow = []
+        wf_trig = []
+        for i in range(0, self.sa_steps+1):
             if not i % 2:
-                wf_f = np.append(wf_f, sec_f0)
+                wf_fast = np.append(wf_fast, sec0_f)
             else:
-                wf_f = np.append(wf_f, sec_f2)
+                wf_fast = np.append(wf_fast, sec2_f)
+            wf_slow = np.append(wf_slow, sec0_s+i*stepsize_s)
+            wf_trig = np.append(wf_trig, np.tile(trig_pulse,self.fa_steps + 1))
 
-        n_steps = int(wf_f.shape[0] / pixeltime)
-        wf = self._get_constant_waveform(wf_f.shape[0])
-        wf[self.fast_motor.axis,:] = wf_f
-        wf[self.slow_motor.axis,:] = wf_s
+        #n_steps = int(wf_f.shape[0] / pixeltime)
+        wf = self._get_constant_waveform(wf_fast.shape[0])
+        wf[self.fast_motor.axis,:] = wf_fast
+        wf[self.slow_motor.axis,:] = wf_slow
         # adding the digital trigger pulse train on the fifth column, operating the digital outputs p0.0 - p0.7
-        trig = np.zeros(int(self.latency*self.dac_rate))
-        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
-        triggers = np.tile(trig,n_steps)
-        wf[4,:] = triggers
-        return wf, n_steps
+        #triggers = np.tile(trig,n_steps)
+        wf[4,:] = wf_trig
+        return wf, self._count_trigger_pulses(wf)
 
 @macro
 class Hwstepmesh(WFtrigscan):
@@ -492,11 +503,11 @@ class Hwstepmesh(WFtrigscan):
             self.fast_motor = args[0]
             self.fa_start = float(args[1])
             self.fa_end = float(args[2])
-            self.steps_f = int(args[3])
+            self.fa_steps = int(args[3])
             self.slow_motor = args[4]
             self.sa_start = float(args[5])
             self.sa_end = float(args[6])
-            self.steps_s = int(args[7])
+            self.sa_steps = int(args[7])
             self.exptime = float(args[8])
             self.latency = float(args[9])
             self.print_progress = False
@@ -513,38 +524,34 @@ class Hwstepmesh(WFtrigscan):
         """
         pixeltime = int(self.dac_rate*(self.latency + self.exptime))
         returntime = int(self.returntime*self.dac_rate)
-        stepsize_f = (self.fa_end-self.fa_start)/self.steps_f
-        stepsize_s = (self.sa_end-self.sa_start)/self.steps_s
+        stepsize_f = (self.fa_end-self.fa_start)/self.fa_steps
+        stepsize_s = (self.sa_end-self.sa_start)/self.sa_steps
 
         # step scanning
-        sec_f0 = np.linspace(self.fa_start, self.fa_end, self.steps_f+1)
-        sec_f0 =np.repeat(sec_f0, pixeltime)
-        sec_s0 = np.full(pixeltime * (self.steps_f+1), self.sa_start)
-        sec_f1 = np.linspace(self.fa_end, self.fa_start, returntime)
-        sec_s1 = np.linspace(self.sa_start, self.sa_start+stepsize_s, returntime)
-        trig = np.zeros(int(self.latency*self.dac_rate))
-        trig = np.append(trig, np.full(int(self.exptime*self.dac_rate), self.trig_high))
-        wf_f = sec_f0
-        wf_s = sec_s0
-        wf_t = np.tile(trig,self.steps_f + 1)
-        print(wf_f.shape, wf_t.shape)
-        for i in range(1, self.steps_s+1):
-            wf_f = np.append(wf_f, sec_f1)
-            wf_s = np.append(wf_s, sec_s1+i*stepsize_s)
-            wf_t = np.append(wf_t, np.zeros(returntime))
-            print(wf_f.shape, wf_t.shape)
-            wf_f = np.append(wf_f, sec_f0)
-            wf_s = np.append(wf_s, sec_s0+i*stepsize_s)
-            wf_t = np.append(wf_t, np.tile(trig,self.steps_f + 1))
-            print(wf_f.shape, wf_t.shape)
+        sec0_f = np.linspace(self.fa_start, self.fa_end, self.fa_steps+1)
+        sec0_f =np.repeat(sec0_f, pixeltime)
+        sec0_s = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
+        sec1_f = np.linspace(self.fa_end, self.fa_start, returntime)
+        sec1_s = np.linspace(self.sa_start, self.sa_start+stepsize_s, returntime)
+        trig_pulse = np.zeros(int(self.latency*self.dac_rate))
+        trig_pulse = np.append(trig_pulse, np.full(int(self.exptime*self.dac_rate), self.trig_high))
+        wf_fast = []
+        wf_slow = []
+        wf_trig = []
+        for i in range(0, self.sa_steps+1):
+            wf_fast = np.append(wf_fast, sec0_f)
+            wf_slow = np.append(wf_slow, sec0_s+i*stepsize_s)
+            wf_trig = np.append(wf_trig, np.tile(trig_pulse,self.fa_steps + 1))
+            if(i < self.sa_steps):
+                wf_fast = np.append(wf_fast, sec1_f)
+                wf_slow = np.append(wf_slow, sec1_s+i*stepsize_s)
+                wf_trig = np.append(wf_trig, np.zeros(returntime))
 
-        wf = self._get_constant_waveform(wf_f.shape[0])
-        wf[self.fast_motor.axis,:] = wf_f
-        wf[self.slow_motor.axis,:] = wf_s
-        print(wf_f.shape, wf_t.shape)
-        wf[4,:] = wf_t
-        n_steps = (self.steps_f + 1)*(self.steps_s + 1)
-        return wf, n_steps
+        wf = self._get_constant_waveform(wf_fast.shape[0])
+        wf[self.fast_motor.axis,:] = wf_fast
+        wf[self.slow_motor.axis,:] = wf_slow
+        wf[4,:] = wf_trig
+        return wf, self._count_trigger_pulses(wf)
 
 @macro
 class Hwflyspiral(WFtrigscan):
@@ -594,7 +601,7 @@ class Hwflyspiral(WFtrigscan):
         wf[4,:] = triggers
         wf[self.fast_motor.axis,:] = spiral_a
         wf[self.slow_motor.axis,:] = spiral_b
-        return wf, self.n_steps
+        return wf, self._count_trigger_pulses(wf)
 
 @macro
 class Hwflysnake(WFtrigscan):
@@ -637,7 +644,6 @@ class Hwflysnake(WFtrigscan):
         returns the waveform and the number of points in the scan
         """
         pixeltime = int(self.dac_rate*(self.latency + self.exptime))
-        n_steps = (self.fa_steps+1) * (self.sa_steps+1)
         fa_stepsize = (self.fa_end-self.fa_start)/self.fa_steps
         if self.sa_steps > 0:
             sa_stepsize = (self.sa_end-self.sa_start)/self.sa_steps
@@ -645,36 +651,40 @@ class Hwflysnake(WFtrigscan):
             sa_stepsize = 0
 
         # contiuous scanning
-        sec_f0 = np.linspace(self.fa_start-0.5*fa_stepsize, self.fa_end+0.5*fa_stepsize, pixeltime * (self.fa_steps + 1))
-        sec_f1 = np.full(pixeltime, self.fa_end+0.5*fa_stepsize)
-        sec_f2 = np.flip(sec_f0, 0)
-        sec_f3 = np.full(pixeltime, self.fa_start-0.5*fa_stepsize)
-        sec_s0 = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
-        sec_s1 = np.linspace(self.sa_start, self.sa_start+sa_stepsize, pixeltime)
-        sec_s1 = np.append(sec_s1, np.full(pixeltime * (self.fa_steps+1), self.sa_start+sa_stepsize))
+        sec0_f = np.linspace(self.fa_start-0.5*fa_stepsize, self.fa_end+0.5*fa_stepsize, pixeltime * (self.fa_steps + 1))
+        sec1_f = np.full(pixeltime, self.fa_end+0.5*fa_stepsize)
+        sec2_f = np.flip(sec0_f, 0)
+        sec3_f = np.full(pixeltime, self.fa_start-0.5*fa_stepsize)
+        sec0_s = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
+        sec1_s = np.linspace(self.sa_start, self.sa_start+sa_stepsize, pixeltime)
         trig_pulse = np.zeros(int(self.latency*self.dac_rate))
         trig_pulse = np.append(trig_pulse, np.full(int(self.exptime*self.dac_rate), self.trig_high))
-        sec_trig_fast_axis = np.tile(trig_pulse,self.fa_steps + 1)
-        sec_trig_slow_axis = np.zeros(pixeltime)
-        wf_fast = sec_f0
-        wf_slow = sec_s0
-        wf_trig = sec_trig_fast_axis
+        sec0_trig = np.tile(trig_pulse,self.fa_steps + 1)
+        sec1_trig = np.zeros(pixeltime)
+        wf_fast = []
+        wf_slow = []
+        wf_trig = []
         for i in range(0, self.sa_steps+1):
             if not i % 2:
-                wf_fast = np.append(wf_fast, sec_f1)
-                wf_fast = np.append(wf_fast, sec_f2)
+                wf_fast = np.append(wf_fast, sec0_f)
             else:
-                wf_fast = np.append(wf_fast, sec_f3)
-                wf_fast = np.append(wf_fast, sec_f0)
-            wf_trig = np.append(wf_trig, sec_trig_slow_axis)
-            wf_trig = np.append(wf_trig, sec_trig_fast_axis)
-            wf_slow = np.append(wf_slow, sec_s1+i*sa_stepsize)
+                wf_fast = np.append(wf_fast, sec2_f)
+            wf_slow = np.append(wf_slow, sec0_s+i*sa_stepsize)
+            wf_trig = np.append(wf_trig, sec0_trig)
+
+            if(i < self.sa_steps):
+                if not i % 2:
+                    wf_fast = np.append(wf_fast, sec1_f)
+                else:
+                    wf_fast = np.append(wf_fast, sec3_f)
+                wf_slow = np.append(wf_slow, sec1_s+i*sa_stepsize)
+                wf_trig = np.append(wf_trig, sec1_trig)
 
         wf = self._get_constant_waveform(wf_fast.shape[0])
         wf[self.fast_motor.axis,:] = wf_fast
         wf[self.slow_motor.axis,:] = wf_slow
         wf[4,:] = wf_trig
-        return wf, n_steps
+        return wf, self._count_trigger_pulses(wf)
 
 @macro
 class Hwflymesh(WFtrigscan):
@@ -719,7 +729,6 @@ class Hwflymesh(WFtrigscan):
         """
         pixeltime = int(self.dac_rate*(self.latency + self.exptime))
         returntime = int(self.returntime*self.dac_rate)
-        n_steps = (self.fa_steps+1) * (self.sa_steps+1)
         fa_stepsize = (self.fa_end-self.fa_start)/self.fa_steps
         if self.sa_steps > 0:
             sa_stepsize = (self.sa_end-self.sa_start)/self.sa_steps
@@ -727,28 +736,29 @@ class Hwflymesh(WFtrigscan):
             sa_stepsize = 0
 
         # contiuous scanning
-        sec_f0 = np.linspace(self.fa_start-0.5*fa_stepsize, self.fa_end+0.5*fa_stepsize, pixeltime * (self.fa_steps + 1))
-        sec_s0 = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
-        sec_f1 = np.linspace(self.fa_end+0.5*fa_stepsize, self.fa_start-0.5*fa_stepsize, returntime)
-        sec_s1 = np.linspace(self.sa_start, self.sa_start+sa_stepsize, returntime)
+        sec0_f = np.linspace(self.fa_start-0.5*fa_stepsize, self.fa_end+0.5*fa_stepsize, pixeltime * (self.fa_steps + 1))
+        sec0_s = np.full(pixeltime * (self.fa_steps+1), self.sa_start)
+        sec1_f = np.linspace(self.fa_end+0.5*fa_stepsize, self.fa_start-0.5*fa_stepsize, returntime)
+        sec1_s = np.linspace(self.sa_start, self.sa_start+sa_stepsize, returntime)
         trig_pulse = np.zeros(int(self.latency*self.dac_rate))
         trig_pulse = np.append(trig_pulse, np.full(int(self.exptime*self.dac_rate), self.trig_high))
-        sec_trig_fast_axis = np.tile(trig_pulse,self.fa_steps + 1)
-        sec_trig_slow_axis = np.zeros(returntime)
-        wf_fast = sec_f0
-        wf_slow = sec_s0
-        wf_trig = sec_trig_fast_axis
+        sec0_trig = np.tile(trig_pulse,self.fa_steps + 1)
+        sec1_trig = np.zeros(returntime)
+        wf_fast = [] 
+        wf_slow = []
+        wf_trig = []
         for i in range(0, self.sa_steps+1):
-            wf_fast = np.append(wf_fast, sec_f1)
-            wf_fast = np.append(wf_fast, sec_f0)
-            wf_slow = np.append(wf_slow, sec_s1+i*sa_stepsize)
-            wf_slow = np.append(wf_slow, sec_s0+(i+1)*sa_stepsize)
-            wf_trig = np.append(wf_trig, sec_trig_slow_axis)
-            wf_trig = np.append(wf_trig, sec_trig_fast_axis)
+            wf_fast = np.append(wf_fast, sec0_f)
+            wf_slow = np.append(wf_slow, sec0_s+i*sa_stepsize)
+            wf_trig = np.append(wf_trig, sec0_trig)
+            if(i < self.sa_steps):
+                wf_fast = np.append(wf_fast, sec1_f)
+                wf_slow = np.append(wf_slow, sec1_s+i*sa_stepsize)
+                wf_trig = np.append(wf_trig, sec1_trig)
 
         wf = self._get_constant_waveform(wf_fast.shape[0])
         wf[self.fast_motor.axis,:] = wf_fast
         wf[self.slow_motor.axis,:] = wf_slow
         wf[4,:] = wf_trig
-        return wf, n_steps
+        return wf, self._count_trigger_pulses(wf)
 
