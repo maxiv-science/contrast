@@ -294,6 +294,5 @@ if __name__ == '__main__':
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/sw/contrast_img/beamlines/nanomax/.memorizer')
 
-
+    # contrast startup message with random acronym
     contrast.wisdom()
-
