@@ -30,15 +30,76 @@ class Optics(object):
     def __init__(self, arg=None):
         self.arg = arg
 
+        self.green = '\033[92m'
+        self.yellow = '\033[93m'
+        self.red = '\033[91m'
+        self.bold = '\033[1m'
+        self.end = '\033[0m'
+
     def run(self):
-        for m in Motor.getinstances():
-            if ('hfm_' in m.name
+        if self.arg is None:
+            self.print_all_motors_states()
+        else:
+            self.check_and_set_all_motors()
+            self.print_all_motors_states()
+    
+    def is_optics_motor(self, m):
+        """
+        returns True if the given motor is part of the ones
+        to be checked
+        """
+        return ('hfm_' in m.name
                 or 'vfm_' in m.name
-                or ('mono_' in m.name and not 'f' in m.name)):
-                if self.arg is None:
-                    print('(%s) %s' % ({True:'on', False:'OFF'}[m.proxy.PowerOn], m.name))
-                else:
-                    print('Turning %s %s' % (self.arg, m.name))
-                    m.proxy.PowerOn = (self.arg.lower() == 'on')
+                or ('mono_' in m.name and not 'f' in m.name))
+
+    def print_all_motors_states(self):
+        """
+        just prints the states of all optics motors
+        """
+        for m in Motor.getinstances():
+            if self.is_optics_motor(m):
+                self.print_motor_state(m)
+
+    def print_motor_state(self, m):
+        """
+        prints the current state of a given motor
+        """
+        if m.proxy.PowerOn:
+            print(f'{self.green}{self.bold}(on){self.end} {m.name}')
+        else:
+            print(f'{self.red}{self.bold}(off){self.end}  {m.name}')
+
+    def check_and_set_all_motors(self):
+        """
+        sets all motots as requested if not already in that state
+        """
+        for m in Motor.getinstances():
+            if self.is_optics_motor(m):
+                self.check_and_set_motor(m)
+    def check_and_set_motor(self, m):
+        """
+        Checks status of the motor.
+        If the current state differs from the desired state (self.arg),
+        will try to change it. If that fails, an error will be printed. 
+        """
+
+        # get requested and state
+        current_state = m.proxy.PowerOn
+        requested_state = (self.arg.lower() == 'on')
+
+        # do not do anything if requested state matched current state
+        if current_state == requested_state:
+            print(f'{m.name} is already {self.arg.lower()}')
+
+        # change states if needed
+        if current_state != requested_state:
+            print(f'Turning {self.arg} {m.name}')
+            m.proxy.PowerOn = requested_state
+
+            # check if the changing of states worked
+            current_state = m.proxy.PowerOn
+            if current_state != requested_state:
+                print(f'{self.yellow}{self.bold}failed to turn {self.arg} {m.name}{self.end}')
+
 
 

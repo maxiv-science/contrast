@@ -138,10 +138,26 @@ class SoftwareScan(object):
         """
         pass
 
-    def _set_triggermap(self, gen_positions, streams):
-        triggermap = {stream:[[{"constraint": i}] for i in range(gen_positions)] for stream in streams}
-        triggermap["contrast"] = [[{"constraint": i}] for i in range(gen_positions)]
-        requests.post("http://nanomax-pipeline-controller.daq.maxiv.lu.se/api/v1/mapping", json=triggermap)
+
+    def arm_dranspose_pipeline(self):
+        """
+        arming dranspose pipeline
+        this sends a message prior to the scan with how many triggers there will be in the scan
+        ... this fails in scans with more than 100k triggers 
+        """ 
+        soft_positions = sum(1 for _ in self._generate_positions())
+        fly_positions = 1
+        if hasattr(self, 'fastmotorintervals'):
+            fly_positions = (self.fastmotorintervals + 1)
+        all_positions = soft_positions * fly_positions
+        print('\nNumber of Positions are', all_positions)
+        streams = [d.name for d in det_group if d.active is True]
+        streams = [d for d in streams if d in ['xspress3', 'panda0']]
+        if all_positions <= 1.e5:
+            triggermap = {stream:[[{"constraint": i}] for i in range(all_positions)] for stream in streams}
+            triggermap['contrast'] = [[{"constraint": i}] if i%fly_positions == (fly_positions-1) else None for i in range(all_positions)] 
+            blub = requests.post("http://nanomax-pipeline-controller.daq.maxiv.lu.se/api/v1/mapping", json=triggermap)
+            print('dramspose UUID:', blub.content)
 
     def run(self):
         """
@@ -154,10 +170,7 @@ class SoftwareScan(object):
         # find and prepare the detectors
         det_group = Detector.get_active()
 
-        if "x3mini" in [d.name for d in det_group]:
-            gen_positions = sum(1 for _ in self._generate_positions())
-            print('\nNumber of Positions are', gen_positions)
-            self._set_triggermap(gen_positions, ["x3mini"])
+        self.arm_dranspose_pipeline()
 
         trg_group = TriggerSource.get_active()
         group = det_group + trg_group
@@ -202,7 +215,7 @@ class SoftwareScan(object):
                 group.start(trials=10)
                 while det_group.busy():
                     self._while_acquiring()
-                    time.sleep(.05)
+                    time.sleep(.025)
                 # read detectors and motors
                 dt = time.time() - t0
                 dct = OrderedDict()
