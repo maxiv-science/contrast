@@ -84,7 +84,7 @@ class FermatScan(AScan):
                               WARNING: can be slow for large scans!
     """
 
-    def __init__(self, m1, l1_l, l1_u, m2, l2_l, l2_u, stepsize, exptime, **kwargs):
+    def __init__(self, m1, l1_l, l1_u, m2, l2_l, l2_u, stepsize, exptime, sort_by_axis=1, **kwargs):
         try:
             SoftwareScan.__init__(self, float(exptime))
             self.motors = [m1, m2]
@@ -93,6 +93,7 @@ class FermatScan(AScan):
             self.optimize = False
             self.calc_positions()
             self.n_positions = int(len(self.pos_12))
+            self.sort_by_axis = sort_by_axis
             assert all_are_motors(self.motors)
         except:
             raise MacroSyntaxError
@@ -134,7 +135,7 @@ class FermatScan(AScan):
             self.pos_12 = pos_12[best_path]
         else:
             # sort on the first motor axis
-            best_path = np.argsort(pos_12[:,0])
+            best_path = np.argsort(pos_12[:,self.sort_by_axis])
             self.pos_12 = pos_12[best_path]
 
     def _generate_positions(self):

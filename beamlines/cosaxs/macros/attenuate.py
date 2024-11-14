@@ -31,6 +31,7 @@ class Attenuate(object):
     # absorber settings at the NanoMAX beamline - status 2019-10-06
     position = [32, 21, 10, 0, -10, -21]
     carriers = ['bcu01_x1pz', 'bcu01_x2pz', 'bcu01_x3pz']
+    #carriers = ['bcu01_x4pz', 'bcu01_bsxpz', 'bcu01_bsypz']  ### breakout modules A and B switched
     thickness = [[   0,   0,    0],   # in um
                  [  18,  75,  165],
                  [  60, 225,  110],
@@ -101,7 +102,8 @@ class Attenuate(object):
 
     def get_current_carrier_positions(self):
         carrier_positions = []
-        for carrier in sorted(self.carriers):
+        #for carrier in sorted(self.carriers):
+        for carrier in self.carriers:
             runCommand('wms ' + carrier)
             carrier_positions.append(env.lastMacroResult)
         return np.array(carrier_positions)
@@ -130,7 +132,7 @@ class Attenuate(object):
             for i_carrier, i_pos in enumerate(carrier_indices):
                 i_pos = int(i_pos)
                 line = '    ' + self.carriers[i_carrier]
-                line += ' ' + str(carrier_positions[i_carrier]).rjust(10)
+                line += ' ' + str(f'{carrier_positions[i_carrier]:.3f}').rjust(10)
                 line += ' #' + str(self.thickness[i_pos, i_carrier]).rjust(5)
                 line += ' um of ' + str(self.elements[i_pos][i_carrier])
                 print(line)
@@ -230,12 +232,13 @@ class Attenuate(object):
 
                     # run all motor movement commands
                     for command in commands:
+                        print(command)
                         self.run_command(command)
 
                     # check that the motors have moved to the calculated pos.
                     self.show_current_attenuation(printing=False)
                     if self.T_currently != self.T_choosen[0]:
-                        msg = 'mattenuation was NOT set'
+                        msg = 'attenuation was NOT set'
                         print('\x1b[0;49;91[ERROR] %s\x1b[0m' % msg)
                     else:
                         msg = 'successfully set the attenuation'
