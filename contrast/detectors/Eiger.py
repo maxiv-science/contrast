@@ -266,6 +266,7 @@ class EigerTango(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetecto
         self.proxy.set_timeout_millis(10000)
         self.acqthread = None
         self._hdf_path = hdf_path
+        self.name = name
         self.rotation = rotation
         self.hw_trig_min_latency = hw_trig_min_latency
         self.host = self._get_tango_property('dcu_host')
@@ -280,9 +281,9 @@ class EigerTango(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetecto
         self.session.trust_env = False
         self.burst_latency = 100e-9
         self.n_started = 0
-        print("Initilazing the Tango Server...")
+        print(f"{self.name}: Initilazing the Tango Server...", end="")
         self.proxy.Init()
-        print("done.")
+        print(f" done.")
     
     def _get_tango_property(self, property: str):
         '''helper function to easily read properties from the Tango servers'''
@@ -381,13 +382,13 @@ class EigerTango(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetecto
     @property
     def rotation(self):
         """Rotation of detector frame. Uses numpy.rot90() notation."""
-        print(f"Frame rotation (in numpy.rot90() notation): {self.proxy.Rotation}")
+        print(f"{self.name}: Frame rotation (in numpy.rot90() notation): {self.proxy.Rotation}")
         return self.proxy.Rotation
     
     @rotation.setter
     def rotation(self, val):
         self.proxy.Rotation = int(val)
-        print(f"Frame rotation (in numpy.rot90() notation): {self.proxy.Rotation}")
+        print(f"{self.name}: Frame rotation (in numpy.rot90() notation): {self.proxy.Rotation}")
 
     def prepare(self, acqtime, dataid, n_starts):
         BurstDetector.prepare(self, acqtime, dataid, n_starts)
