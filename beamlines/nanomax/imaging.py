@@ -220,10 +220,10 @@ if __name__ == '__main__':
     # Pandabox reading the LC400 encoders analog and controlling the fast shutter
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
 
-    macros_common.WFtrigscan.panda = panda2
-    macros_common.WFtrigscan.dac_0 = sx
-    macros_common.WFtrigscan.dac_1 = sy
-    macros_common.WFtrigscan.dac_2 = sz
+    macros_img.WFtrigscan.panda = panda2
+    macros_img.WFtrigscan.dac_0 = sx
+    macros_img.WFtrigscan.dac_1 = sy
+    macros_img.WFtrigscan.dac_2 = sz
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',

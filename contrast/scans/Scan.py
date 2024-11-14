@@ -145,6 +145,7 @@ class SoftwareScan(object):
         this sends a message prior to the scan with how many triggers there will be in the scan
         ... this fails in scans with more than 100k triggers 
         """ 
+        det_group = Detector.get_active()
         soft_positions = sum(1 for _ in self._generate_positions())
         fly_positions = 1
         if hasattr(self, 'fastmotorintervals'):
@@ -170,7 +171,7 @@ class SoftwareScan(object):
         # find and prepare the detectors
         det_group = Detector.get_active()
 
-        self.arm_dranspose_pipeline()
+        #self.arm_dranspose_pipeline()  #commented out until fixed
 
         trg_group = TriggerSource.get_active()
         group = det_group + trg_group
@@ -198,7 +199,8 @@ class SoftwareScan(object):
                                        status='started',
                                        path=env.paths.directory,
                                        snapshot=snap,
-                                       description=self._command))
+                                       description=self._command,
+                                       contrast_version={'git_hash':env.contrast_git_hash}))
         try:
             for i, pos in enumerate(positions):
                 # move motors

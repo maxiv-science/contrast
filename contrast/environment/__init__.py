@@ -30,6 +30,7 @@ class Env(object):
         self.snapshot = MotorSnapshot()
         self.snapshot.pre_scan = True
         self.snapshot.post_scan = True
+        self.contrast_git_hash = utils.get_git_revision(short=False)
 
 env = Env()
 
