@@ -67,6 +67,8 @@ class SmaractLinearMotor(Motor):
         self.proxy.stopOne(self.axis)  # safety first
 
     def health_check(self):
+        # run anything that is in the parent classes
+        super().health_check()
         # check if the encoder is in energy saving mode (not prefered) or always on (prefered)
         state_power_mode = self.proxy.read_attribute('power_mode').value
         if state_power_mode != 'enabled':

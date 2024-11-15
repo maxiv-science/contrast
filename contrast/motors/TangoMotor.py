@@ -77,3 +77,12 @@ class TangoMotor(Motor):
 
     def stop(self):
         self.proxy.stop()
+
+    def health_check(self):
+        # run anything that is in the parent classes
+        super().health_check()
+        # check if the motor is powered on
+        power_on = self.proxy.poweron
+        if power_on == False:
+            print(f'\033[91m[!]\033[0m {self.name}: The motor is not powered on')
+        
