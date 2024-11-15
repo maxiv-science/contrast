@@ -66,6 +66,15 @@ class SmaractLinearMotor(Motor):
     def stop(self):
         self.proxy.stopOne(self.axis)  # safety first
 
+    def health_check(self):
+        # check if the encoder is in energy saving mode (not prefered) or always on (prefered)
+        state_power_mode = self.proxy.read_attribute('power_mode').value
+        if state_power_mode != 'enabled':
+            print(f'\033[91m[!]\033[0m {self.name}: The motor is not in always on mode. Power Saving mode can result in lost positions.')
+        # check if the stage is homed
+        reference_position_known = self.proxy.read_attribute(f'physical_position_known_{self.axis}').value
+        if reference_position_known != True:
+            print(f'\033[91m[!]\033[0m {self.name}: The motor not homed. SmarAct stages do not have absolute encoders.')
 
 class SmaractRotationMotor(SmaractLinearMotor):
     @property
@@ -85,13 +94,6 @@ class SmaractRotationMotor(SmaractLinearMotor):
         attr = 'angle_%d' % self.axis
         val = '%d,%d' % (angle, rev)
         self.proxy.write_attribute(attr, val)
-
-    def health_check(self):
-        # check if the encoder is in energy saving mode (not prefered) or always on (prefered)
-        state_power_mode = self.proxy.read_attribute('power_mode').value
-        if state_power_mode != 'enabled':
-            print(f'\033[91m[!]\033[0m {self.name}: The motor is not in always on mode. Power Saving mode can result in lost positions.')
-
 
 class SmaractLinearMotor_MCS2(SmaractLinearMotor):
 
