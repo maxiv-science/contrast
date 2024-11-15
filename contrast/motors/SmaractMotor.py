@@ -86,6 +86,12 @@ class SmaractRotationMotor(SmaractLinearMotor):
         val = '%d,%d' % (angle, rev)
         self.proxy.write_attribute(attr, val)
 
+    def health_check(self):
+        # check if the encoder is in energy saving mode (not prefered) or always on (prefered)
+        state_power_mode = self.proxy.read_attribute('power_mode').value
+        if state_power_mode != 'enabled':
+            print(f'\033[91m[!]\033[0m {self.name}: The motor is not in always on mode. Power Saving mode can result in lost positions.')
+
 
 class SmaractLinearMotor_MCS2(SmaractLinearMotor):
 

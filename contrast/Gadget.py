@@ -21,6 +21,15 @@ class Gadget(object):
         self.userlevel = userlevel
         self._base_class_instances.add(weakref.ref(self))
 
+    def health_check(self):
+        """
+        A method we want each gadget to have.
+        Specific implementations within child classes will contain known ways
+        to check for known errors and problems. If a potential problem or error
+        is found, this method will print an warning about the found issue.
+        """
+        pass
+
     @classmethod
     def getinstances(cls):
         """

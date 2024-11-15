@@ -9,6 +9,7 @@ The module provides a central instance of the ``Environment`` class,
 
 from IPython import get_ipython
 from .. import utils
+from ..Gadget import Gadget
 from .data import PathFixer
 from .scheduling import DummyScheduler
 from .snapshots import MotorSnapshot
@@ -162,3 +163,20 @@ class CheckGit(object):
             for fname in env.uncommitted_changes:
                 print(f'    {fname}')          
 
+@macro
+class HealthCheck(object):
+    """
+    runs the health check of each gadget in the beamline script
+    """
+    def __init__(self, *args):
+        try:
+            self.gadgets_to_check = args
+        except (TypeError, IndexError):
+            pass
+        if not self.gadgets_to_check:
+            self.gadgets_to_check = [g for g in Gadget.getinstances()]
+
+    def run(self):
+        for g in self.gadgets_to_check:
+            if isinstance(g, Gadget):
+                g.health_check()
