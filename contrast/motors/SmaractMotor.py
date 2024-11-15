@@ -34,19 +34,19 @@ class SmaractLinearMotor(Motor):
         self.axis = int(axis)
         if velocity is not None:
             attr = 'velocity_%d' % self.axis
-            self.proxy.write_attribute(attr, velocity )
+            self.proxy.write_attribute(attr, velocity * 1e3)
         if frequency is not None:
             self.proxy.arbitraryCommand("SCLF%u,%u" % (self.axis, frequency))
 
     @property
     def dial_position(self):
         attr = 'position_%d' % self.axis
-        return self.proxy.read_attribute(attr).value
+        return self.proxy.read_attribute(attr).value * 1e-3
 
     @dial_position.setter
     def dial_position(self, pos):
         attr = 'position_%d' % self.axis
-        self.proxy.write_attribute(attr, pos)
+        self.proxy.write_attribute(attr, pos * 1e3)
 
     def busy(self):
         attr = 'state_%d' % self.axis

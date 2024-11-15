@@ -112,6 +112,7 @@ if __name__ == '__main__':
     
     # smaracts
     # controller 2
+    """
     dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=6)
     dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=6)
     seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3)
@@ -127,7 +128,7 @@ if __name__ == '__main__':
     pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=3, frequency=1000)
     pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=3, frequency=1000)
     pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=3, user_format='%.8f', dial_format='%.8f')
-    
+    """
     # controller 4 in OH2 for fast shutter and first diamondBPM
     # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#)
     #dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#)
@@ -186,13 +187,13 @@ if __name__ == '__main__':
     # PiezoLEGS motors for coarse sample positioning
     basex, basey, basez = ImgSampleStage(device='B303A-E01/CTL/PZCU-02', velocity=90, names=['basex', 'basey', 'basez'], userlevel=1, scaling=1e-3, user_format='%.3f')
 
-    """
+    
     # Smaract motors for sample rotation and first clean-up aperture positioning 
     sr = SmaractRotationMotor(device='B303A-E01/CTL/PZCU-01', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
     grx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
     apx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=15, name='apx', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
     apy = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=16, name='apy', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    #"""    
+    
     # Pixel detector and XRF motors, optical microsope and screen motors
     xrf1_x = TangoMotor(device='B303A-E01/DIA/XRF-01-X', name='xrf1_x', userlevel=2, user_format='%.3f')
     xrf2_x = TangoMotor(device='B303A-E01/DIA/XRF-02-X', name='xrf2_x', userlevel=2, user_format='%.3f')
