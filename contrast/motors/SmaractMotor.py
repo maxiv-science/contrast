@@ -74,7 +74,7 @@ class SmaractLinearMotor(Motor):
         # check if the stage is homed
         reference_position_known = self.proxy.read_attribute(f'physical_position_known_{self.axis}').value
         if reference_position_known != True:
-            print(f'\033[91m[!]\033[0m {self.name}: The motor not homed. SmarAct stages do not have absolute encoders.')
+            print(f'\033[91m[!]\033[0m {self.name}: The motor is not homed. SmarAct stages do not have absolute encoders.')
 
 class SmaractRotationMotor(SmaractLinearMotor):
     @property

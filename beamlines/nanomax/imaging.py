@@ -300,5 +300,3 @@ if __name__ == '__main__':
 
     # contrast startup message with random acronym
     contrast.wisdom()
-
-    # creating uncommited changes for testing
