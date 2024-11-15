@@ -200,7 +200,8 @@ class SoftwareScan(object):
                                        path=env.paths.directory,
                                        snapshot=snap,
                                        description=self._command,
-                                       contrast_version={'git_hash':env.contrast_git_hash}))
+                                       contrast_version={'git_hash':env.contrast_git_hash,
+                                                         'uncommitted_changes': {f'file_{i}': x for i, x in enumerate(env.uncommitted_changes)}}))
         try:
             for i, pos in enumerate(positions):
                 # move motors

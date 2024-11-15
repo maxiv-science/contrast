@@ -295,5 +295,10 @@ if __name__ == '__main__':
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/sw/contrast_img/beamlines/nanomax/.memorizer')
 
+    # chech git repo status at the start
+    runCommand('checkgit')
+
     # contrast startup message with random acronym
     contrast.wisdom()
+
+    # creating uncommited changes for testing

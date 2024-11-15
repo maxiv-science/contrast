@@ -30,7 +30,11 @@ class Env(object):
         self.snapshot = MotorSnapshot()
         self.snapshot.pre_scan = True
         self.snapshot.post_scan = True
+        self.check_git_repo()
+
+    def check_git_repo(self):
         self.contrast_git_hash = utils.get_git_revision(short=False)
+        self.uncommitted_changes = utils.get_uncommitted_git_changes()
 
 env = Env()
 
@@ -138,3 +142,23 @@ class Path(object):
     """
     def run(self):
         print('Current data path:\n\n   ', env.paths.directory)
+
+
+@macro
+class CheckGit(object):
+    """
+    checks the git repo of the used contrast installation
+    looks the the hash of the used commit
+    lists the uncommitted changes
+    """
+    def run(self):
+        env.check_git_repo()
+
+        print(f'git hash of the used contrast installation:')
+        print(f'    {env.contrast_git_hash}')
+
+        if env.uncommitted_changes != []:
+            print(f'\033[91m[!]\033[0m you are running contrast with uncommitted changes:')
+            for fname in env.uncommitted_changes:
+                print(f'    {fname}')          
+

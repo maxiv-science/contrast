@@ -1,6 +1,7 @@
 from .Gadget import Gadget
 from collections import OrderedDict
 from fnmatch import filter
+import os
 import h5py
 import numpy as np
 import pathlib
@@ -216,4 +217,15 @@ def get_git_revision(base_path=None, short=False):
         result = git_hash.readline().strip()
     if short:
         result = result[:8]
+    return result
+
+def get_uncommitted_git_changes(base_path=None):
+    if base_path is None:
+        base_path = pathlib.Path(__file__).resolve().parents[1]
+    result = []
+    with os.popen(f'git -C {base_path} ls-files -m -o --exclude-from=.gitignore') as stream:
+        output = stream.read().split('\n')   
+    for x in output:
+        if x != '':
+            result.append(x)
     return result
