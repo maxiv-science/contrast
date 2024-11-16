@@ -82,7 +82,10 @@ class TangoMotor(Motor):
         # run anything that is in the parent classes
         super().health_check()
         # check if the motor is powered on
-        power_on = self.proxy.poweron
-        if power_on == False:
-            print(f'\033[91m[!]\033[0m {self.name}: The motor is not powered on')
+        try:
+            power_on = self.proxy.poweron
+            if power_on == False:
+                print(f'\033[91m[!]\033[0m {self.name}: The motor is not powered on')
+        except AttributeError:
+            pass
         

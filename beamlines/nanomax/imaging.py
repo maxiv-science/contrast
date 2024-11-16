@@ -77,7 +77,7 @@ if __name__ == '__main__':
     #######################################################################################################
     # Beamline equipment. Comment out when not used
     #######################################################################################################
-    """
+
     # gap and taper via a proxy in the local pool
     ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -112,7 +112,6 @@ if __name__ == '__main__':
     
     # smaracts
     # controller 2
-    """
     dbpm2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=0, name='dbpm2_x', userlevel=6)
     dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=6)
     seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3)
@@ -128,21 +127,17 @@ if __name__ == '__main__':
     pol_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=12, name='pol_x', userlevel=3, frequency=1000)
     pol_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=13, name='pol_y', userlevel=3, frequency=1000)
     pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=3, user_format='%.8f', dial_format='%.8f')
-    """
+
     # controller 4 in OH2 for fast shutter and first diamondBPM
     # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3)#)
-    #dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#)
-    #dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)#)
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=3)#)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=3)#)
 
     # SSA through the Pool
     ssa_gapx = TangoMotor(device='B303A-O/opt/SLIT-01-GAPXPM', name='ssa_gapx', userlevel=2)
     ssa_gapy = TangoMotor(device='B303A-O/opt/SLIT-01-GAPYPM', name='ssa_gapy', userlevel=2)
     ssa_posx = TangoMotor(device='B303A-O/opt/SLIT-01-POSXPM', name='ssa_posx', userlevel=3)
     ssa_posy = TangoMotor(device='B303A-O/opt/SLIT-01-POSYPM', name='ssa_posy', userlevel=3)
-
-    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
-    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
-
 
     # some sardana pseudo motors - these are reimplemented but just need to be configured
     energy_raw = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy_raw')
@@ -155,7 +150,7 @@ if __name__ == '__main__':
     #######################################################################################################
     # Experimental station equipment
     #######################################################################################################
-    """
+
 
     # KB mirror pitch piezos
     m1pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=1, name='m1pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
@@ -256,7 +251,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, x3mini]:
+    for d in [panda2, pseudo, eiger4m]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
