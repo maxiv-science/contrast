@@ -65,15 +65,6 @@ if __name__ == '__main__':
     # 3 - optics
     # 4 - potentially dangerous
 
-    # warn if we are not nanomax-service with correct umask
-    user = os.popen('whoami').read().strip()
-    umask = os.popen('umask').read().strip()
-    if not (user == 'nanomax-service' and umask =='0022'):
-        print(
-            '\033[91mWARNING! The correct way of running the beamline'
-            ' is as nanomax-service with umask 022\033[0m'
-        )
-
     #######################################################################################################
     # Beamline equipment. Comment out when not used
     #######################################################################################################
