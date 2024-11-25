@@ -172,7 +172,6 @@ class SoftwareScan(object):
         det_group = Detector.get_active()
 
         #self.arm_dranspose_pipeline()  #commented out until fixed
-
         trg_group = TriggerSource.get_active()
         group = det_group + trg_group
         if group.busy():

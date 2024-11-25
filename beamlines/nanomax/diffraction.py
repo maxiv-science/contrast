@@ -43,6 +43,12 @@ if __name__ == '__main__':
     import os
     import time
 
+    # dissable ipython auto-completion/suggestions
+    # taken from https://github.com/ipython/ipython/issues/13451#issuecomment-1014526360
+    import IPython
+    terminal = IPython.get_ipython()
+    terminal.pt_app.auto_suggest = None
+
     # warn if we are not nanomax-service with correct umask
     user = os.popen('whoami').read().strip()
     umask = os.popen('umask').read().strip()
@@ -233,7 +239,7 @@ if __name__ == '__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
 
     # Robot
-    # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # microscope motors through the Pool
     oam_x = TangoMotor(device='b303a-e02/dia/om-01-x', name='oam_x', userlevel=4, user_format='%.4f', dial_format='%.4f')
@@ -291,10 +297,13 @@ if __name__ == '__main__':
     # merlin = Merlin(name='merlin', host='localhost')
     
     # old # 
-    #xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
+    # xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
+
+    # SEDS loan xspress3mini # 
+    x3mini = Xspress3(name='x3mini', device='xspress3ds/xspress3/mini-temp')
     
     # new #
-    xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
+    # xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
 
     #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
     # settings for DESY Andor, needs to be changed for the NanoMAX Crytur Andor
@@ -304,11 +313,9 @@ if __name__ == '__main__':
     #andor.proxy.sensorcooling=True
     
     # eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
-    eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m')
-    eiger1m.rotation = 0
+    eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m', rotation = 0)
     #eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    eiger500k = EigerTango('b303a/dia/eiger-500k', name='eiger500k')
-    eiger500k.rotation = 2
+    eiger500k = EigerTango('b303a/dia/eiger-500k', name='eiger500k', rotation = 2)
     # Ion chamber at KB (Ch1), portable PIN diode (Ch3), PIN diode in DM4 (Ch4)
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
@@ -335,7 +342,8 @@ if __name__ == '__main__':
                                        'adc3': 'panda0/FMC_IN.VAL3_Mean',
                                        'adc4': 'panda0/FMC_IN.VAL4_Mean'},
                             expression={'x': 'c2', 'y': 'c3', 'z': 'c1',
-                                        'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5',})
+                                        'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5',
+                                        'xbic': 'adc4'})
 #                                        'analog_x': '-adc2*5*10/2**31', 'analog_y': 'adc3*5*10/2**31', 'analog_z': '-adc1*5*10/2**31'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
@@ -357,7 +365,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, xspress3]:# :eiger500k, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2, x3mini ]:# :x3mini, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
@@ -384,7 +392,6 @@ if __name__ == '__main__':
     Ct._before_ct = pre_scan_stuff
     Ct._after_ct = post_scan_stuff
 
-    contrast.wisdom()
 
     # find the latest scan number and initialize env.nextScanID
     try:
@@ -403,3 +410,8 @@ if __name__ == '__main__':
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
 
+    # chech git repo status at the start
+    runCommand('checkgit')
+
+    # contrast startup message with random acronym
+    contrast.wisdom()
