@@ -313,11 +313,9 @@ if __name__ == '__main__':
     #andor.proxy.sensorcooling=True
     
     # eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
-    eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m')
-    eiger1m.rotation = 0
+    eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m', rotation = 0)
     #eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
-    eiger500k = EigerTango('b303a/dia/eiger-500k', name='eiger500k')
-    eiger500k.rotation = 2
+    eiger500k = EigerTango('b303a/dia/eiger-500k', name='eiger500k', rotation = 2)
     # Ion chamber at KB (Ch1), portable PIN diode (Ch3), PIN diode in DM4 (Ch4)
     alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     #E02_oam = BaslerCamera(name='oam', device='basler/on_axis_microscope/main')
@@ -394,7 +392,6 @@ if __name__ == '__main__':
     Ct._before_ct = pre_scan_stuff
     Ct._after_ct = post_scan_stuff
 
-    contrast.wisdom()
 
     # find the latest scan number and initialize env.nextScanID
     try:
@@ -413,3 +410,8 @@ if __name__ == '__main__':
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/.memorizer')
 
+    # chech git repo status at the start
+    runCommand('checkgit')
+
+    # contrast startup message with random acronym
+    contrast.wisdom()
