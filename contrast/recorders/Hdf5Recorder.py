@@ -1,4 +1,5 @@
 from . import Recorder
+from .. import utils
 import h5py
 import time
 import numpy as np
@@ -50,6 +51,8 @@ class Hdf5Recorder(Recorder):
             self.act_on_data({'snapshots/pre_scan/': dct['snapshot']}, base='entry/')
             self.act_on_data({'description': dct['description']},
                              base='entry/')
+            if 'contrast_version' in dct.keys():
+                self.act_on_data({'contrast_version/': dct['contrast_version']}, base='entry/')
 
     def act_on_data(self, dct, base='entry/measurement/'):
         """

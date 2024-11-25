@@ -1,9 +1,10 @@
 from .Gadget import Gadget
 from collections import OrderedDict
 from fnmatch import filter
+import os
 import h5py
 import numpy as np
-
+import pathlib
 
 def list_to_table(lst, titles, margins=3, sort=True):
     """
@@ -202,3 +203,29 @@ class SpecTable(object):
             else:
                 vals.append(v)
         return tuple(vals)
+
+def get_git_revision(base_path=None, short=False):
+    """
+    retrieve git hash for a given directory or the used contrast installation
+    """
+    if base_path is None:
+        base_path = pathlib.Path(__file__).resolve().parents[1]
+    git_dir = pathlib.Path(base_path) / '.git'
+    with (git_dir / 'HEAD').open('r') as head:
+        ref = head.readline().split(' ')[-1].strip()
+    with (git_dir / ref).open('r') as git_hash:
+        result = git_hash.readline().strip()
+    if short:
+        result = result[:8]
+    return result
+
+def get_uncommitted_git_changes(base_path=None):
+    if base_path is None:
+        base_path = pathlib.Path(__file__).resolve().parents[1]
+    result = []
+    with os.popen(f'git -C {base_path} ls-files -m -o --exclude-from=.gitignore') as stream:
+        output = stream.read().split('\n')   
+    for x in output:
+        if x != '':
+            result.append(x)
+    return result

@@ -143,8 +143,9 @@ class ImgSampleStage(object):
                 assert pos > (self._lims['m0min'] + margin)
                 assert pos < (self._lims['m0max'] - margin)
                 self.proxy.write_attribute('channel00_position', pos)
+                time.sleep(0.2)
             except AssertionError:
-                print('The combination of longitudinal and height postions is not allowed. The longitudina motor cannot reach the requested position')
+                print('The commanded postion is not withing allowed range')
                 self.info()
         elif self.motor2index(motor) == 1:
             # Sets the y-position. This is achieved by a combination of the height wedge motor and the z-motor.
@@ -159,8 +160,23 @@ class ImgSampleStage(object):
                 assert new_long < (self._lims['m1max'] - margin)
                 assert new_wedge > (self._lims['m2min'] + margin)
                 assert new_wedge < (self._lims['m2max'] - margin)
-                self.proxy.write_attribute('channel01_position', new_long)
-                self.proxy.write_attribute('channel02_position', new_wedge)
+                # below if-statement assures that the sample always is moving away from the OSA when changing height. 
+                print('Moving sample stage downstream...\r', end='', flush=True)
+                if current_long < new_long:
+                    self.proxy.write_attribute('channel01_position', new_long)
+                    time.sleep(0.2)
+                    while(self.proxy.read_attribute('channel01_state').value != 'stationary'):
+                        time.sleep(0.05)
+                    self.proxy.write_attribute('channel02_position', new_wedge)
+                else:
+                    self.proxy.write_attribute('channel02_position', new_wedge)
+                    time.sleep(0.2)
+                    while(self.proxy.read_attribute('channel02_state').value != 'stationary'):
+                        time.sleep(0.05)
+                    self.proxy.write_attribute('channel01_position', new_long)
+                print('                                     \r', end='', flush=True)
+
+
             except AssertionError:
                 print('The combination of longitudinal and height postions is not allowed. One or both motors cannot reach the requested positions')
                 self.info()
@@ -172,6 +188,7 @@ class ImgSampleStage(object):
                 assert new_long > (self._lims['m1min'] + margin)
                 assert new_long < (self._lims['m1max'] - margin)
                 self.proxy.write_attribute('channel01_position', new_long)
+                time.sleep(0.2)
             except AssertionError:
                 print('The combination of longitudinal and height postions is not allowed. The longitudina motor cannot reach the requested position')
                 self.info()
@@ -198,7 +215,7 @@ class ImgSampleStage(object):
         if self.motor2index(motor) == 0:
             busy = self.proxy.read_attribute('channel00_state').value == 'running'
         elif self.motor2index(motor) > 0:
-            busy = self.proxy.read_attribute('channel01_state').value == 'running' or self.proxy.read_attribute('channel02_state').value == 'running'
+            busy = (self.proxy.read_attribute('channel01_state').value == 'running') or (self.proxy.read_attribute('channel02_state').value == 'running')
         return busy
 
     def stop(self, motor):
@@ -216,7 +233,7 @@ class ImgSampleStage(object):
         if self.motor2index(motor) == 0:
             self.proxy.arbitrarySend('X0M2')
         elif self.motor2index(motor) > 0:
-            self.proxy.arbitrarySend('X2M1')
+            self.proxy.arbitrarySend('X1M2')
             self.proxy.arbitrarySend('X2M2')
 
     def info(self):

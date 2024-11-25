@@ -1,6 +1,6 @@
 from ..Gadget import Gadget
-from .. import utils
 from ..environment import macro
+from .. import utils
 import time
 import signal
 
@@ -24,12 +24,13 @@ class RecorderHeader(dict):
     when a new scan starts.
     """
     def __init__(self, scannr, path, snapshot=None, description=None,
-                 status=None):
+                 status=None, **kwargs):
         super(RecorderHeader, self).__init__(scannr=scannr,
                                              status=status,
                                              path=path,
                                              snapshot=snapshot,
-                                             description=description)
+                                             description=description,
+                                             **kwargs)
 
 
 class RecorderFooter(dict):
