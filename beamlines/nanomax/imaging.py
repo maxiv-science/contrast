@@ -68,7 +68,7 @@ if __name__ == '__main__':
     #######################################################################################################
     # Beamline equipment. Comment out when not used
     #######################################################################################################
-    """
+
     # gap and taper via a proxy in the local pool
     ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
     zmqrec.start()  # removed for now
-    """
+
     #######################################################################################################
     # Experimental station equipment
     #######################################################################################################
