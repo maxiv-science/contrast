@@ -6,7 +6,7 @@ from contrast.utils import SpecTable
 from contrast.scans.Scan import SoftwareScan
 from collections import OrderedDict
 import sys
-
+import math
 import time
 import sys
 import h5py
@@ -412,7 +412,7 @@ class Hwstepspiral(WFtrigscan):
 @macro
 class Hwstepsnake(WFtrigscan):
     """
-    Waveform snake step scan
+    Waveform snake step scan (bi-directional)
 
     hwstepsnake <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
@@ -484,7 +484,7 @@ class Hwstepsnake(WFtrigscan):
 @macro
 class Hwstepmesh(WFtrigscan):
     """
-    Waveform snake step scan
+    Waveform mesh step scan (uni-directional)
 
     Hwstepmesh <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
@@ -606,11 +606,14 @@ class Hwflyspiral(WFtrigscan):
 @macro
 class Hwflysnake(WFtrigscan):
     """
-    Waveform snake continuous scan
+    Waveform snake continuous scan (bi-directional)
 
     hwflysnake  <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
             <exp time>
+
+        optional:
+            rotation=<degrees> min/max +-45
     """
 
     def __init__(self, *args, **kwargs):
@@ -633,6 +636,14 @@ class Hwflysnake(WFtrigscan):
             self.exptime = float(args[8])
             self.latency = 0.001
             self.print_progress = False
+            self.rotation = 0
+            for key, value in kwargs.items():
+                if key == 'rotation':
+                    if value <=45 and value >=-45:
+                        self.rotation = value
+                    else:
+                        print('Rotation is out of range (+-45)')
+                        raise Exception()
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -684,16 +695,25 @@ class Hwflysnake(WFtrigscan):
         wf[self.fast_motor.axis,:] = wf_fast
         wf[self.slow_motor.axis,:] = wf_slow
         wf[4,:] = wf_trig
+
+        if self.fast_motor.axis < 2 and self.slow_motor.axis < 2: # check that only x and y motors are scanning
+            if self.rotation <= -0.001 or self.rotation >= 0.001:
+                wf[2] = wf[0]*math.sin(-self.rotation*math.pi/180)
+                wf[0] = wf[0]*math.cos(-self.rotation*math.pi/180)
+
         return wf, self._count_trigger_pulses(wf)
 
 @macro
 class Hwflymesh(WFtrigscan):
     """
-    Waveform snake continuous scan
+    Waveform mesh continuous scan (uni-directional)
 
     hwflymesh  <motor 1>  <start> <stop> <intervals>
             <motor 2> <start> <stop> <intervals>
-            <exp time>
+            <exp time> 
+
+        optional:
+            rotation=<degrees> min/max +-45
     """
 
     def __init__(self, *args, **kwargs):
@@ -717,6 +737,14 @@ class Hwflymesh(WFtrigscan):
             self.latency = 0.001
             self.print_progress = False
             self.returntime = 0.2
+            self.rotation = 0
+            for key, value in kwargs.items():
+                if key == 'rotation':
+                    if value <=45 and value >=-45:
+                        self.rotation = value
+                    else:
+                        print('Rotation is out of range (+-45)')
+                        raise Exception()
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -760,5 +788,11 @@ class Hwflymesh(WFtrigscan):
         wf[self.fast_motor.axis,:] = wf_fast
         wf[self.slow_motor.axis,:] = wf_slow
         wf[4,:] = wf_trig
+        
+        if self.fast_motor.axis < 2 and self.slow_motor.axis < 2: # check that only x and y motors are scanning
+            if self.rotation <= -0.001 or self.rotation >= 0.001:
+                wf[2] = wf[0]*math.sin(-self.rotation*math.pi/180)
+                wf[0] = wf[0]*math.cos(-self.rotation*math.pi/180)
+
         return wf, self._count_trigger_pulses(wf)
 
