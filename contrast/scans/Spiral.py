@@ -89,6 +89,7 @@ class FermatScan(AScan):
             SoftwareScan.__init__(self, float(exptime))
             self.motors = [m1, m2]
             self.limits = [[l1_l, l1_u],[l2_l, l2_u]]
+            self._check_limits()
             self.stepsize = float(stepsize)
             self.sort_by_axis = sort_by_axis
             self.optimize = False
@@ -96,6 +97,20 @@ class FermatScan(AScan):
             self.n_positions = int(len(self.pos_12))
             assert all_are_motors(self.motors)
         except Exception as E:
+            raise MacroSyntaxError
+
+    def _check_limits(self):
+        # just making sure the given upper and lower limits to the motors are the right way around
+        if self.limits[0][0] > self.limits[0][1]:
+            #print('inverted limits in the first motor... switching them')
+            self.limits[0][0], self.limits[0][1] = self.limits[0][1], self.limits[0][0]
+        if self.limits[1][0] > self.limits[1][1]:
+            #print('inverted limits in the second motor... switching them')
+            self.limits[1][0], self.limits[1][1] = self.limits[1][1], self.limits[1][0]    
+
+        # check that the upper and lower limits are not identical       
+        if (self.limits[0][0] == self.limits[0][1]) or (self.limits[1][0] == self.limits[1][1]):
+            print('[!] upper and lower limits are identical for at least one of the motors')
             raise MacroSyntaxError
 
     def calc_positions(self):
