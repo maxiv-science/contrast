@@ -8,6 +8,7 @@ from ..recorders import active_recorders, RecorderHeader, RecorderFooter
 from ..detectors import Detector, TriggeredDetector, TriggerSource
 from contrast.detectors.PandaBox import PandaBox
 from ..utils import SpecTable
+from .. import colors
 from collections import OrderedDict
 import sys
 
@@ -166,7 +167,7 @@ class SoftwareScan(object):
         detectors and other ``Gadget`` objects happens.
         """
         self._before_scan()
-        print('\nScan #%d starting at %s' % (self.scannr, time.asctime()))
+        print(f'\nScan {colors.str_scannumber(self.scannr)} starting at {time.asctime()}')
         positions = self._generate_positions()
         # find and prepare the detectors
         det_group = Detector.get_active()
@@ -231,7 +232,7 @@ class SoftwareScan(object):
                     r.queue.put(dct)
                 # print spec-style info
                 self.output(i, dct.copy())
-            print('\nScan #%d ending at %s' % (self.scannr, time.asctime()))
+            print(f'\nScan {colors.str_scannumber(self.scannr)} ending at {time.asctime()}')
 
             # take a post scan snapshot
             if env.snapshot.post_scan:
@@ -248,7 +249,7 @@ class SoftwareScan(object):
 
         except KeyboardInterrupt:
             group.stop()
-            print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
+            print(f'\nScan {colors.str_scannumber(self.scannr)} cancelled at {time.asctime()}')
 
             # take a post scan snapshot
             if env.snapshot.post_scan:

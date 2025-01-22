@@ -10,6 +10,7 @@ The module provides a central instance of the ``Environment`` class,
 from IPython import get_ipython
 from .. import utils
 from ..Gadget import Gadget
+from .. import colors
 from .data import PathFixer
 from .scheduling import DummyScheduler
 from .snapshots import MotorSnapshot
@@ -142,7 +143,7 @@ class Path(object):
     Print the current data path.
     """
     def run(self):
-        print('Current data path:\n\n   ', env.paths.directory)
+        print(f'Current data path:\n\n    {colors.str_path(str(env.paths.directory))}')
 
 
 @macro

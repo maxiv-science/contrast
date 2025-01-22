@@ -152,6 +152,6 @@ class NpointFlyscan(Mesh):
                 n += 1
                 if n >= 10:
                     print('***** start_waveform() failed %u times, is the ' % n
-                          + 'piexo having trouble settling? trying again...')
+                          + 'piezo having trouble settling? trying again...')
                 time.sleep(.1)
 

@@ -4,6 +4,7 @@ from contrast.detectors import Detector, TriggeredDetector, TriggerSource
 from contrast.recorders import active_recorders, RecorderHeader, RecorderFooter
 from contrast.utils import SpecTable
 from contrast.scans.Scan import SoftwareScan
+import contrast.colors as colors
 from collections import OrderedDict
 import sys
 import math
@@ -147,7 +148,7 @@ class WFtrigscan(SoftwareScan):
         detectors and other ``Gadget`` objects happens.
         """
         self._before_scan()
-        print('\nScan #%d starting at %s\n' % (self.scannr, time.asctime()))
+        print(f'\nScan {colors.str_scannumber(self.scannr)} starting at {time.asctime()}\n')
 
         # generating the waveform file
         print('Generating waveform...   ', end='', flush=True)
@@ -199,7 +200,7 @@ class WFtrigscan(SoftwareScan):
             # pass data to recorders
             for r in active_recorders():
                 r.queue.put(dct)
-            print('\n\nScan #%d ending at %s' % (self.scannr, time.asctime()))
+            print(f'\nScan {colors.str_scannumber(self.scannr)} ending at {time.asctime()}')
 
             # tell the recorders that the scan is over
             for r in active_recorders():
@@ -212,7 +213,7 @@ class WFtrigscan(SoftwareScan):
         except KeyboardInterrupt:
             group.stop()
 
-            print('\nScan #%d cancelled at %s' % (self.scannr, time.asctime()))
+            print(f'\nScan {colors.str_scannumber(self.scannr)} cancelled at {time.asctime()}')
 
             # tell the recorders that the scan was interrupted
             for r in active_recorders():
