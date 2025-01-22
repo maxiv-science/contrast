@@ -70,9 +70,9 @@ class Calc_SSA(object):
 
     def get_acceptance(self):
         if self.endstation in self.accepted_names_D:
-            self.accepteance_m = np.array([225e-6, 379e-6])
+            self.accepteance_m = np.array([225e-6, 379e-6])  # horizontal (x), vertical (y)
         elif self.endstation in self.accepted_names_I_KB:
-            self.accepteance_m = np.array([210e-6, 525e-6])
+            self.accepteance_m = np.array([210e-6, 525e-6])  # horizontal (x), vertical (y)
         elif self.endstation in self.accepted_names_I_FZP:
             acc = [1e-6 * self.FZP_diameter_um, 1e-6 * self.FZP_diameter_um]
             self.accepteance_m = np.array(acc)
