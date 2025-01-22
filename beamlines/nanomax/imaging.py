@@ -68,7 +68,7 @@ if __name__ == '__main__':
     #######################################################################################################
     # Beamline equipment. Comment out when not used
     #######################################################################################################
-
+    """
     # gap and taper via a proxy in the local pool
     ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -137,17 +137,17 @@ if __name__ == '__main__':
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec')
     zmqrec.start()  # removed for now
-
+    """
     #######################################################################################################
     # Experimental station equipment
     #######################################################################################################
 
-
+    """
     # KB mirror pitch piezos
     m1pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=1, name='m1pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
     m2pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=2, name='m2pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
     m1roll = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=3, name='m1roll', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
-     
+    """ 
     # sample piezos through National Instruments DAC device
     sx = DacMotor(device='B303A/CTL/IMG-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
@@ -167,9 +167,9 @@ if __name__ == '__main__':
     gry = NanosMotor(device='test/ctl/nanos-01', axis=11, name='gry', velocity=500, stop_window=10000, userlevel=1, scaling=-5e-4)
     grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
     gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
-    #nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=11, name='nanos_dummy', userlevel=1, scaling=5e-4)
+    nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=8, name='nanos_dummy', userlevel=1, scaling=5e-4)
 
-
+    
     # PiezoLEGS motors for coarse sample positioning
     basex, basey, basez = ImgSampleStage(device='B303A-E01/CTL/PZCU-02', velocity=90, names=['basex', 'basey', 'basez'], userlevel=1, scaling=1e-3, user_format='%.3f')
 
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, eiger4m]:
+    for d in [panda2, pseudo, x3mini]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
@@ -274,13 +274,13 @@ if __name__ == '__main__':
         print(f'\nNote: inferring that the next scan number should be {last+1}')
     except:
         pass
-
+    
     # add a memorizer so the motors keep their user positions and limits
     # after a restart note that this will overwrite the dial positions
     # set above! delete the file to generate it again.
     memorizer = MotorMemorizer(
         name='memorizer', filepath='/data/visitors/nanomax/common/sw/contrast_img/beamlines/nanomax/.memorizer')
-
+    
     # chech git repo status at the start
     runCommand('checkgit')
 
