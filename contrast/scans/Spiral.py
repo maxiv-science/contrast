@@ -77,7 +77,7 @@ class FermatScan(AScan):
     The center of the spiral will be the center of the given rectangle.
     Both motors have to be in the same units. ::
         
-        fermatscan <motor1> <start> <stop> <motor2> <start> <stop> <stepsize> <exp_time>
+        fermatscan <motor1> <start> <stop> <motor2> <start> <stop> <stepsize> <exp_time> 
 
     optional keyword arguments:
         optimize: boolean ... will try to solve the traveling salesman problem
@@ -90,12 +90,12 @@ class FermatScan(AScan):
             self.motors = [m1, m2]
             self.limits = [[l1_l, l1_u],[l2_l, l2_u]]
             self.stepsize = float(stepsize)
+            self.sort_by_axis = sort_by_axis
             self.optimize = False
             self.calc_positions()
             self.n_positions = int(len(self.pos_12))
-            self.sort_by_axis = sort_by_axis
             assert all_are_motors(self.motors)
-        except:
+        except Exception as E:
             raise MacroSyntaxError
 
     def calc_positions(self):
