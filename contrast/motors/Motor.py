@@ -3,6 +3,7 @@ import numpy as np
 import os
 import ast
 
+from contrast import colors
 from ..Gadget import Gadget
 from ..environment import macro, env
 from .. import utils
@@ -386,7 +387,7 @@ class Wm(object):
                 else:
                     ulims = ('(%s, %s)' % (2 * (m._uformat,))) % m.user_limits
                     dlims = ('(%s, %s)' % (2 * (m._dformat,))) % m.dial_limits
-                table.append([m.name, upos, ulims, dpos, dlims])
+                table.append([colors.str_position(m.name), colors.str_position(upos), ulims, dpos, dlims])
             except:
                 print('Could not get position of %s' % m.name)
                 ret = None

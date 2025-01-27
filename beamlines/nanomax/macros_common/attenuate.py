@@ -8,6 +8,7 @@ import numpy as np
 from math import isclose
 from contrast.environment import env, macro, register_shortcut, runCommand
 from contrast.motors.SmaractMotor import SmaractLinearMotor
+from contrast import colors
 
 #   ToDo
 #       - avoid elements with absorption edges close to the current energy
@@ -142,8 +143,8 @@ class Attenuate(object):
             print('with:')
             for i_carrier, i_pos in enumerate(carrier_indices):
                 i_pos = int(i_pos)
-                line = '    ' + self.carriers[i_carrier]
-                line += ' ' + str(carrier_positions[i_carrier]).rjust(10)
+                line = '    ' + colors.str_position(self.carriers[i_carrier])
+                line += ' ' + colors.str_position(str(carrier_positions[i_carrier])).rjust(10)
                 line += ' #' + str(self.thickness[i_pos, i_carrier]).rjust(5)
                 line += ' um of ' + str(self.elements[i_pos])
                 print(line)

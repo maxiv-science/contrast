@@ -24,7 +24,7 @@ def list_to_table(lst, titles, margins=3, sort=True):
                       + margins[i])
     # a base format string for every line
     linebase = ''
-    for w in widths:
+    for i, w in enumerate(widths):
         linebase += ('%%-%ss' % w)
     # make the header
     result += linebase % tuple(titles) + '\n'
