@@ -21,7 +21,7 @@ def str_scannumber(scan_number):
     """
     color highlighting of the scan #XYZ number with an orange background
     """
-    string = '\033[48;5;172m' + f'#{scan_number}' + '\033[0m'
+    string = '\033[48;5;214m' + f'#{scan_number}' + '\033[0m'
     return string
 
 
@@ -30,7 +30,7 @@ def str_position(string):
     color highlighting of printed positions with a green background
     taking an already formatted strings.
     """
-    string = '\033[48;5;82m' + string + '\033[0m'
+    string = '\033[48;5;157m' + string + '\033[0m'
     return string
 
 def str_path(string):
@@ -38,6 +38,6 @@ def str_path(string):
     color highlighting of printed path with a turquoise background
     taking an already formatted strings.
     """
-    string = '\033[48;5;87m' + string + '\033[0m'
+    string = '\033[48;5;159m' + string + '\033[0m'
     return string
 
