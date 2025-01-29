@@ -296,10 +296,11 @@ class DetectorGroup(object):
         """
         Checks if one or more of the  constituent devices is busy.
         """
+        is_busy = False
         for d in self:
             if d.busy():
-                return True
-        return False
+                 is_busy = True
+        return is_busy
 
     def __iter__(self):
         return self.detectors.__iter__()

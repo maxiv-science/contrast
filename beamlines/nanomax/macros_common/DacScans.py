@@ -30,9 +30,8 @@ class WFtrigscan(SoftwareScan):
     dac_rate = 1000
     trig_high = 255 # set value in range 0-255 to activate digital output 0-7    
 
-    def __init__(self, *args, **kwargs):
-        # to be implemented by the exact shape of scan to be performed
-        pass
+    def __init__(self, exposuretime):
+        super(WFtrigscan, self).__init__(exposuretime)
 
     def _generate_waveform(self):
         # to be implemented by the exact shape of scan to be performed
@@ -187,7 +186,7 @@ class WFtrigscan(SoftwareScan):
             group.arm()
             group.start(trials=10)
             self.dac_0.proxy.start_waveform()
-            while det_group.busy():
+            while group.busy():
                 time.sleep(1)
                 self._while_acquiring()
 
@@ -252,10 +251,6 @@ class Hwstepfermat(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
-            self.print_progress = True
-            env.nextScanID += 1
             # convert to dial coordinates, as the dac operates in dial units
             self.dac_0_start = ((float(args[0]) - self.dac_0._offset) / self.dac_0._scaling)
             self.dac_0_end   = ((float(args[1]) - self.dac_0._offset) / self.dac_0._scaling)
@@ -266,6 +261,8 @@ class Hwstepfermat(WFtrigscan):
             self.latency = float(args[6])
             self.optimize = bool(args[7])
             self.print_progress = False
+            super(Hwstepfermat, self).__init__(self.exptime)
+
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -373,10 +370,7 @@ class Hwstepspiral(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
             self.print_progress = True
-            env.nextScanID += 1
             self.fast_motor = args[0]
             self.slow_motor = args[1]
             self.stepsize = float(args[2])
@@ -384,6 +378,8 @@ class Hwstepspiral(WFtrigscan):
             self.exptime = float(args[4])
             self.latency = float(args[5])
             self.print_progress = False
+            super(Hwstepspiral, self).__init__(self.exptime)
+
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -425,10 +421,7 @@ class Hwstepsnake(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
             self.print_progress = True
-            env.nextScanID += 1
             self.fast_motor = args[0]
             self.fa_start = float(args[1])
             self.fa_end = float(args[2])
@@ -440,6 +433,7 @@ class Hwstepsnake(WFtrigscan):
             self.exptime = float(args[8])
             self.latency = float(args[9])
             self.print_progress = False
+            super(Hwstepsnake, self).__init__(self.exptime)
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -497,10 +491,7 @@ class Hwstepmesh(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
             self.print_progress = True
-            env.nextScanID += 1
             self.fast_motor = args[0]
             self.fa_start = float(args[1])
             self.fa_end = float(args[2])
@@ -513,6 +504,7 @@ class Hwstepmesh(WFtrigscan):
             self.latency = float(args[9])
             self.print_progress = False
             self.returntime = 0.2
+            super(Hwstepmesh, self).__init__(self.exptime)
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -567,10 +559,7 @@ class Hwflyspiral(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
             self.print_progress = True
-            env.nextScanID += 1
             self.fast_motor = args[0]
             self.slow_motor = args[1]
             self.stepsize = float(args[2])
@@ -578,6 +567,7 @@ class Hwflyspiral(WFtrigscan):
             self.exptime = float(args[4])
             self.latency = 0.001
             self.print_progress = False
+            super(Hwflyspiral, self).__init__(self.exptime)
         except:
             raise MacroSyntaxError
         if self.panda is None:
@@ -622,10 +612,7 @@ class Hwflysnake(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
             self.print_progress = True
-            env.nextScanID += 1
             self.fast_motor = args[0]
             self.fa_start = float(args[1])
             self.fa_end = float(args[2])
@@ -637,6 +624,7 @@ class Hwflysnake(WFtrigscan):
             self.exptime = float(args[8])
             self.latency = 0.001
             self.print_progress = False
+            super(Hwflysnake, self).__init__(self.exptime)
             self.rotation = 0
             for key, value in kwargs.items():
                 if key == 'rotation':
@@ -722,10 +710,7 @@ class Hwflymesh(WFtrigscan):
         Parse arguments
         """
         try:
-            self._command = None  # updated if run via macro
-            self.scannr = env.nextScanID
             self.print_progress = True
-            env.nextScanID += 1
             self.fast_motor = args[0]
             self.fa_start = float(args[1])
             self.fa_end = float(args[2])
@@ -738,6 +723,7 @@ class Hwflymesh(WFtrigscan):
             self.latency = 0.001
             self.print_progress = False
             self.returntime = 0.2
+            super(Hwflymesh, self).__init__(self.exptime)
             self.rotation = 0
             for key, value in kwargs.items():
                 if key == 'rotation':
