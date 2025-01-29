@@ -201,7 +201,8 @@ if __name__ == '__main__':
     #E01cam03 = BaslerCamera(name='E01cam03', device='basler/e01-cam-03/main')
     #E01cam04 = BaslerCamera(name='E01cam04', device='basler/e01-cam-04/main')
 
-    #alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
+    # AlbaEM reading the DBPM in DM4
+    alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
 
     # The pandabox and some related pseudodetectors
     # Pandabox reading the LC400 encoders analog and controlling the fast shutter
@@ -226,7 +227,7 @@ if __name__ == '__main__':
                                         'x': 'a1',
                                         'y': 'a3',
                                         'z': 'a2',
-                                        'ai4': 'a4'})
+                                        'I0': 'a4'})
 
     # the environment keeps track of where to write data
     env.paths = SdmPathFixer('B303A-E01/CTL/SDM-01')
@@ -242,7 +243,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, x3mini]:
+    for d in [panda2, pseudo, alba1]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
