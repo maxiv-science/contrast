@@ -303,7 +303,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if self.hw_trig:
             return
         elif self.burst_n > 1:
-            period = self.acqtime + self.burst_latency
+            period = self.acqtime
             self.em.prepare(period, 1, self.burst_n, self.burst_latency, burst=True)
         else:
             self.em.soft_trigger()
