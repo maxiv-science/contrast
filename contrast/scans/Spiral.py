@@ -286,7 +286,7 @@ class FermatScanPlus(AScan):
             self.pos_12 = pos_12[best_path]
 
     def _generate_positions(self):
-        N_3 = int((self.limits[2][1] - self.limits[2][0]) / self.stepsize3)
+        N_3 = int((self.limits[2][1] - self.limits[2][0]) / self.stepsize3) + 1
         pos_3 = np.linspace(self.limits[2][0], self.limits[2][1], N_3, endpoint=True)
 
         #generate the positions in the improved order
