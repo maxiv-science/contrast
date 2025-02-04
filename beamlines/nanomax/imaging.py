@@ -164,6 +164,16 @@ if __name__ == '__main__':
     csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     """
 
+    # config for Abe
+    osay = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osay', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    osax = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osax', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    osaz = NanosMotor(device='test/ctl/nanos-01', axis=2, name='osaz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    csx = NanosMotor(device='test/ctl/nanos-01', axis=3, name='csx', velocity=500, stop_window=10, userlevel=2, scaling=5e-4)
+    csy = NanosMotor(device='test/ctl/nanos-01', axis=4, name='csy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    zpx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='zpx', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+    zpy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='zpy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
+
     gry = NanosMotor(device='test/ctl/nanos-01', axis=11, name='gry', velocity=500, stop_window=10000, userlevel=1, scaling=-5e-4)
     grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
     gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
@@ -175,11 +185,12 @@ if __name__ == '__main__':
 
     
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    sr = SmaractRotationMotor(device='B303A-E01/CTL/PZCU-01', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
-    grx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    #sr = SmaractRotationMotor(device='B303A-E01/CTL/PZCU-01', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    #grx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    """
     apx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=15, name='apx', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
     apy = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=16, name='apy', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    
+    """
     # Pixel detector and XRF motors, optical microsope and screen motors
     xrf1_x = TangoMotor(device='B303A-E01/DIA/XRF-01-X', name='xrf1_x', userlevel=2, user_format='%.3f')
     xrf2_x = TangoMotor(device='B303A-E01/DIA/XRF-02-X', name='xrf2_x', userlevel=2, user_format='%.3f')
