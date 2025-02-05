@@ -222,7 +222,7 @@ class FermatScanPlus(AScan):
             self.sort_by_axis = sort_by_axis
             self.optimize = False
             self.calc_positions()
-            self.n_positions = int(len(self.pos_12))
+            self.n_positions = int(len(self.pos_12))*int(len(self.pos_3))
             assert all_are_motors(self.motors)
         except Exception as E:
             print(E)
@@ -246,6 +246,10 @@ class FermatScanPlus(AScan):
             raise MacroSyntaxError
 
     def calc_positions(self):
+        # generate positions for innermost loop
+        N_3 = int((self.limits[2][1] - self.limits[2][0]) / self.stepsize3) + 1
+        self.pos_3 = np.linspace(self.limits[2][0], self.limits[2][1], N_3, endpoint=True)
+
         # scaling factors and angular step width
         c_0    = 0.524   # 3rd closest neighbor is on average one step away
         c      = c_0*self.stepsize12
@@ -286,12 +290,10 @@ class FermatScanPlus(AScan):
             self.pos_12 = pos_12[best_path]
 
     def _generate_positions(self):
-        N_3 = int((self.limits[2][1] - self.limits[2][0]) / self.stepsize3) + 1
-        pos_3 = np.linspace(self.limits[2][0], self.limits[2][1], N_3, endpoint=True)
 
         #generate the positions in the improved order
         for i, pos12 in enumerate(self.pos_12):
-            for j, p3 in enumerate(pos_3):
+            for j, p3 in enumerate(self.pos_3):
                 yield {self.motors[0].name: pos12[0],
                        self.motors[1].name: pos12[1],
                        self.motors[2].name: p3}
