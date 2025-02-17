@@ -39,6 +39,8 @@ class DacMotor(Motor):
     def busy(self):
         return self.proxy.read_attribute('dac_%d_is_moving' % self.axis).value
  
+    def stop(self):
+        return self.proxy.stop_waveform()
 
 
 
