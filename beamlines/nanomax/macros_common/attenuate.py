@@ -21,14 +21,15 @@ attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='
 class Attenuate(object):
     """
     Sets the attenuators to absorb X percent of the beam depending
-    on the current photon beam enegery.
+    on the current photon beam energy.
 
     usage / examples:
         %attenuate                  # show current attenuator setting / value
-        %attenuate 0.2              # attenuate to 20% beam intensity
-        %attenuate 0.1 ['Si','Al']  # attenuate to 10% but only use Si and Al
+        %attenuate 0                # remove all attenuators
+        %attenuate 0.2              # attenuate away 20% / to 80% beam intensity
+        %attenuate 0.1 ['Si','Al']  # attenuate to 90% but only use Si and Al
                                     # ['Al','Ti','Si','Cu','Fe','Mo','Ta','Ag']
-        %attenuate 0.2 how='unsafe' # attenuate to 20% beam intensity without
+        %attenuate 0.2 how='unsafe' # attenuate to 80% beam intensity without
                                     # manually confirming the motor movement
                                     # ... for the usement in macros
     """
@@ -208,8 +209,8 @@ class Attenuate(object):
             for i_carrier, i_pos in enumerate(
                     self.T_choosen[1:1 + len(self.carriers)]):
                 i_pos = int(i_pos)
-                command = 'mv ' + str(self.carriers[i_carrier])
-                command += ' ' + str(self.position[i_pos]).ljust(8)
+                command = f'mv {str(self.carriers[i_carrier])}'
+                command += f' {self.position[i_pos]:.3f}'.ljust(8)
                 commands.append(command)
 
             # print an output
@@ -228,7 +229,7 @@ class Attenuate(object):
                     i_pos = int(i_pos)
                     line = '    ' + commands[i_carrier]
                     line += '#' + str(
-                        self.thickness[i_pos, i_carrier]).rjust(5)
+                        self.thickness[i_pos, i_carrier]).rjust(10)
                     line += ' um of ' + str(self.elements[i_pos])
                     print(line)
 
