@@ -51,7 +51,7 @@ class Stream(Thread):
             print(*args)
 
     def run(self):
-        keys = ['timestamp'] + ['CHAN%02u' % (i + 1) for i in range(NUM_CHAN)]
+        keys = ['timestamp'] + ['CHAN%02u' % (i + 1) for i in range(NUM_CHAN)] + ['acquisition_timestamp']
         while True:
             msg = json.loads(self.sock.recv())
             if msg['message_type'] == 'series-start':
@@ -178,7 +178,7 @@ class Electrometer(object):
     def read(self):
         if self.pull_sock is None:
             return
-        keys = ['timestamp'] + ['CHAN%02u' % (i + 1) for i in range(NUM_CHAN)]
+        keys = ['timestamp'] + ['CHAN%02u' % (i + 1) for i in range(NUM_CHAN)] + ['acquisition_timestamp']
         while not self.pull_sock.closed and self.pull_sock.poll(0):
             msg = self.pull_sock.recv_json()
             if msg['message_type'] == 'data':
@@ -303,7 +303,7 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         if self.hw_trig:
             return
         elif self.burst_n > 1:
-            period = self.acqtime + self.burst_latency
+            period = self.acqtime
             self.em.prepare(period, 1, self.burst_n, self.burst_latency, burst=True)
         else:
             self.em.soft_trigger()
@@ -327,9 +327,13 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         assert(False), "Should never get here!"
 
     def read(self):
-        keys = ['t', ] + self.channels
+        keys = ['t', ] + self.channels + ['acquisition_timestamp']
         data = np.array(self.em.data)
         self.em.data.clear()
+        
+        # convert the acquisition timestamp from ns to s
+        data[:,-1] = data[:,-1] / 1e9
+
         ret={}
         for i in range(len(keys)):
             values = data[:, i]

@@ -41,5 +41,3 @@ class DacMotor(Motor):
  
     def stop(self):
         return self.proxy.stop_waveform()
-
-

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     from contrast.recorders import Hdf5Recorder, StreamRecorder, ScicatRecorder
     from contrast.motors import DummyMotor, MotorMemorizer
     from contrast.motors.LC400 import LC400Motor
-    from contrast.detectors.LC400Buffer import LC400Buffer
+    # from contrast.detectors.LC400Buffer import LC400Buffer
     from contrast.motors.TangoMotor import TangoMotor
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor, SmaractRotationMotor
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     # detectors
     # DBPM at SSA
-    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     # DBPM in DM4
     # alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
 
@@ -173,20 +173,20 @@ if __name__ == '__main__':
     # Experimental station equipment
     #######################################################################################################
 
+    # sample piezos through National Instruments DAC device
+    # sx = DacMotor(device='B303A/CTL/DIFF-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
+    # sy = DacMotor(device='B303A/CTL/DIFF-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
+    # sz = DacMotor(device='B303A/CTL/DIFF-02', axis=2, name='sz', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
+  
+    # sample piezos through the nPoint controller
+    sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+    sy = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
+    sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
+
     # PI NanoCube 3-axis piezo. To be used in temporary setups
     #sx = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=1, name='sx', userlevel=1, scaling=-1.0, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     #sy = E727Motor(device='B303A-EH/CTL/PZCU-02', axis=3, name='sy', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
     #sz = E727Motor(device='B303A-EH/CTL/PZCU-02', aos.popen('whoami').read().strip()xis=2, name='sz', userlevel=1, dial_limits=(0,100), user_format='%.3f', dial_format='%.3f')
-
-    # sample piezos through National Instruments DAC device
-    sx = DacMotor(device='B303A/CTL/DIFF-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
-    sy = DacMotor(device='B303A/CTL/DIFF-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
-    sz = DacMotor(device='B303A/CTL/DIFF-02', axis=2, name='sz', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
-  
-    # sample piezos through the nPoint controller
-    #sx = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=2, name='sx', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
-    #sy = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=3, name='sy', dial_limits=(-50,50), user_format='%.3f')
-    #sz = LC400Motor(device='B303A/CTL/PZCU-LC400B', axis=1, name='sz', scaling=-1.0, dial_limits=(-50,50), user_format='%.3f')
 
     # Xerion rotation stage
     #sr = TangoMotor(device='xeryon/test/ulfjoh', name='sr', userlevel=1)
@@ -239,7 +239,7 @@ if __name__ == '__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
 
     # Robot
-    # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # microscope motors through the Pool
     oam_x = TangoMotor(device='b303a-e02/dia/om-01-x', name='oam_x', userlevel=4, user_format='%.4f', dial_format='%.4f')
@@ -328,22 +328,23 @@ if __name__ == '__main__':
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     macros_common.NpointFlyscan.panda = panda0
-    macros_common.WFtrigscan.panda = panda0
-    macros_common.WFtrigscan.dac_0 = sx
-    macros_common.WFtrigscan.dac_1 = sy
-    macros_common.WFtrigscan.dac_2 = sz
+    # macros_common.WFtrigscan.panda = panda0
+    # macros_common.WFtrigscan.dac_0 = sx
+    # macros_common.WFtrigscan.dac_1 = sy
+    # macros_common.WFtrigscan.dac_2 = sz
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',
                                        'c2': 'panda0/INENC2.VAL_Mean',
                                        'c3': 'panda0/INENC3.VAL_Mean',
-                                       'adc1': 'panda0/FMC_IN.VAL1_Mean',
-                                       'adc2': 'panda0/FMC_IN.VAL2_Mean',
-                                       'adc3': 'panda0/FMC_IN.VAL3_Mean',
-                                       'adc4': 'panda0/FMC_IN.VAL4_Mean'},
+                                       # 'adc2': 'panda0/FMC_IN.VAL2_Mean',
+                                       # 'adc3': 'panda0/FMC_IN.VAL3_Mean',
+                                       # 'adc4': 'panda0/FMC_IN.VAL4_Mean',
+                                       },
                             expression={'x': 'c2', 'y': 'c3', 'z': 'c1',
-                                        'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5',
-                                        'xbic': 'adc4'})
+                                        # 'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5',
+                                        # 'xbic': 'adc4',
+                                        })
 #                                        'analog_x': '-adc2*5*10/2**31', 'analog_y': 'adc3*5*10/2**31', 'analog_z': '-adc1*5*10/2**31'})
 
     # The keysight as both a detector (ammeter) and motor (bias voltage)
@@ -365,7 +366,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, x3mini, eiger500k]:# :x3mini, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2, eiger1m]:# :x3mini, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
