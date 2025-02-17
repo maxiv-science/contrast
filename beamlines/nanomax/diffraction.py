@@ -166,7 +166,7 @@ if __name__ == '__main__':
     # alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
 
     # a zmq recorder
-    zmqrec = StreamRecorder(name='zmqrec')
+    zmqrec = StreamRecorder(name='zmqrec', port=5556)
     zmqrec.start() 
     
     #######################################################################################################
