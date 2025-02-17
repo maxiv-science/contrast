@@ -84,9 +84,9 @@ if __name__ == '__main__':
     diff = ExamplePseudoMotor([samx, samy], name='diff')
 
     det1 = DummyDetector(name='det1')
-    det2 = DummyWritingDetector(name='det2')
-    det3 = Dummy1dDetector(name='det3')
-    det4 = DummyWritingDetector2(name='det4')
+    #det2 = DummyWritingDetector(name='det2')
+    #det3 = Dummy1dDetector(name='det3')
+    #det4 = DummyWritingDetector2(name='det4')
 
     env.paths.directory = '/tmp'
 
