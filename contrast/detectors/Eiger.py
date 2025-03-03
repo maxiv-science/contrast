@@ -480,3 +480,19 @@ class EigerTango(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetecto
         # arming and disarming stores it:
         self._set('detector', 'command/arm')
         self._set('detector', 'command/disarm')
+
+
+class SelunTango(EigerTango):
+    """
+    Provides a direct interface to the Dectris SELUN server via a Tango Server.
+    """
+
+    @property
+    def OnDetectorBinning(self):
+        """ Energy threshold for the counters """
+        return self.proxy.OnDetectorBinning
+
+    @OnDetectorBinning.setter
+    def OnDetectorBinning(self, val):
+        """ Energy threshold for the counters """
+        self.proxy.OnDetectorBinning = val
