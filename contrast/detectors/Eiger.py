@@ -489,10 +489,15 @@ class SelunTango(EigerTango):
 
     @property
     def OnDetectorBinning(self):
-        """ Energy threshold for the counters """
+        """ On Detector binning. Options: 
+            '1x1' - 190x190 pixels at max. 30 kHz
+            '2x2' - 94x94 pixels at up to 120 kHz """
         return self.proxy.OnDetectorBinning
 
     @OnDetectorBinning.setter
     def OnDetectorBinning(self, val):
-        """ Energy threshold for the counters """
-        self.proxy.OnDetectorBinning = val
+        """ Setter for the OnDetectorBinning attribute """
+        if val in ['1x1', '2x2']:
+            self.proxy.OnDetectorBinning = val
+        else:
+            print(f'[!] invalid option for OnDetectorBinning. Did not change the setting.')
