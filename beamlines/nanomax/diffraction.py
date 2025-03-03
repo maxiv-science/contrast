@@ -292,8 +292,8 @@ if __name__ == '__main__':
     # detectors
     #heater_detector = EuroThermDSDetector(device="B303A/DIA/TRC-01", name='heater_detector') #20240520 heater
     epoch = Epoch(name='epoch')
-    pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
-    pilatus.hw_trig = True
+    ### commented out for SELUN tests ### pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus') 
+    ###pilatus.hw_trig = True
     # merlin = Merlin(name='merlin', host='localhost')
     
     # old # 
