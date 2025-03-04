@@ -23,13 +23,14 @@ if __name__ == '__main__':
     from contrast.motors.PiezoLegsMotor import ImgSampleStage
     from contrast.motors.DacMotor import DacMotor
     from contrast.detectors.Eiger import Eiger, EigerTango, SelunTango
+    from contrast.detectors.Selun import SelunTangoFG
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
-    #import macros_common
+    import macros_common
     #import macros_img
     import os
     import time
@@ -88,14 +89,17 @@ if __name__ == '__main__':
     # detectors
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     #eiger4m = EigerTango('b303a/dia/eiger-4m', name='eiger4m', rotation=2)
-    selunCZT = SelunTango('b303a/dia/selun', name='selunCZT', rotation=0, 
-                          hdf_path='entry/instrument/Selun/data')
+    #selunCZT = SelunTango('b303a/dia/selun', name='selunCZT', rotation=0, 
+    #                      hdf_path='entry/instrument/Selun/data')
 
+    selunCZT = SelunTangoFG('b303a/dia/selunfg', name='selunCZT')
 
 
     # The pandabox and some related pseudodetectors
     # Pandabox reading the LC400 encoders analog and controlling the fast shutter
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
+
+    macros_common.TriggerBurst.panda = panda2
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda2/INENC1.VAL_Mean',
