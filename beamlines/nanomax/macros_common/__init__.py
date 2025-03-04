@@ -5,3 +5,4 @@ from .DacScans import *
 from .NpointFlyscan import NpointFlyscan
 from .set_energy import SetEnergy
 from .slit_motor import SlitGap, SlitOffset
+from .TriggerBurst import TriggerBurst

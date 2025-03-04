@@ -27,7 +27,7 @@ if __name__ == '__main__':
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
-    from contrast.detectors import Detector, PseudoDetector
+    from contrast.detectors import Detector, PseudoDetector, DummyDetector
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.scans import SoftwareScan, Ct
     import macros_common
@@ -93,12 +93,11 @@ if __name__ == '__main__':
     #                      hdf_path='entry/instrument/Selun/data')
 
     selunCZT = SelunTangoFG('b303a/dia/selunfg', name='selunCZT')
-
+    det1 = DummyDetector(name='det1')
 
     # The pandabox and some related pseudodetectors
     # Pandabox reading the LC400 encoders analog and controlling the fast shutter
     panda2 = PandaBox(name='panda2', host='b-nanomax-pandabox-2')
-
     macros_common.TriggerBurst.panda = panda2
 
     pseudo = PseudoDetector(name='pseudo',
@@ -131,7 +130,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, selunCZT]:
+    for d in [panda2, pseudo, det1]:#, selunCZT]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class
