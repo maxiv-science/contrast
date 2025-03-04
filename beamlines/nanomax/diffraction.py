@@ -29,7 +29,7 @@ if __name__ == '__main__':
     from contrast.detectors.Eiger import Eiger, EigerTango
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
-    from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
+    # from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
     from contrast.detectors.xandy import Xandy
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
@@ -335,10 +335,11 @@ if __name__ == '__main__':
     # macros_common.WFtrigscan.dac_1 = sy
     # macros_common.WFtrigscan.dac_2 = sz
 
-    panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='energy_panda')
-    macros_common.EnergyFlyscan.PCAP=panda1
-    macros_common.EnergyFlyscan.energy_motor=energy
-    macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
+    # # setup of continous energy scanning
+    # panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='energy_panda')
+    # macros_common.EnergyFlyscan.PCAP=panda1
+    # macros_common.EnergyFlyscan.energy_motor=energy
+    # macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',
