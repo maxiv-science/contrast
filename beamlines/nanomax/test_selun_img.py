@@ -89,7 +89,7 @@ if __name__ == '__main__':
     #eiger4m = Eiger(name='eiger4m', host='b-nanomax-eiger-dc-1')
     #eiger4m = EigerTango('b303a/dia/eiger-4m', name='eiger4m', rotation=2)
     selunCZT = SelunTango('b303a/dia/selun', name='selunCZT', rotation=0, 
-                          hdf_path='entry/instrument/Selun/data',)
+                          hdf_path='entry/instrument/Selun/data')
 
 
 
