@@ -130,7 +130,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda2, pseudo, det1]:#, selunCZT]:
+    for d in [panda2, pseudo, selunCZT]:#, selunCZT]:
         d.active = True
 
     # define pre- and post-scan actions, per scan base class

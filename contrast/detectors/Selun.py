@@ -112,21 +112,36 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
     def threshold(self, val):
         self.proxy.ImagesPerFile = val
 
-    def prepare(self, acqtime, dataid, n_starts):
+    @property
+    def OnDetectorBinning(self):
+        """ On Detector binning. Options: 
+            '1x1' - 190x190 pixels at max. 30 kHz
+            '2x2' - 94x94 pixels at up to 120 kHz """
+        return self.proxy.OnDetectorBinning
 
+    @OnDetectorBinning.setter
+    def OnDetectorBinning(self, val):
+        """ Setter for the OnDetectorBinning attribute """
+        if val in ['1x1', '2x2']:
+            self.proxy.OnDetectorBinning = val
+        else:
+            print(f'[!] invalid option for OnDetectorBinning. Did not change the setting.')
+
+
+    def prepare(self, acqtime, dataid, n_starts):
         try:
-            BurstDetector.prepare(self, acqtime, dataid, n_starts)
-            acqtime = self.acqtime
-            
+            self.hw_trig_n = n_starts
+            self.acqtime = acqtime
+            BurstDetector.prepare(self, self.acqtime, dataid, self.hw_trig_n)
+                
             if self.busy():
                 raise Exception(f'{self.name} is busy!')
-            
             self.proxy.NbImages = self.burst_n    
-            self.proxy.CountTime = acqtime  
-            self.proxy.FrameTime = acqtime + self.burst_latency
+            self.proxy.CountTime = self.acqtime  
+            self.proxy.FrameTime = self.acqtime + self.burst_latency
             #self.proxy.ExposureTime = acqtime
             self.repetitions = self.hw_trig_n if self.hw_trig else 1        
-                
+      
             if (dataid is None) or (env.paths.directory is None):
                 self.dpath = ''
             else:
@@ -137,27 +152,30 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                     print('%s: this hdf5 file exists, I am raising an error now'
                           % self.name)
                     raise Exception('%s hdf5 file already exists' % self.name)
-            
+                
             self.proxy.FilenamePattern = self.dpath.replace('_master.h5', '')
+            
             if self.hw_trig:
                 self.proxy.TriggerMode = 'exts'
+                self.proxy.ImagesPerFile = self.hw_trig_n * self.burst_n
+                self.proxy.NbTriggers = self.hw_trig_n
                 self.proxy.NbImages = self.burst_n
-                self.proxy.NbTriggers = self.hw_trig_n * n_starts
 
                 # exts ... external trigger series
                 # Nimages ... per trigger
                 # Ntrigger ... number of triggers
-                
+                    
             else:
                 self.proxy.TriggerMode = 'ints'
-                self.proxy.ImagesPerFile = n_starts * self.burst_n
-                self.proxy.NbTriggers = n_starts
+                self.proxy.ImagesPerFile = self.hw_trig_n * self.burst_n
+                self.proxy.NbTriggers = self.hw_trig_n
                 self.proxy.NbImages = self.burst_n
-                
+                    
             self.proxy.Arm()
             self.n_started = 0
         except Exception as E:
             print(E)
+
 
     def arm(self):
         # The Selun is armed only once.
@@ -169,8 +187,8 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self.proxy.Trigger()
 
     def stop(self):
-        self.proxy.Stop()
-        self.n_started = 0
+        self.proxy.Abort()
+        self.proxy.Abort()
 
     def read(self):
         if self.dpath:

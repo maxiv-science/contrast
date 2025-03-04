@@ -129,8 +129,7 @@ class TriggerBurst(SoftwareScan):
             return
         # start by setting up triggering on all compatible detectors
         self._set_det_trig(True)
-        group.prepare(self.exptime, self.scannr, 1,
-                      trials=10)
+        group.prepare(self.exptime, self.scannr, self.N_triggers, trials=10)
         t0 = time.time()
 
         # send a header to the recorders
@@ -147,6 +146,9 @@ class TriggerBurst(SoftwareScan):
             self.panda.arm()
             group.arm()
             group.start(trials=10)
+
+
+            time.sleep(2)
 
             # set panda trigger counter to 0
             self.counter_start = self._get_panda_trigger_count()
