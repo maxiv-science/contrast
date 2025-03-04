@@ -94,7 +94,7 @@ class TriggerBurst(SoftwareScan):
         print(f'    Will create {self.N_triggers} triggers.')
         print(f'    Triggers will come every {self.trig_step_time} seconds ({1/self.trig_step_time} Hz).')
         print(f'    Triggers will stay high for {self.trig_up_time} seconds.')
-        print(f'    Detectors are set to explose for {self.exptime} seconds ({1/self.exptime} Hz).')
+        print(f'    Detectors are set to expose for {self.exptime} seconds ({1/self.exptime} Hz).')
 
     def run(self):
         """
