@@ -16,6 +16,23 @@ class TriggerBurst(SoftwareScan):
 
     Usage:
         %triggerburst <N_triggers> <rate_Hz> <delay_ns> <fix_rate_bool>
+
+    Examples:
+        %triggerburst 1000 10000 100 0   
+            Will create 1000 triggers.
+            Triggers will come every 0.000100100 seconds (9990.009990009989 Hz).
+            Triggers will stay high for 0.000050000 seconds.
+            Then there will be a gap of 0.000050100 seconds.
+            Detectors are set to expose for 0.000100000 seconds (10000.0 Hz).
+            With a delay of 100.0 nano-seconds.
+
+        %triggerburst 1000 10000 100 1
+            Will create 1000 triggers.
+            Triggers will come every 0.000100000 seconds (10000.0 Hz).
+            Triggers will stay high for 0.000050000 seconds.
+            Then there will be a gap of 0.000050000 seconds.
+            Detectors are set to expose for 0.000099900 seconds (10010.01001001001 Hz).
+            With a delay of 100.0 nano-seconds.
     """
 
     panda = None
@@ -34,6 +51,7 @@ class TriggerBurst(SoftwareScan):
 
         if self.panda is None:
             raise Exception('Set TriggerBurst.panda to your panda master')
+
         print('TriggerBurst controlled by %s' % self.panda.name)
         
         ## find the longest trigger latency of all active triggered detectors
@@ -64,7 +82,6 @@ class TriggerBurst(SoftwareScan):
         # dummy positions with a non existent motor
         yield {'fake': 0}
 
-
     def _set_det_trig(self, on):
         # special treatment for the panda box which rules all
         panda = self.panda
@@ -92,28 +109,17 @@ class TriggerBurst(SoftwareScan):
 
     def _print_setting(self):
         print(f'    Will create {self.N_triggers} triggers.')
-        print(f'    Triggers will come every {self.trig_step_time} seconds ({1/self.trig_step_time} Hz).')
-        print(f'    Triggers will stay high for {self.trig_up_time} seconds.')
-        print(f'    Detectors are set to expose for {self.exptime} seconds ({1/self.exptime} Hz).')
+        print(f'    Triggers will come every {self.trig_step_time:.9f} seconds ({1/self.trig_step_time} Hz).')
+        print(f'    Triggers will stay high for {self.trig_up_time:.9f} seconds.')
+        print(f'    Then there will be a gap of {self.trig_delay_time:.9f} seconds.')
+        print(f'    Detectors are set to expose for {self.exptime:.9f} seconds ({1/self.exptime} Hz).')
+        print(f'    With a delay of {self.delay_ns:.1f} nano-seconds.')
 
     def run(self):
         """
-        try:
-            # start by setting up triggering on all compatible detectors
-            self._set_det_trig(True)
-
-            # we'll also need the pandabox
-            self.panda.active = True
-
-            # run the main part
-            #self.panda.query('%s.A=1' % self.panda.bitblock)
-            #self.panda.query('%s.A=0' % self.panda.bitblock)
-            #super(TriggerBurst, self).run()
-        """
-        #as
-        """
-        This is the main acquisition loop where interaction with motors,
-        detectors and other ``Gadget`` objects happens.
+        The whole scan process is recreated here for the hardware scan:
+        Preparing and arming detectors, running the scan, reading data and 
+        sending it to recorders and cleaning up at the end.
         """
         self._before_scan()
         print(f'\nScan {colors.str_scannumber(self.scannr)} starting at {time.asctime()}\n')
@@ -127,6 +133,7 @@ class TriggerBurst(SoftwareScan):
             print('These gadgets are busy: %s'
                   % (', '.join([d.name for d in group if d.busy()])))
             return
+
         # start by setting up triggering on all compatible detectors
         self._set_det_trig(True)
         group.prepare(self.exptime, self.scannr, self.N_triggers, trials=10)
@@ -148,7 +155,7 @@ class TriggerBurst(SoftwareScan):
             group.start(trials=10)
 
 
-            time.sleep(2)
+            #time.sleep(2)
 
             # set panda trigger counter to 0
             self.counter_start = self._get_panda_trigger_count()
@@ -167,6 +174,7 @@ class TriggerBurst(SoftwareScan):
             for d in det_group_extended:
                 dct[d.name] = d.read()
             dct['dt'] = dt
+
             # pass data to recorders
             for r in active_recorders():
                 r.queue.put(dct)
@@ -209,6 +217,5 @@ class TriggerBurst(SoftwareScan):
         return int(self.panda.query('COUNTER5.OUT?')[4:].replace('\n',''))
 
     def _while_acquiring(self):
-        #pass
         counters = self._get_panda_trigger_count() - self.counter_start
-        print(f'\rEstimated time left {(self.N_triggers-counters) * self.trig_step_time:.3f} s', end='')
+        print(f'\rEstimated time left {(self.N_triggers-counters) * self.trig_step_time:.1f} s', end='')

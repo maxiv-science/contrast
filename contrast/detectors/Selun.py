@@ -122,11 +122,13 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
     @OnDetectorBinning.setter
     def OnDetectorBinning(self, val):
         """ Setter for the OnDetectorBinning attribute """
-        if val in ['1x1', '2x2']:
-            self.proxy.OnDetectorBinning = val
-        else:
+        if not(val in ['1x1', '2x2']):
             print(f'[!] invalid option for OnDetectorBinning. Did not change the setting.')
-
+        elif (self.proxy.OnDetectorBinning == '2x2') and (val == '1x1') and self.proxy.FrameTime < 1./30000.:
+            print(f'[!] The {self.name} detector is still set to a too quick frame time.')
+            print(f'    Set a slower frame rate / longer frame time before returning to 1x1 binning.')
+        else:
+            self.proxy.OnDetectorBinning = val
 
     def prepare(self, acqtime, dataid, n_starts):
         try:
@@ -154,19 +156,15 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                     raise Exception('%s hdf5 file already exists' % self.name)
                 
             self.proxy.FilenamePattern = self.dpath.replace('_master.h5', '')
-            
+
             if self.hw_trig:
-                self.proxy.TriggerMode = 'exts'
+                self.proxy.TriggerMode = 'exts' # "external trigger series" = M frames for each of N triggers
                 self.proxy.ImagesPerFile = self.hw_trig_n * self.burst_n
                 self.proxy.NbTriggers = self.hw_trig_n
                 self.proxy.NbImages = self.burst_n
-
-                # exts ... external trigger series
-                # Nimages ... per trigger
-                # Ntrigger ... number of triggers
                     
             else:
-                self.proxy.TriggerMode = 'ints'
+                self.proxy.TriggerMode = 'ints'  # "internal trigger series" = M frames for each of N triggers
                 self.proxy.ImagesPerFile = self.hw_trig_n * self.burst_n
                 self.proxy.NbTriggers = self.hw_trig_n
                 self.proxy.NbImages = self.burst_n
@@ -175,7 +173,6 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
             self.n_started = 0
         except Exception as E:
             print(E)
-
 
     def arm(self):
         # The Selun is armed only once.
