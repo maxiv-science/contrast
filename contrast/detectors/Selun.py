@@ -66,9 +66,12 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         # so we check the State first, to see if it is idle
         if self.proxy.State() == tango.DevState.STANDBY:
             return False
-        #if self.proxy.nFramesReceived < self.n_started*self.burst_n:
-        #    return True
+        elif str(self.proxy.status()).startswith('acquire'):
+            return True
+        elif str(self.proxy.status()).startswith('idle'):
+            return False
         else:
+            #print(self.proxy.status)
             return False
 
     @property
@@ -179,7 +182,6 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
         pass
 
     def start(self):
-        self.n_started += self.repetitions
         if not self.hw_trig:
             self.proxy.Trigger()
 
