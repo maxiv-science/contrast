@@ -160,15 +160,20 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                 
             self.proxy.FilenamePattern = self.dpath.replace('_master.h5', '')
 
+            # best effort estimation of what might be smart
+            imagesperfile = self.hw_trig_n * self.burst_n
+            #if imagesperfile >= 1e7 and self.burst_n > 1e5:
+            #    imagesperfile = self.burst_n
+
             if self.hw_trig:
                 self.proxy.TriggerMode = 'exts' # "external trigger series" = M frames for each of N triggers
-                self.proxy.ImagesPerFile = self.hw_trig_n * self.burst_n
+                self.proxy.ImagesPerFile = imagesperfile #self.hw_trig_n * self.burst_n
                 self.proxy.NbTriggers = self.hw_trig_n
                 self.proxy.NbImages = self.burst_n
                     
             else:
                 self.proxy.TriggerMode = 'ints'  # "internal trigger series" = M frames for each of N triggers
-                self.proxy.ImagesPerFile = self.hw_trig_n * self.burst_n
+                self.proxy.ImagesPerFile = imagesperfile #self.hw_trig_n * self.burst_n
                 self.proxy.NbTriggers = self.hw_trig_n
                 self.proxy.NbImages = self.burst_n
                     
