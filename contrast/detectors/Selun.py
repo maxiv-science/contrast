@@ -143,7 +143,9 @@ class SelunTangoFG(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetec
                 raise Exception(f'{self.name} is busy!')
             self.proxy.NbImages = self.burst_n    
             self.proxy.CountTime = self.acqtime  
+            #print(f' --- trying to setting frametime {self.proxy.FrameTime} s')
             self.proxy.FrameTime = self.acqtime + self.burst_latency
+
             #self.proxy.ExposureTime = acqtime
             self.repetitions = self.hw_trig_n if self.hw_trig else 1        
       
