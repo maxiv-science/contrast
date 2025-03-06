@@ -374,7 +374,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, panda1]:# :x3mini, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2, eiger1m]:# :x3mini, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
