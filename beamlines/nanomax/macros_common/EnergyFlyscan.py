@@ -45,7 +45,7 @@ class EnergyFlyscan(SoftwareScan):
         self.panda = tango.DeviceProxy("B303A-A100380CAB03/TIM/PANDA-01")
         # PCAP = "b303a-a100380cab03/dia/panda-01"
         self.bragg = tango.DeviceProxy("bragg")
-        self.z1 = tango.DeviceProxy("tango://g-v-csproxy-0:10303/r3-303l/id/idivu-01_mc401")
+        self.z3 = tango.DeviceProxy("tango://g-v-csproxy-0:10303/r3-303l/id/idivu-01_mc401")
         self.energy = tango.DeviceProxy("energy")
         self.energy_corr = tango.DeviceProxy("energy_corr")
         self.ivu = tango.DeviceProxy("tango://g-v-csproxy-0:10303/r3-303l/id/idivu-01_gap")
@@ -139,9 +139,9 @@ class EnergyFlyscan(SoftwareScan):
         # Sync bragg motor
         assert self.bragg.State() not in [tango.DevState.MOVING], "bragg motor is moving, stop it before sync panda encoder"
         self.panda.SyncBragg(self.bragg.EncTgtEnc)
-        # Sync IVU Z1 motor - note this must access accelerator control system
-        assert self.z1.State() not in [tango.DevState.MOVING], "IVU is moving, stop it before sync panda encoder"
-        self.panda.SyncIVU(self.z1.EncAbsEnc)
+        # Sync IVU z3 motor - note this must access accelerator control system
+        assert self.z3.State() not in [tango.DevState.MOVING], "IVU is moving, stop it before sync panda encoder"
+        self.panda.SyncIVU(self.z3.EncAbsEnc)
         print("Panda encoder is synced with icepap encoders")
 
     def _generate_positions(self):
