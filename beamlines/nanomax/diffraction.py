@@ -26,7 +26,8 @@ if __name__ == '__main__':
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Andor3 import Andor3
-    from contrast.detectors.Eiger import Eiger, EigerTango
+    from contrast.detectors.Eiger import Eiger, EigerTango, SelunTango
+    from contrast.detectors.Selun import SelunTangoFG
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     # from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
@@ -314,6 +315,8 @@ if __name__ == '__main__':
     #andor.proxy.fliplr=False
     #andor.proxy.sensorcooling=True
     
+    #selunCZT = SelunTango('b303a/dia/selun', name='selunCZT', rotation=0, hdf_path='entry/instrument/Selun/data')
+    selunCZT = SelunTangoFG('b303a/dia/selunfg', name='selunCZT')
     # eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m', rotation = 0)
     #eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
@@ -330,6 +333,7 @@ if __name__ == '__main__':
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     macros_common.NpointFlyscan.panda = panda0
+    macros_common.TriggerBurst.panda = panda0
     # macros_common.WFtrigscan.panda = panda0
     # macros_common.WFtrigscan.dac_0 = sx
     # macros_common.WFtrigscan.dac_1 = sy
