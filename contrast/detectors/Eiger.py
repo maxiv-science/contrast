@@ -480,3 +480,24 @@ class EigerTango(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetecto
         # arming and disarming stores it:
         self._set('detector', 'command/arm')
         self._set('detector', 'command/disarm')
+
+
+class SelunTango(EigerTango):
+    """
+    Provides a direct interface to the Dectris SELUN server via a Tango Server.
+    """
+
+    @property
+    def OnDetectorBinning(self):
+        """ On Detector binning. Options: 
+            '1x1' - 190x190 pixels at max. 30 kHz
+            '2x2' - 94x94 pixels at up to 120 kHz """
+        return self.proxy.OnDetectorBinning
+
+    @OnDetectorBinning.setter
+    def OnDetectorBinning(self, val):
+        """ Setter for the OnDetectorBinning attribute """
+        if val in ['1x1', '2x2']:
+            self.proxy.OnDetectorBinning = val
+        else:
+            print(f'[!] invalid option for OnDetectorBinning. Did not change the setting.')
