@@ -26,6 +26,7 @@ class PandaBoxPCAP(Detector):
     
     def prepare(self, acqtime, dataid, n_starts):
         
+        self.proxy.nTriggers = n_starts
         self.n_started = 0
         self.n_starts = n_starts
         if self.busy():
@@ -65,12 +66,7 @@ class PandaBoxPCAP(Detector):
         self.n_started = 0
 
     def busy(self):
-        if self.proxy.State() == tango.DevState.RUNNING:
-            if hasattr(self, 'n_starts') and self.n_starts == self.proxy.nFramesReceived:
-                self.proxy.Disarm()
-            return True
-        else:
-            return False
+        return self.proxy.State() == tango.DevState.RUNNING
 
     def read(self):
         if self.saving_file == '':
