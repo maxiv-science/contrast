@@ -12,11 +12,12 @@ class EnergyFlyscan(SoftwareScan):
     energy_motor = None
     ivu_gap_motor = None
 
-    def __init__(self, start_energy, end_energy, intervals, exposure_time, latency = None):
+    def __init__(self, start_energy, end_energy, intervals, exposure_time, latency = None, use_id = True):
         self.start_energy = start_energy
         self.end_energy = end_energy
         self.intervals = intervals
         self.exposuretime = exposure_time
+        self.use_id = use_id
 
         # init Software Scan
         super().__init__(self.exposuretime)
@@ -185,28 +186,29 @@ class EnergyFlyscan(SoftwareScan):
         print(f"Pre-start position at {pre_start} eV")
         print(f"Post-final position at {post_final} eV")
             # check IVU harmonic range for given scan parameters
-        ranges = self.id_traj_ctrl.get_property("EnergyRanges")["EnergyRanges"]
-        # note for the step bellow you should use pre-start and post-final to make sure the motion
-        # space fits in the active trajectory range
-        s = min(pre_start, post_final)  # lower energy independent of scan direction
-        f = max(pre_start, post_final)  # higher energy independent of scan direction
-        harmonic = None
-        for r in ranges:
-            rr = r.split(":")[1].split(", ")
-            (r_min, r_max) = rr
-            if s > float(r_min) and f < float(r_max):
-                harmonic = int(r.split(":")[0])
-                print(
-                    f"IVU harmonic is {harmonic}, Energy range for this harmonic is {r_min} and {r_max}"
-                )
-        assert (
-            harmonic is not None
-        ), f"Failed to find IVU harmonic for given scan energy or it crosses harmonics. ID harmonic table:\n{ranges}"
-        self.id_traj.Harmonic = harmonic
-        time.sleep(1)
-        while self.id_traj.State() in [tango.DevState.MOVING]:
+        if self.use_id:
+            ranges = self.id_traj_ctrl.get_property("EnergyRanges")["EnergyRanges"]
+            # note for the step bellow you should use pre-start and post-final to make sure the motion
+            # space fits in the active trajectory range
+            s = min(pre_start, post_final)  # lower energy independent of scan direction
+            f = max(pre_start, post_final)  # higher energy independent of scan direction
+            harmonic = None
+            for r in ranges:
+                rr = r.split(":")[1].split(", ")
+                (r_min, r_max) = rr
+                if s > float(r_min) and f < float(r_max):
+                    harmonic = int(r.split(":")[0])
+                    print(
+                        f"IVU harmonic is {harmonic}, Energy range for this harmonic is {r_min} and {r_max}"
+                    )
+            assert (
+                harmonic is not None
+            ), f"Failed to find IVU harmonic for given scan energy or it crosses harmonics. ID harmonic table:\n{ranges}"
+            self.id_traj.Harmonic = harmonic
             time.sleep(1)
-        print("IVU harmonic configured")
+            while self.id_traj.State() in [tango.DevState.MOVING]:
+                time.sleep(1)
+            print("IVU harmonic configured")
         
         # move energy to pre-start energy
         self.energy_motor.move(pre_start)
@@ -218,7 +220,8 @@ class EnergyFlyscan(SoftwareScan):
          # sync trajectory motor and set speed to maximum
         # clean min max trajectory range if needed
         self.mono_traj.MoveOntoTrajectoryAt = self.mono_traj.NearestTrajectoryPosition
-        self.id_traj.MoveOntoTrajectoryAt = self.id_traj.NearestTrajectoryPosition
+        if self.use_id:
+            self.id_traj.MoveOntoTrajectoryAt = self.id_traj.NearestTrajectoryPosition
         # wait for trajectory sync to finish
         time.sleep(1)
         while self.mono_traj.State() or self.id_traj.State() in [tango.DevState.MOVING]:
@@ -227,9 +230,10 @@ class EnergyFlyscan(SoftwareScan):
         assert self.mono_traj.State() in [
             tango.DevState.ON
         ], f"Mono trajectory sync failed {self.mono_traj.State()} {self.mono_traj.Status()}"
-        assert self.id_traj.State() in [
-            tango.DevState.ON
-        ], f"ID trajectory sync failed {self.id_traj.State()} {self.id_traj.Status()}"
+        if self.use_id:
+            assert self.id_traj.State() in [
+                tango.DevState.ON
+            ], f"ID trajectory sync failed {self.id_traj.State()} {self.id_traj.Status()}"
         print("ID and mono trajectories are synced")
         
         # # check and set the min and max activy trajectory ranges
@@ -245,12 +249,14 @@ class EnergyFlyscan(SoftwareScan):
         assert (
             velocity <= self.mono_traj.MaxVelocity
         ), f"requested {velocity=} is above mono max speed {self.mono_traj.MaxVelocity}"
-        assert (
-            velocity <= self.id_traj.MaxVelocity
-        ), f"requested {velocity=} is above id max speed {self.id_traj.MaxVelocity}"
+        if self.use_id:
+            assert (
+                velocity <= self.id_traj.MaxVelocity
+            ), f"requested {velocity=} is above id max speed {self.id_traj.MaxVelocity}"
         # set velocity
         self.mono_traj.Velocity = velocity
-        self.id_traj.Velocity = velocity
+        if self.use_id:
+            self.id_traj.Velocity = velocity
         print(f"Trajectories velocities were configured for {velocity} eV/s")
         print(f"{self.mono_traj.Velocity = } {self.mono_traj.Acceleration = }")
         print(f"{self.id_traj.Velocity = } {self.id_traj.Acceleration = }")
@@ -261,7 +267,8 @@ class EnergyFlyscan(SoftwareScan):
         print(f"{self.mono_traj.State() = } {self.id_traj.State() = }")
         print(f"{self.mono_traj.Status() = }\n{self.id_traj.Status() = }")
         self.mono_traj.Position = pre_start
-        self.id_traj.Position = pre_start
+        if self.use_id:
+            self.id_traj.Position = pre_start
         # wait for motion to finish
         time.sleep(0.1)
         while self.mono_traj.State() or self.id_traj.State() in [tango.DevState.MOVING]:
@@ -277,4 +284,5 @@ class EnergyFlyscan(SoftwareScan):
         # Start your motion here, dont forget to check direction and compensate for trapezoidal profile
         print("Starting motion to:", self.post_final)
         self.mono_traj.Position = self.post_final
-        self.id_traj.Position = self.post_final
+        if self.use_id:
+            self.id_traj.Position = self.post_final
