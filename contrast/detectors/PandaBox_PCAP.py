@@ -39,8 +39,7 @@ class PandaBoxPCAP(Detector):
         else:
             # saving
             path = env.paths.directory
-            # FIXME change to .hdf5 once Tnago Server is fixed
-            fn = f'scan_{dataid:06d}_{self.name}.h5'
+            fn = f'scan_{dataid:06d}_{self.name}.hdf5'
             self.saving_file = os.path.join(path, fn)
             if os.path.exists(self.saving_file):
                 print('%s: this hdf5 file exists, I am raising an error now'
@@ -72,6 +71,6 @@ class PandaBoxPCAP(Detector):
         if self.saving_file == '':
             return None
         else:
-            return {'energy': Link(self.saving_file, self._hdf_path,
+            return {'': Link(self.saving_file, self._hdf_path,
                                    universal=True)
                                    }
