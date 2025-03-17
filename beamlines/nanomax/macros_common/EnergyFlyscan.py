@@ -153,6 +153,7 @@ class EnergyFlyscan(SoftwareScan):
         yield positions
 
     def _before_move(self):
+        ### calculations section start
         # calculate velocity
         # here you can add check for allowed velocities if needed
         velocity = abs(self.end_energy - self.start_energy) / ((self.intervals-1) * (self.exposuretime + self.latency))
@@ -162,14 +163,15 @@ class EnergyFlyscan(SoftwareScan):
         # set the scanned acc time to the slowest system involved
         mono_acc = self.mono_traj.Acceleration
         id_acc = self.id_traj.Acceleration
-        max_acc = max(mono_acc, id_acc)
-        energy_compensation = velocity * max_acc / 2
-        print(f"Energy compensation for trapezoidal profile if {energy_compensation} eV")
         # set acceleration time to slowest
         self.mono_traj.Acceleration = 1 # max_acc
         self.id_traj.Acceleration = 1 # max_acc
         #self.mono_traj.Acceleration = max_acc
         #self.id_traj.Acceleration = max_acc
+        max_acc = max(mono_acc, id_acc)
+        self.acct = max_acc
+        energy_compensation = velocity * max_acc / 2
+        print(f"Energy compensation for trapezoidal profile if {energy_compensation} eV")
         print(
             f"Max acceleration time is {max_acc} seconds, both systems were configured to match that"
         )
@@ -185,7 +187,11 @@ class EnergyFlyscan(SoftwareScan):
         self.post_final = post_final
         print(f"Pre-start position at {pre_start} eV")
         print(f"Post-final position at {post_final} eV")
-            # check IVU harmonic range for given scan parameters
+        self.energy_compensation = energy_compensation
+        self.scan_velocity = velocity
+        self.pre_start = pre_start
+        ### calculations section end
+        # check IVU harmonic range for given scan parameters
         if self.use_id:
             ranges = self.id_traj_ctrl.get_property("EnergyRanges")["EnergyRanges"]
             # note for the step bellow you should use pre-start and post-final to make sure the motion
@@ -283,6 +289,86 @@ class EnergyFlyscan(SoftwareScan):
         print("Panda started")
         # Start your motion here, dont forget to check direction and compensate for trapezoidal profile
         print("Starting motion to:", self.post_final)
+        self.mono_traj.Position = self.post_final
+        if self.use_id:
+            self.id_traj.Position = self.post_final
+
+@macro
+class EnergyFlyscanScp(EnergyFlyscan):
+    def _configure_pandabox(self):
+        ### calculations section start (copy of EnergyFlyscan before_move calculations)
+        # calculate velocity
+        # here you can add check for allowed velocities if needed
+        velocity = abs(self.end_energy - self.start_energy) / ((self.intervals-1) * (self.exposuretime + self.latency))
+        print(f"scan velocity is {velocity} in eV/s")
+
+        # calculate the acceleration time and compensation for trapezoidal profile
+        # set the scanned acc time to the slowest system involved
+        mono_acc = self.mono_traj.Acceleration
+        id_acc = self.id_traj.Acceleration
+        # set acceleration time to slowest
+        self.mono_traj.Acceleration = 1 # max_acc
+        self.id_traj.Acceleration = 1 # max_acc
+        #self.mono_traj.Acceleration = max_acc
+        #self.id_traj.Acceleration = max_acc
+        max_acc = max(mono_acc, id_acc)
+        self.acct = max_acc
+        energy_compensation = velocity * max_acc / 2
+        print(f"Energy compensation for trapezoidal profile if {energy_compensation} eV")
+        print(
+            f"Max acceleration time is {max_acc} seconds, both systems were configured to match that"
+        )
+
+        # calculate pre-start and post-final position for energy compensation
+        # check direction of scan for right compensation
+        if self.end_energy > self.start_energy:
+            pre_start = self.start_energy - energy_compensation
+            post_final = self.end_energy + energy_compensation
+        else:
+            pre_start = self.start_energy + energy_compensation
+            post_final = self.end_energy - energy_compensation
+        self.post_final = post_final
+        print(f"Pre-start position at {pre_start} eV")
+        print(f"Post-final position at {post_final} eV")
+        self.energy_compensation = energy_compensation
+        self.scan_velocity = velocity
+        self.pre_start = pre_start
+        ### calculations section end
+
+        self.pcapds = tango.DeviceProxy("b303a-a100380cab03/dia/panda-01")    
+        self.acct_positions = self.acct / (self.latency + self.exposuretime)
+        self.additional_positions = int(1.1 * (self.acct_positions * 2))
+        # Start with 10% extra
+        self.panda.nPoints = self.n_positions + self.additional_positions
+        self.panda.ExposureTime = self.exposuretime
+        self.panda.LatencyTime = self.latency
+        self.panda.EncInUse = (
+            True  # this should be always True if running a cont energy scan
+        )
+        self.pcapds.nTriggers=self.panda.nPoints
+        (energy_raw, *_) = self.energy_corr.CalcAllPhysical(
+            # [self.start_energy]
+            [self.pre_start]
+        )  # START energy in eV dont use pre-start
+        (bragg_value, *_) = self.energy.CalcAllPhysical([energy_raw])
+        bragg_encoder_value = (
+            (bragg_value + self.bragg.Offset)
+            * self.bragg.Step_per_unit
+            * self.bragg.Sign
+        )
+        self.panda.PCOMPReference = bragg_encoder_value - 100
+        print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, bragg_encoder_value, self.pcapds.nTriggers)
+        print("Panda configured for given parameters")
+
+
+    def _before_start(self):
+        print("###before start")
+        self.pcapds.nTriggers=self.panda.nPoints
+        print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, self.pcapds.nTriggers)
+        self.panda.Start()
+        print("Panda started")
+        # Start your motion here, dont forget to check direction and compensate for trapezoidal profile
+        print("Starting motion from:" , self.mono_traj.Position, " self.to:", self.post_final, ' pcomp:', self.panda.PCOMPReference, ' bragg enc:', self.bragg.enctgtenc )
         self.mono_traj.Position = self.post_final
         if self.use_id:
             self.id_traj.Position = self.post_final
