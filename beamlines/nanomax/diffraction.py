@@ -30,7 +30,7 @@ if __name__ == '__main__':
     from contrast.detectors.Selun import SelunTangoFG
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
-    # from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
+    from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
     from contrast.detectors.xandy import Xandy
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
@@ -148,9 +148,9 @@ if __name__ == '__main__':
     pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
     
     # SmarAct controller 4 in OH2 for fast shutter and first diamondBPM
-    fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3, frequency=1000)
-    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
-    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
+    # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3, frequency=1000)
+    # dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
+    # dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
 
     # gap and offset pseudo motors for slits in DM4
     seh_posy = macros_common.SlitOffset([seh_top, seh_bottom], name="seh_posy", userlevel=4)
@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     # detectors
     # DBPM at SSA
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     # DBPM in DM4
     # alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
 
@@ -340,10 +340,10 @@ if __name__ == '__main__':
     # macros_common.WFtrigscan.dac_2 = sz
 
     # # setup of continous energy scanning
-    # panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='energy_panda')
-    # macros_common.EnergyFlyscan.PCAP=panda1
-    # macros_common.EnergyFlyscan.energy_motor=energy
-    # macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
+    panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='panda1', hdf_path='/entry/instrument/pandabox/data/')
+    macros_common.EnergyFlyscan.PCAP=panda1
+    macros_common.EnergyFlyscan.energy_motor=energy
+    macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',
