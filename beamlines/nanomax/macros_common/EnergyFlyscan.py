@@ -141,7 +141,8 @@ class EnergyFlyscan(SoftwareScan):
         assert self.bragg.State() not in [tango.DevState.MOVING], "bragg motor is moving, stop it before sync panda encoder"
         self.panda.SyncBragg(self.bragg.EncTgtEnc)
         # Sync IVU Z1 motor - note this must access accelerator control system
-        assert self.z1.State() not in [tango.DevState.MOVING], "IVU is moving, stop it before sync panda encoder"
+        if self.use_id:
+            assert self.z1.State() not in [tango.DevState.MOVING], "IVU is moving, stop it before sync panda encoder"
         self.panda.SyncIVU(self.z1.EncAbsEnc)
         print("Panda encoder is synced with icepap encoders")
 
@@ -164,8 +165,8 @@ class EnergyFlyscan(SoftwareScan):
         mono_acc = self.mono_traj.Acceleration
         id_acc = self.id_traj.Acceleration
         # set acceleration time to slowest
-        self.mono_traj.Acceleration = 1 # max_acc
-        self.id_traj.Acceleration = 1 # max_acc
+        # self.mono_traj.Acceleration = 1 # max_acc
+        # self.id_traj.Acceleration = 1 # max_acc
         #self.mono_traj.Acceleration = max_acc
         #self.id_traj.Acceleration = max_acc
         max_acc = max(mono_acc, id_acc)
@@ -231,8 +232,13 @@ class EnergyFlyscan(SoftwareScan):
         # wait for trajectory sync to finish
         time.sleep(1)
         while self.mono_traj.State() or self.id_traj.State() in [tango.DevState.MOVING]:
-            print("moving onto trajectory")
+            print("moving mono onto trajectory")
             time.sleep(0.1)
+        if self.use_id:
+            while self.id_traj.State() in [tango.DevState.MOVING]:
+                print("moving id onto trajectory")
+                time.sleep(0.1)
+
         assert self.mono_traj.State() in [
             tango.DevState.ON
         ], f"Mono trajectory sync failed {self.mono_traj.State()} {self.mono_traj.Status()}"
@@ -266,6 +272,7 @@ class EnergyFlyscan(SoftwareScan):
         print(f"Trajectories velocities were configured for {velocity} eV/s")
         print(f"{self.mono_traj.Velocity = } {self.mono_traj.Acceleration = }")
         print(f"{self.id_traj.Velocity = } {self.id_traj.Acceleration = }")
+        print(f"{self.mono_traj.MaxVelocity = }  {self.id_traj.MaxVelocity = }")
 
          # move to pre-start position using trajectory after synced
         print(f"About to move the motors to pre-start position at {pre_start} eV")
@@ -279,7 +286,9 @@ class EnergyFlyscan(SoftwareScan):
         time.sleep(0.1)
         while self.mono_traj.State() or self.id_traj.State() in [tango.DevState.MOVING]:
             time.sleep(0.1)
-            print(f"ID current position {self.id_traj.Position} eV Mono current position: {self.mono_traj.Position} eV", end="\r")  
+            if self.use_id:
+                print(f"ID current position {self.id_traj.Position} eV", end="\r")
+            print(f"Mono current position: {self.mono_traj.Position} eV", end="\r")  
 
     def _before_arm(self):
         self.panda.Arm()
@@ -293,9 +302,35 @@ class EnergyFlyscan(SoftwareScan):
         if self.use_id:
             self.id_traj.Position = self.post_final
 
+
+@macro
+class EnergyFlyscanAcct(EnergyFlyscan):
+
+    def __init__(self, start_energy, end_energy, intervals, exposure_time, latency = None, use_id = True, acct = None):
+        self.acct = acct
+        # init standard EnergyFlyScan
+        super().__init__(start_energy, end_energy, intervals, exposure_time, latency, use_id)
+
+    def _configure_pandabox(self):
+        # acct could be configured in more suitable method
+        if self.acct != None:
+            self.mono_traj.Acceleration = self.acct # max_acc
+            self.id_traj.Acceleration = self.acct# max_acc
+        super()._configure_pandabox()
+
 @macro
 class EnergyFlyscanScp(EnergyFlyscan):
+
+    def __init__(self, start_energy, end_energy, intervals, exposure_time, latency = None, use_id = True, acct = None):
+        self.acct = acct
+        # init standard EnergyFlyScan
+        super().__init__(start_energy, end_energy, intervals, exposure_time, latency, use_id)
+
     def _configure_pandabox(self):
+        # acct could be configured in more suitable method
+        if self.acct != None:
+            self.mono_traj.Acceleration = self.acct # max_acc
+            self.id_traj.Acceleration = self.acct# max_acc
         ### calculations section start (copy of EnergyFlyscan before_move calculations)
         # calculate velocity
         # here you can add check for allowed velocities if needed
@@ -307,8 +342,6 @@ class EnergyFlyscanScp(EnergyFlyscan):
         mono_acc = self.mono_traj.Acceleration
         id_acc = self.id_traj.Acceleration
         # set acceleration time to slowest
-        self.mono_traj.Acceleration = 1 # max_acc
-        self.id_traj.Acceleration = 1 # max_acc
         #self.mono_traj.Acceleration = max_acc
         #self.id_traj.Acceleration = max_acc
         max_acc = max(mono_acc, id_acc)
@@ -357,18 +390,18 @@ class EnergyFlyscanScp(EnergyFlyscan):
             * self.bragg.Sign
         )
         self.panda.PCOMPReference = bragg_encoder_value - 100
-        print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, bragg_encoder_value, self.pcapds.nTriggers)
+        # print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, bragg_encoder_value, self.pcapds.nTriggers)
         print("Panda configured for given parameters")
 
 
     def _before_start(self):
-        print("###before start")
+        #print("###before start")
         self.pcapds.nTriggers=self.panda.nPoints
-        print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, self.pcapds.nTriggers)
+        #print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, self.pcapds.nTriggers)
         self.panda.Start()
         print("Panda started")
         # Start your motion here, dont forget to check direction and compensate for trapezoidal profile
-        print("Starting motion from:" , self.mono_traj.Position, " self.to:", self.post_final, ' pcomp:', self.panda.PCOMPReference, ' bragg enc:', self.bragg.enctgtenc )
+        print("Starting motion from:" , self.mono_traj.Position, "  to:", self.post_final, ' pcomp:', self.panda.PCOMPReference, ' bragg enc:', self.bragg.enctgtenc )
         self.mono_traj.Position = self.post_final
         if self.use_id:
             self.id_traj.Position = self.post_final
