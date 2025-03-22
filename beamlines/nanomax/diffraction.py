@@ -148,9 +148,9 @@ if __name__ == '__main__':
     pol_rot = SmaractRotationMotor(device='B303A-EH/CTL/PZCU-04', axis=14, name='pol_rot', userlevel=2, user_format='%.8f', dial_format='%.8f')
     
     # SmarAct controller 4 in OH2 for fast shutter and first diamondBPM
-    # fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3, frequency=1000)
-    # dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
-    # dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
+    fastshutter_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=0, name='fastshutter_y', userlevel=3, frequency=1000)
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
 
     # gap and offset pseudo motors for slits in DM4
     seh_posy = macros_common.SlitOffset([seh_top, seh_bottom], name="seh_posy", userlevel=4)
