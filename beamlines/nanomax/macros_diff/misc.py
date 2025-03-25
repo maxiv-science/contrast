@@ -64,7 +64,8 @@ class FsOpen(object):
     Opens the fast shutter.
     """
     def run(self):
-        fastshutter_action(False, 'panda0')
+        # fastshutter_action(False, 'panda0')
+        runCommand('umv seh_left 2000')
 
 @macro
 class FsClose(object):
@@ -72,7 +73,8 @@ class FsClose(object):
     Closes the fast shutter.
     """
     def run(self):
-        fastshutter_action(True, 'panda0')
+        # fastshutter_action(True, 'panda0')
+        runCommand('umv seh_left -2000')
 
 @macro
 class M1shift(object):
