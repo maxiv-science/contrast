@@ -26,8 +26,7 @@ if __name__ == '__main__':
     from contrast.detectors.Merlin import Merlin
     from contrast.detectors.Xspress3 import Xspress3
     from contrast.detectors.Andor3 import Andor3
-    from contrast.detectors.Eiger import Eiger, EigerTango, SelunTango
-    from contrast.detectors.Selun import SelunTangoFG
+    from contrast.detectors.Eiger import Eiger, EigerTango
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
     from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
@@ -295,8 +294,8 @@ if __name__ == '__main__':
     # detectors
     #heater_detector = EuroThermDSDetector(device="B303A/DIA/TRC-01", name='heater_detector') #20240520 heater
     epoch = Epoch(name='epoch')
-    ### commented out for SELUN tests ### pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus') 
-    ###pilatus.hw_trig = True
+    pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus') 
+    pilatus.hw_trig = True
     # merlin = Merlin(name='merlin', host='localhost')
     
     # old # 
@@ -315,8 +314,6 @@ if __name__ == '__main__':
     #andor.proxy.fliplr=False
     #andor.proxy.sensorcooling=True
     
-    #selunCZT = SelunTango('b303a/dia/selun', name='selunCZT', rotation=0, hdf_path='entry/instrument/Selun/data')
-    selunCZT = SelunTangoFG('b303a/dia/selunfg', name='selunCZT')
     # eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0')
     eiger1m = EigerTango('b303a/dia/eiger-1m', name='eiger1m', rotation = 0)
     #eiger500k = Eiger(name='eiger500k', host='b-nanomax-eiger-500k-0')
@@ -378,7 +375,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, panda1, pseudo, alba2, eiger1m]:# :x3mini, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2, eiger500k]:# :x3mini, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
