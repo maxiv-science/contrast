@@ -5,6 +5,7 @@ from ..environment import env
 import time
 import numpy as np
 import os
+import numpy as np
 try:
     import tango
 except ImportError:
@@ -17,7 +18,7 @@ class QEPro6500(Detector, TriggeredDetector):
     """
 
     def __init__(self, device, name=None,
-                 hdf_path='entry/instrument/QEPro/data',
+                 hdf_path='entry/measurement/qepro/frames',
                  hw_trig_min_latency=0.01,
                  trigger_mode=3,
                  nonlinearity_correction=True,
@@ -77,7 +78,7 @@ class QEPro6500(Detector, TriggeredDetector):
     def prepare(self, acqtime, dataid, n_starts):
         print(f"calling prepare() with {acqtime = }, {dataid = }, {n_starts = }")
         print(f"{acqtime = }, {self.hw_trig_n = }, {dataid = }")
-        self.dpath = ''
+        # self.dpath = ''
         if self.busy():
             raise Exception(f'{self.name} is busy!')
         
@@ -85,20 +86,21 @@ class QEPro6500(Detector, TriggeredDetector):
         
         self.proxy.ExposureTime = acqtime
         self.proxy.nTriggers = self.hw_trig_n
-        self.proxy.DestinationFileName = f"{dataid}"
-        self.proxy.Prepare()
+        # self.proxy.DestinationFileName = f"{dataid}"
             
-        # if (dataid is None) or (env.paths.directory is None):
-        #     self.dpath = ''
-        # else:
-        #     path = env.paths.directory
-        #     filename = 'scan_%06d_%s.h5' % (dataid, self.name)
-        #     self.dpath = os.path.join(env.paths.directory, filename)
-        #     if os.path.exists(self.dpath):
-        #         print('%s: this hdf5 file exists, I am raising an error now'
-        #               % self.name)
-        #         raise Exception('%s hdf5 file already exists' % self.name)
-        # self.proxy.DestinationFilename = self.dpath
+        if (dataid is None) or (env.paths.directory is None):
+            self.dpath = ''
+        else:
+            path = env.paths.directory
+            filename = 'scan_%06d_%s.h5' % (dataid, self.name)
+            self.dpath = os.path.join(env.paths.directory, filename)
+            if os.path.exists(self.dpath):
+                print('%s: this hdf5 file exists, I am raising an error now'
+                      % self.name)
+                raise Exception('%s hdf5 file already exists' % self.name)
+        print(f"{self.dpath = }")
+        self.proxy.DestinationFilename = self.dpath
+        self.proxy.Prepare()
         # if self.hw_trig:
         #     self.proxy.TriggerMode = 'EXTERNAL_MULTI'
         #     self.proxy.nTriggers = self.hw_trig_n * n_starts
@@ -113,10 +115,11 @@ class QEPro6500(Detector, TriggeredDetector):
 
     def arm(self):
         print("calling arm()")
+        self.proxy.arm()
 
     def start(self):
         print("calling start()")
-        # self.n_started += self.repetitions
+        self.n_started += self.repetitions
         # if not self.hw_trig:
         #     self.proxy.Trigger()
 
@@ -127,8 +130,22 @@ class QEPro6500(Detector, TriggeredDetector):
 
     def read(self):
         print("calling read()")
+        self.proxy.Read()
+        # spectra = self.proxy.Spectra
+        # if not self._has_been_read:
+        #     meta = {'deviceinfo': self.proxy.DeviceInfo,
+        #             'wavelength': self.proxy.Wavelengths,
+        #             }
+        #     self._has_been_read = True
+        # else:
+        #     meta = {'deviceinfo': '',
+        #             'wavelength': [],
+        #             }
+        # ret = {'frames': spectra,
+        #        'metadata': meta}
         if self.dpath:
-            ret = {'frames': Link(self.dpath, self._hdf_path, universal=True)}
+            ret = {'frames': Link(self.dpath, self._hdf_path, universal=True),
+                    'wavelength': Link(self.dpath, self._hdf_path.replace('frames','Wavelength'), universal=True)}
         else:
             ret = None
         return ret
