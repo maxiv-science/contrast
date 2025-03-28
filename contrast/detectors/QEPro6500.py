@@ -20,9 +20,9 @@ class QEPro6500(Detector, TriggeredDetector):
     def __init__(self, device, name=None,
                  hdf_path='entry/measurement/qepro/frames',
                  hw_trig_min_latency=0.01,
-                 trigger_mode=3,
-                 nonlinearity_correction=True,
-                 electric_dark_correction=True,
+                #  trigger_mode=3,
+                #  nonlinearity_correction=True,
+                #  electric_dark_correction=True,
                  ):
         self.proxy = tango.DeviceProxy(device)
         self.proxy.set_timeout_millis(10000)
@@ -30,21 +30,21 @@ class QEPro6500(Detector, TriggeredDetector):
         self._hdf_path = hdf_path
         self.name = name
         self.hw_trig_min_latency = hw_trig_min_latency
-        self.trigger_mode = trigger_mode
-        self.nonlinearity_correction = nonlinearity_correction
-        self.electric_dark_correction = electric_dark_correction
+        # self.trigger_mode = trigger_mode
+        # self.nonlinearity_correction = nonlinearity_correction
+        # self.electric_dark_correction = electric_dark_correction
         Detector.__init__(self, name=name)
         TriggeredDetector.__init__(self)
 
     def initialize(self):
         self.n_started = 0
-        print(f"{self.name}: Initilazing the Tango Server...", end="")
-        self.proxy.Init()
-        # set explicitly to hardware trigger mode
-        self.proxy.TriggerMode = self.trigger_mode
-        self.proxy.nonlinearity_correction = self.nonlinearity_correction
-        self.proxy.electric_dark_correction = self.electric_dark_correction
-        print(f" done.")
+        # print(f"{self.name}: Initilazing the Tango Server...", end="")
+        # self.proxy.Init()
+        # # set explicitly to hardware trigger mode
+        # self.proxy.TriggerMode = self.trigger_mode
+        # self.proxy.NonlinearityCorrection = self.nonlinearity_correction
+        # self.proxy.ElectricDarkCorrection = self.electric_dark_correction
+        # print(f" done.")
 
     def busy(self):
         # if self.proxy.State() == tango.DevState.RUNNING:
@@ -76,8 +76,8 @@ class QEPro6500(Detector, TriggeredDetector):
 
 
     def prepare(self, acqtime, dataid, n_starts):
-        print(f"calling prepare() with {acqtime = }, {dataid = }, {n_starts = }")
-        print(f"{acqtime = }, {self.hw_trig_n = }, {dataid = }")
+        # print(f"calling prepare() with {acqtime = }, {dataid = }, {n_starts = }")
+        # print(f"{acqtime = }, {self.hw_trig_n = }, {dataid = }")
         # self.dpath = ''
         if self.busy():
             raise Exception(f'{self.name} is busy!')
@@ -98,7 +98,7 @@ class QEPro6500(Detector, TriggeredDetector):
                 print('%s: this hdf5 file exists, I am raising an error now'
                       % self.name)
                 raise Exception('%s hdf5 file already exists' % self.name)
-        print(f"{self.dpath = }")
+        # print(f"{self.dpath = }")
         self.proxy.DestinationFilename = self.dpath
         self.proxy.Prepare()
         # if self.hw_trig:
@@ -114,22 +114,22 @@ class QEPro6500(Detector, TriggeredDetector):
         self.n_started = 0
 
     def arm(self):
-        print("calling arm()")
+        # print("calling arm()")
         self.proxy.arm()
 
     def start(self):
-        print("calling start()")
+        # print("calling start()")
         self.n_started += self.repetitions
         # if not self.hw_trig:
         #     self.proxy.Trigger()
 
     def stop(self):
-        print("calling stop()")
+        # print("calling stop()")
         self.proxy.Stop()
         self.n_started = 0
 
     def read(self):
-        print("calling read()")
+        # print("calling read()")
         self.proxy.Read()
         # spectra = self.proxy.Spectra
         # if not self._has_been_read:
@@ -143,6 +143,10 @@ class QEPro6500(Detector, TriggeredDetector):
         #             }
         # ret = {'frames': spectra,
         #        'metadata': meta}
+
+        # check if received frames match sent triggers
+        if self.proxy.nFramesReceived != self.hw_trig_n:
+            print(f"\n\n*** WARNING: QePro expected {self.hw_trig_n} frames, but got {self.proxy.nFramesReceived}\n\n")
         if self.dpath:
             ret = {'frames': Link(self.dpath, self._hdf_path, universal=True),
                     'wavelength': Link(self.dpath, self._hdf_path.replace('frames','Wavelength'), universal=True)}
