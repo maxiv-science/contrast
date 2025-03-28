@@ -331,6 +331,8 @@ if __name__ == '__main__':
     #E01cam03 = BaslerCamera(name='E01cam03', device='basler/e01-cam-03/main')
     #E01cam04 = BaslerCamera(name='E01cam04', device='basler/e01-cam-04/main')
 
+    # configure the smaract mort to be stopped in the attenuate macro
+    macros_common.Attenuate.motor = attenuator3_x
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     macros_common.NpointFlyscan.panda = panda0
