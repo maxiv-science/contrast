@@ -49,13 +49,13 @@ class PandaBoxPCAP(Detector):
 
 
     def arm(self):
-        pass
-
-    def start(self):
         """
         Start acquisition for any software triggered detectors.
         """
         self.proxy.Arm()
+
+    def start(self):
+        pass
 
     def initialize(self):
         self.n_started = 0
