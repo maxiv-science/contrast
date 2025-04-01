@@ -12,6 +12,7 @@ except ImportError:
     pass
 from . import Motor
 import time
+import math
 
 
 class SmaractLinearMotor(Motor):
@@ -97,22 +98,71 @@ class SmaractRotationMotor(SmaractLinearMotor):
         val = '%d,%d' % (angle, rev)
         self.proxy.write_attribute(attr, val)
 
-class SmaractLinearMotor_MCS2(SmaractLinearMotor):
+class SmaractLinearMotor_MCS2(Motor):
+    """
+    Single Smaract MCS2 motor axis.
+    """
 
-    def stop(self):
-        self.proxy.stop(self.axis)  # no stopone for MCS2... yet
-
-class SmaractRotationMotor_MCS2(SmaractLinearMotor):
-
+    def __init__(self, device, axis, velocity=None, acceleration=None, **kwargs):
+        """
+        :param device: Path to the MCS2 Tango device
+        :type device: str
+        :param axis: Axis number on the controller
+        :type axis: int
+        :param velocity: Initialize velocity, defaults to None
+        :type velocity: float
+        :param acceleration: Initialize acceleration, defaults to None
+        :type acceleration: float
+        :param ``**kwargs``: Passed on to the ``Motor`` base class
+        """
+        super().__init__(**kwargs)
+        self.proxy = tango.DeviceProxy(device)
+        self.proxy.set_source(tango.DevSource.DEV)
+        self.axis = int(axis)
+        if velocity is not None:
+            attr = 'velocity_%d' % self.axis
+            self.proxy.write_attribute(attr, velocity)
+        if acceleration is not None:
+            attr = 'acceleration_%d' % self.axis
+            self.proxy.write_attribute(attr, acceleration)
+    
     @property
     def dial_position(self):
         attr = 'position_%d' % self.axis
         val = self.proxy.read_attribute(attr).value
-        pos = val * 3.1415 * 2.50
+        pos = val * 1e3
         return pos
 
     @dial_position.setter
     def dial_position(self, pos):
         attr = 'position_%d' % self.axis
-        val = pos / 3.1415 / 2.50
+        val = pos * 1e-3
+        self.proxy.write_attribute(attr, val)
+
+    def stop(self):
+        self.proxy.stop(self.axis)
+
+    def busy(self):
+        attr = 'state_%d' % self.axis
+        return not (self.proxy.read_attribute(attr).value == tango.DevState.ON)
+
+    def reference(self):
+        self.proxy.reference(self.axis)
+
+    def frequency(self, freq):
+        print('Frequency is not a valid operation on MCS2')
+        
+class SmaractRotationMotor_MCS2(SmaractLinearMotor_MCS2):
+
+    @property
+    def dial_position(self):
+        attr = 'position_%d' % self.axis
+        val = self.proxy.read_attribute(attr).value
+        pos = val * 360/600
+        return pos
+
+    @dial_position.setter
+    def dial_position(self, pos):
+        attr = 'position_%d' % self.axis
+        val = pos * 600/360
         self.proxy.write_attribute(attr, val)

@@ -18,6 +18,8 @@ if __name__ == '__main__':
     from contrast.motors.TangoAttributeMotor import TangoAttributeMotor
     from contrast.motors.SmaractMotor import SmaractLinearMotor
     from contrast.motors.SmaractMotor import SmaractRotationMotor
+    from contrast.motors.SmaractMotor import SmaractLinearMotor_MCS2
+    from contrast.motors.SmaractMotor import SmaractRotationMotor_MCS2
     from contrast.motors.NanosMotor import NanosMotor
     from contrast.motors.PiezoLegsMotor import PiezoLegsMotor
     from contrast.motors.PiezoLegsMotor import ImgSampleStage
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     import os
     import time
 
-    # dissable ipython auto-completion/suggestions
+    # disable ipython auto-completion/suggestions
     # taken from https://github.com/ipython/ipython/issues/13451#issuecomment-1014526360
     import IPython
     terminal = IPython.get_ipython()
@@ -68,7 +70,7 @@ if __name__ == '__main__':
     #######################################################################################################
     # Beamline equipment. Comment out when not used
     #######################################################################################################
-    
+    """
     # gap and taper via a proxy in the local pool
     ivu_gap = TangoMotor(device='motor/ivu_gap_ctrl/1', name='ivu_gap', userlevel=2, dial_limits=(4.5, 25), user_format='%.4f')
     ivu_taper = TangoMotor(device='motor/ivu_taper_ctrl/1', name='ivu_taper', userlevel=4, dial_limits=(-.05, .05), user_format='%.4f')
@@ -137,23 +139,24 @@ if __name__ == '__main__':
     # a zmq recorder
     zmqrec = StreamRecorder(name='zmqrec', port=5556)
     zmqrec.start()  # removed for now
-    
+    """
     #######################################################################################################
     # Experimental station equipment
     #######################################################################################################
 
-    """
+    
     # KB mirror pitch piezos
     m1pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=1, name='m1pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
     m2pitch = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=2, name='m2pitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
     m1roll = E727Motor(device='B303A-E01/CTL/PZCU-04', axis=3, name='m1roll', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
-    """ 
+     
     # sample piezos through National Instruments DAC device
     sx = DacMotor(device='B303A/CTL/IMG-02', axis=0, name='sx', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sy = DacMotor(device='B303A/CTL/IMG-02', axis=1, name='sy', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
     sz = DacMotor(device='B303A/CTL/IMG-02', axis=2, name='sz', scaling=1.0, dial_limits=(-50,50), user_format='%.3f')
-    """
+    
     # Nanos motors for central stop, zone plate and order sorting aperture positioning
+    """
     osax = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osax', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     osay = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osay', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     osaz = NanosMotor(device='test/ctl/nanos-01', axis=2, name='osaz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
@@ -163,34 +166,23 @@ if __name__ == '__main__':
     csx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='csx', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     csy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='csy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
     """
-
-    # config for Abe
-    osay = NanosMotor(device='test/ctl/nanos-01', axis=0, name='osay', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-    osax = NanosMotor(device='test/ctl/nanos-01', axis=1, name='osax', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-    osaz = NanosMotor(device='test/ctl/nanos-01', axis=2, name='osaz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-    csx = NanosMotor(device='test/ctl/nanos-01', axis=3, name='csx', velocity=500, stop_window=10, userlevel=2, scaling=5e-4)
-    csy = NanosMotor(device='test/ctl/nanos-01', axis=4, name='csy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-    zpz = NanosMotor(device='test/ctl/nanos-01', axis=5, name='zpz', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-    zpx = NanosMotor(device='test/ctl/nanos-01', axis=6, name='zpx', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-    zpy = NanosMotor(device='test/ctl/nanos-01', axis=7, name='zpy', velocity=500, stop_window=10, userlevel=2, scaling=-5e-4)
-
-    gry = NanosMotor(device='test/ctl/nanos-01', axis=11, name='gry', velocity=500, stop_window=10000, userlevel=1, scaling=-5e-4)
-    grz = NanosMotor(device='test/ctl/nanos-01', axis=9, name='grz', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
-    gripper = NanosMotor(device='test/ctl/nanos-01', axis=10, name='gripper', velocity=500, stop_window=10000, userlevel=1, scaling=5e-4)
-    nanos_dummy = NanosMotor(device='test/ctl/nanos-01', axis=8, name='nanos_dummy', userlevel=1, scaling=5e-4)
-
     
     # PiezoLEGS motors for coarse sample positioning
     basex, basey, basez = ImgSampleStage(device='B303A-E01/CTL/PZCU-02', velocity=90, names=['basex', 'basey', 'basez'], userlevel=1, scaling=1e-3, user_format='%.3f')
-
     
     # Smaract motors for sample rotation and first clean-up aperture positioning 
-    sr = SmaractRotationMotor(device='B303A-E01/CTL/PZCU-01', axis=0, name='sr', frequency=500, userlevel=1, user_format='%.4f', dial_format='%.4f')
-    grx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=1, name='grx', frequency=500, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    """
-    apx = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=15, name='apx', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    apy = SmaractLinearMotor(device='B303A-E01/CTL/PZCU-01', axis=16, name='apy', frequency=1000, userlevel=1, user_format='%.3f', dial_format='%.3f')
-    """
+    slt = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=0, name='slt', velocity=10, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    slr = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=1, name='slr', velocity=10, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    sll = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=2, name='sll', velocity=10, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    slb = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=3, name='slb', velocity=10, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    grx = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=4, name='grx', velocity=5, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    gry = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=5, name='gry', velocity=2, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    grz = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=6, name='grz', velocity=2, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    grip = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=7, name='grip', velocity=2, userlevel=1, user_format='%.3f', dial_format='%.3f')    
+    sr = SmaractRotationMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=8, name='sr', velocity=30, userlevel=1, user_format='%.4f', dial_format='%.4f')
+    apx = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=9, name='apx', velocity=10, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    apy = SmaractLinearMotor_MCS2(device='B303A-E01/CTL/MCS2-01', axis=10, name='apy', velocity=10, userlevel=1, user_format='%.3f', dial_format='%.3f')
+    
     # Pixel detector and XRF motors, optical microsope and screen motors
     xrf1_x = TangoMotor(device='B303A-E01/DIA/XRF-01-X', name='xrf1_x', userlevel=2, user_format='%.3f')
     xrf2_x = TangoMotor(device='B303A-E01/DIA/XRF-02-X', name='xrf2_x', userlevel=2, user_format='%.3f')
