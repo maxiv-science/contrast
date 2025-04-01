@@ -11,6 +11,10 @@ class EnergyFlyscan(SoftwareScan):
     PCAP = None
     energy_motor = None
     ivu_gap_motor = None
+    # Pandabox for coordinating the energyflyscan
+    energyflyscan_panda = None
+    # Panda for re-distributing the triggers to detectors
+    trigger_distribution_panda = None
 
     def __init__(self, start_energy, end_energy, intervals, exposure_time, latency = None, use_id = True):
         self.start_energy = start_energy
@@ -32,10 +36,18 @@ class EnergyFlyscan(SoftwareScan):
 
         # check if energy motor is configured
         if self.energy_motor is None:
-            raise Exception('Set NpointFlyscan.energy_motor to your energy motor')
+            raise Exception('Set EnergyFlyscan.energy_motor to your energy motor')
         # check ic ivu_gap motor is configured
         if self.ivu_gap_motor is None:
-            raise Exception('Set NpointFlyscan.ivu_gap_motor to your ivu_gap motor')
+            raise Exception('Set EnergyFlyscan.ivu_gap_motor to your ivu_gap motor')
+
+        # check if the pandabox for energy fly scanning is configured
+        if self.energyflyscan_panda is None:
+            raise Exception('Set EnergyFlyscan.energyflyscan_panda to your energyflyscanning pandabox')
+
+        # check is a trigger distribution panda box is configured
+        if self.trigger_distribution_panda is None:
+            raise Exception('Set EnergyFlyscan.trigger_distribution_panda to your trigger distributing pandabox')
         #
         # self.motors.append(self.energy_motor)
         # self.motors.append(self.ivu_gap_motor)
@@ -75,7 +87,11 @@ class EnergyFlyscan(SoftwareScan):
             self.latency = latency
             print(f"Latency set to {self.latency:g} s by user.")
  
+        # activate energy fly scanning pandabox
+        self.energyflyscan_panda.active = True
+
         self.flyscan = True
+        self.trigger_distribution_panda.set_trigger_mode('external')
 
 
     def _before_scan(self):
@@ -97,16 +113,19 @@ class EnergyFlyscan(SoftwareScan):
         self._cleanup()
 
     def _cleanup(self):
-        # reset the velocity of the ivu trajectory and the energy/bragg trajectory to the maxi,um allowed velocity
-        print("### before cleanup ###")
-        print(f"{self.mono_traj.Velocity = } {self.mono_traj.Acceleration = }")
-        print(f"{self.id_traj.Velocity = } {self.id_traj.Acceleration = }")
-        self.id_traj.Velocity = self.id_traj.MaxVelocity
-        self.mono_traj.Velocity = self.mono_traj.MaxVelocity
-        print("### after cleanup ###")
-        print(f"{self.mono_traj.Velocity = } {self.mono_traj.Acceleration = }")
-        print(f"{self.id_traj.Velocity = } {self.id_traj.Acceleration = }")
+        self.trigger_distribution_panda.set_trigger_mode('internal')
+        # deactivate energy fly scanning pandabox
+        self.energyflyscan_panda.active = False
 
+        # # reset the velocity of the ivu trajectory and the energy/bragg trajectory to the maxi,um allowed velocity
+        # print("### before cleanup ###")
+        # print(f"{self.mono_traj.Velocity = } {self.mono_traj.Acceleration = }")
+        # print(f"{self.id_traj.Velocity = } {self.id_traj.Acceleration = }")
+        # self.id_traj.Velocity = self.id_traj.MaxVelocity
+        # self.mono_traj.Velocity = self.mono_traj.MaxVelocity
+        # print("### after cleanup ###")
+        # print(f"{self.mono_traj.Velocity = } {self.mono_traj.Acceleration = }")
+        # print(f"{self.id_traj.Velocity = } {self.id_traj.Acceleration = }")
 
     def _check_pandabox_schema(self):
         # check the schema
