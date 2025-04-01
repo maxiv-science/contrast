@@ -308,6 +308,7 @@ class EnergyFlyscanAcct(EnergyFlyscan):
 
     def __init__(self, start_energy, end_energy, intervals, exposure_time, latency = None, use_id = True, acct = None):
         self.acct = acct
+        self.pcapds = tango.DeviceProxy("b303a-a100380cab03/dia/panda-01")    
         # init standard EnergyFlyScan
         super().__init__(start_energy, end_energy, intervals, exposure_time, latency, use_id)
 
@@ -317,6 +318,13 @@ class EnergyFlyscanAcct(EnergyFlyscan):
             self.mono_traj.Acceleration = self.acct # max_acc
             self.id_traj.Acceleration = self.acct# max_acc
         super()._configure_pandabox()
+        self.pcapds.nTriggers=self.panda.nPoints
+
+    def _before_start(self):
+        #print("###before start")
+        #print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, self.pcapds.nTriggers)
+        super()._before_start()
+        self.pcapds.nTriggers=self.panda.nPoints
 
 @macro
 class EnergyFlyscanScp(EnergyFlyscan):
