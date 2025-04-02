@@ -38,7 +38,6 @@ if __name__ == '__main__':
     from contrast.detectors.BaslerCamera import BaslerCamera
     from contrast.detectors.TangoAttributeDetector import TangoAttributeDetector
     from contrast.scans import SoftwareScan, Ct
-    from contrast.detectors.QEPro6500 import QEPro6500
     #from contrast.motors.EurothermDSMotor import EuroThermDSMotor #20240520 heater
     #from contrast.detectors.EurothermDSDetector import EuroThermDSDetector #20240520
     import macros_common
@@ -305,9 +304,6 @@ if __name__ == '__main__':
     # SEDS loan xspress3mini # 
     x3mini = Xspress3(name='x3mini', device='xspress3ds/xspress3/mini-temp')
 
-    # QE Pro XEOL spectrometer for user beamtime
-    qepro = QEPro6500(name='qepro', device='staff/sebkal/qepro')
-    
     # new #
     # xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
 
