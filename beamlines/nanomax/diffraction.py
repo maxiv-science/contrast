@@ -342,11 +342,13 @@ if __name__ == '__main__':
     # macros_common.WFtrigscan.dac_1 = sy
     # macros_common.WFtrigscan.dac_2 = sz
 
-    # # setup of continous energy scanning
-    panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='panda1', hdf_path='/entry/instrument/pandabox/data/')
-    macros_common.EnergyFlyscan.PCAP=panda1
-    macros_common.EnergyFlyscan.energy_motor=energy
-    macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
+    # setup of continous energy scanning
+    # panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='panda1', hdf_path='/entry/instrument/pandabox/data/')
+    # macros_common.EnergyFlyscan.PCAP=panda1
+    # macros_common.EnergyFlyscan.energy_motor=energy
+    # macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
+    # macros_common.EnergyFlyscan.energyflyscan_panda = panda1
+    # macros_common.EnergyFlyscan.trigger_distribution_panda = panda0
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',
@@ -381,7 +383,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, eiger500k]:# :x3mini, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2]:# :x3mini, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
