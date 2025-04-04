@@ -298,14 +298,12 @@ if __name__ == '__main__':
     pilatus.hw_trig = True
     # merlin = Merlin(name='merlin', host='localhost')
     
-    # old # 
+    # old tango device # 
     # xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
-
+    # new tango devide #
+    #xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
     # SEDS loan xspress3mini # 
     x3mini = Xspress3(name='x3mini', device='xspress3ds/xspress3/mini-temp')
-
-    # new #
-    # xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
 
     #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
     # settings for DESY Andor, needs to be changed for the NanoMAX Crytur Andor
