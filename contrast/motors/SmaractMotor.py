@@ -103,7 +103,7 @@ class SmaractLinearMotor_MCS2(Motor):
     Single Smaract MCS2 motor axis.
     """
 
-    def __init__(self, device, axis, velocity=None, acceleration=None, **kwargs):
+    def __init__(self, device, axis, velocity=None, acceleration=None, hold_time=None, **kwargs):
         """
         :param device: Path to the MCS2 Tango device
         :type device: str
@@ -113,6 +113,8 @@ class SmaractLinearMotor_MCS2(Motor):
         :type velocity: float
         :param acceleration: Initialize acceleration, defaults to None
         :type acceleration: float
+        :param hold_time: Initialize hold_time, defaults to None
+        :type hold_time: float
         :param ``**kwargs``: Passed on to the ``Motor`` base class
         """
         super().__init__(**kwargs)
@@ -125,6 +127,9 @@ class SmaractLinearMotor_MCS2(Motor):
         if acceleration is not None:
             attr = 'acceleration_%d' % self.axis
             self.proxy.write_attribute(attr, acceleration)
+        if hold_time is not None:
+            attr = 'hold_time_%d' % self.axis
+            self.proxy.write_attribute(attr, hold_time)
     
     @property
     def dial_position(self):
@@ -149,8 +154,13 @@ class SmaractLinearMotor_MCS2(Motor):
     def reference(self):
         self.proxy.reference(self.axis)
 
-    def frequency(self, freq):
-        print('Frequency is not a valid operation on MCS2')
+    def health_check(self):
+        # run anything that is in the parent classes
+        super().health_check()
+        # check if the encoder is in energy saving mode (not prefered) or always on (prefered)
+        status = self.proxy.read_attribute(f'status_{self.axis}').value
+        if status.find('IS_REFERENCED : False') > -1:
+            print(f'\033[91m[!]\033[0m {self.name}: The motor is not homed. SmarAct stages do not have absolute encoders.')
         
 class SmaractRotationMotor_MCS2(SmaractLinearMotor_MCS2):
 

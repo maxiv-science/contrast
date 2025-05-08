@@ -34,13 +34,31 @@ def fastshutter_action(state, name):
     else:
         print('Could not actuate the shutter')
 
+# @macro
+# class FsOpen(object):
+#     """
+#     Opens the fast shutter.
+#     """
+#     def run(self):
+#         fastshutter_action(False, 'panda2')
+
+# @macro
+# class FsClose(object):
+#     """
+#     Closes the fast shutter.
+#     """
+#     def run(self):
+#         fastshutter_action(True, 'panda2')
+
+
 @macro
 class FsOpen(object):
     """
     Opens the fast shutter.
     """
     def run(self):
-        fastshutter_action(False, 'panda2')
+        # fastshutter_action(False, 'panda0')
+        runCommand('umv seh_left 2000')
 
 @macro
 class FsClose(object):
@@ -48,7 +66,8 @@ class FsClose(object):
     Closes the fast shutter.
     """
     def run(self):
-        fastshutter_action(True, 'panda2')
+        # fastshutter_action(True, 'panda0')
+        runCommand('umv seh_left -2000')
 
 @macro
 class ShOpen(object):
