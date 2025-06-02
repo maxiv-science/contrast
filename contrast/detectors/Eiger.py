@@ -166,7 +166,7 @@ class Eiger(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetector):
         if dataid is None:
             self.dpath = ''
         else:
-            filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
+            filename = 'scan_%06d_%s.h5' % (dataid, self.name)
             self.dpath = os.path.join(env.paths.directory, filename)
             if os.path.exists(self.dpath):
                 print('%s: this hdf5 file exists, I am raising an error now'
@@ -407,7 +407,7 @@ class EigerTango(Detector, SoftwareLiveDetector, TriggeredDetector, BurstDetecto
             self.dpath = ''
         else:
             path = env.paths.directory
-            filename = 'scan_%06d_%s.hdf5' % (dataid, self.name)
+            filename = 'scan_%06d_%s.h5' % (dataid, self.name)
             self.dpath = os.path.join(env.paths.directory, filename)
             if os.path.exists(self.dpath):
                 print('%s: this hdf5 file exists, I am raising an error now'

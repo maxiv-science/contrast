@@ -29,7 +29,7 @@ if __name__ == '__main__':
     from contrast.detectors.Eiger import Eiger, EigerTango
     from contrast.detectors.AlbaEM import AlbaEM
     from contrast.detectors.PandaBox import PandaBox
-    # from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
+    from contrast.detectors.PandaBox_PCAP import PandaBoxPCAP
     from contrast.detectors.xandy import Xandy
     from contrast.detectors import Detector, PseudoDetector
     from contrast.detectors.DG645 import StanfordTriggerSource
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     dbpm2_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=1, name='dbpm2_y', userlevel=3)
     seh_top = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=2, name='seh_top', userlevel=3, frequency=3000)
     seh_bottom = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=3, name='seh_bottom', userlevel=3, frequency=3000)
-    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=3, frequency=3000)
+    seh_left = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=4, name='seh_left', userlevel=2, frequency=12000)    
     seh_right = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=5, name='seh_right', userlevel=3, frequency=3000)
     attenuator1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=6, name='attenuator1_x', userlevel=2, frequency=3000)
     attenuator2_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=7, name='attenuator2_x', userlevel=2, frequency=3000)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     # detectors
     # DBPM at SSA
-    alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
+    # alba0 = AlbaEM(name='alba0', host='b-nanomax-em2-0')
     # DBPM in DM4
     # alba1 = AlbaEM(name='alba1', host='b-nanomax-em2-1')
 
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     m2fpitch = E727Motor(device='B303A-EH/CTL/PZCU-01', axis=3, name='m2fpitch', userlevel=2, user_format='%.3f', dial_format='%.3f', dial_limits=(0,30))
 
     # Robot
-    #gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
+    # gamma, delta, radius = KukaRobot('B303-EH2/CTL/DM-02-ROBOT', names=['gamma', 'delta', 'radius'])
 
     # microscope motors through the Pool
     oam_x = TangoMotor(device='b303a-e02/dia/om-01-x', name='oam_x', userlevel=4, user_format='%.4f', dial_format='%.4f')
@@ -294,18 +294,16 @@ if __name__ == '__main__':
     # detectors
     #heater_detector = EuroThermDSDetector(device="B303A/DIA/TRC-01", name='heater_detector') #20240520 heater
     epoch = Epoch(name='epoch')
-    ### commented out for SELUN tests ### pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus') 
-    ###pilatus.hw_trig = True
+    pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus') 
+    pilatus.hw_trig = True
     # merlin = Merlin(name='merlin', host='localhost')
     
-    # old # 
+    # old tango device # 
     # xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
-
+    # new tango devide #
+    #xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
     # SEDS loan xspress3mini # 
     x3mini = Xspress3(name='x3mini', device='xspress3ds/xspress3/mini-temp')
-    
-    # new #
-    # xspress3 = Xspress3(name='xspress3', device='xspress3ds/xspress3/01')
 
     #andor = Andor3(name='andor', device='b303a-e01/dia/zyla')
     # settings for DESY Andor, needs to be changed for the NanoMAX Crytur Andor
@@ -327,19 +325,24 @@ if __name__ == '__main__':
     #E01cam03 = BaslerCamera(name='E01cam03', device='basler/e01-cam-03/main')
     #E01cam04 = BaslerCamera(name='E01cam04', device='basler/e01-cam-04/main')
 
+    # configure the smaract mort to be stopped in the attenuate macro
+    macros_common.Attenuate.motor = attenuator3_x
     # The pandabox and some related pseudodetectors
     panda0 = PandaBox(name='panda0', host='b-nanomax-pandabox-0')
     macros_common.NpointFlyscan.panda = panda0
+    macros_common.TriggerBurst.panda = panda0
     # macros_common.WFtrigscan.panda = panda0
     # macros_common.WFtrigscan.dac_0 = sx
     # macros_common.WFtrigscan.dac_1 = sy
     # macros_common.WFtrigscan.dac_2 = sz
 
-    # # setup of continous energy scanning
-    # panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='energy_panda')
-    # macros_common.EnergyFlyscan.PCAP=panda1
-    # macros_common.EnergyFlyscan.energy_motor=energy
-    # macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
+    # setup of continous energy scanning
+    panda1 = PandaBoxPCAP("b303a-a100380cab03/dia/panda-01", name='panda1', hdf_path='/entry/instrument/pandabox/data/')
+    macros_common.EnergyFlyscan.PCAP=panda1
+    macros_common.EnergyFlyscan.energy_motor=energy
+    macros_common.EnergyFlyscan.ivu_gap_motor=ivu_gap
+    macros_common.EnergyFlyscan.energyflyscan_panda = panda1
+    macros_common.EnergyFlyscan.trigger_distribution_panda = panda0
 
     pseudo = PseudoDetector(name='pseudo',
                             variables={'c1': 'panda0/INENC1.VAL_Mean',
@@ -347,15 +350,15 @@ if __name__ == '__main__':
                                        'c3': 'panda0/INENC3.VAL_Mean',
                                        # 'adc2': 'panda0/FMC_IN.VAL2_Mean',
                                        # 'adc3': 'panda0/FMC_IN.VAL3_Mean',
-                                       # 'adc4': 'panda0/FMC_IN.VAL4_Mean',
+                                       'adc4': 'panda0/FMC_IN.VAL4_Mean',
                                        },
                             expression={'x': 'c2', 'y': 'c3', 'z': 'c1',
                                         # 'analog_x': '-adc2*5', 'analog_y': 'adc3*5', 'analog_z': '-adc1*5',
-                                        # 'xbic': 'adc4',
+                                        'xbic': 'adc4',
                                         })
 #                                        'analog_x': '-adc2*5*10/2**31', 'analog_y': 'adc3*5*10/2**31', 'analog_z': '-adc1*5*10/2**31'})
 
-    # The keysight as both a detector (ammeter) and motor (bias voltage)
+    # # The keysight as both a detector (ammeter) and motor (bias voltage)
     # keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
     # keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage', dial_limits=(-10,10))
     # keysight_range = TangoAttributeMotor(name='keysight_range', device='B303A-EH/CTL/KEYSIGHT-01', attribute='current_range', dial_format='%E', user_format='%E')
@@ -374,7 +377,7 @@ if __name__ == '__main__':
     # default detector selection
     for d in Detector.getinstances():
         d.active = False
-    for d in [panda0, pseudo, alba2, eiger1m]:# :x3mini, eiger1m, ring_current, pilatus]:
+    for d in [panda0, pseudo, alba2]:# :x3mini, keysight, eiger1m, ring_current, pilatus]:
         d.active = True
     #for d in [xspress3, eiger500k, eiger1m, pilatus, alba0, alba1, alba2]: 
     #    d.hw_trig = True
