@@ -66,6 +66,9 @@ if __name__ == '__main__':
     # gontheta = TangoMotor(device='b303a-e02/dia/gon-01-theta', name='gontheta', userlevel=2, user_format='%.4f', dial_format='%.4f')
     # gonphi = TangoMotor(device='b303a-e02/dia/gon-01-phi', name='gonphi', userlevel=2, user_format='%.4f', dial_format='%.4f')
 
+    dbpm1_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=1, name='dbpm1_x', userlevel=6, frequency=1000)
+    dbpm1_y = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-07', axis=2, name='dbpm1_y', userlevel=6, frequency=1000)
+
     # # some sardana pseudo motors - these are reimplemented but just need to be configured
     # energy_raw = TangoMotor(device='pseudomotor/nanomaxenergy_ctrl/1', name='energy_raw')
     # energy = TangoMotor(device='pseudomotor/nanomaxenergy_corr_ctrl/1', name='energy')
@@ -77,7 +80,7 @@ if __name__ == '__main__':
     # # detectors
     #epoch = Epoch(name='epoch')
     # pilatus = Pilatus3('b303a/dia/pilatus', name='pilatus')
-    # # merlin = Merlin(name='merlin', host='localhost')
+    merlin = Merlin(name='merlin', host='localhost')
     # # xspress3 = Xspress3(name='xspress3', device='staff/alebjo/xspress3')
     
     # eiger1m = Eiger(name='eiger1m', host='b-nanomax-eiger-1m-0', hdf_path='entry/instrument/Eiger/data')
@@ -87,9 +90,9 @@ if __name__ == '__main__':
     #alba2 = AlbaEM(name='alba2', host='b-nanomax-em2-2')
     
     #The keysight as both     from contrast.detectors.Keysight import Keysight2985a detector (ammeter) and motor (bias voltage)
-    keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
-    keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage',    dial_limits=(-10,10))
-    keysight_range = TangoAttributeMotor(name='keysight_range', device='B303A-EH/CTL/KEYSIGHT-01', attribute='current_range', dial_format='%E', user_format='%E')
+    # keysight = Keysight2985(name='keysight', device='B303A-EH/CTL/KEYSIGHT-01')
+    # keysight_bias = TangoAttributeMotor(name='keysight_bias', device='B303A-EH/CTL/KEYSIGHT-01', attribute='bias_voltage',    dial_limits=(-10,10))
+    # keysight_range = TangoAttributeMotor(name='keysight_range', device='B303A-EH/CTL/KEYSIGHT-01', attribute='current_range', dial_format='%E', user_format='%E')
 
     # CIVIDEC XandY
     # xandy = Xandy(name="xandy", host='b-nanomax-user-devices-0')

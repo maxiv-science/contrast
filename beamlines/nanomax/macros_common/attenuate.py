@@ -15,7 +15,7 @@ from contrast import colors
 #       - way of printing the closest possible absorption values
 
 #needs to be here so it can be stopped after moving -> prevents humming
-attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
+# attenuator3_x = SmaractLinearMotor(device='B303A-EH/CTL/PZCU-04', axis=8, name='attenuator3_x', userlevel=2)
 
 @macro
 class Attenuate(object):
@@ -49,6 +49,8 @@ class Attenuate(object):
                  [20, 40, 80, 160],
                  [25, 50, 100, 200]]
     thickness = np.array(thickness)
+    # smaract motor used for stopping, needs to be configured in beamline script
+    motor = None
 
     # loading offline data between 5 and 25 keV
     # taken from http://henke.lbl.gov/optical_constants/filter2.html
@@ -257,5 +259,7 @@ class Attenuate(object):
                 for command in commands:
                     self.run_command(command)
 
-            # prevent humming when in closed loop 
-            attenuator3_x.stop()
+            # prevent humming when in closed loop
+            if self.motor is not None:
+                self.motor.stop()
+

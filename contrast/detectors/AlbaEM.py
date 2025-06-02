@@ -331,6 +331,11 @@ class AlbaEM(Detector, LiveDetector, TriggeredDetector, BurstDetector):
         data = np.array(self.em.data)
         self.em.data.clear()
         
+        if data.ndim != 2:
+            print("wrong shape of ALbaEM data")
+            print(f"{data.shape = }")
+            print(f'{data = }')
+            return {}
         # convert the acquisition timestamp from ns to s
         data[:,-1] = data[:,-1] / 1e9
 
