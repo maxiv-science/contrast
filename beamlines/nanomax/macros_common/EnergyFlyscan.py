@@ -337,13 +337,13 @@ class EnergyFlyscanAcct(EnergyFlyscan):
             self.mono_traj.Acceleration = self.acct # max_acc
             self.id_traj.Acceleration = self.acct# max_acc
         super()._configure_pandabox()
-        self.pcapds.nTriggers=self.panda.nPoints
+        # self.pcapds.nTriggers=self.panda.nPoints
 
     def _before_start(self):
         #print("###before start")
         #print('###', self.panda.nPoints,  self.panda.EncInUse, self.panda.PCOMPReference, self.pcapds.nTriggers)
         super()._before_start()
-        self.pcapds.nTriggers=self.panda.nPoints
+        # self.pcapds.nTriggers=self.panda.nPoints
 
 @macro
 class EnergyFlyscanScp(EnergyFlyscan):
