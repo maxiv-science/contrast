@@ -45,6 +45,8 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
         self.ctrl_sock.setsockopt(socket.SOL_TCP, socket.TCP_NODELAY, 1)
         self.ctrl_sock.settimeout(1)
         self.ctrl_sock.connect((self.host, self.ctrl_port))
+        # set trigger mode to internal by default
+        self.set_trigger_mode('internal')
 
     def query(self, cmd):
         if self.debug:
@@ -153,3 +155,20 @@ class PandaBox(Detector, TriggeredDetector, BurstDetector):
 
     def read(self):
         return self.data
+
+    def set_trigger_mode(self, mode='internal'):
+        if mode == 'external':
+            self.query(f'{self.bitblock}.C=1')
+        else:
+            self.query(f'{self.bitblock}.C=0')
+
+    def get_trigger_mode(self):
+        resp = self.query(f'{self.bitblock}.C?')
+        if '0' in resp:
+            mode = 'internal'
+        elif '1' in resp:
+            mode = 'external'
+        else:
+            raise ValueError(f"undefined trigger mode. Got {resp}")
+
+        return mode

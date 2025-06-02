@@ -26,6 +26,7 @@ class PandaBoxPCAP(Detector):
     
     def prepare(self, acqtime, dataid, n_starts):
         
+        self.proxy.nTriggers = n_starts
         self.n_started = 0
         self.n_starts = n_starts
         if self.busy():
@@ -38,7 +39,6 @@ class PandaBoxPCAP(Detector):
         else:
             # saving
             path = env.paths.directory
-            # FIXME change to .hdf5 once Tnago Server is fixed
             fn = f'scan_{dataid:06d}_{self.name}.h5'
             self.saving_file = os.path.join(path, fn)
             if os.path.exists(self.saving_file):
@@ -49,13 +49,13 @@ class PandaBoxPCAP(Detector):
 
 
     def arm(self):
-        pass
-
-    def start(self):
         """
         Start acquisition for any software triggered detectors.
         """
         self.proxy.Arm()
+
+    def start(self):
+        pass
 
     def initialize(self):
         self.n_started = 0
@@ -65,17 +65,12 @@ class PandaBoxPCAP(Detector):
         self.n_started = 0
 
     def busy(self):
-        if self.proxy.State() == tango.DevState.RUNNING:
-            if hasattr(self, 'n_starts') and self.n_starts == self.proxy.nFramesReceived:
-                self.proxy.Disarm()
-            return True
-        else:
-            return False
+        return self.proxy.State() == tango.DevState.RUNNING
 
     def read(self):
         if self.saving_file == '':
             return None
         else:
-            return {'energy': Link(self.saving_file, self._hdf_path,
+            return {'': Link(self.saving_file, self._hdf_path,
                                    universal=True)
                                    }
