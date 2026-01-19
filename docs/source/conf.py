@@ -102,5 +102,6 @@ with open('macros.rst', 'w') as fp:
 # -- Infer the version numbers from git tags ---------------------------------
 # The full version, including git commit etc.
 release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
+print(f"git describe --tags = {release}")
 # The base version, corresponding to the latest release.
 version = release.split('-')[0]
