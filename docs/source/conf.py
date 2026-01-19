@@ -22,8 +22,8 @@ from contrast.environment import env
 # -- Project information -----------------------------------------------------
 
 project = 'Contrast'
-copyright = '2026, Alexander Björling'
-author = 'Alexander Björling'
+copyright = '2026, Alexander Björling, Maik Kahnt'
+author = 'Alexander Björling, Maik Kahnt'
 
 # -- General configuration ---------------------------------------------------
 
@@ -102,6 +102,5 @@ with open('macros.rst', 'w') as fp:
 # -- Infer the version numbers from git tags ---------------------------------
 # The full version, including git commit etc.
 release = re.sub('^v', '', os.popen('git describe --tags').read().strip())
-print(f"git describe --tags = {release}")
 # The base version, corresponding to the latest release.
 version = release.split('-')[0]
