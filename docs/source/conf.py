@@ -52,7 +52,7 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 autoclass_content = 'both'  # docstring from both class and constructor
-autodoc_mock_imports = ['PyTango', 'telnetlib']
+autodoc_mock_imports = ['PyTango', 'telnetlib', 'pyzmq', 'requests']
 autodoc_member_order = 'bysource'  # in the source code order, not A-Z
 autodoc_inherit_docstrings = False
 

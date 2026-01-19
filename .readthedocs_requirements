@@ -1,7 +1,5 @@
-ipython
 h5py
-pyzmq
-matplotlib
-requests
-nbsphinx
 ipykernel
+ipython
+matplotlib
+nbsphinx
