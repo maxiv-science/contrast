@@ -70,8 +70,7 @@ html_theme = 'classic'  # 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-
+# html_static_path = ['_static']
 
 # -- Special handling of macro classes ---------------------------------------
 def label_macros(app, what, name, obj, options, lines):
@@ -85,7 +84,6 @@ def label_macros(app, what, name, obj, options, lines):
 
 def setup(app):
     app.connect('autodoc-process-docstring', label_macros)
-
 
 # -- Build a document listing the built-in macros ----------------------------
 dct = env.registeredMacros
