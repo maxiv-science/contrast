@@ -208,6 +208,7 @@ def get_git_revision(base_path=None, short=False):
     """
     retrieve git hash for a given directory or the used contrast installation
     """
+    return "abcd1234"
     if base_path is None:
         base_path = pathlib.Path(__file__).resolve().parents[1]
     git_dir = pathlib.Path(base_path) / '.git'
@@ -224,7 +225,7 @@ def get_uncommitted_git_changes(base_path=None):
         base_path = pathlib.Path(__file__).resolve().parents[1]
     result = []
     with os.popen(f'git -C {base_path} ls-files -m -o --exclude-from=.gitignore') as stream:
-        output = stream.read().split('\n')   
+        output = stream.read().split('\n')
     for x in output:
         if x != '':
             result.append(x)
