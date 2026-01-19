@@ -22,7 +22,7 @@ from contrast.environment import env
 # -- Project information -----------------------------------------------------
 
 project = 'Contrast'
-copyright = '2019, Alexander Björling'
+copyright = '2026, Alexander Björling'
 author = 'Alexander Björling'
 
 # -- General configuration ---------------------------------------------------
