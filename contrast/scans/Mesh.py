@@ -104,7 +104,7 @@ class DMesh(Mesh):
 class MeshJMesh(SoftwareScan):
     """
     2D Software scan for NearField ptychography.
-    Each point of a larger 2D mesh scan is another smaller 2D mesh.
+    Each point of a larger 2D mesh scan is another smaller 2D mesh. ::
         
         meshjmesh <motor1> <abs_start1>     <abs_stop1>     <nr_int1>     <jit_amp1> 
                            <rel_start_sub1> <rel_stop_sub1> <nr_int_sub1> <jit_amp_sub1>

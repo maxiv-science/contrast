@@ -22,8 +22,8 @@ from contrast.environment import env
 # -- Project information -----------------------------------------------------
 
 project = 'Contrast'
-copyright = '2019, Alexander Björling'
-author = 'Alexander Björling'
+copyright = '2026, Alexander Björling, Maik Kahnt'
+author = 'Alexander Björling, Maik Kahnt'
 
 # -- General configuration ---------------------------------------------------
 
@@ -52,7 +52,7 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 autoclass_content = 'both'  # docstring from both class and constructor
-autodoc_mock_imports = ['PyTango']
+autodoc_mock_imports = ['PyTango', 'telnetlib', 'pyzmq', 'requests']
 autodoc_member_order = 'bysource'  # in the source code order, not A-Z
 autodoc_inherit_docstrings = False
 
@@ -70,8 +70,7 @@ html_theme = 'classic'  # 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-
+# html_static_path = ['_static']
 
 # -- Special handling of macro classes ---------------------------------------
 def label_macros(app, what, name, obj, options, lines):
@@ -85,7 +84,6 @@ def label_macros(app, what, name, obj, options, lines):
 
 def setup(app):
     app.connect('autodoc-process-docstring', label_macros)
-
 
 # -- Build a document listing the built-in macros ----------------------------
 dct = env.registeredMacros

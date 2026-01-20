@@ -211,10 +211,14 @@ def get_git_revision(base_path=None, short=False):
     if base_path is None:
         base_path = pathlib.Path(__file__).resolve().parents[1]
     git_dir = pathlib.Path(base_path) / '.git'
-    with (git_dir / 'HEAD').open('r') as head:
-        ref = head.readline().split(' ')[-1].strip()
-    with (git_dir / ref).open('r') as git_hash:
-        result = git_hash.readline().strip()
+    try:
+        with (git_dir / 'HEAD').open('r') as head:
+            ref = head.readline().split(' ')[-1].strip()
+        with (git_dir / ref).open('r') as git_hash:
+            result = git_hash.readline().strip()
+    except FileNotFoundError:
+        # this folder won't exist for a non-editable installation
+        return ''
     if short:
         result = result[:8]
     return result
@@ -223,8 +227,11 @@ def get_uncommitted_git_changes(base_path=None):
     if base_path is None:
         base_path = pathlib.Path(__file__).resolve().parents[1]
     result = []
+    if not os.path.exists(base_path / '.git'):
+        # if not installed editable, this is probably not a git repo
+        return result
     with os.popen(f'git -C {base_path} ls-files -m -o --exclude-from=.gitignore') as stream:
-        output = stream.read().split('\n')   
+        output = stream.read().split('\n')
     for x in output:
         if x != '':
             result.append(x)
